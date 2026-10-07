@@ -4,6 +4,9 @@ import type { FlightProfile, ProvenanceEntry } from "@speedwall-lab/core";
 import type { Fixture } from "./fixture-schema.js";
 import { FITTED_WALL } from "./fitted.js";
 
+/** Author-described, not yet measured: see provenance "boost.redZonePct". */
+const RED_ZONE_PCT = 25;
+
 const MEASURED = "Measured in-game by AdobeWan (sc-flighttest / hand tests)";
 
 /**
@@ -38,6 +41,7 @@ export function profileFromFixture(f: Fixture): FlightProfile {
   set("boost.softWallK", "assumed", unstated);
   set("boost.tankDrainPctPerS", "assumed", unstated);
   set("boost.tankRegenPctPerS", "assumed", unstated);
+  set("boost.redZonePct", "assumed", "author's description of the in-game AB meter (2026-10-07): boost is disabled in the bottom 25 % after the tank empties; not in the fixture");
   set("thrustRule.fullStrafeForwardCurve.settledSpeed", "measured", "round 3 full-strafe sweep");
   set("thrustRule.fullStrafeForwardCurve.effectiveForwardG", "fitted", "derived from the settled speeds (limaçon inverse), per fixture note");
   const fit = "fitted to the fixture's wall and release traces by tools/fit-gladius.mjs";
@@ -64,6 +68,7 @@ export function profileFromFixture(f: Fixture): FlightProfile {
       softWallK: boost.softWallK_per_s,
       tankDrainPctPerS: boost.tankDrain_pct_per_s,
       tankRegenPctPerS: boost.tankRegen_pct_per_s,
+      redZonePct: RED_ZONE_PCT,
     },
     thrustRule: {
       name: "c2",

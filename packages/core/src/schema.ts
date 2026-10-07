@@ -34,6 +34,7 @@ export const flightProfileSchema = z
         softWallK: num.positive(),
         tankDrainPctPerS: num.nonnegative(),
         tankRegenPctPerS: num.nonnegative(),
+        redZonePct: num.min(0).max(100),
       })
       .strict(),
     thrustRule: z

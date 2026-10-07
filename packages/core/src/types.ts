@@ -11,6 +11,8 @@ export interface Input {
   lat: number;
   up: number;
   boost: boolean;
+  /** Trainer option: the boost tank never drains. */
+  unlimitedBoost?: boolean;
   pitch?: number;
   yaw?: number;
   roll?: number;
@@ -22,6 +24,8 @@ export interface State {
   q: Quat;
   /** Boost tank, percent (0..100). */
   tank: number;
+  /** The tank ran empty: boost stays off until it refills past the red zone. */
+  boostLocked: boolean;
   /** Seconds since the start of the run. */
   t: number;
   /** Thrust command after the thrusters' slew limit, m/s², ship frame (before the speed wall trims it). */
@@ -74,6 +78,8 @@ export interface FlightProfile {
     softWallK: number;
     tankDrainPctPerS: number;
     tankRegenPctPerS: number;
+    /** After the tank empties, boost is disabled until it refills to this percentage (the meter's red zone). */
+    redZonePct: number;
   };
   thrustRule: {
     name: "c2";
@@ -121,4 +127,5 @@ export interface Readouts {
   settleSpeed: number;
   tvi: { dirShip: Vec3; offAngleDeg: number };
   tank: number;
+  boostLocked: boolean;
 }

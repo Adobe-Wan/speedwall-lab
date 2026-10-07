@@ -14,7 +14,16 @@ const hyp = (v: Vec3) => Math.hypot(v[0], v[1], v[2]);
 const clamp01 = (x: number) => (x < 0 ? 0 : x > 1 ? 1 : x);
 const ramp = (x: number, from: number, to: number) => (to === from ? (x >= to ? 1 : 0) : clamp01((x - from) / (to - from)));
 
-export const boostActive = (s: State, u: Input) => u.boost && s.tank > 0;
+/** Boost is on while held, unless the tank is empty or still refilling through the red zone. */
+export const boostActive = (s: State, u: Input) => u.boost && (u.unlimitedBoost === true || (!s.boostLocked && s.tank > 0));
+
+/** Tank after one step: drains only while boost is actually on, otherwise refills; empty locks boost out until the red zone is passed. */
+function nextTank(s: State, u: Input, p: FlightProfile, boosted: boolean, dt: number): { tank: number; boostLocked: boolean } {
+  if (u.unlimitedBoost) return { tank: s.tank, boostLocked: false };
+  const tank = Math.min(100, Math.max(0, s.tank + (boosted ? -p.boost.tankDrainPctPerS : p.boost.tankRegenPctPerS) * dt));
+  const boostLocked = tank <= 0 ? true : s.boostLocked && tank < p.boost.redZonePct;
+  return { tank, boostLocked };
+}
 
 /**
  * Requested thrust in G, ship frame (PLAN.md §4 items 1–3), and the C2 cap it is held to.
@@ -140,12 +149,13 @@ export function step(s: State, u: Input, p: FlightProfile, dt: number = DT): Sta
     if (sn > scm) vn = [(vn[0] * scm) / sn, (vn[1] * scm) / sn, (vn[2] * scm) / sn];
   }
   const applied: Vec3 = [(vn[0] - v[0]) / dt, (vn[1] - v[1]) / dt, (vn[2] - v[2]) / dt];
-  const tank = Math.min(100, Math.max(0, s.tank + (u.boost ? -p.boost.tankDrainPctPerS : p.boost.tankRegenPctPerS) * dt));
+  const { tank, boostLocked } = nextTank(s, u, p, boosted, dt);
   return {
     vWorld: vn,
     xWorld: [s.xWorld[0] + vn[0] * dt, s.xWorld[1] + vn[1] * dt, s.xWorld[2] + vn[2] * dt],
     q: s.q,
     tank,
+    boostLocked,
     t: s.t + dt,
     cmd,
     aWorld: applied,
@@ -174,10 +184,11 @@ export function derive(s: State, u: Input, p: FlightProfile): Readouts {
     settleSpeed,
     tvi: { dirShip, offAngleDeg: speed > 1e-9 ? (Math.acos(Math.max(-1, Math.min(1, dirShip[0]))) * 180) / Math.PI : 0 },
     tank: s.tank,
+    boostLocked: s.boostLocked,
   };
 }
 
 /** A state at rest, attitude identity, full tank. */
 export function restState(): State {
-  return { vWorld: [0, 0, 0], xWorld: [0, 0, 0], q: [0, 0, 0, 1], tank: 100, t: 0, cmd: [0, 0, 0], aWorld: [0, 0, 0] };
+  return { vWorld: [0, 0, 0], xWorld: [0, 0, 0], q: [0, 0, 0, 1], tank: 100, boostLocked: false, t: 0, cmd: [0, 0, 0], aWorld: [0, 0, 0] };
 }

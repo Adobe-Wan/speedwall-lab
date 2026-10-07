@@ -22,7 +22,7 @@ export default defineConfig({
         resolve: { alias },
         test: {
           name: "unit",
-          include: ["packages/*/test/**/*.test.ts"],
+          include: ["packages/*/test/**/*.test.ts", "tools/tests/**/*.test.mjs"],
           exclude: ["packages/*/test/acceptance/**"],
         },
       },
