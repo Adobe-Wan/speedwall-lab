@@ -132,8 +132,8 @@ export function createHud(svg) {
     svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
     const S = Math.min(w, h), u = S / 100;
     const cx = w / 2, cy = h / 2;
-    const fsS = Math.max(10, 1.9 * u);     // small labels
-    const fsM = Math.max(12, 2.7 * u);     // numbers under the bars
+    const fsS = Math.max(11.5, 1.9 * u);   // small labels (≥ 11.5 px so they stay readable on phones)
+    const fsM = Math.max(13, 2.7 * u);     // numbers under the bars
     const fsL = Math.max(17, 4.0 * u);     // G value
     const H = Math.max(84, 23 * u);        // bar height
     const top = cy - H * 0.55, bot = top + H;

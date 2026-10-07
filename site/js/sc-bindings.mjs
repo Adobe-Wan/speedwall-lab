@@ -121,7 +121,7 @@ export function browserAxisIndex(axisName, type = 'joystick') {
 
 const ENT = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" };
 const decode = (s) => s.replace(/&(?:#x([0-9a-f]+)|#(\d+)|(\w+));/gi, (all, hex, dec, name) =>
-  hex ? String.fromCodePoint(parseInt(hex, 16)) : dec ? String.fromCodePoint(Number(dec)) : ENT[name] ?? all);
+  hex ? String.fromCodePoint(parseInt(hex, 16)) : dec ? String.fromCodePoint(Number(dec)) : (Object.hasOwn(ENT, name) ? ENT[name] : all));
 
 function regexTree(text, warnings) {
   const doc = { name: '#doc', attrs: {}, children: [] };
@@ -184,10 +184,10 @@ function parseInput(raw, deviceAttr, warnings) {
   const token = parts.pop();
   if (!token) return null; // "kb1_ " / "js1_" = explicitly unbound
   const b = { device, type, instance: Number(m[2]), kind: null, code: null, button: null, axis: null,
-    hat: null, direction: null, modifiers: parts.map((p) => SC_KEY_TO_CODE[p] ?? p), invert: false, sign: 1, scInput: s };
+    hat: null, direction: null, modifiers: parts.map((p) => (Object.hasOwn(SC_KEY_TO_CODE, p) ? SC_KEY_TO_CODE[p] : p)), invert: false, sign: 1, scInput: s };
   let k;
   if (device === 'kb') {
-    b.kind = 'key'; b.code = SC_KEY_TO_CODE[token] ?? null;
+    b.kind = 'key'; b.code = Object.hasOwn(SC_KEY_TO_CODE, token) ? SC_KEY_TO_CODE[token] : null;
     if (!b.code) warnings.push(`Unknown keyboard key "${token}" in "${s}".`);
   } else if (device === 'mouse') {
     if ((k = /^maxis_(\w+)$/.exec(token))) { b.kind = 'axis'; b.axis = k[1]; }
@@ -259,7 +259,7 @@ export function parseActionmaps(xmlText) {
       if (map.attrs.name && !FLIGHT_MAP.test(map.attrs.name)) continue;
       for (const action of findAll(map, 'action')) {
         const scName = action.attrs.name ?? '';
-        const target = ACTION_MAP[lc(scName)];
+        const target = Object.hasOwn(ACTION_MAP, lc(scName)) ? ACTION_MAP[lc(scName)] : undefined;
         if (!target) { if (scName && (!map.attrs.name || MOVEMENT_MAP.test(map.attrs.name))) unknown.add(scName); continue; }
         const [app, sign = 1] = target;
         for (const r of findAll(action, 'rebind')) {

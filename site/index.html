@@ -37,7 +37,7 @@ h1 { margin: 0; font-size: 1.35rem; letter-spacing: .02em; text-wrap: balance; }
 .sub { color: var(--muted); font-size: .85rem; }
 .chip { font: 600 .68rem/1 var(--font-data); letter-spacing: .08em; text-transform: uppercase; padding: 5px 7px; border-radius: 4px; border: 1px solid var(--line); color: var(--muted); }
 .chip.proto { margin-left: auto; }
-.btn.fb { text-decoration: none; padding: 6px 10px; font-size: .78rem; border-color: var(--tvi); color: var(--tvi); }
+.btn.fb { text-decoration: none; padding: 6px 10px; font-size: .78rem; }
 .chip.on-boost { color: var(--bg); background: var(--boost); border-color: var(--boost); }
 .chip.on-scm { color: var(--bg); background: var(--scm); border-color: var(--scm); }
 .chip.pinned { color: var(--bg); background: var(--warn); border-color: var(--warn); }
@@ -62,8 +62,11 @@ button[aria-pressed="true"], .tabs button[aria-selected="true"] { border-color: 
 .caption:empty { display: none; }
 .caption .watch { display: block; color: var(--tvi); font-size: .8rem; margin-top: 2px; }
 #v-egg .caption { left: 166px; }
-.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
-.seg button { border: 0; border-radius: 0; } .seg button + button { border-left: 1px solid var(--line); }
+.seg { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 6px; }
+.seg button { border: 0; border-radius: 0; } .seg button + button { border-left: 1px solid var(--line-strong); }
+.seg button:first-child { border-radius: 5px 0 0 5px; } .seg button:last-child { border-radius: 0 5px 5px 0; }
+/* on-state that isn't colour alone: a filled background and an underline bar */
+.seg button[aria-pressed="true"], .vtools button[aria-pressed="true"] { background: rgba(126,240,200,.14); box-shadow: inset 0 -2px 0 var(--tvi); }
 .lbl { position: absolute; transform: translate(-50%, -50%); font: 600 .7rem var(--font-data); white-space: nowrap; color: var(--muted); }
 .lbl.boost { color: var(--boost); } .lbl.scm { color: var(--scm); } .lbl.tvi { color: var(--tvi); } .lbl.room { color: var(--fg); }
 .view canvas.inset { position: absolute; inset: auto; left: 8px; bottom: 34px; width: 150px; height: 150px; touch-action: auto; border: 1px solid var(--line); border-radius: 6px; background: rgba(7,11,17,.85); }
@@ -89,7 +92,7 @@ button[aria-pressed="true"], .tabs button[aria-selected="true"] { border-color: 
 #thr { writing-mode: vertical-lr; direction: rtl; width: 34px; height: 170px; accent-color: var(--boost); }
 .thr-val { font: 600 .9rem var(--font-data); font-variant-numeric: tabular-nums; }
 .pad-wrap { display: grid; justify-items: center; gap: 4px; }
-#pad { position: relative; width: 170px; height: 170px; border-radius: 50%; border: 1px solid var(--line); background: radial-gradient(circle, #16223a 0 30%, #0e1624 70%); touch-action: none; cursor: grab; }
+#pad { position: relative; width: 170px; height: 170px; border-radius: 50%; border: 1px solid var(--line-strong); background: radial-gradient(circle, #16223a 0 30%, #0e1624 70%); touch-action: none; cursor: grab; }
 #pad::before, #pad::after { content: ""; position: absolute; background: var(--line); }
 #pad::before { left: 50%; top: 8%; bottom: 8%; width: 1px; } #pad::after { top: 50%; left: 8%; right: 8%; height: 1px; }
 #knob { position: absolute; width: 46px; height: 46px; left: 62px; top: 62px; border-radius: 50%; background: var(--tvi); opacity: .9; box-shadow: 0 0 0 4px rgba(126,240,200,.15); pointer-events: none; }
@@ -109,6 +112,7 @@ label.tog { display: inline-flex; gap: 6px; align-items: center; color: var(--mu
 .thr-track.detent::after { background: var(--tvi); opacity: 1; }
 .rollrow { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 .rollrow button { min-width: 64px; }
+.rollrow .set { flex: 1 1 100%; } /* the roll-rate slider gets its own full row instead of collapsing */
 .keytable { display: grid; grid-template-columns: auto 1fr auto 1fr; gap: 3px 8px; font-size: .78rem; color: var(--muted); align-items: center; }
 .keytable span:nth-child(odd) { text-align: right; white-space: nowrap; }
 details.more summary { cursor: pointer; color: var(--muted); font-size: .8rem; }
@@ -136,6 +140,16 @@ dialog p { margin: 0 0 10px; }
 .binds .opts { grid-column: 2 / -1; display: flex; gap: 10px; flex-wrap: wrap; color: var(--muted); }
 .binds select { font: inherit; background: var(--bg); color: var(--fg); border: 1px solid var(--line); border-radius: 4px; }
 button.hdr { padding: 6px 10px; font-size: .78rem; }
+#ctl-open { border-color: var(--tvi); color: var(--tvi); }
+.btn.fb { border-color: var(--line-strong); color: var(--muted); }
+.notice { color: var(--tvi); margin: 0 0 8px; }
+.brow { display: contents; } /* rows keep the shared grid on wide screens */
+@media (max-width: 520px) {
+  .binds { display: block; }
+  .brow { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; padding: 6px 0; border-top: 1px solid var(--line); }
+  .brow .src { grid-column: 1; white-space: normal; } .brow .live { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
+  .brow .opts { grid-column: 1 / -1; }
+}
 .kinds { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 6px; margin: 8px 0 10px; }
 .kind { display: flex; gap: 8px; align-items: flex-start; border: 1px solid var(--line); border-radius: 6px; padding: 8px; cursor: pointer; }
 .kind input { margin-top: 3px; } .kind b { display: block; } .kind small { color: var(--muted); }
@@ -153,8 +167,11 @@ footer { color: var(--muted); font-size: .74rem; line-height: 1.5; border-top: 1
 footer p { margin: 0 0 4px; max-width: 75ch; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 
+.views.single { grid-template-columns: 1fr; }
+.no-gl { position: absolute; left: 10px; right: 10px; top: 28px; z-index: 2; margin: 0; font-size: .8rem; color: var(--boost); }
 @media (max-width: 979px) {
   .tabs { display: flex; }
+  .vtitle { display: none; } /* the tabs name the view; the title would sit under the tool buttons */
   .views { grid-template-columns: 1fr; }
   .view[data-hidden="true"] { display: none; }
   .view canvas.inset { display: none; }
@@ -179,7 +196,7 @@ footer p { margin: 0 0 4px; max-width: 75ch; }
   <header>
     <h1>Speedwall Lab</h1>
     <span class="sub">Gladius · decoupled · how your speed limits your maneuvers</span>
-    <span class="chip proto" title="Physics reproduces the measured settle speeds; some wall behavior is still being fitted.">Alpha · v0.5</span>
+    <span class="chip proto" title="Physics reproduces the measured settle speeds; some wall behavior is still being fitted.">Alpha · v0.5.1</span>
     <button id="ctl-open" class="hdr">Controls</button>
     <button id="fly" class="hdr" aria-pressed="false" title="Full screen, with every key going to the simulator (hold Esc to leave)">Fly full screen</button>
     <a class="btn fb" href="https://github.com/Adobe-Wan/speedwall-lab/issues/new?template=alpha-feedback.yml" target="_blank" rel="noopener">Send feedback</a>
@@ -223,6 +240,7 @@ footer p { margin: 0 0 4px; max-width: 75ch; }
     <section class="view" id="v-slice" data-hidden="true" aria-label="Slice view: top-down slice of the egg">
       <canvas id="slice-big"></canvas>
       <div class="vtitle">Speed limits · top-down</div>
+      <p class="no-gl" id="no-gl" hidden>3D views need WebGL, which this browser has turned off. Everything else works here in the top-down view.</p>
       <div class="caption" id="cap-slice"></div>
     </section>
   </div>
@@ -274,13 +292,13 @@ footer p { margin: 0 0 4px; max-width: 75ch; }
           <button data-preset="rest">Strafe from a stop<small>The most dodge you'll ever have: 394 m/s sideways</small></button>
           <button data-preset="dodge-nose">Dodge at top speed<small>Pinned at 520: how far do you get sideways in 2 s?</small></button>
           <button data-preset="dodge-mid">Dodge from mid-egg (300 m/s)<small>Same input, lower forward speed: compare the 2 s distance</small></button>
-          <button data-preset="letoff">Ease off to make room<small>Let go of forward: speed drops to ~435 (in game) and the dodge room opens</small></button>
+          <button data-preset="letoff">Ease off to make room<small>Let go of forward and strafe: speed drops to ~435 (in game), the dodge room opens</small></button>
           <button data-preset="jink">Jink (no boost)<small>Strafe left, right, left… every reversal gets the full 9.9 G</small></button>
         </div>
         <h3>Corkscrews · roll while strafing so the shooter's lead is wrong</h3>
         <div class="mgrid">
           <button data-preset="ck-escape">Best escape corkscrew<small>No boost, forward + up, roll ~110 °/s: biggest miss (model)</small></button>
-          <button data-preset="ck-shoot">Corkscrew and still shoot back<small>Boost, forward + up, slow roll ~27 °/s: target stays steady</small></button>
+          <button data-preset="ck-shoot">Corkscrew and still shoot back<small>Boost, forward + up, slow roll ~27 °/s: the TVI holds still</small></button>
           <button data-preset="ck-spin">Over-spinning (don't)<small>Full-rate roll: the spiral is smaller than the ship</small></button>
         </div>
       </section>
@@ -356,25 +374,37 @@ const qAxisAngle = (w, dt) => { const a = Math.hypot(...w) * dt; if (a < 1e-12) 
   return [w[0] * s, w[1] * s, w[2] * s, Math.cos(a / 2)]; };
 let S = mkState(0, false);
 let script = null;
+// Ending a maneuver. resetOnScreen: the pilot took over with keys or a controller, so the on-screen throttle,
+// pad and boost lock the maneuver set are cleared too (otherwise they keep flying the ship).
+function endManeuver(resetOnScreen) {
+  if (!script && !maneuver) return;
+  script = null; maneuver = null; dodge = null; markPreset(null); ctl.rollHold = 0;
+  if (resetOnScreen) { setThr(0); ctl.padL = ctl.padU = 0; ctl.padSticky = false; drawKnob(); setLock(false); }
+}
 
 // Controls (site/js/controls.mjs): keyboard, mouse, joysticks/HOTAS, pedals and gamepads, set in the setup
 // wizard or imported from a Star Citizen bindings file. Defaults are the Star Citizen keyboard bindings.
 const controls = createControls({ dialog: $('ctl-dlg'), body: $('ctl-body'), status: $('ctl-status'), onFly: () => fly(true) });
 let FLIGHT_KEYS = controls.flightKeys();
 $('ctl-dlg').addEventListener('close', () => { FLIGHT_KEYS = controls.flightKeys(); });
+const NO_INPUT = { f: undefined, l: undefined, u: undefined, roll: undefined, pitch: undefined, yaw: undefined, boost: false, brake: false, rollIsButton: false };
 function currentInput() {
-  const dev = controls.read(ctl.keys);
+  // While the Controls dialog is open you're testing inputs there: the ship doesn't fly.
+  const dev = controls.dialogOpen() ? NO_INPUT : controls.read(ctl.keys);
+  // A controller axis coming out of its deadzone takes over from a running maneuver.
+  if (script && !controls.dialogOpen() && ['f', 'l', 'u', 'roll', 'pitch', 'yaw'].some(a => dev[a] != null && dev[a] !== 0)) endManeuver(true);
   // priority per axis: a bound key/button or device axis > on-screen controls
   let u = { f: dev.f ?? ctl.thr / 100, l: dev.l ?? ctl.padL, u: dev.u ?? ctl.padU };
   // keys, the on-screen buttons and maneuvers roll at the chosen rate; a device axis is analog
   const rd = ctl.rollBtn || ctl.rollHold;
-  const roll = dev.roll != null ? (Math.abs(dev.roll) >= 0.999 ? Math.sign(dev.roll) * ctl.rollFrac : dev.roll) : rd * ctl.rollFrac;
+  const roll = dev.roll != null ? (dev.rollIsButton ? Math.sign(dev.roll) * ctl.rollFrac : dev.roll) : rd * ctl.rollFrac;
   const pitch = dev.pitch ?? (script ? script.pitch || 0 : 0), yaw = dev.yaw ?? (script ? script.yaw || 0 : 0);
   const boost = ctl.boostLock || ctl.boostBtn || dev.boost;
   const brake = dev.brake;
   // Spacebrake: full thrust against the current velocity, through the same per-axis G as any other input
   // (the game's exact spacebrake behavior is not measured; this is the assumed model).
-  if (brake) { const sp = len(S.v); u = sp < 0.5 ? { f: 0, l: 0, u: 0 } : (() => { const m = Math.max(Math.abs(S.v[0]), Math.abs(S.v[1]), Math.abs(S.v[2]));
+  // Tapered over the last 25 m/s, so it stops instead of overshooting into reverse.
+  if (brake) { const sp = len(S.v); u = sp < 0.5 ? { f: 0, l: 0, u: 0 } : (() => { const m = Math.max(Math.abs(S.v[0]), Math.abs(S.v[1]), Math.abs(S.v[2])) / Math.min(1, sp / 25);
     return { f: -S.v[0] / m, l: S.v[1] / m, u: -S.v[2] / m }; })(); }
   return { u, boost, brake, roll, pitch, yaw };
 }
@@ -382,8 +412,11 @@ const thr = $('thr');
 function setThr(v) { ctl.thr = v; thr.value = v; $('thr-val').textContent = `${v > 0 ? '+' : ''}${v}%`; $('thr-track').classList.toggle('detent', v === 0); }
 // Sticky midpoint: within ±8 % of the centre the slider snaps to zero, so "no forward input" is easy to find by touch.
 const DETENT = 8;
-thr.addEventListener('input', () => { script = null; const v = +thr.value; setThr(Math.abs(v) <= DETENT ? 0 : v); });
-$('thr0').onclick = () => { script = null; setThr(0); };
+// The sticky middle applies to dragging only, so arrow keys can still step out of zero.
+let thrDrag = false;
+thr.addEventListener('pointerdown', () => { thrDrag = true; }); addEventListener('pointerup', () => { thrDrag = false; });
+thr.addEventListener('input', () => { endManeuver(false); const v = +thr.value; setThr(thrDrag && Math.abs(v) <= DETENT ? 0 : v); });
+$('thr0').onclick = () => { endManeuver(false); setThr(0); };
 
 const pad = $('pad'), knob = $('knob');
 function drawKnob() {
@@ -397,7 +430,7 @@ function padFrom(e) {
   const m = Math.hypot(x, y); if (m > 1) { x /= m; y /= m; }
   ctl.padL = Math.abs(x) > 0.96 ? Math.sign(x) : x; ctl.padU = Math.abs(y) > 0.96 ? Math.sign(y) : y; drawKnob();
 }
-pad.addEventListener('pointerdown', e => { script = null; ctl.padSticky = false; pad.setPointerCapture(e.pointerId); padFrom(e); });
+pad.addEventListener('pointerdown', e => { endManeuver(false); ctl.padSticky = false; pad.setPointerCapture(e.pointerId); padFrom(e); });
 pad.addEventListener('pointermove', e => { if (pad.hasPointerCapture(e.pointerId)) padFrom(e); });
 const padUp = () => { if (!ctl.padSticky) { ctl.padL = 0; ctl.padU = 0; drawKnob(); } };
 pad.addEventListener('pointerup', padUp); pad.addEventListener('pointercancel', padUp);
@@ -406,12 +439,18 @@ const bBtn = $('boost');
 const boostDown = e => { e.preventDefault(); ctl.boostBtn = true; };
 const boostUp = () => { ctl.boostBtn = false; };
 bBtn.addEventListener('pointerdown', boostDown); bBtn.addEventListener('pointerup', boostUp);
+// hold-to-boost from the keyboard: Enter/Space held on the focused button
+bBtn.addEventListener('keydown', e => { if (e.code === 'Enter' || e.code === 'Space') { e.preventDefault(); e.stopPropagation(); ctl.boostBtn = true; } });
+bBtn.addEventListener('keyup', e => { if (e.code === 'Enter' || e.code === 'Space') { e.stopPropagation(); ctl.boostBtn = false; } });
 bBtn.addEventListener('pointerleave', boostUp); bBtn.addEventListener('pointercancel', boostUp);
 $('boost-lock').addEventListener('change', e => { ctl.boostLock = e.target.checked; });
 function setLock(v) { ctl.boostLock = v; $('boost-lock').checked = v; }
 for (const [id, dir] of [['roll-l', -1], ['roll-r', 1]]) {
   const b = $(id), up = () => { if (ctl.rollBtn === dir) ctl.rollBtn = 0; };
-  b.addEventListener('pointerdown', e => { e.preventDefault(); script = null; ctl.rollHold = 0; ctl.rollBtn = dir; });
+  b.addEventListener('pointerdown', e => { e.preventDefault(); endManeuver(false); ctl.rollBtn = dir; });
+  // hold-to-roll works from the keyboard too
+  b.addEventListener('keydown', e => { if ((e.code === 'Enter' || e.code === 'Space') && !e.repeat) { e.preventDefault(); e.stopPropagation(); endManeuver(false); ctl.rollBtn = dir; } });
+  b.addEventListener('keyup', e => { if (e.code === 'Enter' || e.code === 'Space') { e.stopPropagation(); up(); } });
   b.addEventListener('pointerup', up); b.addEventListener('pointerleave', up); b.addEventListener('pointercancel', up);
 }
 function setRollFrac(f) { ctl.rollFrac = f; $('rollrate').value = Math.round(f * 100);
@@ -422,19 +461,27 @@ setRollFrac(1);
 // Keys. Bound flight keys belong to the simulator while it has focus, so they can't trigger page or browser
 // shortcuts (Space scrolling, Ctrl+S/D/E/A...). Ctrl+W, Ctrl+Q and Ctrl+T can only be captured in full-screen
 // fly mode (Keyboard Lock API, Chrome/Edge); elsewhere a leave-page prompt guards Ctrl+W.
+let focusFromKeyboard = false;
+addEventListener('keydown', e => { if (e.code === 'Tab') focusFromKeyboard = true; }, true);
+addEventListener('pointerdown', () => { focusFromKeyboard = false; }, true);
 const typing = e => e.target.closest?.('input[type=text], input[type=number], textarea, select, [contenteditable]');
 addEventListener('keydown', e => {
   if (controls.dialogOpen() || typing(e)) return;
   if (FLIGHT_KEYS.has(e.code)) {
     // a focused button or checkbox keeps Space/Enter, unless we're flying full screen
-    if (!flying && (e.code === 'Space' || e.code === 'Enter') && e.target.closest?.('button, input, summary, a')) return;
-    ctl.keys.add(e.code); script = null; e.preventDefault(); return;
+    // A control reached with the keyboard (Tab) keeps Space/Enter. One that was only clicked doesn't, so Space
+    // strafes instead of re-pressing the last button. (:focus-visible can't tell: Chromium turns it on at any key.)
+    const kbFocused = focusFromKeyboard && e.target.closest?.('button, input, summary, a, select');
+    if (!flying && (e.code === 'Space' || e.code === 'Enter') && kbFocused) return;
+    if (e.target.closest?.('button, input, summary, select')) e.target.blur?.();
+    ctl.keys.add(e.code); if (script) endManeuver(true); e.preventDefault(); return;
   }
   const ctrlHeld = [...ctl.keys].some(c => c.startsWith('Control'));
   if (ctrlHeld || flying) e.preventDefault();
   if (e.ctrlKey || e.metaKey || e.altKey) return;
-  if (e.code >= 'Digit1' && e.code <= 'Digit4' && e.code.length === 6) { script = null; setThr(25 * +e.code.slice(5)); }
-  if (e.code === 'Digit0') { script = null; setThr(0); }
+  if (e.target.closest?.('input, select, textarea')) return; // single-key shortcuts don't fire inside form controls
+  if (e.code >= 'Digit1' && e.code <= 'Digit4' && e.code.length === 6) { endManeuver(false); setThr(25 * +e.code.slice(5)); }
+  if (e.code === 'Digit0') { endManeuver(false); setThr(0); }
   if (e.code === 'KeyP') togglePause();
   if (e.code === 'KeyR') reset(false);
   if (e.code === 'KeyN') reset(true);
@@ -442,26 +489,27 @@ addEventListener('keydown', e => {
 });
 addEventListener('keyup', e => ctl.keys.delete(e.code));
 addEventListener('blur', () => ctl.keys.clear());
-addEventListener('beforeunload', e => { if (!flying && [...ctl.keys].some(c => c.startsWith('Control'))) { e.preventDefault(); e.returnValue = ''; } });
+// Guard Ctrl+W unless the keyboard is really captured (full screen alone isn't enough in Firefox/Safari).
+addEventListener('beforeunload', e => { if (!keysLocked && [...ctl.keys].some(c => c.startsWith('Control'))) { e.preventDefault(); e.returnValue = ''; } });
 
 // Fly mode: full screen, keyboard captured (so Ctrl+W / Ctrl+Q strafe instead of closing the tab), and the mouse
 // captured when it flies the nose. Hold Esc to leave (the browser's rule while keys are captured).
-let flying = false;
+let flying = false, keysLocked = false;
 async function fly(on) {
   try {
     if (on) {
       await document.documentElement.requestFullscreen?.({ navigationUI: 'hide' });
-      if (navigator.keyboard?.lock) await navigator.keyboard.lock();
+      if (navigator.keyboard?.lock) { try { await navigator.keyboard.lock(); keysLocked = true; } catch { keysLocked = false; } }
       if (controls.mouse.enabled) $('c-pilot').requestPointerLock?.();
     } else if (document.fullscreenElement) await document.exitFullscreen();
   } catch { /* not allowed here: stay windowed */ }
 }
 document.addEventListener('fullscreenchange', () => {
-  flying = !!document.fullscreenElement;
+  flying = !!document.fullscreenElement; if (!flying) keysLocked = false;
   document.body.classList.toggle('flying', flying);
   $('fly').setAttribute('aria-pressed', flying);
   $('fly-note').hidden = !flying;
-  $('fly-note').textContent = navigator.keyboard?.lock ? 'Flying: all keys go to the simulator. Hold Esc to leave full screen.'
+  $('fly-note').textContent = keysLocked ? 'Flying: all keys go to the simulator. Hold Esc to leave full screen.'
     : 'Full screen. This browser can\'t capture Ctrl+W: use Chrome or Edge, or rebind strafe down.';
   requestAnimationFrame(resizeAll);
 });
@@ -479,7 +527,7 @@ $('unlimited').addEventListener('change', e => { ctl.unlimited = e.target.checke
 function reset(pinned) {
   if (pinned === 'rest') pinned = false; if (pinned === 'nose') pinned = true;
   if (typeof pinned === 'object' && pinned) { const { vx, boost } = pinned; reset(false); S = { ...mkState(vx, boost), x: S.x }; setLock(boost); return; }
-  script = null; maneuver = null; markPreset(null); ctl.rollHold = 0; qAtt = [0, 0, 0, 1]; controls.mouse.center();
+  script = null; maneuver = null; dodge = null; markPreset(null); ctl.rollHold = 0; qAtt = [0, 0, 0, 1]; controls.mouse.center();
   const vx = pinned === 'scm' ? 225 : pinned ? 520 : 0;
   S = { ...mkState(vx, pinned === true), x: S.x };
   trail.length = 0; setThr(pinned ? 100 : 0); setLock(pinned === true); ctl.padL = ctl.padU = 0; ctl.padSticky = false; drawKnob();
@@ -502,15 +550,15 @@ const PRESETS = {
                   steps: [[0, { f: 1, l: 1, u: 0, boost: true }]] },
   'dodge-mid':  { start: { vx: 300, boost: true }, dodge: true, watch: 'At 300 m/s forward you\'re in the fat middle of the egg: full ~10 G side push, ~180 m in 2 s, twice the nose (model).',
                   steps: [[0, { f: 0, l: 1, u: 0, boost: true }]] },
-  letoff:       { start: 'nose', watch: 'Strafing with forward released: speed falls from 519 to ~435 m/s (fixture), the ship drops back into the egg and the dodge ring opens.',
-                  steps: [[0, { f: 1, l: 1, u: 0, boost: true }], [1.5, { f: 0, l: 1, u: 0, boost: true }]] },
+  letoff:       { start: 'nose', watch: 'Forward released, strafe held: in game the speed falls from 519 to ~435 m/s (fixture; this model dips to ~415). The ship drops back into the egg and the dodge ring opens.',
+                  steps: [[0, { f: 0, l: 1, u: 0, boost: true }]] },
   jink:         { start: 'scm', dodge: true, watch: 'Each reversal drops you just inside the 225 sphere, so every leg gets the full 9.9 G (fixture). A jink keeps a shooter missing ~89 % of the time (research).',
                   steps: [0, 1.5, 3, 4.5, 6, 7.5, 9, 10.5].map((t, i) => [t, { f: 0, l: i % 2 ? 1 : -1, u: 0, boost: false }]) },
   'ck-escape':  { start: 'scm', watch: 'No boost, forward + up, roll ~110 °/s: keeps all 9.8 G of side push (fixture) and the TVI parks ~13° off the nose. Best miss: ~41 m vs ~34 m at full roll (research). Up strafe, not sideways: sideways + roll greyed pilots out in 2–3 s.',
                   steps: [[0, { f: 1, l: 0, u: 1, boost: false, r: 1, rf: 110 / 199.9 }]] },
-  'ck-shoot':   { start: 'nose', watch: 'Boosted, forward + up, roll ~27 °/s: the TVI holds ~13° off the nose, so your target doesn\'t spin and you can shoot back. ~27 m miss vs 16 m at full roll (research); 514 m/s, 5.4 G side (fixture).',
+  'ck-shoot':   { start: 'nose', watch: 'Boosted, forward + up, roll ~27 °/s: the TVI holds steady ~15° off the nose (this model; the research rule of thumb says ~13°), so your target doesn\'t spin and you can shoot back. ~27 m miss vs 16 m at full roll (research). Corkscrews measured at the nose ran 514–518 m/s (fixture).',
                   steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: 27 / 240 }]] },
-  'ck-spin':    { start: 'nose', watch: 'Full-rate roll (240 °/s): the side push spins so fast the spiral is ~3 m across, smaller than the ship. It throws away ~40 % of the miss (research). Measured 514 m/s, 5.4 G (fixture).',
+  'ck-spin':    { start: 'nose', watch: 'Full-rate roll (240 °/s): the side push spins so fast the spiral is ~3 m across, smaller than the ship. It throws away ~40 % of the miss (research). In game: 514 m/s, 5.4 G side (fixture); this model: ~520 m/s, ~6 G.',
                   steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: 1 }]] },
 };
 let maneuver = null, dodge = null;   // dodge: sideways distance covered in the first 2 s of a maneuver
@@ -542,6 +590,9 @@ const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 let active = reduceMotion ? 'slice' : 'egg';
 function applyTabs() {
   document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.view === active));
+  // No WebGL: the 3D views can't run, so the top-down view is the whole app (PLAN.md §9 fallback).
+  if (!hasWebGL) { active = 'slice'; for (const [k, el] of Object.entries(views)) el.dataset.hidden = String(k !== 'slice');
+    $('tab-egg').hidden = $('tab-pilot').hidden = true; document.querySelector('.views').classList.add('single'); $('no-gl').hidden = false; requestAnimationFrame(resizeAll); return; }
   for (const [k, el] of Object.entries(views)) el.dataset.hidden = narrow.matches ? String(k !== active) : String(k === 'slice');
   requestAnimationFrame(resizeAll);
 }
@@ -611,6 +662,7 @@ function dartGeometry(gl) {
 const FS_LAMBERT = `precision mediump float; uniform vec3 uColor; varying vec3 vN; varying vec3 vV;
 void main(){ float d = 0.35 + 0.65*abs(dot(normalize(vN), normalize(vec3(0.4,0.8,0.5)))); gl_FragColor = vec4(uColor*d, 1.0); }`;
 
+const hasWebGL = (() => { try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch { return false; } })();
 function makeRenderer(canvas) {
   const renderer = new Renderer({ canvas, dpr: Math.min(devicePixelRatio || 1, matchMedia('(pointer: coarse)').matches ? 1.5 : 2), antialias: true, alpha: false, webgl: 2 });
   renderer.gl.clearColor(0.027, 0.043, 0.067, 1);
@@ -618,7 +670,8 @@ function makeRenderer(canvas) {
 }
 
 /* ───────────────────────── egg view ───────────────────────── */
-const egg = (() => {
+const stubView = { resize() {}, draw() {}, camera() {}, hud() {} };
+const egg = !hasWebGL ? stubView : (() => {
   const canvas = $('c-egg'), renderer = makeRenderer(canvas), gl = renderer.gl;
   const camera = new Camera(gl, { fov: 38, near: 5, far: 8000 });
   const scene = new Transform();
@@ -766,7 +819,7 @@ const egg = (() => {
 })();
 
 /* ───────────────────────── pilot view: dust + crosshair + TVI ───────────────────────── */
-const pilot = (() => {
+const pilot = !hasWebGL ? stubView : (() => {
   const canvas = $('c-pilot'), renderer = makeRenderer(canvas), gl = renderer.gl;
   const camera = new Camera(gl, { fov: 60, near: 0.5, far: 6000 });
   camera.position.set(0, 0, 0); camera.lookAt([1, 0, 0]);
@@ -836,7 +889,7 @@ const pilot = (() => {
     let tviPt = null;
     if (fwd > 0.087) { tviPt = proj(fwd, right, up); }
     if (tviPt && inView(tviPt)) { show('#h-tvi', ...tviPt, true); show('#h-edge', 0, 0, false); }
-    else { show('#h-tvi', 0, 0, false); const ang = Math.atan2(-up, right); const ex = cx + Math.cos(ang) * (w / 2 - 22), ey = cy + Math.sin(ang) * (h / 2 - 22);
+    else { show('#h-tvi', 0, 0, false); const ang = Math.hypot(up, right) < 0.05 ? Math.PI / 2 : Math.atan2(-up, right) /* straight behind: point down */; const ex = cx + Math.cos(ang) * (w / 2 - 22), ey = cy + Math.sin(ang) * (h / 2 - 22);
       const g = el('#h-edge'); g.style.display = ''; g.setAttribute('transform', `translate(${Math.min(w - 18, Math.max(18, ex))} ${Math.min(h - 18, Math.max(18, ey))}) rotate(${ang * 180 / Math.PI})`); }
     const anti = -fwd > 0.087 ? proj(-fwd, -right, -up) : null; show('#h-anti', ...(anti || [0, 0]), !!anti && inView(anti));
     const lp = tviPt && inView(tviPt) ? tviPt : [cx, cy + 46];
@@ -860,7 +913,8 @@ function drawSlice(canvas, st, d, big) {
   c.strokeStyle = '#f2a33a'; c.stroke(); c.fillStyle = 'rgba(242,163,58,.06)'; c.fill();
   c.beginPath(); c.arc(ox, oy, 225 * sc, 0, 2 * Math.PI); c.strokeStyle = 'rgba(90,169,230,.7)'; c.stroke();
   c.strokeStyle = 'rgba(135,150,171,.35)'; c.beginPath(); c.moveTo(...P(0, -290)); c.lineTo(...P(0, 545)); c.stroke();
-  const fwd = st.v[0], lat = -st.v[1], room = d.room;
+  // top-down: sideways = all of the speed off the nose axis (left/right and up/down), signed by left/right
+  const fwd = st.v[0], lat = (st.v[1] > 0 ? -1 : 1) * Math.hypot(st.v[1], st.v[2]), room = d.room;
   c.strokeStyle = d.pinned ? '#ff6a55' : '#e7edf5'; c.lineWidth = big ? 3 : 2; c.beginPath(); c.moveTo(...P(-room, fwd)); c.lineTo(...P(room, fwd)); c.stroke();
   if (d.settle) { c.setLineDash([5, 6]); c.strokeStyle = 'rgba(126,240,200,.6)'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(ox, oy); c.lineTo(...P(-d.settle.p[1], d.settle.p[0])); c.stroke(); c.setLineDash([]); }
   c.strokeStyle = '#7ef0c8'; c.lineWidth = big ? 2.5 : 1.5; c.beginPath(); c.moveTo(ox, oy); c.lineTo(...P(lat, fwd)); c.stroke();
@@ -881,7 +935,7 @@ function derive(st, inp) {
   const ci = coreInput(inp.u, inp.boost), d = coreDerive(st.c, ci, gladius), boost = boostActive(st.c, ci);
   const sp = d.speed, settle = d.settleSpeed > 0 ? { p: toA(d.settlePoint), speed: d.settleSpeed, side: Math.hypot(d.settlePoint[1], d.settlePoint[2]) } : null;
   return { speed: sp, fwd: st.v[0], side: Math.hypot(st.v[1], st.v[2]), g: d.gNow, boost, r: eggRadiusAlong(gladius, boost, st.c.vWorld), req: request(inp.u, boost),
-    pinned: d.pinned, room: d.lateralRoom, tviDeg: sp > 0.5 ? d.tvi.offAngleDeg : 0, settle };
+    pinned: d.pinned, room: d.lateralRoom, roomLeft: Math.max(0, d.lateralRoom - Math.hypot(st.v[1], st.v[2])), tviDeg: sp > 0.5 ? d.tvi.offAngleDeg : 0, settle };
 }
 function teach(el, d) {
   let w = script && maneuver ? PRESETS[maneuver].watch : '';
@@ -894,17 +948,19 @@ function caption(d) {
     `Rolling ${Math.round(Math.abs(S.roll))} °/s · ${Math.round(d.side)} m/s sideways at ${Math.round(d.speed)} m/s · ${d.g.toFixed(1)} G.`;
   if (d.speed < 5) return d.boost ? 'Stopped, boosting: you can reach 520 m/s forward or 394 m/s sideways.'
     : 'Stopped, no boost: you can reach 225 m/s in any direction (blue ball). Hold Boost to use the amber egg.';
-  if (d.pinned && d.boost && d.fwd > 440) return `Top forward speed (${Math.round(d.fwd)} m/s): only ${Math.round(d.room)} m/s of dodge left.`;
+  if (d.fwd < -5) return `Flying backwards at ${Math.round(-d.fwd)} m/s. The egg is shortest at the tail: ${d.boost ? 268 : 225} m/s.`;
+  if (d.pinned && !d.boost && d.speed > 230) return 'Boost released: the flight computer is bleeding your speed back down to 225.';
+  if (d.pinned && d.boost && d.fwd > 500) return `Top forward speed (${Math.round(d.fwd)} m/s): only ${Math.round(d.roomLeft)} m/s of dodge left.`;
   if (d.pinned) return 'At your speed limit: you can\'t go faster this way. Strafing only slides you along the edge.';
-  return `At ${Math.round(Math.max(0, d.fwd))} m/s forward you can still add ${Math.round(d.room)} m/s sideways.`;
+  return `At ${Math.round(Math.max(0, d.fwd))} m/s forward you can still add ${Math.round(d.roomLeft)} m/s sideways.`;
 }
-let gSmooth = 0, gPeak = 0;
+let gSmooth = 0, gPeak = 0, lastEv = '';
 function frame(now) {
   requestAnimationFrame(frame);
-  const dt = Math.min(0.1, (now - last) / 1000); last = now;
+  const dt = Math.min(0.25, (now - last) / 1000); last = now;
   if (document.hidden) return;
   // Taking the controls ends a maneuver: drop its highlight and its held roll.
-  if (!script && maneuver) { maneuver = null; markPreset(null); ctl.rollHold = 0; }
+  if (!script && maneuver) endManeuver(false);
   if (!ctl.paused) {
     runScript(dt); acc += dt;
     const live = currentInput();
@@ -925,7 +981,8 @@ function frame(now) {
       S.roll = live.roll * R.roll; S.pitch = live.pitch * R.pitch; S.yaw = live.yaw * R.yaw;
       if (dodge && dodge.t < 2) { dodge.t += DT; dodge.dist += Math.hypot(S.v[1], S.v[2]) * DT; }
     }
-    trailT += dt; if (trailT > 1 / 60) { trailT = 0; trail.push(R3(...S.v)); if (trail.length > 360) trail.shift(); }
+    // a ~3 s trail: one point per 1/60 s of sim time, whatever the frame rate
+    trailT += dt; while (trailT > 1 / 60) { trailT -= 1 / 60; trail.push(R3(...S.v)); if (trail.length > 180) trail.shift(); }
   }
   const inp = currentInput(), d = derive(S, inp);
   gSmooth += (d.g - gSmooth) * 0.15;
@@ -933,18 +990,20 @@ function frame(now) {
   bBtn.classList.toggle('active', d.boost); bBtn.setAttribute('aria-pressed', d.boost);
   if (visible('egg')) { egg.draw(S, d); drawSlice($('c-inset'), S, d, false); teach($('cap-egg'), d); }
   if (visible('pilot')) { pilot.draw(S, d);
-    pilot.hud({ speed: d.speed, speedCap: d.r, throttle: inp.u.f, g: gSmooth, gPeak, tank: S.tank, redZone: gladius.boost.redZonePct,
+    pilot.hud({ speed: d.fwd < -1 ? -d.speed : d.speed, speedCap: d.r, throttle: inp.u.f, g: gSmooth, gPeak, tank: S.tank, redZone: gladius.boost.redZonePct,
       boostActive: d.boost, boostLocked: !!S.c.boostLocked && !ctl.unlimited, unlimited: ctl.unlimited, mode: d.boost ? 'BOOST' : 'SCM',
       roll: S.roll || 0, pitch: S.pitch || 0, yaw: S.yaw || 0 }); $('cap-pilot').textContent = d.speed < 3 ? 'Stopped: the space dust hangs still. Move and it streams away from where you\'re heading.' : `The dust streams out of the TVI (circle with wings), ${Math.round(d.tviDeg)}° off your nose: that's where you're really going.`; }
   if (visible('slice')) { drawSlice($('slice-big'), S, d, true); teach($('cap-slice'), d); }
   roT += dt; if (roT > 0.08) { roT = 0;
     $('r-speed').textContent = Math.round(d.speed); $('r-fwd').textContent = Math.round(d.fwd); $('r-side').textContent = Math.round(d.side);
-    $('r-room').textContent = Math.round(d.room); $('r-g').textContent = gSmooth.toFixed(1); $('r-tvi').textContent = d.speed > 3 ? Math.round(d.tviDeg) : '–';
-    $('r-tank').textContent = ctl.unlimited ? '∞' : S.c.boostLocked ? `${Math.round(S.tank)} · locked` : Math.round(S.tank);
+    $('r-room').textContent = Math.round(d.roomLeft); $('r-g').textContent = gSmooth.toFixed(1); $('r-tvi').textContent = d.speed > 3 ? Math.round(d.tviDeg) : '–';
+    $('r-tank').textContent = ctl.unlimited ? '∞' : S.c.boostLocked ? `${Math.round(S.tank)}🔒` : Math.round(S.tank);
     $('r-tankbar').classList.toggle('locked', !!S.c.boostLocked && !ctl.unlimited); $('r-roll').textContent = Math.round(Math.abs(S.roll || 0)); $('r-tankbar').style.width = `${S.tank}%`;
     const mode = $('r-mode'); mode.textContent = d.boost ? 'Boost' : 'SCM'; mode.className = `chip ${d.boost ? 'on-boost' : 'on-scm'}`;
     $('r-pin').hidden = !d.pinned; $('r-pin').className = 'chip pinned'; }
-  liveT += dt; if (liveT > 2) { liveT = 0; $('live').textContent = `Speed ${Math.round(d.speed)} meters per second, sideways room ${Math.round(d.room)}.`; }
+  // Screen readers: announce what changed (boost, the limit, lockout), not the speed every few seconds.
+  const ev = `${d.boost ? 'Boost on' : 'Boost off'}${d.pinned ? ', at your speed limit' : ''}${S.c.boostLocked && !ctl.unlimited ? ', boost locked until the tank refills to 25 percent' : ''}`;
+  liveT += dt; if (ev !== lastEv && liveT > 0.5) { liveT = 0; lastEv = ev; $('live').textContent = `${ev}. Speed ${Math.round(d.speed)} meters per second, dodge room ${Math.round(d.roomLeft)}.`; }
 }
 function resizeAll() { egg.resize(); pilot.resize(); }
 new ResizeObserver(resizeAll).observe(document.querySelector('.views'));

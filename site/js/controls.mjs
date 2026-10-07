@@ -90,6 +90,26 @@ export function describe(b) {
   return b.t === 'btn' ? `${dev} · button ${b.button + 1}` : `${dev} · axis ${b.axis + 1}${b.inv ? ' (inverted)' : ''}`;
 }
 
+// Rebuild a saved map from known fields only, dropping anything malformed.
+const okBinding = (b) => !!b && typeof b === 'object' && (
+  (b.t === 'key' && typeof b.code === 'string') || (b.t === 'mouse' && (b.axis === 'x' || b.axis === 'y')) ||
+  ((b.t === 'btn' || b.t === 'axis') && typeof b.key === 'string' && Number.isInteger(b.t === 'btn' ? b.button : b.axis)));
+const okList = (l) => (Array.isArray(l) ? l.filter(okBinding) : []);
+function sanitize(j) {
+  const m = emptyMap();
+  for (const a of AXES) {
+    const x = Object.hasOwn(j.axes, a) && j.axes[a] && typeof j.axes[a] === 'object' ? j.axes[a] : {};
+    m.axes[a] = { axis: okBinding(x.axis) && x.axis.t !== 'key' && x.axis.t !== 'btn' ? x.axis : null, pos: okList(x.pos), neg: okList(x.neg) };
+  }
+  for (const n of BUTTONS) m.buttons[n] = okList(j.buttons && Object.hasOwn(j.buttons, n) ? j.buttons[n] : []);
+  if (Number.isFinite(j.deadzone)) m.deadzone = Math.min(0.5, Math.max(0, j.deadzone));
+  if (j.mouse && typeof j.mouse === 'object') m.mouse = { enabled: !!j.mouse.enabled, sens: Number.isFinite(j.mouse.sens) ? j.mouse.sens : 1 };
+  if (typeof j.source === 'string') m.source = j.source;
+  return m;
+}
+// Some browsers report a joystick hat as an axis that rests outside -1..1 (e.g. 1.2857): never treat it as an axis.
+const isHat = (v) => Math.abs(v) > 1.05;
+
 /**
  * @param {{ dialog: HTMLDialogElement, body: HTMLElement, status: HTMLElement, onFly?: () => void }} ui
  */
@@ -97,11 +117,7 @@ export function createControls(ui) {
   let map = null;
   try {
     const j = JSON.parse(localStorage.getItem(STORE) || 'null');
-    if (j && j.axes) { // merge over a complete map, so a partial or older save can't break reading
-      const e = emptyMap();
-      map = { ...e, ...j, axes: { ...e.axes }, buttons: { ...e.buttons, ...(j.buttons || {}) }, mouse: { ...e.mouse, ...(j.mouse || {}) } };
-      for (const a of AXES) map.axes[a] = { ...e.axes[a], ...(j.axes[a] || {}) };
-    }
+    if (j && typeof j === 'object' && j.axes && typeof j.axes === 'object') map = sanitize(j); // a partial or damaged save can't break the page
   } catch { /* private mode or bad JSON: start fresh */ }
   const firstRun = !map;
   if (!map) map = scDefaults();
@@ -121,7 +137,7 @@ export function createControls(ui) {
   const mouseCenter = () => { mouse.x = 0; mouse.y = 0; };
 
   // ---------- reading ----------
-  const out = { f: undefined, l: undefined, u: undefined, roll: undefined, pitch: undefined, yaw: undefined, boost: false, brake: false };
+  const out = { f: undefined, l: undefined, u: undefined, roll: undefined, pitch: undefined, yaw: undefined, boost: false, brake: false, rollIsButton: false };
   function pressed(b, keys, pads) {
     if (b.t === 'key') return keys.has(b.code);
     if (b.t === 'btn') { const p = padFor(b, pads); return !!(p && p.buttons[b.button] && p.buttons[b.button].pressed); }
@@ -132,9 +148,12 @@ export function createControls(ui) {
     let v;
     if (b.t === 'mouse') { if (!map.mouse.enabled || !mouse.locked) return undefined; v = b.axis === 'x' ? mouse.x : mouse.y; if (b.inv) v = -v; return Math.abs(v) < 0.02 ? 0 : v; }
     const p = padFor(b, pads); if (!p) return undefined;
-    v = p.axes[b.axis]; if (v == null) return undefined;
+    v = p.axes[b.axis]; if (v == null || isHat(v)) return undefined;
     v = Math.max(-1, Math.min(1, b.inv ? -v : v));
-    if (b.mode === 'throttle') v = (v + 1) / 2; // a throttle resting at the back = 0 %, full forward = 100 %
+    if (b.mode === 'throttle') { // a throttle lever is always in charge: at the back it means 0 %, not "not in use"
+      v = (v + 1) / 2;
+      return v < dz ? 0 : (v - dz) / (1 - dz);
+    }
     if (Math.abs(v) < dz) return undefined;
     return Math.sign(v) * (Math.abs(v) - dz) / (1 - dz);
   }
@@ -147,6 +166,7 @@ export function createControls(ui) {
       const m = map.axes[a];
       const bv = m.pos.reduce((s, b) => s + (pressed(b, keys, pads) ? 1 : 0), 0) - m.neg.reduce((s, b) => s + (pressed(b, keys, pads) ? 1 : 0), 0);
       out[a] = bv ? Math.max(-1, Math.min(1, bv)) : m.axis ? axisValue(m.axis, pads) : undefined;
+      if (a === 'roll') out.rollIsButton = !!bv; // keys/buttons roll at the chosen rate; an axis is analog
     }
     for (const n of BUTTONS) out[n] = map.buttons[n].some((b) => pressed(b, keys, pads));
     // No controller bound yet: a standard-layout gamepad works out of the box. Left stick strafes,
@@ -159,7 +179,7 @@ export function createControls(ui) {
         out.f ??= sh(-(p.axes[1] || 0)); out.l ??= sh(p.axes[0] || 0);
         out.yaw ??= sh(p.axes[2] || 0); out.pitch ??= sh(-(p.axes[3] || 0));
         const ud = (btn(5) ? 1 : 0) - (btn(4) ? 1 : 0); if (ud) out.u = ud;
-        const rl = (p.buttons[7]?.value || 0) - (p.buttons[6]?.value || 0); if (Math.abs(rl) > dz) out.roll = rl;
+        const rl = (p.buttons[7]?.value || 0) - (p.buttons[6]?.value || 0); if (Math.abs(rl) > dz && out.roll == null) out.roll = rl;
         out.boost ||= btn(0); out.brake ||= btn(1);
       }
     }
@@ -176,8 +196,10 @@ export function createControls(ui) {
 
   // ---------- wizard ----------
   const dlg = ui.dialog, body = ui.body;
-  let wiz = null; // { stage, kinds, step, base, draft, done:Set }
+  let wiz = null; // { stage, kinds, step, base, draft, done:Set, history:[], held:Set, settle }
   let keyCapture = null;
+  // Keys held in the dialog (for the summary's live values) and keys still held from the last capture.
+  const dlgKeys = new Set();
 
   function status() {
     const pads = connectedPads(), n = pads.length;
@@ -226,14 +248,15 @@ export function createControls(ui) {
     d.mouse = { ...map.mouse, enabled: wiz.kinds.has('mouse') };
     d.deadzone = map.deadzone;
     wiz.draft = d; wiz.stage = 'steps'; wiz.step = 0; wiz.done = new Set(); wiz.base = snapshotAll();
+    wiz.history = []; wiz.held = new Set(); wiz.settle = null;
     render();
   }
   const curStep = () => STEPS[wiz.step];
   function renderStep() {
     const st = curStep(), n = STEPS.length;
     const useMouse = st.mouse && wiz.kinds.has('mouse');
-    body.innerHTML = `<p class="keys">Step ${wiz.step + 1} of ${n}</p>
-      <p class="ask">${esc(st.label)}</p>
+    body.innerHTML = `<p class="keys" role="status">Step ${wiz.step + 1} of ${n}: ${esc(st.label)}</p>
+      <p class="ask" tabindex="-1">${esc(st.label)}</p>
       <p class="keys">Press a key or button, or move an axis${useMouse ? ', or use the mouse' : ''}. ${esc(st.hint)}</p>
       <div class="meter" aria-hidden="true"><i id="wiz-live"></i></div>
       <p class="keys" id="wiz-pads">${padLine()}</p>
@@ -241,35 +264,69 @@ export function createControls(ui) {
         ${useMouse ? `<button id="wiz-mouse" class="primary">Use the mouse</button>` : ''}
         <button id="wiz-skip">Skip</button><button id="wiz-back" ${wiz.step ? '' : 'disabled'}>Back</button><button id="wiz-stop">Cancel</button>
       </div>`;
-    body.querySelector('#wiz-skip').onclick = () => advance();
-    body.querySelector('#wiz-back').onclick = () => { do wiz.step--; while (wiz.step > 0 && wiz.done.has(STEPS[wiz.step].id) && wiz.autoskipped?.has(STEPS[wiz.step].id)); wiz.base = snapshotAll(); render(); };
+    body.querySelector('#wiz-skip').onclick = () => { remember(); advance(); };
+    // Back undoes the previous step completely (its binding, and any step its axis covered).
+    body.querySelector('#wiz-back').onclick = () => {
+      const h = wiz.history.pop(); if (!h) return;
+      wiz.step = h.step; wiz.draft = h.draft; wiz.done = h.done; wiz.settle = null; wiz.base = snapshotAll(); render();
+    };
     body.querySelector('#wiz-stop').onclick = () => { wiz = null; render(); };
     if (useMouse) body.querySelector('#wiz-mouse').onclick = () => bindCaptured({ t: 'mouse', axis: st.mouse, inv: false }, true);
     keyCapture = (e) => {
       if (e.code === 'Escape' || e.code === 'Tab') return;
+      // Enter/Space on a focused wizard button press the button (keyboard users need Skip, Back, Cancel)
+      if ((e.code === 'Enter' || e.code === 'NumpadEnter' || e.code === 'Space') && e.target.closest?.('button, summary, input, select')) return;
       e.preventDefault(); e.stopPropagation();
+      if (e.repeat || wiz.held.has(e.code)) return; // auto-repeat, or still holding the key bound a step ago
+      wiz.held.add(e.code);
       bindCaptured(key(e.code), false);
     };
+    body.querySelector('.ask')?.focus({ preventScroll: true });
   }
+  const remember = () => wiz.history.push({ step: wiz.step, draft: structuredClone(wiz.draft), done: new Set(wiz.done) });
   // Store a captured control for the current step. An axis covers both directions of the step's logical
   // axis, so the paired step is skipped.
   function bindCaptured(b, isAxis) {
+    remember();
     const st = curStep(), d = wiz.draft, [a, sign] = st.target;
     if (a === 'button') d.buttons[sign].push(b);
-    else if (isAxis) { d.axes[a].axis = b; if (st.pair) { wiz.done.add(st.pair); (wiz.autoskipped ||= new Set()).add(st.pair); } if (b.t === 'mouse') d.mouse.enabled = true; }
+    else if (isAxis) { d.axes[a].axis = b; if (st.pair) wiz.done.add(st.pair); if (b.t === 'mouse') d.mouse.enabled = true; }
     else (sign > 0 ? d.axes[a].pos : d.axes[a].neg).push(b);
     wiz.done.add(st.id);
     advance();
   }
   function advance() {
     do wiz.step++; while (wiz.step < STEPS.length && wiz.done.has(STEPS[wiz.step].id));
-    wiz.base = snapshotAll();
-    if (wiz.step >= STEPS.length) { map = { ...wiz.draft, source: 'wizard' }; save(); wiz = null; keyCapture = null; status(); }
+    // Don't listen again until every control is back at rest: releasing the axis just bound must not bind it
+    // to the next step.
+    wiz.base = null; wiz.settle = { frames: 0, last: null };
+    if (wiz.step >= STEPS.length) finishWizard();
     render();
+  }
+  function finishWizard() {
+    const d = wiz.draft, def = scDefaults();
+    // anything skipped keeps its Star Citizen keyboard default
+    for (const a of AXES) if (!d.axes[a].axis && !d.axes[a].pos.length && !d.axes[a].neg.length) d.axes[a] = def.axes[a];
+    for (const n of BUTTONS) if (!d.buttons[n].length) d.buttons[n] = def.buttons[n];
+    map = { ...d, source: 'wizard' }; save(); wiz = null; keyCapture = null; status();
+    notice = 'Saved. Anything you skipped keeps its Star Citizen keyboard default.';
+  }
+  // Wait until no axis has moved for ~15 frames before taking the new step's baseline.
+  function settled(pads) {
+    const snap = snapshotAll(), st = wiz.settle;
+    const moved = !st.last || Object.keys(snap).some((k) => !st.last[k] || snap[k].axes.some((v, i) => Math.abs(v - (st.last[k].axes[i] ?? v)) > 0.02));
+    st.last = snap; st.frames = moved ? 0 : st.frames + 1;
+    if (st.frames < 15) return false;
+    wiz.base = snap; wiz.settle = null; void pads; return true;
   }
   function tickStep() {
     const st = curStep(), pads = connectedPads();
     const np = body.querySelector('#wiz-pads'); if (np) np.innerHTML = padLine();
+    if (wiz.settle && !settled(pads)) return;
+    for (const d of pads) { // a controller that appeared during this step: take its baseline now
+      const k = d.pad.index + '|' + d.id;
+      if (!wiz.base[k]) wiz.base[k] = { axes: d.pad.axes.slice(), buttons: d.pad.buttons.map((b) => b.pressed) };
+    }
     for (const d of pads) { // a new button press
       const b0 = (wiz.base[d.pad.index + '|' + d.id] || {}).buttons || [];
       const i = d.pad.buttons.findIndex((b, k) => b.pressed && !b0[k]);
@@ -280,6 +337,7 @@ export function createControls(ui) {
     for (const d of pads) {
       const a0 = (wiz.base[d.pad.index + '|' + d.id] || {}).axes || [];
       d.pad.axes.forEach((v, i) => {
+        if (isHat(v) || isHat(a0[i] ?? 0)) return; // a hat reported as an axis
         const delta = v - (a0[i] ?? v);
         if (!best || Math.abs(delta) > Math.abs(best.delta)) best = { d, i, delta, start: a0[i] ?? v };
       });
@@ -294,9 +352,10 @@ export function createControls(ui) {
     }
   }
 
+  let notice = '';
   function renderSummary() {
     keyCapture = null;
-    const row = (label, html, liveId, opts = '') => `<span class="what">${label}</span><span class="src">${html}</span><span class="live" id="${liveId}">–</span>${opts ? `<span class="opts">${opts}</span>` : ''}`;
+    const row = (label, html, liveId, opts = '') => `<div class="brow"><span class="what">${label}</span><span class="src">${html}</span><span class="live" id="${liveId}">–</span>${opts ? `<span class="opts">${opts}</span>` : ''}</div>`;
     const names = { f: 'Throttle (strafe forward / back)', l: 'Strafe left / right', u: 'Strafe up / down', roll: 'Roll', pitch: 'Pitch', yaw: 'Yaw' };
     const rows = AXES.map((a) => {
       const m = map.axes[a], parts = [];
@@ -307,7 +366,7 @@ export function createControls(ui) {
       if (a === 'f' && m.axis?.t === 'axis') opts += `<label class="tog">Range <select data-mode="f"><option value="centered" ${m.axis.mode !== 'throttle' ? 'selected' : ''}>centred (back ↔ forward)</option><option value="throttle" ${m.axis.mode === 'throttle' ? 'selected' : ''}>throttle (0 → 100 %)</option></select></label>`;
       return row(names[a], parts.join(' · ') || 'not bound', `c-v-${a}`, opts);
     }).join('') + BUTTONS.map((n) => row(n === 'boost' ? 'Boost' : 'Spacebrake', map.buttons[n].map(describe).map(esc).join(' / ') || 'not bound', `c-v-${n}`)).join('');
-    body.innerHTML = `<p class="keys">${firstRun && map.source === 'defaults' ? 'Using the Star Citizen keyboard defaults. ' : ''}Move each control to check it. Saved in this browser.</p>
+    body.innerHTML = `${notice ? `<p class="notice" role="status">${esc(notice)}</p>` : ''}<p class="keys">${firstRun && map.source === 'defaults' ? 'Using the Star Citizen keyboard defaults. ' : ''}Move each control to check it. Saved in this browser.</p>
       <div class="binds">${rows}</div>
       <div class="set">
         <span>Deadzone</span><input type="range" id="c-dz" min="0" max="25" value="${Math.round(map.deadzone * 100)}" aria-label="Axis deadzone"><output id="c-dz-v">${Math.round(map.deadzone * 100)}%</output>
@@ -324,6 +383,7 @@ export function createControls(ui) {
     body.querySelector('#c-wizard').onclick = () => open(true);
     body.querySelector('#c-defaults').onclick = () => { const mouseOn = map.mouse.enabled; map = scDefaults(); map.mouse.enabled = mouseOn; save(); status(); render(); };
     body.querySelector('#c-close').onclick = () => dlg.close();
+    notice = '';
     body.querySelector('#c-fly').onclick = () => { dlg.close(); ui.onFly?.(); };
     body.querySelector('#c-dz').oninput = (e) => { map.deadzone = +e.target.value / 100; body.querySelector('#c-dz-v').textContent = `${e.target.value}%`; save(); };
     body.querySelector('#c-sens').oninput = (e) => { map.mouse.sens = +e.target.value / 100; body.querySelector('#c-sens-v').textContent = `${e.target.value}%`; save(); };
@@ -336,7 +396,7 @@ export function createControls(ui) {
     body.querySelectorAll('[data-mode]').forEach((c) => (c.onchange = () => { map.axes.f.axis.mode = c.value; save(); }));
   }
   function tickSummary(keys) {
-    const v = read(keys);
+    const v = read(new Set([...keys, ...dlgKeys]));
     for (const a of AXES) { const e = body.querySelector('#c-v-' + a); if (e) e.textContent = v[a] == null ? '0' : `${v[a] > 0 ? '+' : ''}${Math.round(v[a] * 100)}`; }
     for (const n of BUTTONS) { const e = body.querySelector('#c-v-' + n); if (e) e.textContent = v[n] ? 'ON' : 'off'; }
   }
@@ -350,7 +410,7 @@ export function createControls(ui) {
       const load = (file) => file.text().then((text) => {
         const res = fromActionmaps(sc, text);
         msg.textContent = res.message;
-        if (res.ok) { wiz = null; render(); }
+        if (res.ok) { notice = res.message; wiz = null; render(); }
       });
       body.querySelector('#wiz-file').onchange = (e) => { const f = e.target.files?.[0]; if (f) load(f); };
       const box = body.querySelector('details.import');
@@ -361,16 +421,24 @@ export function createControls(ui) {
   // Convert a parsed Star Citizen bindings file into this app's map.
   function fromActionmaps(sc, text) {
     const r = sc.parseActionmaps(text);
-    const d = emptyMap(); d.deadzone = map.deadzone; d.mouse = { ...map.mouse };
-    const pads = connectedPads();
+    // Start from the keyboard defaults: the game's file may list only what you changed. Each action the file
+    // binds replaces that action's defaults.
+    const d = scDefaults(); d.deadzone = map.deadzone; d.mouse = { ...map.mouse };
+    const pads = connectedPads(), skipped = [];
+    const keyOf = (dv, inst) => dv?.vidPid || (dv?.product ? prettyName(dv.product).toLowerCase() : `js${inst}`);
     const devFor = (e) => {
-      const dv = r.devices.find((x) => x.instance === e.instance && (e.device === 'js' ? x.type === 'joystick' : x.type === 'gamepad'));
+      const isJs = (x) => (e.device === 'js' ? x.type === 'joystick' : x.type === 'gamepad' || x.type === 'xboxpad');
+      const dv = r.devices.find((x) => x.instance === e.instance && isJs(x));
       if (e.device === 'gp') return { key: '*standard*', nth: 0, id: dv?.product || 'Gamepad' };
-      const k = dv?.vidPid || (dv?.product ? prettyName(dv.product).toLowerCase() : `js${e.instance}`);
-      const live = pads.find((p) => p.key === k);
-      return { key: k, nth: live ? live.nth : 0, id: live?.id || dv?.product || `Joystick ${e.instance}` };
+      const k = keyOf(dv, e.instance);
+      // identical sticks: the game numbers them; the 2nd one in the file is the 2nd one the browser sees
+      const nth = r.devices.filter((x) => isJs(x) && x.instance < e.instance && keyOf(x, x.instance) === k).length;
+      const live = pads.find((p) => p.key === k && p.nth === nth);
+      return { key: k, nth, id: live?.id || dv?.product || `Joystick ${e.instance}` };
     };
     const conv = (e) => {
+      if (e.modifiers?.length) { skipped.push(e.scInput); return null; } // combos like Alt+W aren't supported yet
+      if (e.kind === 'hat' || e.kind === 'wheel') { skipped.push(e.scInput); return null; }
       if (e.device === 'kb' && e.code) return key(e.code);
       if (e.device === 'mouse' && e.kind === 'axis' && /^(x|y)$/.test(e.axis || '')) { d.mouse.enabled = true; return { t: 'mouse', axis: e.axis, inv: !!e.invert }; }
       if ((e.device === 'js' || e.device === 'gp') && e.kind === 'button' && e.button != null) return { t: 'btn', ...devFor(e), button: e.button };
@@ -381,12 +449,17 @@ export function createControls(ui) {
       }
       return null;
     };
+    const replaced = new Set(); let count = 0;
+    const list = (target, sign) => (target[0] === 'button' ? d.buttons[target[1]] : sign > 0 ? d.axes[target[0]].pos : d.axes[target[0]].neg);
     const put = (action, target) => {
-      for (const e of r.bindings[action] || []) {
+      const entries = Object.hasOwn(r.bindings, action) ? r.bindings[action] : [];
+      for (const e of entries) {
         const b = conv(e); if (!b) continue;
-        if (target[0] === 'button') d.buttons[target[1]].push(b);
-        else if (b.t === 'axis' || b.t === 'mouse') { if (!d.axes[target[0]].axis) d.axes[target[0]].axis = b; }
-        else if (b.t === 'key' || b.t === 'btn') (target[1] * (e.sign || 1) > 0 ? d.axes[target[0]].pos : d.axes[target[0]].neg).push(b);
+        count++;
+        if (b.t === 'axis' || b.t === 'mouse') { if (target[0] !== 'button') d.axes[target[0]].axis = b; continue; }
+        const sign = target[1] * (e.sign || 1), l = list(target, sign), id = `${target[0]}${target[0] === 'button' ? target[1] : sign}`;
+        if (!replaced.has(id)) { l.length = 0; replaced.add(id); }
+        l.push(b);
       }
     };
     put('strafeUp', ['u', 1]); put('strafeDown', ['u', -1]); put('strafeLeft', ['l', -1]); put('strafeRight', ['l', 1]);
@@ -394,21 +467,17 @@ export function createControls(ui) {
     put('strafeVert', ['u', 1]); put('strafeLat', ['l', 1]); put('strafeLong', ['f', 1]);
     put('pitch', ['pitch', 1]); put('yaw', ['yaw', 1]); put('roll', ['roll', 1]);
     put('boost', ['button', 'boost']); put('spacebrake', ['button', 'brake']);
-    const count = AXES.reduce((s, a) => s + (d.axes[a].axis ? 1 : 0) + d.axes[a].pos.length + d.axes[a].neg.length, 0) + d.buttons.boost.length + d.buttons.brake.length;
     if (!count) return { ok: false, message: `No flight bindings found in that file.${r.warnings?.length ? ' ' + r.warnings[0] : ''}` };
-    // anything the file leaves unbound falls back to the keyboard defaults
-    const def = scDefaults();
-    for (const a of AXES) if (!d.axes[a].axis && !d.axes[a].pos.length && !d.axes[a].neg.length) d.axes[a] = def.axes[a];
-    for (const n of BUTTONS) if (!d.buttons[n].length) d.buttons[n] = def.buttons[n];
     d.source = 'import';
     map = d; save(); status();
-    return { ok: true, message: `Imported ${count} bindings from "${r.profileName || 'your profile'}". Move each control to check it; joystick axes are matched by guess, so fix any that are inverted or swapped.` };
+    const skip = skipped.length ? ` Not imported (combos and hats aren't supported yet): ${[...new Set(skipped)].slice(0, 6).join(', ')}.` : '';
+    return { ok: true, message: `Imported ${count} bindings from "${r.profileName || 'your profile'}"; everything else keeps the keyboard defaults. Move each control to check it: joystick axes are matched by guess, so fix any that are inverted or swapped.${skip}` };
   }
 
   // ---------- dialog plumbing ----------
-  let keysRef = new Set();
+  let keysRef = new Set(), ticking = false;
   function tick() {
-    if (!dlg.open) return;
+    if (!dlg.open) { ticking = false; return; }
     requestAnimationFrame(tick);
     if (wiz && wiz.stage === 'steps') tickStep();
     else if (!wiz) tickSummary(keysRef);
@@ -422,10 +491,17 @@ export function createControls(ui) {
     wiz = wizard ? { stage: 'devices', kinds } : null;
     render();
     if (!dlg.open) dlg.showModal();
-    requestAnimationFrame(tick);
+    if (!ticking) { ticking = true; requestAnimationFrame(tick); }
   }
-  addEventListener('keydown', (e) => { if (dlg.open && keyCapture) keyCapture(e); }, true);
-  dlg.addEventListener('close', () => { wiz = null; keyCapture = null; });
+  addEventListener('keydown', (e) => { if (!dlg.open) return; if (keyCapture) keyCapture(e); else dlgKeys.add(e.code); }, true);
+  addEventListener('keyup', (e) => { dlgKeys.delete(e.code); wiz?.held?.delete(e.code); }, true);
+  addEventListener('blur', () => { dlgKeys.clear(); wiz?.held?.clear(); });
+  let saved = !firstRun;
+  dlg.addEventListener('close', () => {
+    wiz = null; keyCapture = null; dlgKeys.clear();
+    // closing the first-run wizard keeps the defaults, so it doesn't reopen on every visit
+    if (!saved) { save(); saved = true; status(); }
+  });
   addEventListener('gamepadconnected', status); addEventListener('gamepaddisconnected', status);
   status();
 
@@ -433,6 +509,6 @@ export function createControls(ui) {
     read, flightKeys, open, status,
     dialogOpen: () => dlg.open,
     firstRun,
-    mouse: { move: mouseMove, center: mouseCenter, setLocked: (on) => { mouse.locked = on; }, get enabled() { return map.mouse.enabled; }, get state() { return mouse; } },
+    mouse: { move: mouseMove, center: mouseCenter, setLocked: (on) => { mouse.locked = on; if (!on) mouseCenter(); }, get enabled() { return map.mouse.enabled; }, get state() { return mouse; } },
   };
 }

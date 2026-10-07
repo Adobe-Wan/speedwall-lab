@@ -15,11 +15,11 @@ const clamp01 = (x: number) => (x < 0 ? 0 : x > 1 ? 1 : x);
 const ramp = (x: number, from: number, to: number) => (to === from ? (x >= to ? 1 : 0) : clamp01((x - from) / (to - from)));
 
 /** Boost is on while held, unless the tank is empty or still refilling through the red zone. */
-export const boostActive = (s: State, u: Input) => u.boost && (u.unlimitedBoost === true || (!s.boostLocked && s.tank > 0));
+export const boostActive = (s: State, u: Input) => u.boost && (!!u.unlimitedBoost || (!s.boostLocked && s.tank > 0));
 
 /** Tank after one step: drains only while boost is actually on, otherwise refills; empty locks boost out until the red zone is passed. */
 function nextTank(s: State, u: Input, p: FlightProfile, boosted: boolean, dt: number): { tank: number; boostLocked: boolean } {
-  if (u.unlimitedBoost) return { tank: s.tank, boostLocked: false };
+  if (u.unlimitedBoost) return { tank: 100, boostLocked: false }; // trainer option: always a full tank
   const tank = Math.min(100, Math.max(0, s.tank + (boosted ? -p.boost.tankDrainPctPerS : p.boost.tankRegenPctPerS) * dt));
   const boostLocked = tank <= 0 ? true : s.boostLocked && tank < p.boost.redZonePct;
   return { tank, boostLocked };

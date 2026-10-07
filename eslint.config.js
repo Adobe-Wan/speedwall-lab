@@ -12,7 +12,7 @@ export default tseslint.config(
     files: ["site/js/**/*.mjs"],
     languageOptions: {
       globals: Object.fromEntries(["window", "document", "navigator", "localStorage", "requestAnimationFrame", "addEventListener",
-        "removeEventListener", "DOMParser", "matchMedia", "innerHeight", "innerWidth", "devicePixelRatio", "performance", "HTMLElement"].map((g) => [g, "readonly"])),
+        "removeEventListener", "structuredClone", "DOMParser", "matchMedia", "innerHeight", "innerWidth", "devicePixelRatio", "performance", "HTMLElement"].map((g) => [g, "readonly"])),
     },
   },
 );
