@@ -1,0 +1,8 @@
+[
+  {
+    "name": "core (part of the 60 KB initial-JS budget, PLAN.md §9)",
+    "path": "packages/core/dist/index.js",
+    "limit": "60 KB",
+    "gzip": true
+  }
+]
