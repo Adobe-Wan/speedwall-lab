@@ -307,7 +307,7 @@ There's no public spviewer repository or license, and the framework is unknown. 
 | Item | License / rule |
 |---|---|
 | **Code** | **MIT**. Simplest for any host, including a closed-source spviewer. SPDX headers on every file ([REUSE](https://reuse.software) layout). |
-| **Gladius data** (`data-gladius`, fixture) | **CC BY 4.0**, credited "Measured in-game by Alex Bruecken Blaum". |
+| **Gladius data** (`data-gladius`, fixture) | **CC BY 4.0**, credited "Measured in-game by AdobeWan". |
 | **Third-party data** | **None in the open repo.** The fixture still has two spviewer-sourced values (boosted back 5.9 G and down 6.6 G). Measure them with `sc-flighttest/tests_round4.yaml` and replace them before the repo goes public. The permission from Olakeen covers use in the app, not relicensing under CC BY. |
 | **Dependencies** | Allow-list only: MIT, BSD-2/3, ISC, Apache-2.0, Unlicense, 0BSD, CC0. Checked in CI. Runtime deps: `ogl` (Unlicense) only. |
 | **Contributions** | DCO sign-off (`Signed-off-by`) on every commit, so provenance stays clean for a later hand-off to spviewer. |
