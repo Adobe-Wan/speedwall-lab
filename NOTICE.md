@@ -3,6 +3,8 @@
 ## Third-party software
 - **OGL** v1.0.11 (https://github.com/oframe/ogl), public domain (Unlicense). Vendored as `site/vendor/ogl.mjs`; see `site/vendor/OGL-LICENSE`.
 
+- **Stay On Target** (https://github.com/Adobe-Wan/stay-on-target), MIT, Copyright (c) 2026 Stay On Target contributors. The controller matching and "move it to map it" capture in `site/index.html` are adapted from it.
+
 ## Third-party data (not covered by this repository's licenses)
 Two Gladius values come from **SC Ships Performances Viewer (spviewer.eu) by Olakeen** and are used with the author's permission:
 - boosted reverse acceleration 5.9 G;

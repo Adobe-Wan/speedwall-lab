@@ -92,6 +92,18 @@ label.tog { display: inline-flex; gap: 6px; align-items: center; color: var(--mu
 .set output { font-family: var(--font-data); color: var(--fg); }
 .keys { color: var(--muted); font-size: .75rem; }
 kbd { font: .72rem var(--font-data); border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; color: var(--fg); }
+dialog { background: var(--panel); color: var(--fg); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; width: min(520px, calc(100vw - 32px)); box-sizing: border-box; }
+dialog::backdrop { background: rgba(4,7,12,.7); }
+dialog h2 { margin: 0 0 10px; font-size: 1.05rem; }
+dialog p { margin: 0 0 10px; }
+.ask { font-size: 1.05rem; font-weight: 600; margin: 6px 0 10px; }
+.meter { height: 8px; background: #1a2436; border-radius: 4px; overflow: hidden; margin: 8px 0 12px; }
+.meter i { display: block; height: 100%; width: 0; background: var(--tvi); }
+.binds { display: grid; grid-template-columns: auto 1fr auto; gap: 6px 10px; align-items: center; font-size: .8rem; margin: 6px 0 12px; }
+.binds .what { font-weight: 600; } .binds .src { color: var(--muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.binds .live { font-family: var(--font-data); font-variant-numeric: tabular-nums; min-width: 4.5ch; text-align: right; }
+.binds .opts { grid-column: 2 / -1; display: flex; gap: 10px; flex-wrap: wrap; color: var(--muted); }
+.binds select { font: inherit; background: var(--bg); color: var(--fg); border: 1px solid var(--line); border-radius: 4px; }
 footer { color: var(--muted); font-size: .74rem; line-height: 1.5; border-top: 1px solid var(--line); padding-top: 10px; }
 footer p { margin: 0 0 4px; max-width: 75ch; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
@@ -120,7 +132,7 @@ footer p { margin: 0 0 4px; max-width: 75ch; }
   <header>
     <h1>Speedwall Lab</h1>
     <span class="sub">Gladius · decoupled · how your speed limits your maneuvers</span>
-    <span class="chip proto" title="Physics reproduces the measured settle speeds; some wall behavior is still being fitted.">Alpha · v0.1</span>
+    <span class="chip proto" title="Physics reproduces the measured settle speeds; some wall behavior is still being fitted.">Alpha · v0.2</span>
     <a class="btn fb" href="https://github.com/Adobe-Wan/speedwall-lab/issues/new?template=alpha-feedback.yml" target="_blank" rel="noopener">Send feedback</a>
   </header>
 
@@ -137,6 +149,7 @@ footer p { margin: 0 0 4px; max-width: 75ch; }
       <div class="vtitle">Egg · velocity space</div>
       <div class="vtools">
         <button id="t-scm" aria-pressed="true">SCM sphere</button>
+        <button id="t-follow" aria-pressed="false">Follow ship</button>
         <button id="t-scale" aria-pressed="false">True scale</button>
         <button id="t-view">Reset view</button>
       </div>
@@ -204,12 +217,18 @@ footer p { margin: 0 0 4px; max-width: 75ch; }
         <span>FOV</span><input type="range" id="fov" min="60" max="120" value="90" aria-label="Pilot view horizontal field of view"><output id="fov-v">90°</output>
         <span>Guide ring</span><input type="range" id="ring" min="2" max="30" value="13" aria-label="TVI guide ring angle"><output id="ring-v">13°</output>
       </div>
-      <div class="keys">Keys: <kbd>W</kbd><kbd>S</kbd> fwd/back · <kbd>A</kbd><kbd>D</kbd> strafe · <kbd>Space</kbd>/<kbd>C</kbd> up/down · <kbd>Shift</kbd> boost · <kbd>1</kbd>–<kbd>4</kbd> 25–100% · <kbd>X</kbd> zero · <kbd>P</kbd> pause</div>
+      <div class="keys">Star Citizen default keys: <kbd>W</kbd><kbd>S</kbd> strafe fwd/back · <kbd>A</kbd><kbd>D</kbd> strafe left/right · <kbd>Space</kbd> up · <kbd>L Ctrl</kbd> down · <kbd>L Shift</kbd> boost · <kbd>X</kbd> spacebrake. Lab: <kbd>1</kbd>–<kbd>4</kbd> forward 25–100% · <kbd>0</kbd> zero · <kbd>P</kbd> pause · <kbd>R</kbd> stop · <kbd>N</kbd> pin at nose</div>
+      <div class="row"><button id="dev-open">Map controllers…</button><span class="keys" id="dev-status">No controller mapped. Press a button on it so the browser can see it.</span></div>
     </div>
   </div>
 
+  <dialog id="dev-dlg" aria-labelledby="dev-h">
+    <h2 id="dev-h">Map controllers</h2>
+    <div id="dev-body"></div>
+  </dialog>
+
   <footer>
-    <p><strong>How to read it:</strong> the amber egg is every velocity the Gladius can reach while boosting; the blue sphere is SCM (225 m/s). The mint dot is your velocity, and the white ring is how much sideways speed is left at your current forward speed.</p>
+    <p><strong>How to read it:</strong> the amber egg is every velocity the Gladius can reach while boosting; the blue sphere is SCM (225 m/s). The ship sits on your velocity: the further it is from the grey <em>rest</em> cross, the faster you are going, and in that direction. The white ring is the egg's cross-section at your forward speed; the white lines from the ship to the ring are how much more you can strafe each way before you hit the wall.</p>
     <p>Alpha physics reproduces the author's measured settle speeds within 0.5%; boosted-wall dodge strength and boost-release timing are still being fitted. Decoupled mode only.</p>
     <p>Measurements: Alex Bruecken Blaum, in-game tests (Oct 2026). Original directional-G research: <a href="https://www.spviewer.eu/" style="color:var(--muted)">SC Ships Performances Viewer</a> by Olakeen, used with permission.</p>
     <p>This is an unofficial Star Citizen fan project, not affiliated with the Cloud Imperium group of companies. Star Citizen® is a registered trademark of Cloud Imperium Rights LLC. No game assets are used.</p>
@@ -280,14 +299,30 @@ const ctl = { thr: 0, padL: 0, padU: 0, padSticky: false, boostLock: false, boos
 let S = { v: [0, 0, 0], x: [0, 0, 0], tank: 100, a: [0, 0, 0], boost: false };
 let script = null;
 
+// Star Citizen default keyboard bindings (flight, decoupled). Matched on the physical key (e.code),
+// like the game, so they sit in the same place on any keyboard layout.
+const SC_KEYS = {
+  KeyW: ['f', 1], KeyS: ['f', -1],                  // strafe forward / back
+  KeyA: ['l', -1], KeyD: ['l', 1],                  // strafe left / right
+  Space: ['u', 1], ControlLeft: ['u', -1],          // strafe up / down
+};
+const BOOST_KEYS = ['ShiftLeft'], BRAKE_KEYS = ['KeyX']; // afterburner (boost), spacebrake
 function currentInput() {
-  const k = ctl.keys;
-  let f = ctl.thr / 100, l = ctl.padL, u = ctl.padU;
-  if (k.has('w')) f = 1; if (k.has('s')) f = -1;
-  if (k.has('a')) l = -1; if (k.has('d')) l = 1;
-  if (k.has(' ')) u = 1; if (k.has('c')) u = -1;
-  const boost = ctl.boostLock || ctl.boostBtn || k.has('shift');
-  return { u: { f, l, u }, boost };
+  const k = ctl.keys, dev = devices.read();
+  // priority per axis: keyboard (held) > mapped device (outside its deadzone) > on-screen controls
+  const axis = (name, onScreen) => {
+    let kv = 0; for (const [code, [a, v]] of Object.entries(SC_KEYS)) if (a === name && k.has(code)) kv += v;
+    if (kv) return Math.max(-1, Math.min(1, kv));
+    return dev[name] ?? onScreen;
+  };
+  let u = { f: axis('f', ctl.thr / 100), l: axis('l', ctl.padL), u: axis('u', ctl.padU) };
+  const boost = ctl.boostLock || ctl.boostBtn || BOOST_KEYS.some(c => k.has(c)) || dev.boost;
+  const brake = BRAKE_KEYS.some(c => k.has(c)) || dev.brake;
+  // Spacebrake: full thrust against the current velocity, through the same per-axis G as any other input
+  // (the game's exact spacebrake behavior is not measured; this is the assumed model).
+  if (brake) { const sp = len(S.v); u = sp < 0.5 ? { f: 0, l: 0, u: 0 } : (() => { const m = Math.max(Math.abs(S.v[0]), Math.abs(S.v[1]), Math.abs(S.v[2]));
+    return { f: -S.v[0] / m, l: S.v[1] / m, u: -S.v[2] / m }; })(); }
+  return { u, boost, brake };
 }
 const thr = $('thr');
 function setThr(v) { ctl.thr = v; thr.value = v; $('thr-val').textContent = `${v > 0 ? '+' : ''}${v}%`; }
@@ -319,18 +354,29 @@ bBtn.addEventListener('pointerleave', boostUp); bBtn.addEventListener('pointerca
 $('boost-lock').addEventListener('change', e => { ctl.boostLock = e.target.checked; });
 function setLock(v) { ctl.boostLock = v; $('boost-lock').checked = v; }
 
+const FLIGHT_KEYS = new Set([...Object.keys(SC_KEYS), ...BOOST_KEYS, ...BRAKE_KEYS]);
 addEventListener('keydown', e => {
+  if (devices.dialogOpen()) return;
   if (e.target.tagName === 'INPUT' && e.target.type !== 'range' && e.target.type !== 'checkbox') return;
-  const k = e.key.toLowerCase();
-  if (['w','a','s','d',' ','c','shift'].includes(k)) { ctl.keys.add(k); script = null; if (k === ' ') e.preventDefault(); }
-  if (k >= '1' && k <= '4') { script = null; setThr(25 * +k); }
-  if (k === 'x') { script = null; setThr(0); }
-  if (k === 'p') togglePause();
-  if (k === 'r') reset(false);
-  if (k === 'n') reset(true);
+  const flying = ctl.keys.has('ControlLeft');
+  if (FLIGHT_KEYS.has(e.code)) {
+    ctl.keys.add(e.code); script = null;
+    // Space would scroll; Ctrl+S / Ctrl+D / Ctrl+A would save, bookmark or select. (Ctrl+W can't be blocked:
+    // see the beforeunload guard below.)
+    e.preventDefault(); return;
+  }
+  if (flying || e.ctrlKey || e.metaKey || e.altKey) { if (flying) e.preventDefault(); return; }
+  if (e.code.startsWith('Digit') && e.code >= 'Digit1' && e.code <= 'Digit4') { script = null; setThr(25 * +e.code.slice(5)); }
+  if (e.code === 'Digit0') { script = null; setThr(0); }
+  if (e.code === 'KeyP') togglePause();
+  if (e.code === 'KeyR') reset(false);
+  if (e.code === 'KeyN') reset(true);
 });
-addEventListener('keyup', e => ctl.keys.delete(e.key.toLowerCase()));
+addEventListener('keyup', e => ctl.keys.delete(e.code));
 addEventListener('blur', () => ctl.keys.clear());
+// Holding Left Ctrl (strafe down) and pressing W (strafe forward) is Ctrl+W, which closes the tab and
+// can't be cancelled. Ask before leaving while Ctrl is held.
+addEventListener('beforeunload', e => { if (ctl.keys.has('ControlLeft')) { e.preventDefault(); e.returnValue = ''; } });
 
 function reset(pinned) {
   script = null; S = { v: [pinned ? 520 : 0, 0, 0], x: S.x, tank: 100, a: [0, 0, 0], boost: pinned };
@@ -358,6 +404,160 @@ function runScript(dt) {
     setThr(Math.round(s.f * 100)); ctl.padL = s.l; ctl.padU = s.u; ctl.padSticky = true; setLock(s.boost); drawKnob();
   }
 }
+
+/* ───────────────────────── controllers (HOTAS, gamepad, pedals) ─────────────────────────
+   Device matching and "move it to map it" capture are adapted from Stay On Target
+   (https://github.com/Adobe-Wan/stay-on-target, MIT): devKey, prettyName, connectedPads, the axis
+   snapshot / biggest-delta detection with auto-invert, and the first-new-press button capture. */
+const devices = (() => {
+  const STORE = 'speedwall.devices.v1';
+  // Browsers name the same device differently: Chrome/Edge say "T-Rudder (Vendor: 231d Product: 011f)",
+  // Firefox says "231d-11f-T-Rudder". Match on USB vendor + product, falling back to the cleaned-up name.
+  const prettyName = id => (id || '').replace(/\s*\((STANDARD GAMEPAD\s*)?Vendor:.*\)\s*$/i, '').replace(/^[0-9a-f]{1,4}-[0-9a-f]{1,4}-/i, '').trim() || id;
+  function devKey(id) {
+    const m = /Vendor:\s*([0-9a-f]{1,4})\s*Product:\s*([0-9a-f]{1,4})/i.exec(id || '') || /^([0-9a-f]{1,4})-([0-9a-f]{1,4})-/i.exec(id || '');
+    return m ? m[1].toLowerCase().padStart(4, '0') + ':' + m[2].toLowerCase().padStart(4, '0') : prettyName(id).toLowerCase();
+  }
+  function connectedPads() {
+    const list = [], pads = navigator.getGamepads ? navigator.getGamepads() : [];
+    for (const p of pads) if (p && p.connected !== false) list.push(p);
+    list.sort((a, b) => a.index - b.index);
+    const count = {};   // identical twins (two of the same stick) are told apart by order
+    return list.map(p => { const key = devKey(p.id); return { pad: p, id: p.id, key, nth: count[key] = (count[key] ?? -1) + 1 }; });
+  }
+  const padFor = (b, pads) => (pads.find(d => d.key === b.key && d.nth === (b.nth || 0)) || {}).pad || null;
+  function snapshotAll() {
+    const s = {};
+    for (const d of connectedPads()) s[d.pad.index + '|' + d.id] = { axes: d.pad.axes.slice(), buttons: d.pad.buttons.map(b => b.pressed) };
+    return s;
+  }
+
+  // What Speedwall needs, in Star Citizen terms. dir: which way the user moves it, so we can auto-invert.
+  const STEPS = [
+    { key: 'f', kind: 'axis', name: 'Strafe forward / back', ask: 'Push your strafe forward/back axis fully FORWARD', hint: 'Usually your throttle.', dir: +1 },
+    { key: 'l', kind: 'axis', name: 'Strafe left / right', ask: 'Move your strafe left/right axis fully RIGHT', hint: 'A thumb stick on the throttle, or a stick axis.', dir: +1 },
+    { key: 'u', kind: 'axis', name: 'Strafe up / down', ask: 'Move your strafe up/down axis fully UP', hint: 'Skip it if you strafe up/down with buttons or keys.', dir: +1 },
+    { key: 'boost', kind: 'button', name: 'Boost (afterburner)', ask: 'Press your BOOST button', hint: 'Hold-to-boost, like the game default.' },
+    { key: 'brake', kind: 'button', name: 'Spacebrake', ask: 'Press your SPACEBRAKE button', hint: 'Optional.' },
+  ];
+  let map = { binds: {}, deadzone: 0.05 };
+  try { const j = JSON.parse(localStorage.getItem(STORE) || 'null'); if (j && j.binds) map = { deadzone: 0.05, ...j }; } catch (e) {}
+  const save = () => { try { localStorage.setItem(STORE, JSON.stringify(map)); } catch (e) {} };
+
+  // Reads every frame. Returns only what a device is actively doing, so keys and on-screen controls still work.
+  const out = {};
+  function read() {
+    out.f = out.l = out.u = undefined; out.boost = out.brake = false;
+    const pads = connectedPads(); if (!pads.length) return out;
+    const dz = map.deadzone, shape = v => Math.abs(v) < dz ? undefined : Math.sign(v) * (Math.abs(v) - dz) / (1 - dz);
+    const custom = Object.keys(map.binds).length > 0;
+    if (custom) {
+      for (const st of STEPS) {
+        const b = map.binds[st.key]; if (!b) continue;
+        const pad = padFor(b, pads); if (!pad) continue;
+        if (st.kind === 'button') { out[st.key] = !!(pad.buttons[b.button] && pad.buttons[b.button].pressed); continue; }
+        let v = pad.axes[b.axis]; if (v == null) continue;
+        v = Math.max(-1, Math.min(1, b.inv ? -v : v));
+        if (b.mode === 'throttle') v = (v + 1) / 2;     // throttle resting at the back = 0 %, full forward = 100 %
+        out[st.key] = shape(v);
+      }
+    } else {
+      // No mapping yet: a standard-layout gamepad works out of the box.
+      // Left stick: strafe fwd/back + left/right; bumpers: down/up; A: boost; B: spacebrake.
+      const gp = pads.find(d => d.pad.mapping === 'standard'); if (!gp) return out;
+      const p = gp.pad, btn = i => !!(p.buttons[i] && p.buttons[i].pressed);
+      out.f = shape(-(p.axes[1] || 0)); out.l = shape(p.axes[0] || 0);
+      const ud = (btn(5) ? 1 : 0) - (btn(4) ? 1 : 0); out.u = ud || undefined;
+      out.boost = btn(0); out.brake = btn(1);
+    }
+    return out;
+  }
+
+  // ---------- capture wizard ----------
+  const dlg = $('dev-dlg'), body = $('dev-body');
+  let wiz = null;
+  const html = (strings, ...vals) => strings.reduce((a, s, i) => a + s + (i < vals.length ? String(vals[i]).replace(/[&<>"]/g, c => `&#${c.charCodeAt(0)};`) : ''), '');
+  function describe(b) {
+    if (!b) return 'not mapped';
+    return `${prettyName(b.id)}${b.nth ? ' #' + (b.nth + 1) : ''} · ${b.button != null ? 'button ' + (b.button + 1) : 'axis ' + (b.axis + 1)}`;
+  }
+  function render() {
+    if (wiz) {
+      const st = STEPS[wiz.step];
+      body.innerHTML = html`<p class="keys">Step ${wiz.step + 1} of ${STEPS.length} · ${st.name}</p>
+        <p class="ask">${st.ask}</p><p class="keys">${st.hint}</p>
+        <div class="meter" aria-hidden="true"><i id="dev-live"></i></div>
+        <p class="keys" id="dev-nopad" ${connectedPads().length ? 'hidden' : ''}>No controller seen yet. Press any button on it: browsers only show controllers after you use them.</p>
+        <div class="row"><button id="dev-skip">Skip</button><button id="dev-stop">Stop mapping</button></div>`;
+      $('dev-skip').onclick = () => next(); $('dev-stop').onclick = () => { wiz = null; render(); };
+      return;
+    }
+    const rows = STEPS.map(st => { const b = map.binds[st.key];
+      const opts = b && st.kind === 'axis' ? html`<label class="tog"><input type="checkbox" data-inv="${st.key}" ${b.inv ? 'checked' : ''}> Invert</label>` +
+        (st.key === 'f' ? html`<label class="tog">Range <select data-mode="f"><option value="centered" ${b.mode !== 'throttle' ? 'selected' : ''}>centered (back ↔ forward)</option><option value="throttle" ${b.mode === 'throttle' ? 'selected' : ''}>throttle (0 → 100 % forward)</option></select></label>` : '') : '';
+      return html`<span class="what">${st.name}</span><span class="src">${describe(b)}</span><span class="live" id="dev-v-${st.key}">–</span>` + (opts ? `<span class="opts">${opts}</span>` : ''); }).join('');
+    body.innerHTML = `<p class="keys">Map your HOTAS, gamepad or pedals to the same actions as in Star Citizen. Keyboard keys keep working alongside. The mapping is saved in this browser.</p>
+      <div class="binds">${rows}</div>
+      <div class="set"><span>Deadzone</span><input type="range" id="dev-dz" min="0" max="25" value="${Math.round(map.deadzone * 100)}" aria-label="Axis deadzone"><output id="dev-dz-v">${Math.round(map.deadzone * 100)}%</output></div>
+      <p></p><div class="row"><button id="dev-start">${Object.keys(map.binds).length ? 'Map again' : 'Start mapping'}</button><button id="dev-clear">Clear mapping</button><button id="dev-close">Done</button></div>`;
+    $('dev-start').onclick = () => { wiz = { step: 0, base: snapshotAll(), binds: {} }; render(); };
+    $('dev-clear').onclick = () => { map.binds = {}; save(); render(); status(); };
+    $('dev-close').onclick = () => dlg.close();
+    $('dev-dz').oninput = e => { map.deadzone = +e.target.value / 100; $('dev-dz-v').textContent = `${e.target.value}%`; save(); };
+    body.querySelectorAll('[data-inv]').forEach(c => c.onchange = () => { map.binds[c.dataset.inv].inv = c.checked; save(); });
+    body.querySelectorAll('[data-mode]').forEach(c => c.onchange = () => { map.binds.f.mode = c.value; save(); });
+  }
+  function next() {
+    wiz.step++; wiz.base = snapshotAll();
+    if (wiz.step >= STEPS.length) { map.binds = wiz.binds; wiz = null; save(); status(); }
+    render();
+  }
+  function tick() {
+    if (!dlg.open) return;
+    requestAnimationFrame(tick);
+    const pads = connectedPads();
+    if (!wiz) { const v = read(); for (const st of STEPS) { const e = $('dev-v-' + st.key); if (!e) continue;
+      const x = v[st.key]; e.textContent = st.kind === 'button' ? (x ? 'ON' : 'off') : x == null ? '0' : `${x > 0 ? '+' : ''}${Math.round(x * 100)}`; } return; }
+    const np = $('dev-nopad'); if (np) np.hidden = pads.length > 0;
+    const st = STEPS[wiz.step];
+    if (st.kind === 'button') {
+      for (const d of pads) {
+        const b0 = (wiz.base[d.pad.index + '|' + d.id] || {}).buttons || [];
+        const i = d.pad.buttons.findIndex((b, k) => b.pressed && !b0[k]);
+        if (i >= 0) { wiz.binds[st.key] = { id: d.id, key: d.key, nth: d.nth, button: i }; return next(); }
+      }
+      return;
+    }
+    let best = null;   // the axis that moved furthest from where it was when the step began
+    for (const d of pads) {
+      const a0 = (wiz.base[d.pad.index + '|' + d.id] || {}).axes || [];
+      d.pad.axes.forEach((v, i) => {
+        if (Object.values(wiz.binds).some(b => b.key === d.key && b.nth === d.nth && b.axis === i)) return;
+        const delta = v - (a0[i] ?? v);
+        if (!best || Math.abs(delta) > Math.abs(best.delta)) best = { d, i, delta, start: a0[i] ?? v };
+      });
+    }
+    const live = $('dev-live'); if (live) live.style.width = (best ? Math.min(1, Math.abs(best.delta) / 0.8) * 100 : 0) + '%';
+    if (best && Math.abs(best.delta) > 0.6) {
+      const inv = Math.sign(best.delta) !== st.dir;
+      const b = { id: best.d.id, key: best.d.key, nth: best.d.nth, axis: best.i, inv };
+      // A throttle rests at one end of its travel: guess "throttle" range when the axis started near an end.
+      if (st.key === 'f') b.mode = Math.abs(best.start) > 0.9 ? 'throttle' : 'centered';
+      wiz.binds[st.key] = b; next();
+    }
+  }
+  function status() {
+    const n = Object.keys(map.binds).length, pads = connectedPads();
+    $('dev-status').textContent = n ? `${n} control${n > 1 ? 's' : ''} mapped${pads.length ? '' : ' (press a button on your controller to wake it)'}.`
+      : pads.some(d => d.pad.mapping === 'standard') ? 'Gamepad: left stick strafes, bumpers up/down, A boost, B spacebrake.'
+      : pads.length ? `${pads.length} controller${pads.length > 1 ? 's' : ''} found, not mapped yet.` : 'No controller mapped. Press a button on it so the browser can see it.';
+  }
+  $('dev-open').onclick = () => { render(); dlg.showModal(); requestAnimationFrame(tick); };
+  dlg.addEventListener('close', () => { wiz = null; });
+  addEventListener('gamepadconnected', status); addEventListener('gamepaddisconnected', status);
+  status();
+  return { read, dialogOpen: () => dlg.open };
+})();
 
 /* ───────────────────────── views: tabs + visibility ───────────────────────── */
 const views = { egg: $('v-egg'), pilot: $('v-pilot'), slice: $('v-slice') };
@@ -449,7 +649,7 @@ const egg = (() => {
   const home = () => { const k = Math.max(1, 1.15 / aspect); camera.position.set(130 - 390 * k, 520 * k, 1500 * k); camera.lookAt([130, 0, 0]); };
   let touched = false; canvas.addEventListener('pointerdown', () => { touched = true; }); canvas.addEventListener('wheel', () => { touched = true; }, { passive: true });
   home();
-  const orbit = new Orbit(camera, { target: new Vec3(130, 0, 0), element: canvas, ease: 0.2, inertia: 0.8, minDistance: 350, maxDistance: 3200, enablePan: false });
+  const orbit = new Orbit(camera, { target: new Vec3(130, 0, 0), element: canvas, ease: 0.2, inertia: 0.8, minDistance: 140, maxDistance: 3200, enablePan: false });
 
   shell(gl, eggGeometry(gl, 520, 268), COL.boost, 0.035, 0.34, 10).forEach(m => m.setParent(scene));
   const scmShell = shell(gl, eggGeometry(gl, 225, 225, 40, 40), COL.scm, 0.045, 0.3, 20);
@@ -475,20 +675,27 @@ const egg = (() => {
 
   const glyphT = new Transform(); glyphT.setParent(scene);
   const glyph = new Mesh(gl, { geometry: dartGeometry(gl), program: new Program(gl, { vertex: VS_SHELL, fragment: FS_LAMBERT, uniforms: { uColor: { value: COL.glyph } } }) });
-  glyph.setParent(glyphT); glyphT.scale.set(6);
+  // The ship rides on the velocity point: in velocity space, where the ship sits IS how fast it is going.
+  const GLYPH_READABLE = 3;
+  glyph.setParent(glyphT); glyphT.scale.set(GLYPH_READABLE);
+  const restPts = []; for (const [a, b] of [[[-14,0,0],[14,0,0]], [[0,-14,0],[0,14,0]], [[0,0,-14],[0,0,14]]]) restPts.push(...a, ...b);
+  new Mesh(gl, { geometry: new Geometry(gl, { position: { size: 3, data: new Float32Array(restPts) } }), program: lineProgram(gl, COL.grey, 0.7), mode: gl.LINES }).setParent(scene);
 
   const vel = dynLines(gl, 2, lineProgram(gl, COL.tvi, 1), gl.LINES); vel.renderOrder = 40;
   const trailM = dynLines(gl, 400, lineProgram(gl, COL.tvi, 0.45), gl.LINE_STRIP); trailM.renderOrder = 39;
   const settleM = dynLines(gl, 80, lineProgram(gl, COL.tvi, 0.5), gl.LINES); settleM.renderOrder = 38;
   const thrustM = dynLines(gl, 2, lineProgram(gl, COL.boost, 1), gl.LINES); thrustM.renderOrder = 41;
   const deadM = dynLines(gl, 2, lineProgram(gl, COL.grey, 0.8), gl.LINES); deadM.renderOrder = 41;
-  [vel, trailM, settleM, thrustM, deadM].forEach(m => m.setParent(scene));
+  // reach: from the ship straight out to the wall, left / right / up / down, inside the sideways-room disc
+  const reachM = dynLines(gl, 8 + 16, lineProgram(gl, COL.white, 0.9), gl.LINES); reachM.renderOrder = 42;
+  [vel, trailM, settleM, thrustM, deadM, reachM].forEach(m => m.setParent(scene));
 
   // HTML labels
   const ov = $('o-egg'), labels = {};
   const mk = (k, cls, text) => { const d = document.createElement('div'); d.className = `lbl ${cls}`; d.textContent = text; ov.appendChild(d); labels[k] = d; return d; };
   mk('nose', 'boost', 'nose 520'); mk('side', 'boost', 'sides 394'); mk('tail', 'boost', 'tail 268'); mk('scm', 'scm', 'SCM 225');
-  mk('room', 'room', ''); mk('settle', 'tvi', '');
+  mk('room', 'room', ''); mk('settle', 'tvi', ''); mk('rest', '', 'rest 0');
+  mk('reachL', 'room', ''); mk('reachR', 'room', '');
   const tviIcon = document.createElement('div'); tviIcon.className = 'lbl tvi';
   tviIcon.innerHTML = '<svg width="34" height="20" viewBox="-17 -10 34 20"><circle r="5.5" fill="none" stroke="#7ef0c8" stroke-width="2"/><path d="M-15 0h9.5M5.5 0H15M0-5.5V-10" stroke="#7ef0c8" stroke-width="2"/></svg>';
   ov.appendChild(tviIcon);
@@ -498,17 +705,41 @@ const egg = (() => {
 
   let showScm = true, trueScale = false;
   $('t-scm').onclick = e => { showScm = !showScm; e.target.setAttribute('aria-pressed', showScm); scmShell.forEach(m => m.visible = showScm); labels.scm.hidden = !showScm; };
-  $('t-scale').onclick = e => { trueScale = !trueScale; e.target.setAttribute('aria-pressed', trueScale); glyphT.scale.set(trueScale ? 1 : 6); };
-  $('t-view').onclick = () => { touched = false; home(); orbit.forcePosition(); };
+  // Following up close, a readable-size glyph would be wider than the nose's sideways room, so use true scale there.
+  const glyphScale = () => glyphT.scale.set(trueScale || follow ? 1 : GLYPH_READABLE);
+  $('t-scale').onclick = e => { trueScale = !trueScale; e.target.setAttribute('aria-pressed', trueScale); glyphScale(); };
+  // Follow: the orbit target rides with the ship, so you can zoom in on it squeezed into the egg's nose.
+  let follow = false; const HOME_T = [130, 0, 0];
+  $('t-follow').onclick = e => { follow = !follow; e.target.setAttribute('aria-pressed', follow); glyphScale();
+    // Look up the nose from behind the ship: the sideways-room ring faces you, with the ship inside it.
+    if (follow) { const p = R3(...S.v); orbit.target.set(...p); camera.position.set(p[0] - 430, p[1] + 110, p[2] + 70); orbit.forcePosition(); touched = true; } };
+  $('t-view').onclick = () => { touched = false; if (follow) $('t-follow').click(); orbit.target.set(...HOME_T); home(); orbit.forcePosition(); };
 
   function resize() { const w = canvas.parentElement.clientWidth, h = canvas.parentElement.clientHeight; if (!w || !h) return; renderer.setSize(w, h); aspect = w / h; camera.perspective({ aspect }); if (!touched) { home(); orbit.forcePosition(); } }
   function draw(st, d) {
-    orbit.update();
     const [vx, vy, vz] = st.v, room = d.room;
+    { // ease the orbit target toward the ship (follow) or home; moving the target carries the camera along
+      const want = follow ? R3(vx, vy, vz) : HOME_T, t = orbit.target, k = follow ? 0.25 : 0.08;
+      const dx = (want[0] - t.x) * k, dy = (want[1] - t.y) * k, dz = (want[2] - t.z) * k;
+      if (Math.abs(dx) + Math.abs(dy) + Math.abs(dz) > 1e-3) { t.set(t.x + dx, t.y + dy, t.z + dz); camera.position.set(camera.position.x + dx, camera.position.y + dy, camera.position.z + dz); }
+    }
+    orbit.update();
     discT.position.set(vx, 0, 0); discT.scale.set(1, Math.max(room, 0.001), Math.max(room, 0.001));
     discLine.program.uniforms.uColor.value = d.pinned ? COL.warn : COL.white;
     const pv = R3(vx, vy, vz);
+    glyphT.position.set(...pv);
     vel.set([[0, 0, 0], pv]);
+    // reach lines: from the ship to the edge of the sideways-room disc along each strafe axis
+    // (physics y = left, z = up). Ticks at the ends mark the wall.
+    const reach = [], ends = {};
+    const yMax = Math.sqrt(Math.max(0, room * room - vz * vz)), zMax = Math.sqrt(Math.max(0, room * room - vy * vy));
+    for (const [k, y, z] of [['L', yMax, vz], ['R', -yMax, vz], ['U', vy, zMax], ['D', vy, -zMax]]) {
+      const e = R3(vx, y, z); ends[k] = e; reach.push(pv, e);
+      const tick = k === 'L' || k === 'R' ? [0, 9, 0] : [0, 0, 9];
+      reach.push([e[0] - 9, e[1] - tick[1], e[2] - tick[2]], [e[0] + 9, e[1] + tick[1], e[2] + tick[2]]);
+    }
+    reachM.set(room > 0.5 ? reach : []);
+    reachM.program.uniforms.uColor.value = d.pinned ? COL.warn : COL.white;
     trailM.set(trail);
     if (d.settle) { const pts = [], n = 18, s = d.settle.p; for (let i = 0; i < n; i++) { const a = i / n, b = (i + 0.55) / n; pts.push(R3(s[0]*a, s[1]*a, s[2]*a), R3(s[0]*b, s[1]*b, s[2]*b)); } settleM.set(pts); } else settleM.set([]);
     const ga = st.a, gl_ = len(ga);
@@ -518,6 +749,11 @@ const egg = (() => {
     place(labels.nose, R3(520, 0, -70)); place(labels.tail, R3(-300, 0, 0)); place(labels.side, R3(0, 0, 420));
     if (showScm) place(labels.scm, R3(0, -160, -170));
     place(labels.room, R3(vx, -room * 0.71, room * 0.71 + 18)); labels.room.textContent = `room ${Math.round(room)}`;
+    place(labels.rest, R3(0, 0, -26));
+    const leftRoom = Math.max(0, yMax - vy), rightRoom = Math.max(0, yMax + vy);
+    if (room > 8) { place(labels.reachL, ends.L); labels.reachL.textContent = `◂ ${Math.round(leftRoom)}`;
+      place(labels.reachR, ends.R); labels.reachR.textContent = `${Math.round(rightRoom)} ▸`; }
+    else labels.reachL.hidden = labels.reachR.hidden = true;
     const sv = d.settle, far = sv && Math.hypot(sv.p[0] - vx, sv.p[1] - vy, sv.p[2] - vz) > 25;
     if (far) { place(labels.settle, R3(...sv.p)); labels.settle.textContent = `ends ~${Math.round(sv.speed)} · ${Math.round(sv.side)} sideways`; }
     else labels.settle.hidden = true;
@@ -618,8 +854,10 @@ function drawSlice(canvas, st, d, big) {
   if (d.settle) { c.setLineDash([5, 6]); c.strokeStyle = 'rgba(126,240,200,.6)'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(ox, oy); c.lineTo(...P(-d.settle.p[1], d.settle.p[0])); c.stroke(); c.setLineDash([]); }
   c.strokeStyle = '#7ef0c8'; c.lineWidth = big ? 2.5 : 1.5; c.beginPath(); c.moveTo(ox, oy); c.lineTo(...P(lat, fwd)); c.stroke();
   c.fillStyle = '#7ef0c8'; c.beginPath(); c.arc(...P(lat, fwd), big ? 6 : 3.5, 0, 2 * Math.PI); c.fill();
-  // glyph
-  c.save(); c.translate(ox, oy); c.fillStyle = '#c7d1e5'; const g = big ? 1.6 : 1; c.beginPath(); c.moveTo(0, -10 * g); c.lineTo(8.5 * g, 2 * g); c.lineTo(0, 10 * g); c.lineTo(-8.5 * g, 2 * g); c.closePath(); c.fill(); c.restore();
+  // origin = rest
+  c.strokeStyle = 'rgba(135,150,171,.8)'; c.lineWidth = 1.2; c.beginPath(); c.moveTo(ox - 5, oy); c.lineTo(ox + 5, oy); c.moveTo(ox, oy - 5); c.lineTo(ox, oy + 5); c.stroke();
+  // the ship rides on the velocity point (nose up the page = +forward; no rotation in V1)
+  c.save(); c.translate(...P(lat, fwd)); c.fillStyle = '#c7d1e5'; const g = big ? 1.6 : 1; c.beginPath(); c.moveTo(0, -10 * g); c.lineTo(8.5 * g, 2 * g); c.lineTo(0, 10 * g); c.lineTo(-8.5 * g, 2 * g); c.closePath(); c.fill(); c.restore();
   if (big) { c.font = '600 12px ui-monospace, Menlo, monospace'; c.fillStyle = '#f2a33a'; c.textAlign = 'center';
     c.fillText('nose 520', ...P(0, 532)); c.fillText('tail 268', ...P(0, -284)); c.textAlign = 'left'; c.fillText('394', ...P(398, 6)); c.fillStyle = '#5aa9e6'; c.fillText('SCM 225', ...P(150, 190));
     c.fillStyle = d.pinned ? '#ff6a55' : '#e7edf5'; c.fillText(`room ${Math.round(room)}`, ...P(room + 8, fwd - 4)); }
@@ -637,7 +875,7 @@ function derive(st, inp) {
 }
 function caption(d) {
   if (d.speed < 5) return d.boost ? 'At rest, boosted: you can reach 520 m/s forward or 394 m/s sideways.' : 'At rest. Hold boost to see the full egg; strafe or throttle to move.';
-  if (d.pinned && d.boost && d.fwd > 440) return `Pinned at the nose: only ${Math.round(d.room)} m/s of sideways room left at ${Math.round(d.fwd)} m/s forward.`;
+  if (d.pinned && d.boost && d.fwd > 440) return `Pinned at the nose: the ship is squeezed into the tip of the egg, with only ${Math.round(d.room)} m/s of sideways room at ${Math.round(d.fwd)} m/s forward.`;
   if (d.pinned) return 'On the wall: outward thrust is dead, so strafing only slides you along the wall.';
   return `Sideways room at ${Math.round(Math.max(0, d.fwd))} m/s forward: ${Math.round(d.room)} m/s.`;
 }
