@@ -71,9 +71,12 @@ describe("boosted wall traces: G within ±1.5 and speed within ±10 m/s per samp
 
 describe("boost release: speed within ±15 m/s per sample", () => {
   // All inputs and boost released near the boosted nose wall; samples are t after release.
+  // The fixture notes the HUD shows the response ~0.3 s after release (game/HUD latency), so the model
+  // at time t is compared with the sample at t + 0.3 s.
+  const LATENCY = 0.3;
   const start: State = { ...restState(), vWorld: [fixture.boostRelease.samples[0]![1], 0, 0] };
   const states = lazy(() => run(profile, start, input(), 1.5));
   it.each(fixture.boostRelease.samples.map(([t, v]): [number, number] => [t, v]))("t = %d s", (t, v) => {
-    expect(Math.abs(speedOf(at(states(), t)) - v)).toBeLessThanOrEqual(15);
+    expect(Math.abs(speedOf(at(states(), Math.max(0, t - LATENCY))) - v)).toBeLessThanOrEqual(15);
   });
 });

@@ -30,11 +30,14 @@ jobs:
       - run: pnpm test
       - run: pnpm size
       - run: pnpm check:licenses
+      - name: Alpha physics bundle is up to date
+        run: node tools/build-alpha.mjs && git diff --exit-code site/vendor/speedwall-core.mjs
 
   physics:
     # Acceptance tests written from the fixture before the physics exists (P0).
-    # Expected to fail until P1; remove continue-on-error when P1 lands.
-    name: physics acceptance (expected red until P1)
+    # P1: 197 of 230 checks pass; the misses are wall-trace samples listed in docs/physics-fit.md.
+    # Keep continue-on-error until those are resolved (round 5) or the tolerances are revised.
+    name: physics acceptance (known misses, docs/physics-fit.md)
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:

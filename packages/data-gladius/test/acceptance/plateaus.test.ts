@@ -21,11 +21,13 @@ describe("settled speed (every fixture plateau within 1 % or ±3 m/s)", () => {
   });
 });
 
+// The fixture's accel_G is the G-meter plateau (or a speed-slope fit), not the first frame: thrust ramps up
+// in game (the G meter reads 7.3 of 9.9 G after 0.25 s). So compare against the peak in the first 1.5 s.
 describe("acceleration from rest (within 5 %)", () => {
   it.each(withAccel.map((p): [string, typeof p] => [p.id, p]))("%s", (_id, p) => {
     const u = input({ ...p.inputs, boost: p.boost });
-    const s1 = step(restState(), u, profile, DT);
-    const g = derive(s1, u, profile).gNow;
+    let s = restState(), g = 0;
+    for (let i = 0; i < 1.5 / DT; i++) { s = step(s, u, profile, DT); g = Math.max(g, derive(s, u, profile).gNow); }
     const want = p.accel_G as number;
     expect(Math.abs(g - want)).toBeLessThanOrEqual(0.05 * want);
   });

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 import type { FlightProfile, ProvenanceEntry } from "@speedwall-lab/core";
 import type { Fixture } from "./fixture-schema.js";
+import { FITTED_WALL } from "./fitted.js";
 
 const MEASURED = "Measured in-game by AdobeWan (sc-flighttest / hand tests)";
 
@@ -39,6 +40,9 @@ export function profileFromFixture(f: Fixture): FlightProfile {
   set("boost.tankRegenPctPerS", "assumed", unstated);
   set("thrustRule.fullStrafeForwardCurve.settledSpeed", "measured", "round 3 full-strafe sweep");
   set("thrustRule.fullStrafeForwardCurve.effectiveForwardG", "fitted", "derived from the settled speeds (limaçon inverse), per fixture note");
+  const fit = "fitted to the fixture's wall and release traces by tools/fit-gladius.mjs";
+  for (const k of ["slewGps", "boostSide", "letOffBleed", "retroEaseK", "releaseK"]) set(`wall.${k}`, "fitted", fit);
+  set("lateralRoomTable", "fitted", "fixture lateralRoom.boost (limaçon cross-section, tabulated)");
   set("dimensionsM", "assumed", "author-specified 20 x 17 x 5.5 m (fixture dimensions_note)");
 
   return {
@@ -68,6 +72,8 @@ export function profileFromFixture(f: Fixture): FlightProfile {
         effectiveForwardG: curve.effectiveForwardG.map(([a, b]) => [a, b]),
       },
     },
+    lateralRoomTable: f.lateralRoom.boost.map(([a, b]) => [a, b]),
+    wall: structuredClone(FITTED_WALL),
     provenance,
   };
 }

@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 AdobeWan
 // SPDX-License-Identifier: MIT
 
-/** [x, y, z]; ship frame, +X = nose. In V1 the world frame equals the ship frame. */
+/** [x, y, z]; ship frame: +x = nose, +y = right, +z = up. In V1 the world frame equals the ship frame. */
 export type Vec3 = [number, number, number];
 export type Quat = [number, number, number, number];
 
@@ -24,6 +24,10 @@ export interface State {
   tank: number;
   /** Seconds since the start of the run. */
   t: number;
+  /** Thrust command after the thrusters' slew limit, m/s², ship frame (before the speed wall trims it). */
+  cmd: Vec3;
+  /** Acceleration actually applied in the last step, m/s² (what the G meter shows). */
+  aWorld: Vec3;
 }
 
 export type Provenance = "measured" | "fitted" | "gameFile" | "thirdParty" | "assumed";
@@ -80,8 +84,28 @@ export interface FlightProfile {
       effectiveForwardG: [number, number][];
     };
   };
+  /** Boosted lateral room table, [forward m/s, sideways room m/s] (fixture lateralRoom.boost). */
+  lateralRoomTable?: [number, number][];
+  /** Wall and transient behaviour, fitted to the measured traces (PLAN.md §4, items 4–6). */
+  wall: WallParams;
   /** Key: dotted field path, e.g. "boost.G.back". Fields not listed are unlabelled. */
   provenance: Record<string, ProvenanceEntry>;
+}
+
+export interface WallParams {
+  /** How fast the thrust command can change, G per second (sets the G-meter ramps and jink dips). */
+  slewGps: number;
+  /** Boosted: multiplier on the thrust perpendicular to the velocity (what turns it), 1 at forward speed `fromFwd`, `factor` at `toFwd` and above. */
+  boostSide: { factor: number; fromFwd: number; toFwd: number };
+  /**
+   * Boosted, forward stick released: retro bleed in G and a side-thrust multiplier, both ramping in from
+   * forward speed `fromFwd` to `toFwd`.
+   */
+  letOffBleed: { G: number; side: number; fromFwd: number; toFwd: number };
+  /** Retros easing off as forward speed runs out in a dodge: retro ≤ k · forward speed, 1/s. */
+  retroEaseK: number;
+  /** Boost released above the SCM cap: deceleration = k·(speed − SCM cap)², in 1/m. */
+  releaseK: number;
 }
 
 export interface Readouts {

@@ -44,6 +44,16 @@ export const flightProfileSchema = z
           .strict(),
       })
       .strict(),
+    lateralRoomTable: z.array(pair).min(2).optional(),
+    wall: z
+      .object({
+        slewGps: num.positive(),
+        boostSide: z.object({ factor: num.min(0).max(1), fromFwd: num, toFwd: num }).strict(),
+        letOffBleed: z.object({ G: num.nonnegative(), side: num.min(0).max(1), fromFwd: num, toFwd: num }).strict(),
+        retroEaseK: num.nonnegative(),
+        releaseK: num.nonnegative(),
+      })
+      .strict(),
     provenance: z.record(z.string(), provenanceEntrySchema),
   })
   .strict()

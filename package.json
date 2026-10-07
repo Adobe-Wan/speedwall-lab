@@ -19,12 +19,15 @@
     "size": "pnpm build && size-limit",
     "check:licenses": "node tools/check-licenses.mjs",
     "check:reuse": "reuse lint",
-    "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm check:licenses"
+    "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm check:licenses",
+    "build:alpha": "pnpm build && node tools/build-alpha.mjs",
+    "fit": "pnpm build && node tools/fit-gladius.mjs --fit --write"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.0",
     "@size-limit/preset-small-lib": "^11.2.0",
     "@types/node": "^22.20.5",
+    "esbuild": "^0.25.12",
     "eslint": "^9.39.0",
     "size-limit": "^11.2.0",
     "typescript": "^5.9.0",

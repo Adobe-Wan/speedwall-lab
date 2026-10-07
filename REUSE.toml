@@ -12,7 +12,7 @@ path = [
   "tsconfig.base.json", "packages/*/package.json", "packages/*/tsconfig*.json",
   "packages/*/README.md",
   ".github/**", "README.md", "CLAUDE.md", "PLAN.md", "CONTRIBUTING.md", "NOTICE.md",
-  "LICENSE", "LICENSE-DATA.md", "docs/adr/**", "tools/sc-flighttest/**",
+  "LICENSE", "LICENSE-DATA.md", "docs/adr/**", "docs/physics-fit.md", "tools/sc-flighttest/**",
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 AdobeWan"
@@ -37,7 +37,7 @@ SPDX-License-Identifier = "MIT AND CC-BY-4.0"
 
 # Vendored OGL (public domain).
 [[annotations]]
-path = ["site/vendor/**"]
+path = ["site/vendor/ogl.mjs", "site/vendor/OGL-LICENSE"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "OGL authors (https://github.com/oframe/ogl)"
 SPDX-License-Identifier = "Unlicense"
@@ -48,3 +48,10 @@ path = "CODE_OF_CONDUCT.md"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "Contributor Covenant authors"
 SPDX-License-Identifier = "CC-BY-4.0"
+
+# The alpha's physics bundle, generated from packages/core (MIT) with the Gladius profile (CC BY 4.0) inlined.
+[[annotations]]
+path = "site/vendor/speedwall-core.mjs"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 AdobeWan"
+SPDX-License-Identifier = "MIT AND CC-BY-4.0"

@@ -1,0 +1,47 @@
+# Round 5 (Gladius, DECOUPLED, SCM mode): measure the SHAPE of the boosted egg near the nose directly,
+# and how far the velocity really swings off the nose when you strafe while pinned there.
+#   python run.py run --tests tests_round5.yaml        (5 tests, about 6 minutes)
+#
+# Why: the limaçon r(θ) = 394 + 126·cosθ is pinned by speed alone at the nose (519), sides (394) and tail (267).
+# Off-axis it rests on one assumption: from rest, the velocity grows along the thrust direction. Round 3's
+# partial-strafe plateaus (518 / 514 / 508 at 8.6° / 16.9° / 24.5°) agree with it within 1 m/s. These tests
+# measure the shape without that assumption, and check the pinned-at-the-nose slide (dd_wall_fwdlat_boost):
+# there the speed held 517–518 for 6 s, which on the limaçon means the TVI stalled ~12–14° off the nose,
+# while the G meter's ~3 G says it kept swinging. One of the two readings is misleading; these tests say which.
+tests:
+  # --- A. Calibrate the slow yaw used in B. Round 3 measured 62.7 °/s at 100 % (boosted); 15 % is assumed
+  #        linear (9.4 °/s). Same method as rg_yaw_100_boost: the speed oscillation of a sideways strafe.
+  - id: r5_yawcal_15_boost
+    note: yaw 15 %, boosted, + 25 % right strafe; measures the slow yaw rate (linear would be 9.4 deg/s)
+    steps: [{t: 14, yaw: 0.15, strafe_lat: 0.25, boost: true}]
+    expect: {rot_dps_osc: 9.4}
+
+  # --- B. Egg shape by heading. Pin at the boosted nose, release translation (keep boost), then yaw slowly.
+  #        The velocity is world-fixed (decoupled), so the nose swings away from it at the yaw rate. The cap
+  #        along the velocity becomes r(δ), δ = angle from the nose, and IFCS bleeds the excess (soft wall,
+  #        K ≈ 1.3 /s, so the speed lags the cap by ~0.8 s). HUD speed vs time therefore traces the egg's
+  #        radius vs heading: limaçon 519 (0°), 516 (15°), 503 (30°), 483 (45°), 457 (60°), 394 (90°).
+  #        A narrow nose would show a much faster drop in the first 20–30°.
+  - id: r5_yawsweep_right
+    note: pin at boosted nose 6 s, release translation, yaw right 15 % for 10 s (~94 deg); speed traces r(heading)
+    steps: [{t: 6, strafe_long: 1.0, boost: true}, {t: 0.5, boost: true}, {t: 10, yaw: 0.15, boost: true}]
+    expect: {speed_at_heading: "limacon 394+126cos"}
+  - id: r5_yawsweep_left
+    note: same, yawing left (checks symmetry and the yaw sign)
+    steps: [{t: 6, strafe_long: 1.0, boost: true}, {t: 0.5, boost: true}, {t: 10, yaw: -0.15, boost: true}]
+    expect: {speed_at_heading: "limacon 394+126cos"}
+
+  # --- C. The pinned-at-the-nose slide, longer. Round 3's 7 s trace (dd_wall_fwdlat_boost) ended at 515 and
+  #        still falling. If the slide continues it ends at the from-rest settle point (501, 31.9 deg off the
+  #        nose); if the TVI really stalls near the nose, the speed stays ~515+.
+  - id: r5_nose_slide_long
+    note: pin at boosted nose 6 s, then forward + full left strafe 13 s (round 3 trace was 7 s)
+    steps: [{t: 6, strafe_long: 1.0, boost: true}, {t: 13, strafe_long: 1.0, strafe_lat: -1.0, boost: true}]
+    expect: {end_speed_if_slide_continues: 501, end_speed_if_stalled: 515}
+
+  # --- D. The same settle from rest with LEFT strafe (round 1 measured forward + up = 501; the hand test
+  #        forward + strafe = 501-502). Confirms the end point of C.
+  - id: r5_fwd_lat_rest
+    note: boosted forward + full left strafe from rest
+    steps: [{t: 14, strafe_long: 1.0, strafe_lat: -1.0, boost: true}]
+    expect: {plateau_mps: 501}
