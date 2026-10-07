@@ -15,7 +15,7 @@ path = [
   "LICENSE", "LICENSE-DATA.md", "docs/adr/**", "tools/sc-flighttest/**",
 ]
 precedence = "aggregate"
-SPDX-FileCopyrightText = "2026 Alex Bruecken Blaum"
+SPDX-FileCopyrightText = "2026 AdobeWan"
 SPDX-License-Identifier = "MIT"
 
 # Measured data and the research record: CC BY 4.0.
@@ -25,14 +25,14 @@ SPDX-License-Identifier = "MIT"
 [[annotations]]
 path = ["research/**", "docs/RESEARCH.md"]
 precedence = "aggregate"
-SPDX-FileCopyrightText = "2026 Alex Bruecken Blaum"
+SPDX-FileCopyrightText = "2026 AdobeWan"
 SPDX-License-Identifier = "CC-BY-4.0"
 
 # The live alpha: one page with MIT code and CC BY data embedded.
 [[annotations]]
 path = "site/index.html"
 precedence = "aggregate"
-SPDX-FileCopyrightText = "2026 Alex Bruecken Blaum"
+SPDX-FileCopyrightText = "2026 AdobeWan"
 SPDX-License-Identifier = "MIT AND CC-BY-4.0"
 
 # Vendored OGL (public domain).

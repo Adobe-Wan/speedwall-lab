@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Alex Bruecken Blaum
+// SPDX-FileCopyrightText: 2026 AdobeWan
 // SPDX-License-Identifier: MIT
 import { describe, expect, it } from "vitest";
 import { flightProfileSchema } from "@speedwall-lab/core/schema";

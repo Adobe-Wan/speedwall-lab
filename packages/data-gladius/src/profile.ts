@@ -1,9 +1,9 @@
-// SPDX-FileCopyrightText: 2026 Alex Bruecken Blaum
+// SPDX-FileCopyrightText: 2026 AdobeWan
 // SPDX-License-Identifier: MIT
 import type { FlightProfile, ProvenanceEntry } from "@speedwall-lab/core";
 import type { Fixture } from "./fixture-schema.js";
 
-const MEASURED = "Measured in-game by Alex Bruecken Blaum (sc-flighttest / hand tests)";
+const MEASURED = "Measured in-game by AdobeWan (sc-flighttest / hand tests)";
 
 /**
  * Map the measured fixture onto the FlightProfile contract (PLAN.md §3).

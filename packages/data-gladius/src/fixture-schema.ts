@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Alex Bruecken Blaum
+// SPDX-FileCopyrightText: 2026 AdobeWan
 // SPDX-License-Identifier: MIT
 // Zod schema for research/gladius-v1-fixture.json. Validation tooling only (ADR-003).
 import { z } from "zod";

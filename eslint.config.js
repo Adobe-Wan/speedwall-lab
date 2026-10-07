@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Alex Bruecken Blaum
+// SPDX-FileCopyrightText: 2026 AdobeWan
 // SPDX-License-Identifier: MIT
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";

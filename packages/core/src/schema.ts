@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Alex Bruecken Blaum
+// SPDX-FileCopyrightText: 2026 AdobeWan
 // SPDX-License-Identifier: MIT
 // Zod is a devDependency: this module is validation tooling (CI, data build,
 // host adapters that opt in), not part of the zero-dependency runtime. See ADR-003.

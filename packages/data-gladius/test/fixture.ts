@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Alex Bruecken Blaum
+// SPDX-FileCopyrightText: 2026 AdobeWan
 // SPDX-License-Identifier: MIT
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";

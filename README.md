@@ -32,11 +32,11 @@
 
 ## Licenses
 - **Code:** MIT (`LICENSE`).
-- **Measured data:** CC BY 4.0 (`LICENSE-DATA.md`), credit "Alex Bruecken Blaum". The exceptions are listed in `NOTICE.md`.
+- **Measured data:** CC BY 4.0 (`LICENSE-DATA.md`), credit "AdobeWan". The exceptions are listed in `NOTICE.md`.
 - **Third-party:** see `NOTICE.md`.
 
 ## Credits
 - Directional-G research and permission: [SC Ships Performances Viewer](https://www.spviewer.eu/) by **Olakeen**.
-- In-game measurements and design: Alex Bruecken Blaum.
+- In-game measurements and design: AdobeWan.
 
 *Star Citizen®, Squadron 42®, Roberts Space Industries® and Cloud Imperium® are registered trademarks of Cloud Imperium Rights LLC. This project uses no game assets.*

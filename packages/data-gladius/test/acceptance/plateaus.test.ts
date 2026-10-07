@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Alex Bruecken Blaum
+// SPDX-FileCopyrightText: 2026 AdobeWan
 // SPDX-License-Identifier: MIT
 // PLAN.md §4 acceptance. Written from the fixture before the physics exists (P0); expected to fail until P1.
 import { describe, expect, it } from "vitest";

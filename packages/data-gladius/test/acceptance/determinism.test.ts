@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Alex Bruecken Blaum
+// SPDX-FileCopyrightText: 2026 AdobeWan
 // SPDX-License-Identifier: MIT
 // PLAN.md §4: the same input stream gives bit-identical replays. Expected to fail until P1.
 import { describe, expect, it } from "vitest";
