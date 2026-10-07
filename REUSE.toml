@@ -1,0 +1,50 @@
+version = 1
+SPDX-PackageName = "speedwall-lab"
+SPDX-PackageDownloadLocation = "https://github.com/Adobe-Wan/speedwall-lab"
+
+# Files that cannot carry an SPDX header (JSON, YAML, lockfiles, prose, vendored code).
+# New TypeScript sources carry their own headers.
+
+# Code, config and project docs: MIT.
+[[annotations]]
+path = [
+  "package.json", "pnpm-workspace.yaml", "pnpm-lock.yaml", ".gitignore", ".size-limit.json",
+  "tsconfig.base.json", "packages/*/package.json", "packages/*/tsconfig*.json",
+  "packages/*/README.md",
+  ".github/**", "README.md", "CLAUDE.md", "PLAN.md", "CONTRIBUTING.md", "NOTICE.md",
+  "LICENSE", "LICENSE-DATA.md", "docs/adr/**", "tools/sc-flighttest/**",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 AdobeWan"
+SPDX-License-Identifier = "MIT"
+
+# Measured data and the research record: CC BY 4.0.
+# Exception (NOTICE.md): the two values marked `spviewer` in the fixture, and the spviewer
+# figures quoted in docs/RESEARCH.md, are third-party and are NOT covered by this licence.
+# They must be replaced with round-4 measurements before the repo goes public.
+[[annotations]]
+path = ["research/**", "docs/RESEARCH.md"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 AdobeWan"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# The live alpha: one page with MIT code and CC BY data embedded.
+[[annotations]]
+path = "site/index.html"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 AdobeWan"
+SPDX-License-Identifier = "MIT AND CC-BY-4.0"
+
+# Vendored OGL (public domain).
+[[annotations]]
+path = ["site/vendor/**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "OGL authors (https://github.com/oframe/ogl)"
+SPDX-License-Identifier = "Unlicense"
+
+# Code of Conduct: Contributor Covenant 2.1, CC BY 4.0.
+[[annotations]]
+path = "CODE_OF_CONDUCT.md"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Contributor Covenant authors"
+SPDX-License-Identifier = "CC-BY-4.0"

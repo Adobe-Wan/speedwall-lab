@@ -24,7 +24,12 @@
 | `docs/RESEARCH.md` | Research record: test rounds 1–3, wall behavior, corkscrews, duels, TVI. |
 | `research/gladius-v1-fixture.json` | Measured Gladius data, the source of truth for physics tests. |
 | `tools/sc-flighttest/` | The automated in-game test harness (vJoy + HUD OCR) used to measure everything. Arena Commander only. |
+| `packages/` | The real app, built phase by phase (P0 scaffold done): `core` (physics, 0 deps), `data-gladius` (profile + fixture adapter), `render` and `element` (placeholders until P3/P2). |
+| `docs/adr/` | Architecture decision records (OGL, custom element, Zod). |
 | `CLAUDE.md` | Working notes for Claude Code. |
+
+## Development
+`pnpm install`, then `pnpm check` (typecheck, lint, unit tests, license check). `pnpm test:physics` runs the physics acceptance tests, which fail until phase P1 lands. See `CONTRIBUTING.md` (DCO sign-off required).
 
 ## Licenses
 - **Code:** MIT (`LICENSE`).

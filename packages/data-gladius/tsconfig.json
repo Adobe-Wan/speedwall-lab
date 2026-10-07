@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "paths": {
+      "@speedwall-lab/core": ["../core/src/index.ts"],
+      "@speedwall-lab/core/schema": ["../core/src/schema.ts"],
+      "@speedwall-lab/render": ["../render/src/index.ts"],
+      "@speedwall-lab/data-gladius": ["./src/index.ts"],
+      "@speedwall-lab/data-gladius/fixture-schema": ["./src/fixture-schema.ts"]
+    }
+  },
+  "include": ["src", "test"]
+}

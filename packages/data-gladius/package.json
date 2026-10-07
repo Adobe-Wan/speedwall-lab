@@ -1,0 +1,33 @@
+{
+  "name": "@speedwall-lab/data-gladius",
+  "version": "0.0.0",
+  "description": "Gladius FlightProfile built from the author's in-game measurements.",
+  "license": "MIT AND CC-BY-4.0",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./fixture-schema": {
+      "types": "./dist/fixture-schema.d.ts",
+      "default": "./dist/fixture-schema.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@speedwall-lab/core": "workspace:*"
+  },
+  "devDependencies": {
+    "zod": "^4.1.0"
+  }
+}
