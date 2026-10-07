@@ -7,11 +7,12 @@
 
 > Unofficial fan project. Not affiliated with the Cloud Imperium group of companies.
 
-## What's in the alpha (v0.1)
-- **Egg view.** The 3D boost egg (520 at the nose, 394 at the sides, 268 at the tail) and the SCM sphere (225), with your velocity point. The **sideways-room ring** shrinks as forward speed climbs.
-- **Pilot view.** Space dust fixed in space streams out of the **TVI**, your actual direction of travel, next to the crosshair (where your nose points). There's a guide ring and an FOV control so offsets match your screen.
+## What's in the alpha (v0.3)
+- **Egg view.** The 3D boost egg (520 at the nose, 394 at the sides, 268 at the tail) and the SCM sphere (225). The **ship rides on your velocity point**, with lines out to the wall showing how much sideways room is left. Camera views: 3/4, **Side** (the egg's true profile) and **Follow ship**. White dots are the settle speeds measured in game.
+- **Pilot view.** Space dust fixed in space streams out of the **TVI**, next to the crosshair. Rolling swirls the dust; the TVI stays true.
 - **Slice view.** A flat, top-down version of the egg. It's the main view on phones.
-- **Controls.** Touch throttle, strafe pad, boost (hold or lock) and keyboard. Five presets: strafe from rest, full forward then strafe, forward + strafe, 50% forward + strafe, let off forward.
+- **Controls.** Star Citizen default keys (W/S, A/D, Space, L Ctrl, Q/E roll, L Shift boost, X spacebrake), a throttle with a sticky zero, a strafe pad, roll buttons with an adjustable roll rate, and **Map controllers** for HOTAS, gamepads and pedals.
+- **Maneuvers.** Five translation maneuvers and five **corkscrews** (roll + strafe at the nose), each with what to watch and the in-game result.
 
 **Physics status.** Settled speeds match the author's in-game measurements within 0.5% (30 test points). Boosted-wall dodge strength and boost-release timing are approximate and still being fitted. Decoupled mode only; no rotation yet.
 
