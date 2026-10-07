@@ -1,0 +1,62 @@
+# Round 2 (Gladius, decoupled, SCM mode). Run with:  python run.py run --tests tests_round2.yaml
+# Point the canopy at a planet/moon or busy star field for the roll tests.
+
+tests:
+  # --- A. Validate the roll tracker against spec rates (no translation) -------------------------
+  - id: roll_scm
+    note: full roll, SCM (spec 200 deg/s)
+    steps: [{t: 6, roll: 1.0}]
+    expect: {roll_dps: 200}
+  - id: roll_boost
+    note: full roll, boosted (spec 240 deg/s)
+    steps: [{t: 6, roll: 1.0, boost: true}]
+    expect: {roll_dps: 240}
+  - id: roll_half
+    note: 50% roll, SCM (linear -> 100 deg/s)
+    steps: [{t: 6, roll: 0.5}]
+    expect: {roll_dps: 100}
+
+  # --- B. Does translation starve roll? (round 1 implied ~20 deg/s in corkscrews) -----------------
+  - id: roll_fwd_boost
+    note: full roll + full forward, boosted
+    steps: [{t: 12, strafe_long: 1.0, roll: 1.0, boost: true}]
+  - id: roll_up_boost
+    note: full roll + full up, boosted
+    steps: [{t: 12, strafe_vert: 1.0, roll: 1.0, boost: true}]
+  - id: cork_full
+    note: full roll + full forward + full up, boosted (round 1 -> 513 m/s, 6.3 G)
+    steps: [{t: 14, strafe_long: 1.0, strafe_vert: 1.0, roll: 1.0, boost: true}]
+    expect: {plateau_mps: 513, implied_roll_dps: "~20"}
+  - id: roll_fwd_scm
+    note: full roll + full forward, SCM
+    steps: [{t: 12, strafe_long: 1.0, roll: 1.0}]
+  - id: cork_full_scm
+    note: full roll + full forward + full up, SCM
+    steps: [{t: 12, strafe_long: 1.0, strafe_vert: 1.0, roll: 1.0}]
+
+  # --- C. How partial inputs combine (boosted). Two hypotheses: forward share uses boosted 21.1 G
+  #        (A) or unboosted 13.6 G (B) when another axis is also commanded. ------------------------
+  - id: fwd75_up
+    note: boosted 75% forward + full up
+    steps: [{t: 15, strafe_long: 0.75, strafe_vert: 1.0, boost: true}]
+    expect: {plateau_mps: "A 492 / B 472", g_meter_peak: "A 15.8 / B 12.9"}
+  - id: fwd25_up
+    note: boosted 25% forward + full up
+    steps: [{t: 15, strafe_long: 0.25, strafe_vert: 1.0, boost: true}]
+    expect: {plateau_mps: "A 442 / B 426"}
+  - id: fwd50_up50
+    note: boosted 50% forward + 50% up
+    steps: [{t: 15, strafe_long: 0.5, strafe_vert: 0.5, boost: true}]
+    expect: {plateau_mps: "A 502 / B 485", g_meter_peak: "A 10.6 / B 6.8"}
+  - id: fwd_up50
+    note: boosted full forward + 50% up
+    steps: [{t: 15, strafe_long: 1.0, strafe_vert: 0.5, boost: true}]
+    expect: {plateau_mps: "A 514 / B 508"}
+  - id: fwd50_left
+    note: boosted 50% forward + full left (same as fwd50_up but lateral)
+    steps: [{t: 15, strafe_long: 0.5, strafe_lat: -1.0, boost: true}]
+    expect: {plateau_mps: "A 474 / B 453 (round-1 fwd50_up gave 455)"}
+  - id: scm_fwd50_up
+    note: SCM 50% forward + full up (sphere -> 226 either way; checks direction via G only)
+    steps: [{t: 15, strafe_long: 0.5, strafe_vert: 1.0}]
+    expect: {plateau_mps: 226, g_meter_peak: 9.9}

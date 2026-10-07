@@ -1,0 +1,46 @@
+name: Alpha feedback
+description: Tell us what made sense, what didn't, and whether it matches what you feel in the cockpit.
+title: "[Alpha feedback] "
+labels: ["alpha-feedback"]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for flying the Speedwall Lab alpha. Short answers are fine.
+  - type: dropdown
+    id: device
+    attributes:
+      label: What did you use?
+      options: [Phone, Tablet, Desktop / laptop]
+    validations: { required: true }
+  - type: checkboxes
+    id: views
+    attributes:
+      label: Which views did you try?
+      options:
+        - label: Egg (3D)
+        - label: Pilot (dust + TVI)
+        - label: Slice (top-down)
+  - type: dropdown
+    id: experience
+    attributes:
+      label: How long have you been flying in Star Citizen?
+      options: [New (under 3 months), 3–12 months, 1–3 years, 3+ years / competitive]
+  - type: textarea
+    id: understood
+    attributes:
+      label: In one sentence, what did the tool teach you?
+      description: If nothing clicked, say so. That's useful too.
+  - type: textarea
+    id: mismatch
+    attributes:
+      label: Anything that doesn't match the game?
+      description: Speeds, the way the dust or TVI moves, how strafing at the wall feels. Include ship, mode (decoupled/coupled), boost and any numbers you saw.
+  - type: textarea
+    id: confusing
+    attributes:
+      label: Anything confusing, broken or slow?
+      description: Controls, layout, labels, frame rate. Screenshots help.
+  - type: textarea
+    id: wish
+    attributes:
+      label: What would make this more useful to you?

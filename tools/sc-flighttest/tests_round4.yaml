@@ -1,0 +1,19 @@
+# Round 4 (Gladius, DECOUPLED, SCM mode): measure the last two Gs that still come from spviewer,
+# so the open-source Gladius dataset is 100% self-measured.  python run.py run --tests tests_round4.yaml
+tests:
+  - id: r4_boost_back
+    note: boosted full reverse from rest (spviewer 5.9 G; plateau 267)
+    steps: [{t: 14, strafe_long: -1.0, boost: true}]
+    expect: {plateau_mps: 267, accel_G_fit: 5.9}
+  - id: r4_boost_down
+    note: boosted full down from rest (spviewer 6.6 G; plateau 391)
+    steps: [{t: 14, strafe_vert: -1.0, boost: true}]
+    expect: {plateau_mps: 391, accel_G_fit: 6.6}
+  - id: r4_boost_up
+    note: boosted full up from rest (repeat check, 12.9 G; plateau 394)
+    steps: [{t: 10, strafe_vert: 1.0, boost: true}]
+    expect: {plateau_mps: 394, accel_G_fit: 12.9}
+  - id: r4_scm_up
+    note: SCM full up from rest (9.9 G; plateau 225)
+    steps: [{t: 6, strafe_vert: 1.0}]
+    expect: {plateau_mps: 225, accel_G_fit: 9.9}

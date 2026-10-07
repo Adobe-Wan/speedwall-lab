@@ -1,0 +1,50 @@
+# sc-flighttest configuration. Run `python run.py calibrate` to fill in the screen regions.
+vjoy_device: 1
+
+# Logical control -> vJoy axis. Bind each vJoy axis to the matching Star Citizen action
+# (see README "Bindings"). Use `python run.py bind <control>` to wiggle one axis while SC listens.
+axes:
+  strafe_lat:  x     # + = right    -> SC "Strafe Left / Right (abs.)"
+  strafe_long: y     # + = forward  -> SC "Strafe Forward / Backward (abs.)"
+  strafe_vert: z     # + = up       -> SC "Strafe Up / Down (abs.)"
+  roll:        rz    # + = right    -> SC "Roll"
+  pitch:       rx    # + = up       -> SC "Pitch"
+  yaw:         ry    # + = right    -> SC "Yaw"
+buttons:
+  boost: 1           # -> SC "Afterburner" (hold)
+  brake: 2           # -> SC "Spacebrake" (hold)
+
+# Safety
+window_title_contains: "Star Citizen"   # inputs are only sent while this window is focused
+abort_key: F12                          # press to release all inputs and stop immediately
+
+# Capture
+monitor: 2            # mss monitor index of the game screen (1 = primary). Calibrate sets this.
+target_fps: 60
+# Screen regions as FRACTIONS of the game monitor: [left, top, width, height].
+# Defaults come from a Gladius cockpit, default FOV, 16:9. `python run.py calibrate` lets you
+# drag new boxes if your HUD sits elsewhere (other ship, FOV, aspect ratio).
+roi:
+  speed: [0.383, 0.545, 0.042, 0.028]   # big speed digits ("225"), not the "m/s" label
+  g:     [0.656, 0.470, 0.030, 0.022]   # G number ("0.0"), not the "G" label
+  ab:    [0.594, 0.547, 0.031, 0.024]   # boost tank percent ("100%")
+  view:  [0.650, 0.090, 0.300, 0.270]   # optional sky patch, only used when roll_view: true
+roll_view: false      # camera roll tracking is no longer needed: rotation rates come from the speed readout
+view_downscale: 480
+view_max_px: 450000
+
+# Between tests
+brake_until_mps: 1.0  # spacebrake until OCR speed is below this (falls back to brake_max_s)
+brake_max_s: 45
+refill_until_pct: 99  # after a test, idle until the AB (boost) readout is at least this
+refill_max_s: 60      # ...or this long, whichever comes first
+start_max_mps: 3.0
+turnaround: true      # yaw ~180 deg between tests so the run doesn't drift into the map boundary
+turnaround_s: 3.6     # seconds of full yaw for ~180 deg (Gladius SCM yaw ~52 deg/s)    # a test never starts above this speed (brakes again, else skips the test)
+
+# G-LOC guard: if the HUD digits fade below this fraction of their pre-test brightness for
+# gloc_hold_s, all inputs are released and the test ends early; then the run waits for the HUD.
+gloc_dim_frac: 0.5
+gloc_hold_s: 0.25
+gloc_recover_max_s: 40
+gloc_rest_s: 8

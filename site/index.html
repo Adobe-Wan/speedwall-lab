@@ -1,0 +1,676 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Speedwall Lab</title>
+<meta name="description" content="See how your speed limits your maneuvers: the Gladius speed egg, space dust and TVI, built from in-game measurements. Unofficial fan project.">
+<meta property="og:title" content="Speedwall Lab (alpha)">
+<meta property="og:description" content="See how your speed limits your maneuvers: the Gladius speed egg, space dust and TVI, built from in-game measurements.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cellipse cx='14' cy='16' rx='13' ry='12' fill='none' stroke='%23f2a33a' stroke-width='3'/%3E%3Ccircle cx='22' cy='16' r='3.5' fill='%237ef0c8'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#0a0f17">
+<style>body{margin:0}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+
+<style>
+/* Layout: instrument-panel app. Views on top (Egg | Pilot side by side on wide screens, tabs on phones),
+   readout strip, then a touch control deck. One deliberate dark cockpit look. */
+:root {
+  --bg: #0a0f17;          /* deep cockpit blue-black */
+  --panel: #111925;
+  --line: #22304a;
+  --fg: #e7edf5;
+  --muted: #8796ab;
+  --boost: #f2a33a;       /* boost egg / boost state */
+  --scm: #5aa9e6;         /* SCM sphere */
+  --tvi: #7ef0c8;         /* velocity / TVI */
+  --warn: #ff6a55;        /* pinned at the wall */
+  --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-data: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--fg); font: 14px/1.45 var(--font-ui); }
+.app { max-width: 1280px; margin: 0 auto; padding: 12px 16px 24px; display: grid; gap: 12px; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
+h1 { margin: 0; font-size: 1.35rem; letter-spacing: .02em; text-wrap: balance; }
+.sub { color: var(--muted); font-size: .85rem; }
+.chip { font: 600 .68rem/1 var(--font-data); letter-spacing: .08em; text-transform: uppercase; padding: 5px 7px; border-radius: 4px; border: 1px solid var(--line); color: var(--muted); }
+.chip.proto { margin-left: auto; }
+.btn.fb { text-decoration: none; padding: 6px 10px; font-size: .78rem; border-color: var(--tvi); color: var(--tvi); }
+.chip.on-boost { color: var(--bg); background: var(--boost); border-color: var(--boost); }
+.chip.on-scm { color: var(--bg); background: var(--scm); border-color: var(--scm); }
+.chip.pinned { color: var(--bg); background: var(--warn); border-color: var(--warn); }
+
+.tabs { display: none; gap: 4px; }
+.tabs button { flex: 1; }
+button, .btn { font: 600 .82rem var(--font-ui); color: var(--fg); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 9px 10px; cursor: pointer; touch-action: manipulation; }
+button:hover { border-color: #33476b; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--tvi); outline-offset: 2px; }
+button[aria-pressed="true"], .tabs button[aria-selected="true"] { border-color: var(--tvi); color: var(--tvi); }
+
+.views { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.view { position: relative; height: clamp(300px, 56vh, 560px); background: #070b11; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; min-width: 0; }
+.view[data-hidden="true"] { display: none; }
+.vtitle, .vtools, .caption, .inset { z-index: 2; }
+.view canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+.view .overlay { position: absolute; inset: 0; pointer-events: none; }
+.vtitle { position: absolute; left: 10px; top: 8px; font: 600 .7rem var(--font-data); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.vtools { position: absolute; right: 8px; top: 6px; display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; pointer-events: auto; max-width: 70%; }
+.vtools button { padding: 5px 8px; font-size: .72rem; background: rgba(17,25,37,.85); }
+.caption { position: absolute; left: 10px; right: 10px; bottom: 8px; font-size: .82rem; color: var(--fg); text-shadow: 0 1px 2px #000; }
+.lbl { position: absolute; transform: translate(-50%, -50%); font: 600 .7rem var(--font-data); white-space: nowrap; color: var(--muted); }
+.lbl.boost { color: var(--boost); } .lbl.scm { color: var(--scm); } .lbl.tvi { color: var(--tvi); } .lbl.room { color: var(--fg); }
+.view canvas.inset { position: absolute; inset: auto; left: 8px; bottom: 34px; width: 150px; height: 150px; touch-action: auto; border: 1px solid var(--line); border-radius: 6px; background: rgba(7,11,17,.85); }
+#slice-big { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+.readouts { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 6px; }
+.ro { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; min-width: 0; }
+.ro b { display: block; font: 600 .62rem var(--font-data); letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+.ro span { font: 600 1.15rem var(--font-data); font-variant-numeric: tabular-nums; }
+.ro small { color: var(--muted); font-size: .7rem; margin-left: 2px; }
+.tank { height: 6px; background: #1a2436; border-radius: 3px; margin-top: 6px; overflow: hidden; }
+.tank i { display: block; height: 100%; width: 100%; background: var(--boost); }
+
+.deck { display: grid; grid-template-columns: auto auto 1fr; gap: 14px; align-items: start; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; }
+.ctl-label { font: 600 .62rem var(--font-data); letter-spacing: .09em; text-transform: uppercase; color: var(--muted); text-align: center; }
+.throttle { display: grid; justify-items: center; gap: 4px; }
+#thr { writing-mode: vertical-lr; direction: rtl; width: 34px; height: 170px; accent-color: var(--boost); }
+.thr-val { font: 600 .9rem var(--font-data); font-variant-numeric: tabular-nums; }
+.pad-wrap { display: grid; justify-items: center; gap: 4px; }
+#pad { position: relative; width: 170px; height: 170px; border-radius: 50%; border: 1px solid var(--line); background: radial-gradient(circle, #16223a 0 30%, #0e1624 70%); touch-action: none; cursor: grab; }
+#pad::before, #pad::after { content: ""; position: absolute; background: var(--line); }
+#pad::before { left: 50%; top: 8%; bottom: 8%; width: 1px; } #pad::after { top: 50%; left: 8%; right: 8%; height: 1px; }
+#knob { position: absolute; width: 46px; height: 46px; left: 62px; top: 62px; border-radius: 50%; background: var(--tvi); opacity: .9; box-shadow: 0 0 0 4px rgba(126,240,200,.15); pointer-events: none; }
+.side { display: grid; gap: 10px; min-width: 0; }
+.row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+#boost { padding: 12px 16px; border-color: var(--boost); color: var(--boost); font-size: .9rem; }
+#boost.active { background: var(--boost); color: var(--bg); }
+label.tog { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); font-size: .8rem; }
+.presets button { font-weight: 500; font-size: .78rem; padding: 7px 9px; }
+.set { display: grid; grid-template-columns: auto 1fr auto; gap: 4px 8px; align-items: center; font-size: .78rem; color: var(--muted); }
+.set input[type=range] { accent-color: var(--tvi); min-width: 0; width: 100%; }
+.set output { font-family: var(--font-data); color: var(--fg); }
+.keys { color: var(--muted); font-size: .75rem; }
+kbd { font: .72rem var(--font-data); border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; color: var(--fg); }
+footer { color: var(--muted); font-size: .74rem; line-height: 1.5; border-top: 1px solid var(--line); padding-top: 10px; }
+footer p { margin: 0 0 4px; max-width: 75ch; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+@media (max-width: 979px) {
+  .tabs { display: flex; }
+  .views { grid-template-columns: 1fr; }
+  .view[data-hidden="true"] { display: none; }
+  .view canvas.inset { display: none; }
+}
+@media (max-width: 560px) {
+  .btn.fb { margin-left: auto; }
+  .deck { grid-template-columns: auto 1fr; }
+  .side { grid-column: 1 / -1; }
+  #pad { width: 150px; height: 150px; } #knob { left: 52px; top: 52px; }
+  #thr { height: 150px; }
+  .chip.proto { margin-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+
+
+<div class="app">
+  <header>
+    <h1>Speedwall Lab</h1>
+    <span class="sub">Gladius · decoupled · how your speed limits your maneuvers</span>
+    <span class="chip proto" title="Physics reproduces the measured settle speeds; some wall behavior is still being fitted.">Alpha · v0.1</span>
+    <a class="btn fb" href="https://github.com/Adobe-Wan/speedwall-lab/issues/new?template=alpha-feedback.yml" target="_blank" rel="noopener">Send feedback</a>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Views">
+    <button role="tab" id="tab-egg" aria-selected="true" data-view="egg">Egg</button>
+    <button role="tab" id="tab-pilot" aria-selected="false" data-view="pilot">Pilot</button>
+    <button role="tab" id="tab-slice" aria-selected="false" data-view="slice">Slice</button>
+  </div>
+
+  <div class="views">
+    <section class="view" id="v-egg" data-hidden="false" aria-label="Egg view: your velocity inside the Gladius speed egg">
+      <canvas id="c-egg"></canvas>
+      <div class="overlay" id="o-egg"></div>
+      <div class="vtitle">Egg · velocity space</div>
+      <div class="vtools">
+        <button id="t-scm" aria-pressed="true">SCM sphere</button>
+        <button id="t-scale" aria-pressed="false">True scale</button>
+        <button id="t-view">Reset view</button>
+      </div>
+      <canvas class="inset" id="c-inset" aria-hidden="true"></canvas>
+      <div class="caption" id="cap-egg"></div>
+    </section>
+    <section class="view" id="v-pilot" data-hidden="false" aria-label="Pilot view: space dust, crosshair and TVI">
+      <canvas id="c-pilot"></canvas>
+      <svg class="overlay" id="hud" aria-hidden="true"></svg>
+      <div class="vtitle">Pilot · cockpit</div>
+      <div class="vtools">
+        <button id="t-dust" aria-pressed="true">Dust</button>
+        <button id="t-ring" aria-pressed="true">Guide ring</button>
+      </div>
+      <div class="caption" id="cap-pilot"></div>
+    </section>
+    <section class="view" id="v-slice" data-hidden="true" aria-label="Slice view: top-down slice of the egg">
+      <canvas id="slice-big"></canvas>
+      <div class="vtitle">Slice · top-down</div>
+      <div class="caption" id="cap-slice"></div>
+    </section>
+  </div>
+
+  <div class="readouts" aria-hidden="true">
+    <div class="ro"><b>Speed</b><span id="r-speed">0</span><small>m/s</small></div>
+    <div class="ro"><b>Forward</b><span id="r-fwd">0</span><small>m/s</small></div>
+    <div class="ro"><b>Sideways</b><span id="r-side">0</span><small>m/s</small></div>
+    <div class="ro"><b>Sideways room</b><span id="r-room">394</span><small>m/s</small></div>
+    <div class="ro"><b>Accel</b><span id="r-g">0.0</span><small>G</small></div>
+    <div class="ro"><b>TVI off nose</b><span id="r-tvi">–</span><small>°</small></div>
+    <div class="ro"><b>Boost tank</b><span id="r-tank">100</span><small>%</small><div class="tank"><i id="r-tankbar"></i></div></div>
+    <div class="ro"><b>Mode</b><span class="chip" id="r-mode">SCM</span> <span class="chip" id="r-pin" hidden>Pinned</span></div>
+  </div>
+  <p class="sr" aria-live="polite" id="live"></p>
+
+  <div class="deck">
+    <div class="throttle">
+      <span class="ctl-label">Fwd</span>
+      <input type="range" id="thr" min="-100" max="100" step="1" value="0" aria-label="Throttle, back to forward">
+      <span class="ctl-label">Back</span>
+      <span class="thr-val" id="thr-val">0%</span>
+      <button id="thr0" style="padding:4px 10px">0</button>
+    </div>
+    <div class="pad-wrap">
+      <span class="ctl-label">Strafe · up / left / right / down</span>
+      <div id="pad" role="application" aria-label="Strafe pad. Drag to strafe; release to center."><div id="knob"></div></div>
+      <span class="thr-val" id="pad-val">L/R 0 · U/D 0</span>
+    </div>
+    <div class="side">
+      <div class="row">
+        <button id="boost" aria-pressed="false">Hold to boost</button>
+        <label class="tog"><input type="checkbox" id="boost-lock"> Lock boost</label>
+        <button id="reset">Stop</button>
+        <button id="pin">Pin at the nose</button>
+        <button id="pause" aria-pressed="false">Pause</button>
+      </div>
+      <div class="row presets" aria-label="Presets">
+        <button data-preset="rest">Strafe from rest</button>
+        <button data-preset="fwdthen">Full forward, then strafe</button>
+        <button data-preset="diag">Forward + strafe from rest</button>
+        <button data-preset="half">50% forward + strafe</button>
+        <button data-preset="letoff">Let off forward</button>
+      </div>
+      <div class="set">
+        <span>FOV</span><input type="range" id="fov" min="60" max="120" value="90" aria-label="Pilot view horizontal field of view"><output id="fov-v">90°</output>
+        <span>Guide ring</span><input type="range" id="ring" min="2" max="30" value="13" aria-label="TVI guide ring angle"><output id="ring-v">13°</output>
+      </div>
+      <div class="keys">Keys: <kbd>W</kbd><kbd>S</kbd> fwd/back · <kbd>A</kbd><kbd>D</kbd> strafe · <kbd>Space</kbd>/<kbd>C</kbd> up/down · <kbd>Shift</kbd> boost · <kbd>1</kbd>–<kbd>4</kbd> 25–100% · <kbd>X</kbd> zero · <kbd>P</kbd> pause</div>
+    </div>
+  </div>
+
+  <footer>
+    <p><strong>How to read it:</strong> the amber egg is every velocity the Gladius can reach while boosting; the blue sphere is SCM (225 m/s). The mint dot is your velocity, and the white ring is how much sideways speed is left at your current forward speed.</p>
+    <p>Alpha physics reproduces the author's measured settle speeds within 0.5%; boosted-wall dodge strength and boost-release timing are still being fitted. Decoupled mode only.</p>
+    <p>Measurements: Alex Bruecken Blaum, in-game tests (Oct 2026). Original directional-G research: <a href="https://www.spviewer.eu/" style="color:var(--muted)">SC Ships Performances Viewer</a> by Olakeen, used with permission.</p>
+    <p>This is an unofficial Star Citizen fan project, not affiliated with the Cloud Imperium group of companies. Star Citizen® is a registered trademark of Cloud Imperium Rights LLC. No game assets are used.</p>
+  </footer>
+</div>
+
+<script type="module">
+import { Renderer, Camera, Transform, Program, Mesh, Geometry, Orbit, Vec3 } from './vendor/ogl.mjs';
+
+/* ───────────────────────── physics (port of packages/core, prototype) ───────────────────────── */
+const g0 = 9.80665;
+const GL_ = {
+  scm:   { G: { f: 13.7, b: 4.24, l: 9.95, u: 9.9, d: 4.97 }, F: 225, B: 225 },
+  boost: { G: { f: 21.2, b: 5.9, l: 12.9, u: 12.9, d: 6.6 }, F: 520, B: 268, K: 1.3, sideAtWall: 0.5 },
+  tank: { drain: 4.8, regen: 4.0 }, release: { k: 0.5 },
+  effFwd: [[0,0],[0.1,2.07],[0.25,5.19],[0.4,7.14],[0.5,7.14],[0.6,7.14],[0.75,12.05],[0.9,18.86],[1,20.75]],
+};
+const eggR = (c, F, B) => (F + B) / 2 + (F - B) / 2 * c;
+const len = v => Math.hypot(v[0], v[1], v[2]);
+const interp = (t, x) => { for (let i = 1; i < t.length; i++) if (x <= t[i][0]) { const [a, b] = t[i-1], [c, d] = t[i]; return b + (d - b) * (x - a) / (c - a); } return t[t.length-1][1]; };
+function request(u, boost) {
+  const G = (boost ? GL_.boost : GL_.scm).G;
+  const w = [u.f * (u.f >= 0 ? G.f : G.b), -u.l * G.l, u.u * (u.u >= 0 ? G.u : G.d)];
+  const maxU = Math.max(Math.abs(u.f), Math.abs(u.l), Math.abs(u.u));
+  if (maxU < 1e-6) return [0, 0, 0];
+  const cap = Math.max(...w.map(Math.abs)) / maxU;
+  if (boost && Math.max(Math.abs(u.l), Math.abs(u.u)) >= 0.95 && u.f > 0) w[0] = interp(GL_.effFwd, u.f);
+  const n = len(w), s = n > cap ? cap / n : 1;
+  return w.map(c => c * s * g0);
+}
+function axisCap(a, G) { const ax = a.map(Math.abs), k = ax.indexOf(Math.max(...ax));
+  return G[k === 0 ? (a[0] >= 0 ? 'f' : 'b') : k === 1 ? 'l' : (a[2] >= 0 ? 'u' : 'd')] * g0; }
+function step(s, u, boostHeld, dt) {
+  const boost = boostHeld && s.tank > 0, P = boost ? GL_.boost : GL_.scm, { F, B } = P;
+  let a = request(u, boost);
+  const sp = len(s.v), r = sp > 1e-6 ? eggR(s.v[0] / sp, F, B) : F;
+  if (!boost && sp > r + 0.5) {
+    const vh = s.v.map(c => c / sp), out = a[0]*vh[0] + a[1]*vh[1] + a[2]*vh[2];
+    if (out > 0) a = a.map((c, i) => c - out * vh[i]);
+    const dec = Math.min(GL_.release.k * (sp - r), 20 * g0);
+    a = a.map((c, i) => c - dec * vh[i]);
+  } else if (sp > 1e-6 && sp > r - (boost ? 160 : 0.5)) {
+    const vh = s.v.map(c => c / sp), lim = boost ? P.K * (r - sp) : (sp < r - 0.5 ? 1e9 : 0);
+    let out = a[0]*vh[0] + a[1]*vh[1] + a[2]*vh[2];
+    if (out > lim) a = a.map((c, i) => c - (out - lim) * vh[i]);
+    const c = axisCap(a, P.G), n = len(a); if (n > c) a = a.map(x => x * c / n);
+    if (boost && u.f <= 0.05 && s.v[0] > 420) { const k = Math.min(1, (s.v[0] - 420) / 40); a[0] = Math.min(a[0], -3.5 * g0 * k); }
+    if (boost && sp > r - 30) { out = a[0]*vh[0] + a[1]*vh[1] + a[2]*vh[2]; a = a.map((x, i) => out * vh[i] + (x - out * vh[i]) * P.sideAtWall); }
+  }
+  const v = s.v.map((c, i) => c + a[i] * dt);
+  const sp2 = len(v), r2 = sp2 > 1e-6 ? eggR(v[0] / sp2, F, B) : F;
+  if (!boost && sp <= r + 0.5 && sp2 > r2) { const k = r2 / sp2; for (let i = 0; i < 3; i++) v[i] *= k; }
+  const tank = Math.max(0, Math.min(100, s.tank + (boostHeld ? -GL_.tank.drain : GL_.tank.regen) * dt));
+  return { v, x: s.x.map((c, i) => c + v[i] * dt), tank, a: v.map((c, i) => (c - s.v[i]) / dt), boost };
+}
+const ROOM = (() => { const A = 394, C = 126, xs = [], ys = [];
+  for (let i = 0; i <= 3000; i++) { const t = Math.PI * i / 3000, r = A + C * Math.cos(t); xs.push(r * Math.cos(t)); ys.push(r * Math.sin(t)); } return { xs, ys }; })();
+function lateralRoom(x, boost) {
+  if (!boost) return Math.sqrt(Math.max(0, 225 * 225 - x * x));
+  const { xs, ys } = ROOM; if (x >= xs[0] || x <= xs[xs.length - 1]) return 0;
+  let lo = 0, hi = xs.length - 1; while (hi - lo > 1) { const m = (lo + hi) >> 1; if (xs[m] > x) lo = m; else hi = m; }
+  return ys[lo] + (x - xs[lo]) / (xs[hi] - xs[lo]) * (ys[hi] - ys[lo]);
+}
+
+/* ───────────────────────── input ───────────────────────── */
+const $ = id => document.getElementById(id);
+const ctl = { thr: 0, padL: 0, padU: 0, padSticky: false, boostLock: false, boostBtn: false, keys: new Set(), paused: false };
+let S = { v: [0, 0, 0], x: [0, 0, 0], tank: 100, a: [0, 0, 0], boost: false };
+let script = null;
+
+function currentInput() {
+  const k = ctl.keys;
+  let f = ctl.thr / 100, l = ctl.padL, u = ctl.padU;
+  if (k.has('w')) f = 1; if (k.has('s')) f = -1;
+  if (k.has('a')) l = -1; if (k.has('d')) l = 1;
+  if (k.has(' ')) u = 1; if (k.has('c')) u = -1;
+  const boost = ctl.boostLock || ctl.boostBtn || k.has('shift');
+  return { u: { f, l, u }, boost };
+}
+const thr = $('thr');
+function setThr(v) { ctl.thr = v; thr.value = v; $('thr-val').textContent = `${v > 0 ? '+' : ''}${v}%`; }
+thr.addEventListener('input', () => { script = null; setThr(+thr.value); });
+$('thr0').onclick = () => { script = null; setThr(0); };
+
+const pad = $('pad'), knob = $('knob');
+function drawKnob() {
+  const R = pad.clientWidth / 2, kr = knob.offsetWidth / 2;
+  knob.style.left = `${R - kr + ctl.padL * (R - kr)}px`; knob.style.top = `${R - kr - ctl.padU * (R - kr)}px`;
+  $('pad-val').textContent = `L/R ${Math.round(ctl.padL * 100)} · U/D ${Math.round(ctl.padU * 100)}`;
+}
+function padFrom(e) {
+  const b = pad.getBoundingClientRect(), R = b.width / 2;
+  let x = (e.clientX - b.left - R) / (R * 0.75), y = -(e.clientY - b.top - R) / (R * 0.75);
+  const m = Math.hypot(x, y); if (m > 1) { x /= m; y /= m; }
+  ctl.padL = Math.abs(x) > 0.96 ? Math.sign(x) : x; ctl.padU = Math.abs(y) > 0.96 ? Math.sign(y) : y; drawKnob();
+}
+pad.addEventListener('pointerdown', e => { script = null; ctl.padSticky = false; pad.setPointerCapture(e.pointerId); padFrom(e); });
+pad.addEventListener('pointermove', e => { if (pad.hasPointerCapture(e.pointerId)) padFrom(e); });
+const padUp = () => { if (!ctl.padSticky) { ctl.padL = 0; ctl.padU = 0; drawKnob(); } };
+pad.addEventListener('pointerup', padUp); pad.addEventListener('pointercancel', padUp);
+
+const bBtn = $('boost');
+const boostDown = e => { e.preventDefault(); ctl.boostBtn = true; };
+const boostUp = () => { ctl.boostBtn = false; };
+bBtn.addEventListener('pointerdown', boostDown); bBtn.addEventListener('pointerup', boostUp);
+bBtn.addEventListener('pointerleave', boostUp); bBtn.addEventListener('pointercancel', boostUp);
+$('boost-lock').addEventListener('change', e => { ctl.boostLock = e.target.checked; });
+function setLock(v) { ctl.boostLock = v; $('boost-lock').checked = v; }
+
+addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' && e.target.type !== 'range' && e.target.type !== 'checkbox') return;
+  const k = e.key.toLowerCase();
+  if (['w','a','s','d',' ','c','shift'].includes(k)) { ctl.keys.add(k); script = null; if (k === ' ') e.preventDefault(); }
+  if (k >= '1' && k <= '4') { script = null; setThr(25 * +k); }
+  if (k === 'x') { script = null; setThr(0); }
+  if (k === 'p') togglePause();
+  if (k === 'r') reset(false);
+  if (k === 'n') reset(true);
+});
+addEventListener('keyup', e => ctl.keys.delete(e.key.toLowerCase()));
+addEventListener('blur', () => ctl.keys.clear());
+
+function reset(pinned) {
+  script = null; S = { v: [pinned ? 520 : 0, 0, 0], x: S.x, tank: 100, a: [0, 0, 0], boost: pinned };
+  trail.length = 0; setThr(pinned ? 100 : 0); setLock(pinned); ctl.padL = ctl.padU = 0; ctl.padSticky = false; drawKnob();
+}
+$('reset').onclick = () => reset(false);
+$('pin').onclick = () => reset(true);
+function togglePause() { ctl.paused = !ctl.paused; $('pause').setAttribute('aria-pressed', ctl.paused); $('pause').textContent = ctl.paused ? 'Resume' : 'Pause'; }
+$('pause').onclick = togglePause;
+
+const PRESETS = {
+  rest:    { pin: false, steps: [[0, { f: 0, l: 1, u: 0, boost: true }]] },
+  fwdthen: { pin: false, steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [5, { f: 1, l: 1, u: 0, boost: true }]] },
+  diag:    { pin: false, steps: [[0, { f: 1, l: 1, u: 0, boost: true }]] },
+  half:    { pin: false, steps: [[0, { f: 0.5, l: 1, u: 0, boost: true }]] },
+  letoff:  { pin: true,  steps: [[0, { f: 1, l: 1, u: 0, boost: true }], [3, { f: 0, l: 1, u: 0, boost: true }]] },
+};
+document.querySelectorAll('[data-preset]').forEach(b => b.onclick = () => {
+  const p = PRESETS[b.dataset.preset]; reset(p.pin); script = { t: 0, steps: p.steps, i: -1 };
+});
+function runScript(dt) {
+  if (!script) return; script.t += dt;
+  while (script.i + 1 < script.steps.length && script.t >= script.steps[script.i + 1][0]) {
+    script.i++; const s = script.steps[script.i][1];
+    setThr(Math.round(s.f * 100)); ctl.padL = s.l; ctl.padU = s.u; ctl.padSticky = true; setLock(s.boost); drawKnob();
+  }
+}
+
+/* ───────────────────────── views: tabs + visibility ───────────────────────── */
+const views = { egg: $('v-egg'), pilot: $('v-pilot'), slice: $('v-slice') };
+const narrow = matchMedia('(max-width: 979px)');
+let active = 'egg';
+function applyTabs() {
+  document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.view === active));
+  for (const [k, el] of Object.entries(views)) el.dataset.hidden = narrow.matches ? String(k !== active) : String(k === 'slice');
+  requestAnimationFrame(resizeAll);
+}
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { active = b.dataset.view; applyTabs(); });
+narrow.addEventListener('change', applyTabs);
+const visible = k => views[k].dataset.hidden !== 'true';
+
+/* ───────────────────────── render helpers ───────────────────────── */
+// physics frame (x nose, y left, z up) -> render frame (X nose, Y up, Z right)
+const R3 = (x, y, z) => [x, z, -y];
+const hex = h => [parseInt(h.slice(1, 3), 16) / 255, parseInt(h.slice(3, 5), 16) / 255, parseInt(h.slice(5, 7), 16) / 255];
+const COL = { boost: hex('#f2a33a'), scm: hex('#5aa9e6'), tvi: hex('#7ef0c8'), white: [0.92, 0.95, 1], grey: [0.5, 0.56, 0.66], warn: hex('#ff6a55'), glyph: [0.78, 0.82, 0.9] };
+const VS_LINE = `attribute vec3 position; uniform mat4 modelViewMatrix, projectionMatrix; void main(){ gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }`;
+const FS_LINE = `precision mediump float; uniform vec3 uColor; uniform float uAlpha; void main(){ gl_FragColor = vec4(uColor, uAlpha); }`;
+function lineProgram(gl, color, alpha, extra = {}) {
+  return new Program(gl, { vertex: VS_LINE, fragment: FS_LINE, uniforms: { uColor: { value: color }, uAlpha: { value: alpha } }, transparent: true, depthWrite: false, ...extra });
+}
+function dynLines(gl, maxVerts, program, mode) {
+  const geometry = new Geometry(gl, { position: { size: 3, data: new Float32Array(maxVerts * 3), usage: gl.DYNAMIC_DRAW } });
+  const mesh = new Mesh(gl, { geometry, program, mode, frustumCulled: false });
+  mesh.set = (pts) => { const d = geometry.attributes.position.data; let n = 0;
+    for (const p of pts) { if (n >= maxVerts) break; d[n*3] = p[0]; d[n*3+1] = p[1]; d[n*3+2] = p[2]; n++; }
+    geometry.attributes.position.needsUpdate = true; geometry.setDrawRange(0, n); mesh.visible = n > 0; };
+  return mesh;
+}
+function eggGeometry(gl, F, B, nT = 72, nP = 56) {
+  const A = (F + B) / 2, C = (F - B) / 2, pos = [], nor = [], idx = [];
+  for (let i = 0; i <= nT; i++) {
+    const t = Math.PI * i / nT, r = A + C * Math.cos(t), dr = -C * Math.sin(t);
+    const px = r * Math.cos(t), pr = r * Math.sin(t);
+    let tx = dr * Math.cos(t) - r * Math.sin(t), tr = dr * Math.sin(t) + r * Math.cos(t);
+    let nx = tr, nr = -tx; const nl = Math.hypot(nx, nr) || 1; nx /= nl; nr /= nl;
+    if (i === 0) { nx = 1; nr = 0; } if (i === nT) { nx = -1; nr = 0; }
+    for (let j = 0; j <= nP; j++) {
+      const p = 2 * Math.PI * j / nP, cy = Math.cos(p), sz = Math.sin(p);
+      pos.push(...R3(px, pr * cy, pr * sz)); nor.push(...R3(nx, nr * cy, nr * sz));
+    }
+  }
+  for (let i = 0; i < nT; i++) for (let j = 0; j < nP; j++) { const a = i * (nP + 1) + j, b = a + nP + 1; idx.push(a, b, a + 1, b, b + 1, a + 1); }
+  return new Geometry(gl, { position: { size: 3, data: new Float32Array(pos) }, normal: { size: 3, data: new Float32Array(nor) }, index: { data: new Uint16Array(idx) } });
+}
+const VS_SHELL = `attribute vec3 position; attribute vec3 normal; uniform mat4 modelViewMatrix, projectionMatrix; uniform mat3 normalMatrix;
+varying vec3 vN; varying vec3 vV; void main(){ vec4 mv = modelViewMatrix*vec4(position,1.0); vN = normalize(normalMatrix*normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }`;
+const FS_SHELL = `precision mediump float; uniform vec3 uColor; uniform float uAlpha; uniform float uRim; varying vec3 vN; varying vec3 vV;
+void main(){ float f = 1.0 - abs(dot(normalize(vN), normalize(vV))); gl_FragColor = vec4(uColor*(0.55+0.7*f), uAlpha + uRim*pow(f, 2.2)); }`;
+function shell(gl, geometry, color, alpha, rim, order) {
+  const meshes = [];
+  for (const cull of [gl.FRONT, gl.BACK]) {
+    const program = new Program(gl, { vertex: VS_SHELL, fragment: FS_SHELL, uniforms: { uColor: { value: color }, uAlpha: { value: alpha }, uRim: { value: rim } }, transparent: true, depthWrite: false, cullFace: cull });
+    const m = new Mesh(gl, { geometry, program }); m.renderOrder = order + (cull === gl.BACK ? 1 : 0); meshes.push(m);
+  }
+  return meshes;
+}
+function dartGeometry(gl) {
+  const L = 20, W = 17, H = 5.5, xw = L / 2 - 0.6 * L;
+  const N = [L/2,0,0], T = [-L/2,0,0], Wl = [xw, W/2, 0], Wr = [xw, -W/2, 0], Up = [xw, 0, H/2], Dn = [xw, 0, -H/2];
+  const faces = [[N,Wl,Up],[N,Up,Wr],[N,Wr,Dn],[N,Dn,Wl],[T,Up,Wl],[T,Wr,Up],[T,Dn,Wr],[T,Wl,Dn]];
+  const pos = [], nor = [];
+  for (const f of faces) {
+    const [a, b, c] = f.map(p => R3(...p));
+    const u = b.map((x, i) => x - a[i]), v = c.map((x, i) => x - a[i]);
+    let n = [u[1]*v[2]-u[2]*v[1], u[2]*v[0]-u[0]*v[2], u[0]*v[1]-u[1]*v[0]]; const l = Math.hypot(...n); n = n.map(x => x / l);
+    pos.push(...a, ...b, ...c); nor.push(...n, ...n, ...n);
+  }
+  return new Geometry(gl, { position: { size: 3, data: new Float32Array(pos) }, normal: { size: 3, data: new Float32Array(nor) } });
+}
+const FS_LAMBERT = `precision mediump float; uniform vec3 uColor; varying vec3 vN; varying vec3 vV;
+void main(){ float d = 0.35 + 0.65*abs(dot(normalize(vN), normalize(vec3(0.4,0.8,0.5)))); gl_FragColor = vec4(uColor*d, 1.0); }`;
+
+function makeRenderer(canvas) {
+  const renderer = new Renderer({ canvas, dpr: Math.min(devicePixelRatio || 1, matchMedia('(pointer: coarse)').matches ? 1.5 : 2), antialias: true, alpha: false, webgl: 2 });
+  renderer.gl.clearColor(0.027, 0.043, 0.067, 1);
+  return renderer;
+}
+
+/* ───────────────────────── egg view ───────────────────────── */
+const egg = (() => {
+  const canvas = $('c-egg'), renderer = makeRenderer(canvas), gl = renderer.gl;
+  const camera = new Camera(gl, { fov: 38, near: 5, far: 8000 });
+  const scene = new Transform();
+  let aspect = 1.3;
+  const home = () => { const k = Math.max(1, 1.15 / aspect); camera.position.set(130 - 390 * k, 520 * k, 1500 * k); camera.lookAt([130, 0, 0]); };
+  let touched = false; canvas.addEventListener('pointerdown', () => { touched = true; }); canvas.addEventListener('wheel', () => { touched = true; }, { passive: true });
+  home();
+  const orbit = new Orbit(camera, { target: new Vec3(130, 0, 0), element: canvas, ease: 0.2, inertia: 0.8, minDistance: 350, maxDistance: 3200, enablePan: false });
+
+  shell(gl, eggGeometry(gl, 520, 268), COL.boost, 0.035, 0.34, 10).forEach(m => m.setParent(scene));
+  const scmShell = shell(gl, eggGeometry(gl, 225, 225, 40, 40), COL.scm, 0.045, 0.3, 20);
+  scmShell.forEach(m => m.setParent(scene));
+
+  // latitude rings every 100 m/s of forward speed + 4 meridians + the nose axis (one static line mesh)
+  const ring = [];
+  for (let x = -200; x <= 500; x += 100) { const rr = lateralRoom(x, true); for (let j = 0; j < 64; j++) { const a1 = 2*Math.PI*j/64, a2 = 2*Math.PI*(j+1)/64;
+    ring.push(...R3(x, rr*Math.cos(a1), rr*Math.sin(a1)), ...R3(x, rr*Math.cos(a2), rr*Math.sin(a2))); } }
+  for (let k = 0; k < 4; k++) { const p = k * Math.PI / 2; for (let i = 0; i < 72; i++) {
+    const seg = [i, i + 1].map(n => { const t = Math.PI * n / 72, r = 394 + 126 * Math.cos(t); return R3(r*Math.cos(t), r*Math.sin(t)*Math.cos(p), r*Math.sin(t)*Math.sin(p)); });
+    ring.push(...seg[0], ...seg[1]); } }
+  ring.push(...R3(-320, 0, 0), ...R3(600, 0, 0));
+  new Mesh(gl, { geometry: new Geometry(gl, { position: { size: 3, data: new Float32Array(ring) } }), program: lineProgram(gl, COL.boost, 0.16), mode: gl.LINES }).setParent(scene);
+
+  // sideways-room disc: unit circle in the render Y-Z plane, moved to the current forward speed
+  const discT = new Transform(); discT.setParent(scene);
+  const circ = [], fan = [0, 0, 0];
+  for (let j = 0; j <= 96; j++) { const a = 2 * Math.PI * j / 96; circ.push(0, Math.sin(a), Math.cos(a)); fan.push(0, Math.sin(a), Math.cos(a)); }
+  const discFill = new Mesh(gl, { geometry: new Geometry(gl, { position: { size: 3, data: new Float32Array(fan) } }), program: lineProgram(gl, COL.white, 0.07, { cullFace: false }), mode: gl.TRIANGLE_FAN, frustumCulled: false });
+  const discLine = new Mesh(gl, { geometry: new Geometry(gl, { position: { size: 3, data: new Float32Array(circ) } }), program: lineProgram(gl, COL.white, 0.85), mode: gl.LINE_STRIP, frustumCulled: false });
+  discFill.renderOrder = 30; discLine.renderOrder = 31; discFill.setParent(discT); discLine.setParent(discT);
+
+  const glyphT = new Transform(); glyphT.setParent(scene);
+  const glyph = new Mesh(gl, { geometry: dartGeometry(gl), program: new Program(gl, { vertex: VS_SHELL, fragment: FS_LAMBERT, uniforms: { uColor: { value: COL.glyph } } }) });
+  glyph.setParent(glyphT); glyphT.scale.set(6);
+
+  const vel = dynLines(gl, 2, lineProgram(gl, COL.tvi, 1), gl.LINES); vel.renderOrder = 40;
+  const trailM = dynLines(gl, 400, lineProgram(gl, COL.tvi, 0.45), gl.LINE_STRIP); trailM.renderOrder = 39;
+  const settleM = dynLines(gl, 80, lineProgram(gl, COL.tvi, 0.5), gl.LINES); settleM.renderOrder = 38;
+  const thrustM = dynLines(gl, 2, lineProgram(gl, COL.boost, 1), gl.LINES); thrustM.renderOrder = 41;
+  const deadM = dynLines(gl, 2, lineProgram(gl, COL.grey, 0.8), gl.LINES); deadM.renderOrder = 41;
+  [vel, trailM, settleM, thrustM, deadM].forEach(m => m.setParent(scene));
+
+  // HTML labels
+  const ov = $('o-egg'), labels = {};
+  const mk = (k, cls, text) => { const d = document.createElement('div'); d.className = `lbl ${cls}`; d.textContent = text; ov.appendChild(d); labels[k] = d; return d; };
+  mk('nose', 'boost', 'nose 520'); mk('side', 'boost', 'sides 394'); mk('tail', 'boost', 'tail 268'); mk('scm', 'scm', 'SCM 225');
+  mk('room', 'room', ''); mk('settle', 'tvi', '');
+  const tviIcon = document.createElement('div'); tviIcon.className = 'lbl tvi';
+  tviIcon.innerHTML = '<svg width="34" height="20" viewBox="-17 -10 34 20"><circle r="5.5" fill="none" stroke="#7ef0c8" stroke-width="2"/><path d="M-15 0h9.5M5.5 0H15M0-5.5V-10" stroke="#7ef0c8" stroke-width="2"/></svg>';
+  ov.appendChild(tviIcon);
+  const v3 = new Vec3();
+  function place(el, p) { v3.set(...p); camera.project(v3); const w = canvas.parentElement.clientWidth, h = canvas.parentElement.clientHeight;
+    const on = v3.z < 1 && v3.z > -1; el.hidden = !on; if (on) { el.style.left = `${(v3.x + 1) / 2 * w}px`; el.style.top = `${(1 - v3.y) / 2 * h}px`; } }
+
+  let showScm = true, trueScale = false;
+  $('t-scm').onclick = e => { showScm = !showScm; e.target.setAttribute('aria-pressed', showScm); scmShell.forEach(m => m.visible = showScm); labels.scm.hidden = !showScm; };
+  $('t-scale').onclick = e => { trueScale = !trueScale; e.target.setAttribute('aria-pressed', trueScale); glyphT.scale.set(trueScale ? 1 : 6); };
+  $('t-view').onclick = () => { touched = false; home(); orbit.forcePosition(); };
+
+  function resize() { const w = canvas.parentElement.clientWidth, h = canvas.parentElement.clientHeight; if (!w || !h) return; renderer.setSize(w, h); aspect = w / h; camera.perspective({ aspect }); if (!touched) { home(); orbit.forcePosition(); } }
+  function draw(st, d) {
+    orbit.update();
+    const [vx, vy, vz] = st.v, room = d.room;
+    discT.position.set(vx, 0, 0); discT.scale.set(1, Math.max(room, 0.001), Math.max(room, 0.001));
+    discLine.program.uniforms.uColor.value = d.pinned ? COL.warn : COL.white;
+    const pv = R3(vx, vy, vz);
+    vel.set([[0, 0, 0], pv]);
+    trailM.set(trail);
+    if (d.settle) { const pts = [], n = 18, s = d.settle.p; for (let i = 0; i < n; i++) { const a = i / n, b = (i + 0.55) / n; pts.push(R3(s[0]*a, s[1]*a, s[2]*a), R3(s[0]*b, s[1]*b, s[2]*b)); } settleM.set(pts); } else settleM.set([]);
+    const ga = st.a, gl_ = len(ga);
+    if (gl_ > 0.5) { const k = 9 / g0; thrustM.set([pv, R3(vx + ga[0]*k, vy + ga[1]*k, vz + ga[2]*k)]); } else thrustM.set([]);
+    if (d.pinned && d.req && len(d.req) > 0.5) { const k = 9 / g0, q = d.req; deadM.set([pv, R3(vx + q[0]*k, vy + q[1]*k, vz + q[2]*k)]); } else deadM.set([]);
+    renderer.render({ scene, camera, sort: true });
+    place(labels.nose, R3(520, 0, -70)); place(labels.tail, R3(-300, 0, 0)); place(labels.side, R3(0, 0, 420));
+    if (showScm) place(labels.scm, R3(0, -160, -170));
+    place(labels.room, R3(vx, -room * 0.71, room * 0.71 + 18)); labels.room.textContent = `room ${Math.round(room)}`;
+    const sv = d.settle, far = sv && Math.hypot(sv.p[0] - vx, sv.p[1] - vy, sv.p[2] - vz) > 25;
+    if (far) { place(labels.settle, R3(...sv.p)); labels.settle.textContent = `ends ~${Math.round(sv.speed)} · ${Math.round(sv.side)} sideways`; }
+    else labels.settle.hidden = true;
+    place(tviIcon, pv); tviIcon.hidden = tviIcon.hidden || d.speed < 3;
+  }
+  return { resize, draw };
+})();
+
+/* ───────────────────────── pilot view: dust + crosshair + TVI ───────────────────────── */
+const pilot = (() => {
+  const canvas = $('c-pilot'), renderer = makeRenderer(canvas), gl = renderer.gl;
+  const camera = new Camera(gl, { fov: 60, near: 0.5, far: 6000 });
+  camera.position.set(0, 0, 0); camera.lookAt([1, 0, 0]);
+  const scene = new Transform();
+  const coarse = matchMedia('(pointer: coarse)').matches, N = coarse ? 700 : 1600, L = 400;
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const aSeed = new Float32Array(N * 6), aTail = new Float32Array(N * 2);
+  for (let i = 0; i < N; i++) { const p = [rnd() * L, rnd() * L, rnd() * L]; aSeed.set(p, i * 6); aSeed.set(p, i * 6 + 3); aTail[i * 2 + 1] = 1; }
+  const dustGeo = new Geometry(gl, { aSeed: { size: 3, data: aSeed }, aTail: { size: 1, data: aTail } });
+  const DUST_VS = `attribute vec3 aSeed; attribute float aTail; uniform mat4 modelViewMatrix, projectionMatrix;
+    uniform vec3 uShipMod; uniform float uL; uniform vec3 uVel; uniform float uTau; uniform float uOpacity; uniform float uPt; varying float vA;
+    void main(){ vec3 r = mod(aSeed - uShipMod + 0.5*uL, uL) - 0.5*uL; vec3 p = r + aTail*uVel*uTau; float d = length(r);
+      vA = (1.0 - smoothstep(0.34*uL, 0.5*uL, d)) * smoothstep(1.5, 10.0, d) * uOpacity * (1.0 - 0.75*aTail);
+      gl_Position = projectionMatrix*modelViewMatrix*vec4(p,1.0); gl_PointSize = uPt; }`;
+  const DUST_FS = `precision mediump float; uniform vec3 uColor; varying float vA; void main(){ gl_FragColor = vec4(uColor, vA); }`;
+  const uniforms = { uShipMod: { value: [0, 0, 0] }, uL: { value: L }, uVel: { value: [0, 0, 0] }, uTau: { value: 1 / 30 }, uOpacity: { value: 0.9 }, uPt: { value: 2 }, uColor: { value: [0.86, 0.9, 1] } };
+  const dustProg = new Program(gl, { vertex: DUST_VS, fragment: DUST_FS, uniforms, transparent: true, depthTest: false, depthWrite: false });
+  dustProg.setBlendFunc(gl.SRC_ALPHA, gl.ONE);
+  const dotUniforms = { ...uniforms, uOpacity: { value: 0.6 }, uPt: { value: 2.5 } };
+  const dotProg = new Program(gl, { vertex: DUST_VS, fragment: DUST_FS, uniforms: dotUniforms, transparent: true, depthTest: false, depthWrite: false });
+  dotProg.setBlendFunc(gl.SRC_ALPHA, gl.ONE);
+  const streaks = new Mesh(gl, { geometry: dustGeo, program: dustProg, mode: gl.LINES, frustumCulled: false });
+  const dots = new Mesh(gl, { geometry: dustGeo, program: dotProg, mode: gl.POINTS, frustumCulled: false });
+  streaks.setParent(scene); dots.setParent(scene);
+  // distant stars: fixed directions, they never move under translation (only the dust does)
+  const stars = []; for (let i = 0; i < 500; i++) { const z = rnd() * 2 - 1, t = rnd() * 2 * Math.PI, r = Math.sqrt(1 - z * z); stars.push(4000 * r * Math.cos(t), 4000 * z, 4000 * r * Math.sin(t)); }
+  const starProg = new Program(gl, { vertex: `attribute vec3 position; uniform mat4 modelViewMatrix, projectionMatrix; void main(){ gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); gl_PointSize = 1.5; }`,
+    fragment: FS_LINE, uniforms: { uColor: { value: [0.6, 0.66, 0.78] }, uAlpha: { value: 0.55 } }, transparent: true, depthTest: false });
+  new Mesh(gl, { geometry: new Geometry(gl, { position: { size: 3, data: new Float32Array(stars) } }), program: starProg, mode: gl.POINTS, frustumCulled: false }).setParent(scene);
+
+  let dustOn = true, ringOn = true, hfov = 90, ringDeg = 13;
+  $('t-dust').onclick = e => { dustOn = !dustOn; e.target.setAttribute('aria-pressed', dustOn); streaks.visible = dots.visible = dustOn; };
+  $('t-ring').onclick = e => { ringOn = !ringOn; e.target.setAttribute('aria-pressed', ringOn); };
+  $('fov').oninput = e => { hfov = +e.target.value; $('fov-v').textContent = `${hfov}°`; resize(); };
+  $('ring').oninput = e => { ringDeg = +e.target.value; $('ring-v').textContent = `${ringDeg}°`; };
+
+  const svg = $('hud'), NS = 'http://www.w3.org/2000/svg';
+  svg.innerHTML = `
+    <g id="h-ring"><circle fill="none" stroke="#7ef0c8" stroke-opacity=".35" stroke-dasharray="4 6" stroke-width="1.5"/></g>
+    <g id="h-cross" stroke="#e7edf5" stroke-width="2" fill="none"><circle r="4"/><path d="M-22 0h-12M22 0h12M0 22v12"/></g>
+    <g id="h-tvi" stroke="#7ef0c8" stroke-width="2.2" fill="none"><circle r="8"/><path d="M-22 0h14M8 0h14M0-8v-9"/></g>
+    <g id="h-anti" stroke="#7ef0c8" stroke-width="2" fill="none" opacity=".8"><circle r="8"/><path d="M-5.6-5.6l11.2 11.2M5.6-5.6l-11.2 11.2"/></g>
+    <g id="h-edge" fill="#7ef0c8"><path d="M0-9L16 0 0 9z"/></g>
+    <text id="h-lbl" fill="#7ef0c8" font-family="ui-monospace, Menlo, monospace" font-size="12" font-weight="600"></text>`;
+  const el = id => svg.querySelector(id);
+  function resize() { const w = canvas.parentElement.clientWidth, h = canvas.parentElement.clientHeight; if (!w || !h) return; renderer.setSize(w, h);
+    const vf = 2 * Math.atan(Math.tan(hfov * Math.PI / 360) / (w / h)) * 180 / Math.PI; camera.perspective({ aspect: w / h, fov: vf }); svg.setAttribute('viewBox', `0 0 ${w} ${h}`); }
+  function draw(st, d) {
+    const m = st.x.map(c => ((c % L) + L) % L);
+    uniforms.uShipMod.value = R3(m[0], m[1], m[2]); dotUniforms.uShipMod.value = uniforms.uShipMod.value;
+    uniforms.uVel.value = R3(...st.v); dotUniforms.uVel.value = uniforms.uVel.value;
+    const sp = d.speed; uniforms.uTau.value = Math.min(1 / 30, 40 / Math.max(sp, 1)); dotUniforms.uOpacity.value = 0.65 * Math.max(0, 1 - sp / 60);
+    renderer.render({ scene, camera });
+    const w = canvas.parentElement.clientWidth, h = canvas.parentElement.clientHeight, cx = w / 2, cy = h / 2, f = (w / 2) / Math.tan(hfov * Math.PI / 360);
+    el('#h-cross').setAttribute('transform', `translate(${cx} ${cy})`);
+    const rc = el('#h-ring circle'); rc.setAttribute('cx', cx); rc.setAttribute('cy', cy); rc.setAttribute('r', f * Math.tan(ringDeg * Math.PI / 180)); el('#h-ring').style.display = ringOn ? '' : 'none';
+    const show = (id, x, y, on) => { const g = el(id); g.style.display = on ? '' : 'none'; if (on) g.setAttribute('transform', `translate(${x} ${y})`); };
+    if (sp < 3) { show('#h-tvi', 0, 0, false); show('#h-anti', 0, 0, false); show('#h-edge', 0, 0, false); el('#h-lbl').textContent = ''; return; }
+    const vh = st.v.map(c => c / sp), fwd = vh[0], right = -vh[1], up = vh[2];
+    const proj = (fx, rx, ux) => [cx + f * rx / fx, cy - f * ux / fx];
+    const inView = ([x, y]) => x > 12 && x < w - 12 && y > 12 && y < h - 12;
+    let tviPt = null;
+    if (fwd > 0.087) { tviPt = proj(fwd, right, up); }
+    if (tviPt && inView(tviPt)) { show('#h-tvi', ...tviPt, true); show('#h-edge', 0, 0, false); }
+    else { show('#h-tvi', 0, 0, false); const ang = Math.atan2(-up, right); const ex = cx + Math.cos(ang) * (w / 2 - 22), ey = cy + Math.sin(ang) * (h / 2 - 22);
+      const g = el('#h-edge'); g.style.display = ''; g.setAttribute('transform', `translate(${Math.min(w - 18, Math.max(18, ex))} ${Math.min(h - 18, Math.max(18, ey))}) rotate(${ang * 180 / Math.PI})`); }
+    const anti = -fwd > 0.087 ? proj(-fwd, -right, -up) : null; show('#h-anti', ...(anti || [0, 0]), !!anti && inView(anti));
+    const lp = tviPt && inView(tviPt) ? tviPt : [cx, cy + 46];
+    const t = el('#h-lbl'); t.setAttribute('x', lp[0] + 14); t.setAttribute('y', lp[1] + 22); t.textContent = `TVI ${Math.round(d.tviDeg)}°`;
+  }
+  return { resize, draw };
+})();
+
+/* ───────────────────────── slice views (2D canvas) ───────────────────────── */
+function drawSlice(canvas, st, d, big) {
+  const dpr = Math.min(devicePixelRatio || 1, 2), w = canvas.clientWidth, h = canvas.clientHeight; if (!w || !h) return;
+  if (canvas.width !== Math.round(w * dpr)) { canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr); }
+  const c = canvas.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, w, h);
+  const pad = big ? 36 : 10, sc = Math.min((h - 2 * pad) / 800, (w - 2 * pad) / 840), ox = w / 2, oy = pad + 530 * sc;
+  const P = (lat, fwd) => [ox + lat * sc, oy - fwd * sc];
+  c.lineWidth = big ? 2 : 1.2;
+  c.beginPath(); for (let i = 0; i <= 360; i++) { const t = i * Math.PI / 180, r = 394 + 126 * Math.cos(t); const [x, y] = P(r * Math.sin(t), r * Math.cos(t)); i ? c.lineTo(x, y) : c.moveTo(x, y); }
+  c.strokeStyle = '#f2a33a'; c.stroke(); c.fillStyle = 'rgba(242,163,58,.06)'; c.fill();
+  c.beginPath(); c.arc(ox, oy, 225 * sc, 0, 2 * Math.PI); c.strokeStyle = 'rgba(90,169,230,.7)'; c.stroke();
+  c.strokeStyle = 'rgba(135,150,171,.35)'; c.beginPath(); c.moveTo(...P(0, -290)); c.lineTo(...P(0, 545)); c.stroke();
+  const fwd = st.v[0], lat = -st.v[1], room = d.room;
+  c.strokeStyle = d.pinned ? '#ff6a55' : '#e7edf5'; c.lineWidth = big ? 3 : 2; c.beginPath(); c.moveTo(...P(-room, fwd)); c.lineTo(...P(room, fwd)); c.stroke();
+  if (d.settle) { c.setLineDash([5, 6]); c.strokeStyle = 'rgba(126,240,200,.6)'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(ox, oy); c.lineTo(...P(-d.settle.p[1], d.settle.p[0])); c.stroke(); c.setLineDash([]); }
+  c.strokeStyle = '#7ef0c8'; c.lineWidth = big ? 2.5 : 1.5; c.beginPath(); c.moveTo(ox, oy); c.lineTo(...P(lat, fwd)); c.stroke();
+  c.fillStyle = '#7ef0c8'; c.beginPath(); c.arc(...P(lat, fwd), big ? 6 : 3.5, 0, 2 * Math.PI); c.fill();
+  // glyph
+  c.save(); c.translate(ox, oy); c.fillStyle = '#c7d1e5'; const g = big ? 1.6 : 1; c.beginPath(); c.moveTo(0, -10 * g); c.lineTo(8.5 * g, 2 * g); c.lineTo(0, 10 * g); c.lineTo(-8.5 * g, 2 * g); c.closePath(); c.fill(); c.restore();
+  if (big) { c.font = '600 12px ui-monospace, Menlo, monospace'; c.fillStyle = '#f2a33a'; c.textAlign = 'center';
+    c.fillText('nose 520', ...P(0, 532)); c.fillText('tail 268', ...P(0, -284)); c.textAlign = 'left'; c.fillText('394', ...P(398, 6)); c.fillStyle = '#5aa9e6'; c.fillText('SCM 225', ...P(150, 190));
+    c.fillStyle = d.pinned ? '#ff6a55' : '#e7edf5'; c.fillText(`room ${Math.round(room)}`, ...P(room + 8, fwd - 4)); }
+}
+
+/* ───────────────────────── loop ───────────────────────── */
+const trail = []; let acc = 0, last = performance.now(), roT = 0, trailT = 0, liveT = 0;
+const DT = 1 / 240;
+function derive(st, inp) {
+  const boost = inp.boost && st.tank > 0, F = boost ? 520 : 225, B = boost ? 268 : 225;
+  const sp = len(st.v), r = sp > 1e-6 ? eggR(st.v[0] / sp, F, B) : F, req = request(inp.u, boost), rn = len(req);
+  let settle = null; if (rn > 1e-6) { const dd = req.map(c => c / rn), rr = eggR(dd[0], F, B); settle = { p: dd.map(c => c * rr), speed: rr, side: rr * Math.hypot(dd[1], dd[2]) }; }
+  return { speed: sp, fwd: st.v[0], side: Math.hypot(st.v[1], st.v[2]), g: len(st.a) / g0, boost, r, req,
+    pinned: sp > 5 && sp >= 0.985 * r, room: lateralRoom(st.v[0], boost), tviDeg: sp > 0.5 ? Math.acos(Math.max(-1, Math.min(1, st.v[0] / sp))) * 180 / Math.PI : 0, settle };
+}
+function caption(d) {
+  if (d.speed < 5) return d.boost ? 'At rest, boosted: you can reach 520 m/s forward or 394 m/s sideways.' : 'At rest. Hold boost to see the full egg; strafe or throttle to move.';
+  if (d.pinned && d.boost && d.fwd > 440) return `Pinned at the nose: only ${Math.round(d.room)} m/s of sideways room left at ${Math.round(d.fwd)} m/s forward.`;
+  if (d.pinned) return 'On the wall: outward thrust is dead, so strafing only slides you along the wall.';
+  return `Sideways room at ${Math.round(Math.max(0, d.fwd))} m/s forward: ${Math.round(d.room)} m/s.`;
+}
+let gSmooth = 0;
+function frame(now) {
+  requestAnimationFrame(frame);
+  const dt = Math.min(0.1, (now - last) / 1000); last = now;
+  if (document.hidden) return;
+  const inp = currentInput();
+  if (!ctl.paused) {
+    runScript(dt); acc += dt;
+    const live = currentInput();
+    while (acc >= DT) { S = step(S, live.u, live.boost, DT); acc -= DT; }
+    trailT += dt; if (trailT > 1 / 60) { trailT = 0; trail.push(R3(...S.v)); if (trail.length > 360) trail.shift(); }
+  }
+  const d = derive(S, currentInput());
+  gSmooth += (d.g - gSmooth) * 0.15;
+  bBtn.classList.toggle('active', d.boost); bBtn.setAttribute('aria-pressed', d.boost);
+  if (visible('egg')) { egg.draw(S, d); drawSlice($('c-inset'), S, d, false); $('cap-egg').textContent = caption(d); }
+  if (visible('pilot')) { pilot.draw(S, d); $('cap-pilot').textContent = d.speed < 3 ? 'The dust is fixed in space. Start moving and it streams out of the TVI.' : `Dust streams out of the TVI, ${Math.round(d.tviDeg)}° off your nose. That is where you are going.`; }
+  if (visible('slice')) { drawSlice($('slice-big'), S, d, true); $('cap-slice').textContent = caption(d); }
+  roT += dt; if (roT > 0.08) { roT = 0;
+    $('r-speed').textContent = Math.round(d.speed); $('r-fwd').textContent = Math.round(d.fwd); $('r-side').textContent = Math.round(d.side);
+    $('r-room').textContent = Math.round(d.room); $('r-g').textContent = gSmooth.toFixed(1); $('r-tvi').textContent = d.speed > 3 ? Math.round(d.tviDeg) : '–';
+    $('r-tank').textContent = Math.round(S.tank); $('r-tankbar').style.width = `${S.tank}%`;
+    const mode = $('r-mode'); mode.textContent = d.boost ? 'Boost' : 'SCM'; mode.className = `chip ${d.boost ? 'on-boost' : 'on-scm'}`;
+    $('r-pin').hidden = !d.pinned; $('r-pin').className = 'chip pinned'; }
+  liveT += dt; if (liveT > 2) { liveT = 0; $('live').textContent = `Speed ${Math.round(d.speed)} meters per second, sideways room ${Math.round(d.room)}.`; }
+}
+function resizeAll() { egg.resize(); pilot.resize(); }
+new ResizeObserver(resizeAll).observe(document.querySelector('.views'));
+applyTabs(); drawKnob(); setThr(0); resizeAll(); requestAnimationFrame(frame);
+</script>
+
+</body>
+</html>

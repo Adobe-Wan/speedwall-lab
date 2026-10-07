@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.DS_Store
+tools/sc-flighttest/results/
+tools/sc-flighttest/.venv/
+__pycache__/

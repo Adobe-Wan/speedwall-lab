@@ -1,0 +1,83 @@
+# Gladius test suite. Fly in Arena Commander free flight, DECOUPLED, SCM master mode, hands off your own sticks.
+# Each test: spacebrake to 0, wait for a full boost tank (boosted tests), then hold the steps below.
+# Controls: strafe_long (+fwd), strafe_lat (+right), strafe_vert (+up), roll (+right), pitch, yaw; boost: true.
+# `expect` = model predictions (Gladius) printed next to the results.
+
+tests:
+  # --- A. SCM (unboosted) sphere + base accelerations -------------------------------------------
+  - id: scm_fwd
+    note: SCM full forward
+    steps: [{t: 20, strafe_long: 1.0}]
+    expect: {plateau_mps: 226, accel_G: 13.6}
+  - id: scm_fwd_50
+    note: SCM 50% forward (is throttle = thrust fraction?)
+    steps: [{t: 30, strafe_long: 0.5}]
+    expect: {plateau_mps: 226, accel_G: 6.8}
+  - id: scm_back
+    note: SCM full reverse
+    steps: [{t: 25, strafe_long: -1.0}]
+    expect: {plateau_mps: 226, accel_G: 4.2}
+  - id: scm_right
+    note: SCM full right strafe
+    steps: [{t: 20, strafe_lat: 1.0}]
+    expect: {plateau_mps: 226, accel_G: 9.9}
+  - id: scm_down
+    note: SCM full down strafe
+    steps: [{t: 25, strafe_vert: -1.0}]
+    expect: {plateau_mps: 226, accel_G: 4.9}
+
+  # --- B. Boosted egg + thrust budget -------------------------------------------------------------
+  - id: boost_fwd
+    note: boosted full forward
+    steps: [{t: 15, strafe_long: 1.0, boost: true}]
+    expect: {plateau_mps: 520, accel_G: 21.1, t_to_480_s: "~2.3 + ramp"}
+  - id: boost_fwd_50
+    note: boosted 50% forward (does boost scale partial throttle?)
+    steps: [{t: 15, strafe_long: 0.5, boost: true}]
+    expect: {accel_G: "10.6 if boost scales it, 6.8 if not", t_to_300_s: "2.9 vs 4.5"}
+  - id: boost_fwd_up
+    note: boosted full forward + full up (shared thrust budget?)
+    steps: [{t: 15, strafe_long: 1.0, strafe_vert: 1.0, boost: true}]
+    expect: {plateau_mps: 501.5, t_to_480_s: "2.0 independent / 2.6 superellipse / 2.8 ellipse (+ramp)"}
+  - id: boost_fwd_down
+    note: boosted full forward + full down
+    steps: [{t: 15, strafe_long: 1.0, strafe_vert: -1.0, boost: true}]
+    expect: {plateau_mps: 514.3, g_meter: "16.5 shared / 22.1 independent"}
+  - id: boost_up_left
+    note: boosted full up + full left
+    steps: [{t: 15, strafe_vert: 1.0, strafe_lat: -1.0, boost: true}]
+    expect: {plateau_mps: 394, g_meter: "13.6 shared / 18.2 independent"}
+  - id: boost_fwd50_up
+    note: boosted 50% forward + full up (earlier hand test 455 m/s, 12.8 G)
+    steps: [{t: 15, strafe_long: 0.5, strafe_vert: 1.0, boost: true}]
+    expect: {plateau_mps: "453 if partial throttle uses unboosted G"}
+
+  # --- C. Roll rate (needs the `view` region on open sky / a planet) -----------------------------
+  - id: roll_scm
+    note: full roll, no translation, SCM
+    steps: [{t: 8, roll: 1.0}]
+    expect: {roll_dps: 200}
+  - id: roll_boost
+    note: full roll, no translation, boosted
+    steps: [{t: 8, roll: 1.0, boost: true}]
+    expect: {roll_dps: 240}
+  - id: roll_half
+    note: 50% roll, SCM (is roll input linear?)
+    steps: [{t: 8, roll: 0.5}]
+    expect: {roll_dps: 100}
+  - id: roll_quarter
+    note: 25% roll, SCM
+    steps: [{t: 8, roll: 0.25}]
+    expect: {roll_dps: 50}
+
+  # --- D. Corkscrews ------------------------------------------------------------------------------
+  - id: cork_full
+    note: boosted full fwd + full up + full roll (hand test gave 513 m/s, 21.2 G)
+    steps: [{t: 15, strafe_long: 1.0, strafe_vert: 1.0, roll: 1.0, boost: true}]
+    expect: {plateau_mps: "513 measured by hand; 519-520 if roll stays at 240"}
+  - id: cork_roll25
+    note: boosted full fwd + full up + 25% roll
+    steps: [{t: 15, strafe_long: 1.0, strafe_vert: 1.0, roll: 0.25, boost: true}]
+  - id: cork_roll12
+    note: boosted full fwd + full up + 12% roll (near the predicted optimum ~28 deg/s)
+    steps: [{t: 15, strafe_long: 1.0, strafe_vert: 1.0, roll: 0.12, boost: true}]

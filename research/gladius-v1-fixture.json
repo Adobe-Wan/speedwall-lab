@@ -1,0 +1,1388 @@
+{
+ "ship": "Gladius",
+ "patch": "4.x LIVE (tested 2026-10-06)",
+ "mode": "DECOUPLED",
+ "provenance": "sc-flighttest automated runs (vJoy + HUD OCR) and hand tests by the author",
+ "constants": {
+  "scm": {
+   "speedCap_mps": 225,
+   "egg": "sphere",
+   "G": {
+    "fwd": 13.7,
+    "back": 4.24,
+    "lat": 9.95,
+    "up": 9.9,
+    "down": 4.97
+   },
+   "rotation_dps": {
+    "pitch": 68.0,
+    "yaw": 52.1,
+    "roll": 199.9
+   },
+   "G_provenance": "all measured by the author (sc-flighttest round 1 speed slopes; up from round 2 G meter + slope 9.94)",
+   "rotation_provenance": "measured (rg_* rotation gauges, round 3)"
+  },
+  "boost": {
+   "egg": "limacon",
+   "F_mps": 520,
+   "B_mps": 268,
+   "A_mps": 394,
+   "G": {
+    "fwd": 21.2,
+    "back": 5.9,
+    "lat": 12.9,
+    "up": 12.9,
+    "down": 6.6
+   },
+   "rotation_dps": {
+    "pitch": 81.6,
+    "yaw": 62.7,
+    "roll": 240.0
+   },
+   "softWallK_per_s": 1.3,
+   "tankDrain_pct_per_s": 4.8,
+   "tankRegen_pct_per_s": 4.0,
+   "G_provenance": {
+    "fwd": "measured (G meter 21.2; speed slope 20.7 includes boost ramp)",
+    "lat": "measured",
+    "up": "measured",
+    "back": "spviewer.eu by Olakeen (used with permission) - REPLACE with round-4 measurement before open-sourcing",
+    "down": "spviewer.eu by Olakeen (used with permission) - REPLACE with round-4 measurement before open-sourcing"
+   },
+   "speedEgg_provenance": "F 519-520 and B 267 measured; sides 394 measured; limacon shape validated within 1%",
+   "rotation_provenance": "measured (rg_* rotation gauges, round 3)"
+  },
+  "dimensions_m": {
+   "length": 20,
+   "width": 17,
+   "height": 5.5
+  },
+  "rollCurve": "linear (10/25/50/75/100% -> 20.1/50.1/100.0/149.9/199.9 deg/s)"
+ },
+ "thrustRule": {
+  "name": "C2",
+  "formula": "|a| = min(|w|, max_i|w_i| / max_i|u_i|); w_i = u_i * G_i(direction)",
+  "fullStrafeForwardCurve": {
+   "note": "boosted, full lateral strafe, forward fraction -> settled speed (m/s). Rule-A direction holds except 0.4-0.75.",
+   "points": [
+    [
+     0.0,
+     394
+    ],
+    [
+     0.1,
+     414
+    ],
+    [
+     0.25,
+     441
+    ],
+    [
+     0.4,
+     455
+    ],
+    [
+     0.5,
+     455
+    ],
+    [
+     0.6,
+     455
+    ],
+    [
+     0.75,
+     480
+    ],
+    [
+     0.9,
+     498
+    ],
+    [
+     1.0,
+     501
+    ]
+   ],
+   "effectiveForwardG": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.1,
+     2.07
+    ],
+    [
+     0.25,
+     5.19
+    ],
+    [
+     0.4,
+     7.14
+    ],
+    [
+     0.5,
+     7.14
+    ],
+    [
+     0.6,
+     7.14
+    ],
+    [
+     0.75,
+     12.05
+    ],
+    [
+     0.9,
+     18.86
+    ],
+    [
+     1.0,
+     20.75
+    ]
+   ],
+   "effectiveForwardG_note": "Derived: forward G that, with 12.9 G lateral, points thrust at the measured settle angle (limacon inverse). Rule A would be u*21.1."
+  }
+ },
+ "plateaus": [
+  {
+   "id": "hand_rev",
+   "inputs": {
+    "fwd": -1
+   },
+   "boost": true,
+   "plateau_mps": 267,
+   "accel_G": null,
+   "source": "hand"
+  },
+  {
+   "id": "hand_lat",
+   "inputs": {
+    "lat": 1
+   },
+   "boost": true,
+   "plateau_mps": 394,
+   "accel_G": null,
+   "source": "hand"
+  },
+  {
+   "id": "hand_down",
+   "inputs": {
+    "up": -1
+   },
+   "boost": true,
+   "plateau_mps": 391,
+   "accel_G": null,
+   "source": "hand (real asymmetry vs 394)"
+  },
+  {
+   "id": "r1_boost_fwd",
+   "inputs": {
+    "fwd": 1
+   },
+   "boost": true,
+   "plateau_mps": 519,
+   "accel_G": 21.2,
+   "source": "round1"
+  },
+  {
+   "id": "r1_boost_fwd_up",
+   "inputs": {
+    "fwd": 1,
+    "up": 1
+   },
+   "boost": true,
+   "plateau_mps": 501,
+   "accel_G": 21.2,
+   "source": "round1"
+  },
+  {
+   "id": "r1_boost_fwd_down",
+   "inputs": {
+    "fwd": 1,
+    "up": -1
+   },
+   "boost": true,
+   "plateau_mps": 514,
+   "accel_G": null,
+   "source": "round1"
+  },
+  {
+   "id": "r1_boost_up_left",
+   "inputs": {
+    "up": 1,
+    "lat": -1
+   },
+   "boost": true,
+   "plateau_mps": 394,
+   "accel_G": 12.9,
+   "source": "round1"
+  },
+  {
+   "id": "r1_boost_fwd50",
+   "inputs": {
+    "fwd": 0.5
+   },
+   "boost": true,
+   "plateau_mps": null,
+   "accel_G": 10.62,
+   "source": "round1"
+  },
+  {
+   "id": "r1_boost_fwd50_up",
+   "inputs": {
+    "fwd": 0.5,
+    "up": 1
+   },
+   "boost": true,
+   "plateau_mps": 455,
+   "accel_G": 12.9,
+   "source": "round1"
+  },
+  {
+   "id": "r1_scm_fwd",
+   "inputs": {
+    "fwd": 1
+   },
+   "boost": false,
+   "plateau_mps": 226,
+   "accel_G": 13.7,
+   "source": "round1"
+  },
+  {
+   "id": "r1_scm_back",
+   "inputs": {
+    "fwd": -1
+   },
+   "boost": false,
+   "plateau_mps": 226,
+   "accel_G": 4.24,
+   "source": "round1"
+  },
+  {
+   "id": "r1_scm_right",
+   "inputs": {
+    "lat": 1
+   },
+   "boost": false,
+   "plateau_mps": 226,
+   "accel_G": 9.95,
+   "source": "round1"
+  },
+  {
+   "id": "r1_scm_down",
+   "inputs": {
+    "up": -1
+   },
+   "boost": false,
+   "plateau_mps": 226,
+   "accel_G": 4.97,
+   "source": "round1"
+  },
+  {
+   "id": "r1_scm_fwd50",
+   "inputs": {
+    "fwd": 0.5
+   },
+   "boost": false,
+   "plateau_mps": 226,
+   "accel_G": 6.84,
+   "source": "round1"
+  },
+  {
+   "id": "r2_fwd25_up",
+   "inputs": {
+    "fwd": 0.25,
+    "up": 1
+   },
+   "boost": true,
+   "plateau_mps": 441,
+   "accel_G": 12.9,
+   "source": "round2"
+  },
+  {
+   "id": "r2_fwd50_up50",
+   "inputs": {
+    "fwd": 0.5,
+    "up": 0.5
+   },
+   "boost": true,
+   "plateau_mps": 501,
+   "accel_G": 12.4,
+   "source": "round2"
+  },
+  {
+   "id": "r2_fwd50_left",
+   "inputs": {
+    "fwd": 0.5,
+    "lat": -1
+   },
+   "boost": true,
+   "plateau_mps": 455,
+   "accel_G": 12.9,
+   "source": "round2"
+  },
+  {
+   "id": "r2_scm_fwd50_up",
+   "inputs": {
+    "fwd": 0.5,
+    "up": 1
+   },
+   "boost": false,
+   "plateau_mps": 225,
+   "accel_G": 9.9,
+   "source": "round2"
+  },
+  {
+   "id": "sw_f10_l100",
+   "inputs": {
+    "fwd": 0.1,
+    "lat": -1
+   },
+   "boost": true,
+   "plateau_mps": 414.0,
+   "accel_G": 12.9,
+   "source": "round3"
+  },
+  {
+   "id": "sw_f25_l100",
+   "inputs": {
+    "fwd": 0.25,
+    "lat": -1
+   },
+   "boost": true,
+   "plateau_mps": 441.0,
+   "accel_G": 12.78,
+   "source": "round3"
+  },
+  {
+   "id": "sw_f40_l100",
+   "inputs": {
+    "fwd": 0.4,
+    "lat": -1
+   },
+   "boost": true,
+   "plateau_mps": 455.0,
+   "accel_G": 12.99,
+   "source": "round3"
+  },
+  {
+   "id": "sw_f60_l100",
+   "inputs": {
+    "fwd": 0.6,
+    "lat": -1
+   },
+   "boost": true,
+   "plateau_mps": 455.0,
+   "accel_G": 12.8,
+   "source": "round3"
+  },
+  {
+   "id": "sw_f75_l100",
+   "inputs": {
+    "fwd": 0.75,
+    "lat": -1
+   },
+   "boost": true,
+   "plateau_mps": 480.0,
+   "accel_G": 15.67,
+   "source": "round3"
+  },
+  {
+   "id": "sw_f90_l100",
+   "inputs": {
+    "fwd": 0.9,
+    "lat": -1
+   },
+   "boost": true,
+   "plateau_mps": 498.0,
+   "accel_G": 18.71,
+   "source": "round3"
+  },
+  {
+   "id": "sw_f100_l25",
+   "inputs": {
+    "fwd": 1,
+    "lat": -0.25
+   },
+   "boost": true,
+   "plateau_mps": 518.0,
+   "accel_G": 20.72,
+   "source": "round3"
+  },
+  {
+   "id": "sw_f100_l50",
+   "inputs": {
+    "fwd": 1,
+    "lat": -0.5
+   },
+   "boost": true,
+   "plateau_mps": 514.0,
+   "accel_G": 20.73,
+   "source": "round3"
+  },
+  {
+   "id": "sw_f100_l75",
+   "inputs": {
+    "fwd": 1,
+    "lat": -0.75
+   },
+   "boost": true,
+   "plateau_mps": 508.0,
+   "accel_G": 20.72,
+   "source": "round3"
+  },
+  {
+   "id": "sw_f25_l25",
+   "inputs": {
+    "fwd": 0.25,
+    "lat": -0.25
+   },
+   "boost": true,
+   "plateau_mps": 501.0,
+   "accel_G": 6.21,
+   "source": "round3"
+  },
+  {
+   "id": "sw_f75_l75",
+   "inputs": {
+    "fwd": 0.75,
+    "lat": -0.75
+   },
+   "boost": true,
+   "plateau_mps": 501.0,
+   "accel_G": 18.58,
+   "source": "round3"
+  },
+  {
+   "id": "dd_down_left",
+   "inputs": {
+    "lat": -1,
+    "up": -1
+   },
+   "boost": false,
+   "plateau_mps": 225,
+   "accel_G": 9.93,
+   "source": "round3"
+  }
+ ],
+ "wallTraces": {
+  "dd_wall_lat": {
+   "steps": [
+    {
+     "t": 6.0,
+     "strafe_long": 1.0
+    },
+    {
+     "t": 6.0,
+     "strafe_lat": -1.0
+    }
+   ],
+   "note": "t = seconds after the dodge input starts (ship pinned at the forward wall); [t, HUD speed m/s, G meter]",
+   "samples": [
+    [
+     0.0,
+     225,
+     0.0
+    ],
+    [
+     0.25,
+     225,
+     7.3
+    ],
+    [
+     0.5,
+     225,
+     9.9
+    ],
+    [
+     0.75,
+     225,
+     9.7
+    ],
+    [
+     1.0,
+     225,
+     9.5
+    ],
+    [
+     1.25,
+     225,
+     4.2
+    ],
+    [
+     1.5,
+     225,
+     8.4
+    ],
+    [
+     1.75,
+     225,
+     7.1
+    ],
+    [
+     2.0,
+     225,
+     6.1
+    ],
+    [
+     2.25,
+     225,
+     5.3
+    ],
+    [
+     2.5,
+     225,
+     4.7
+    ],
+    [
+     2.75,
+     225,
+     4.3
+    ],
+    [
+     3.0,
+     225,
+     4.2
+    ],
+    [
+     3.25,
+     225,
+     4.2
+    ],
+    [
+     3.5,
+     225,
+     4.2
+    ],
+    [
+     3.75,
+     225,
+     4.2
+    ],
+    [
+     4.0,
+     225,
+     4.2
+    ],
+    [
+     4.25,
+     225,
+     4.2
+    ],
+    [
+     4.5,
+     225,
+     4.2
+    ],
+    [
+     4.75,
+     225,
+     4.2
+    ],
+    [
+     5.0,
+     226,
+     3.8
+    ],
+    [
+     5.25,
+     225,
+     3.4
+    ],
+    [
+     5.5,
+     226,
+     3.0
+    ],
+    [
+     5.75,
+     225,
+     2.6
+    ],
+    [
+     6.0,
+     225,
+     2.3
+    ]
+   ]
+  },
+  "dd_wall_fwdlat": {
+   "steps": [
+    {
+     "t": 6.0,
+     "strafe_long": 1.0
+    },
+    {
+     "t": 6.0,
+     "strafe_long": 1.0,
+     "strafe_lat": -1.0
+    }
+   ],
+   "note": "t = seconds after the dodge input starts (ship pinned at the forward wall); [t, HUD speed m/s, G meter]",
+   "samples": [
+    [
+     0.0,
+     225,
+     0.0
+    ],
+    [
+     0.25,
+     225,
+     9.1
+    ],
+    [
+     0.5,
+     225,
+     8.2
+    ],
+    [
+     0.75,
+     225,
+     6.8
+    ],
+    [
+     1.0,
+     225,
+     7.1
+    ],
+    [
+     1.25,
+     226,
+     5.0
+    ],
+    [
+     1.5,
+     225,
+     3.8
+    ],
+    [
+     1.75,
+     225,
+     3.4
+    ],
+    [
+     2.0,
+     225,
+     5.6
+    ],
+    [
+     2.25,
+     225,
+     5.5
+    ],
+    [
+     2.5,
+     226,
+     1.2
+    ],
+    [
+     2.75,
+     225,
+     0.8
+    ],
+    [
+     3.0,
+     226,
+     0.9
+    ],
+    [
+     3.25,
+     225,
+     0.3
+    ],
+    [
+     3.5,
+     226,
+     0.7
+    ],
+    [
+     3.75,
+     225,
+     4.7
+    ],
+    [
+     4.0,
+     225,
+     4.7
+    ],
+    [
+     4.25,
+     225,
+     1.0
+    ],
+    [
+     4.5,
+     225,
+     1.3
+    ],
+    [
+     4.75,
+     225,
+     1.3
+    ],
+    [
+     5.0,
+     225,
+     1.4
+    ],
+    [
+     5.25,
+     225,
+     1.6
+    ],
+    [
+     5.5,
+     225,
+     1.6
+    ],
+    [
+     5.75,
+     226,
+     1.7
+    ],
+    [
+     6.0,
+     225,
+     4.4
+    ]
+   ]
+  },
+  "dd_wall_jink": {
+   "steps": [
+    {
+     "t": 6.0,
+     "strafe_long": 1.0
+    },
+    {
+     "t": 1.5,
+     "strafe_lat": -1.0
+    },
+    {
+     "t": 1.5,
+     "strafe_lat": 1.0
+    },
+    {
+     "t": 1.5,
+     "strafe_lat": -1.0
+    },
+    {
+     "t": 1.5,
+     "strafe_lat": 1.0
+    }
+   ],
+   "note": "t = seconds after the dodge input starts (ship pinned at the forward wall); [t, HUD speed m/s, G meter]",
+   "samples": [
+    [
+     0.0,
+     225,
+     0.0
+    ],
+    [
+     0.25,
+     225,
+     8.4
+    ],
+    [
+     0.5,
+     225,
+     9.8
+    ],
+    [
+     0.75,
+     225,
+     9.6
+    ],
+    [
+     1.0,
+     225,
+     9.4
+    ],
+    [
+     1.25,
+     225,
+     9.1
+    ],
+    [
+     1.5,
+     225,
+     8.2
+    ],
+    [
+     1.75,
+     225,
+     1.2
+    ],
+    [
+     2.0,
+     219,
+     9.9
+    ],
+    [
+     2.25,
+     209,
+     9.9
+    ],
+    [
+     2.5,
+     201,
+     9.9
+    ],
+    [
+     2.75,
+     196,
+     9.9
+    ],
+    [
+     3.0,
+     194,
+     9.9
+    ],
+    [
+     3.25,
+     194,
+     1.4
+    ],
+    [
+     3.5,
+     194,
+     9.9
+    ],
+    [
+     3.75,
+     196,
+     9.9
+    ],
+    [
+     4.0,
+     201,
+     9.9
+    ],
+    [
+     4.25,
+     208,
+     9.9
+    ],
+    [
+     4.5,
+     218,
+     9.9
+    ],
+    [
+     4.75,
+     225,
+     1.7
+    ],
+    [
+     5.0,
+     219,
+     9.9
+    ],
+    [
+     5.25,
+     208,
+     9.9
+    ],
+    [
+     5.5,
+     200,
+     9.9
+    ],
+    [
+     5.75,
+     195,
+     9.9
+    ],
+    [
+     6.0,
+     193,
+     9.9
+    ]
+   ]
+  },
+  "dd_wall_lat_boost": {
+   "steps": [
+    {
+     "t": 7.0,
+     "strafe_long": 1.0,
+     "boost": true
+    },
+    {
+     "t": 7.0,
+     "strafe_lat": -1.0,
+     "boost": true
+    }
+   ],
+   "note": "t = seconds after the dodge input starts (ship pinned at the forward wall); [t, HUD speed m/s, G meter]",
+   "samples": [
+    [
+     0.0,
+     519,
+     0.0
+    ],
+    [
+     0.25,
+     518,
+     6.3
+    ],
+    [
+     0.5,
+     512,
+     6.7
+    ],
+    [
+     0.75,
+     504,
+     6.7
+    ],
+    [
+     1.0,
+     494,
+     6.9
+    ],
+    [
+     1.25,
+     484,
+     7.1
+    ],
+    [
+     1.5,
+     473,
+     7.2
+    ],
+    [
+     1.75,
+     463,
+     7.4
+    ],
+    [
+     2.0,
+     456,
+     7.5
+    ],
+    [
+     2.25,
+     450,
+     7.5
+    ],
+    [
+     2.5,
+     445,
+     7.6
+    ],
+    [
+     2.75,
+     442,
+     7.6
+    ],
+    [
+     3.0,
+     439,
+     7.7
+    ],
+    [
+     3.25,
+     438,
+     7.5
+    ],
+    [
+     3.5,
+     437,
+     7.3
+    ],
+    [
+     3.75,
+     436,
+     7.0
+    ],
+    [
+     4.0,
+     436,
+     6.5
+    ],
+    [
+     4.25,
+     435,
+     6.4
+    ],
+    [
+     4.5,
+     435,
+     6.2
+    ],
+    [
+     4.75,
+     436,
+     6.0
+    ],
+    [
+     5.0,
+     436,
+     5.8
+    ],
+    [
+     5.25,
+     437,
+     5.6
+    ],
+    [
+     5.5,
+     438,
+     5.4
+    ],
+    [
+     5.75,
+     439,
+     5.2
+    ],
+    [
+     6.0,
+     440,
+     5.0
+    ],
+    [
+     6.25,
+     441,
+     4.8
+    ],
+    [
+     6.5,
+     442,
+     4.6
+    ],
+    [
+     6.75,
+     443,
+     4.4
+    ],
+    [
+     7.0,
+     443,
+     4.2
+    ]
+   ]
+  },
+  "dd_wall_fwdlat_boost": {
+   "steps": [
+    {
+     "t": 7.0,
+     "strafe_long": 1.0,
+     "boost": true
+    },
+    {
+     "t": 7.0,
+     "strafe_long": 1.0,
+     "strafe_lat": -1.0,
+     "boost": true
+    }
+   ],
+   "note": "t = seconds after the dodge input starts (ship pinned at the forward wall); [t, HUD speed m/s, G meter]",
+   "samples": [
+    [
+     0.0,
+     519,
+     0.0
+    ],
+    [
+     0.25,
+     518,
+     5.8
+    ],
+    [
+     0.5,
+     517,
+     5.0
+    ],
+    [
+     0.75,
+     517,
+     4.7
+    ],
+    [
+     1.0,
+     516,
+     4.4
+    ],
+    [
+     1.25,
+     516,
+     4.0
+    ],
+    [
+     1.5,
+     516,
+     3.6
+    ],
+    [
+     1.75,
+     517,
+     3.3
+    ],
+    [
+     2.0,
+     517,
+     3.1
+    ],
+    [
+     2.25,
+     517,
+     3.0
+    ],
+    [
+     2.5,
+     517,
+     2.9
+    ],
+    [
+     2.75,
+     517,
+     2.9
+    ],
+    [
+     3.0,
+     517,
+     2.9
+    ],
+    [
+     3.25,
+     517,
+     2.9
+    ],
+    [
+     3.5,
+     517,
+     3.0
+    ],
+    [
+     3.75,
+     517,
+     3.0
+    ],
+    [
+     4.0,
+     517,
+     3.0
+    ],
+    [
+     4.25,
+     518,
+     2.9
+    ],
+    [
+     4.5,
+     518,
+     2.9
+    ],
+    [
+     4.75,
+     518,
+     2.8
+    ],
+    [
+     5.0,
+     518,
+     2.8
+    ],
+    [
+     5.25,
+     518,
+     2.8
+    ],
+    [
+     5.5,
+     518,
+     2.9
+    ],
+    [
+     5.75,
+     518,
+     2.7
+    ],
+    [
+     6.0,
+     518,
+     2.5
+    ],
+    [
+     6.25,
+     517,
+     2.0
+    ],
+    [
+     6.5,
+     516,
+     1.7
+    ],
+    [
+     6.75,
+     516,
+     1.6
+    ],
+    [
+     7.0,
+     515,
+     1.5
+    ]
+   ]
+  }
+ },
+ "corkscrewAtWall": {
+  "boost_fwd100_up100_roll100": {
+   "speed": 514,
+   "sideG_mean": 5.4,
+   "source": "round2"
+  },
+  "boost_fwd100_lat100_roll25": {
+   "speed": 515,
+   "sideG_mean": 6.2,
+   "source": "round3"
+  },
+  "boost_fwd100_lat50_roll100": {
+   "speed": 518,
+   "sideG_mean": 3.3,
+   "source": "round3"
+  },
+  "scm_fwd100_up100_roll100": {
+   "speed": 225,
+   "sideG_mean": 9.8,
+   "source": "round2"
+  },
+  "note": "V1 excludes rotation; kept for V2."
+ },
+ "gloc": "Lateral strafe + roll greys out in ~2-3 s; up + roll ~4-7 s at 10-13 G; held strafes/jinks fine for 6 s.",
+ "boostRelease": {
+  "note": "All inputs and boost released while moving ~514 m/s near the boosted nose wall; IFCS decelerates toward the SCM cap. [t after release, speed, G meter] Inputs were released at t=0; the HUD shows the response ~0.3 s later (game/HUD latency).",
+  "samples": [
+   [
+    0.0,
+    515,
+    1.5
+   ],
+   [
+    0.125,
+    515,
+    1.4
+   ],
+   [
+    0.25,
+    512,
+    3.1
+   ],
+   [
+    0.375,
+    505,
+    18.8
+   ],
+   [
+    0.5,
+    484,
+    16.6
+   ],
+   [
+    0.625,
+    466,
+    14.3
+   ],
+   [
+    0.75,
+    450,
+    12.4
+   ],
+   [
+    0.875,
+    435,
+    10.9
+   ],
+   [
+    1.0,
+    422,
+    9.6
+   ],
+   [
+    1.125,
+    412,
+    8.6
+   ],
+   [
+    1.25,
+    402,
+    7.7
+   ],
+   [
+    1.375,
+    393,
+    6.9
+   ]
+  ]
+ },
+ "lateralRoom": {
+  "note": "Boost egg cross-section radius (max sideways speed) at a given forward speed; SCM sphere: sqrt(225^2 - v_fwd^2).",
+  "boost": [
+   [
+    0,
+    394.0
+   ],
+   [
+    50,
+    406.3
+   ],
+   [
+    100,
+    411.8
+   ],
+   [
+    150,
+    410.7
+   ],
+   [
+    200,
+    403.1
+   ],
+   [
+    250,
+    388.7
+   ],
+   [
+    300,
+    366.7
+   ],
+   [
+    350,
+    335.7
+   ],
+   [
+    400,
+    292.8
+   ],
+   [
+    450,
+    231.5
+   ],
+   [
+    480,
+    178.5
+   ],
+   [
+    500,
+    127.9
+   ],
+   [
+    510,
+    91.1
+   ],
+   [
+    515,
+    64.7
+   ],
+   [
+    519,
+    29.3
+   ],
+   [
+    520,
+    0.0
+   ]
+  ]
+ },
+ "dimensions_note": "V1 glyph uses 20 x 17 x 5.5 m (author-specified, matches spviewer); scunpacked lists 21 x 17.5 x 5.5.",
+ "license": "CC-BY-4.0 (measurements by Alex Bruecken Blaum), except fields marked spviewer"
+}

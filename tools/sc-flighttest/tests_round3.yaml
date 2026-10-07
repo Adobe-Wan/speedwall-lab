@@ -1,0 +1,156 @@
+# Round 3 (Gladius, DECOUPLED, SCM master mode, open space). Run with:
+#   python run.py run --tests tests_round3.yaml
+# No sky box needed: rotation rates come from the speed readout (see README "How rotation is measured").
+# G-LOC guard is on: if the HUD fades, inputs are released, the test ends, and the run waits for recovery.
+# Every sideways push here uses LEFT/RIGHT strafe, not up, because round 2's blackouts came from sustained up-G.
+
+tests:
+  # --- A. Rotation gauges: a gentle 25% strafe + one rotation axis, no forward. ----------------------
+  #        Speed swings with a period of 360 deg / rate. Gives max rates AND the input curve (keys vs analog).
+  - id: rg_roll_100
+    note: roll 100% + 25% right strafe (spec 200)
+    steps: [{t: 8, roll: 1.0, strafe_lat: 0.25}]
+    expect: {rot_dps_osc: 200}
+  - id: rg_roll_075
+    note: roll 75% (linear -> 150)
+    steps: [{t: 8, roll: 0.75, strafe_lat: 0.25}]
+    expect: {rot_dps_osc: 150}
+  - id: rg_roll_050
+    note: roll 50% (linear -> 100)
+    steps: [{t: 9, roll: 0.5, strafe_lat: 0.25}]
+    expect: {rot_dps_osc: 100}
+  - id: rg_roll_025
+    note: roll 25% (linear -> 50)
+    steps: [{t: 10, roll: 0.25, strafe_lat: 0.25}]
+    expect: {rot_dps_osc: 50}
+  - id: rg_roll_010
+    note: roll 10% (linear -> 20)
+    steps: [{t: 12, roll: 0.10, strafe_lat: 0.25}]
+    expect: {rot_dps_osc: 20}
+  - id: rg_roll_100_boost
+    note: roll 100%, boosted (spec 240)
+    steps: [{t: 8, roll: 1.0, strafe_lat: 0.25, boost: true}]
+    expect: {rot_dps_osc: 240}
+  - id: rg_roll_050_boost
+    note: roll 50%, boosted (linear -> 120)
+    steps: [{t: 9, roll: 0.5, strafe_lat: 0.25, boost: true}]
+    expect: {rot_dps_osc: 120}
+  - id: rg_pitch_100
+    note: pitch 100% + 25% up strafe (spec 68)
+    steps: [{t: 10, pitch: 1.0, strafe_vert: 0.25}]
+    expect: {rot_dps_osc: 68}
+  - id: rg_pitch_100_boost
+    note: pitch 100%, boosted (spec 81.6)
+    steps: [{t: 10, pitch: 1.0, strafe_vert: 0.25, boost: true}]
+    expect: {rot_dps_osc: 81.6}
+  - id: rg_yaw_100
+    note: yaw 100% + 25% right strafe (spec 52)
+    steps: [{t: 10, yaw: 1.0, strafe_lat: 0.25}]
+    expect: {rot_dps_osc: 52}
+  - id: rg_yaw_100_boost
+    note: yaw 100%, boosted (spec 62.4)
+    steps: [{t: 10, yaw: 1.0, strafe_lat: 0.25, boost: true}]
+    expect: {rot_dps_osc: 62.4}
+  - id: rg_roll_100_strafe100
+    note: roll 100% + FULL right strafe (does heavy translation slow roll? 9.95 G lateral)
+    steps: [{t: 6, roll: 1.0, strafe_lat: 1.0}]
+    expect: {rot_dps_osc: 200}
+
+  # --- B. How partial inputs combine (boosted, from rest, forward + LEFT). -------------------------
+  #        Expect = rule A (direction from per-axis Gs). Round 2: 25%+full -> 441 (A), 50%+full -> 455 (A says 474).
+  - id: sw_f10_l100
+    note: boosted 10% forward + full left
+    steps: [{t: 14, strafe_long: 0.10, strafe_lat: -1.0, boost: true}]
+    expect: {plateau_mps: "A 414"}
+  - id: sw_f25_l100
+    note: boosted 25% forward + full left (round 2 with up -> 441)
+    steps: [{t: 14, strafe_long: 0.25, strafe_lat: -1.0, boost: true}]
+    expect: {plateau_mps: "A 442"}
+  - id: sw_f40_l100
+    note: boosted 40% forward + full left
+    steps: [{t: 14, strafe_long: 0.40, strafe_lat: -1.0, boost: true}]
+    expect: {plateau_mps: "A 463"}
+  - id: sw_f60_l100
+    note: boosted 60% forward + full left
+    steps: [{t: 14, strafe_long: 0.60, strafe_lat: -1.0, boost: true}]
+    expect: {plateau_mps: "A 482"}
+  - id: sw_f75_l100
+    note: boosted 75% forward + full left (round 2 started moving; redo)
+    steps: [{t: 14, strafe_long: 0.75, strafe_lat: -1.0, boost: true}]
+    expect: {plateau_mps: "A 492", accel_G_fit: "C1 20.4 / C2 15.8"}
+  - id: sw_f90_l100
+    note: boosted 90% forward + full left
+    steps: [{t: 14, strafe_long: 0.90, strafe_lat: -1.0, boost: true}]
+    expect: {plateau_mps: "A 498", accel_G_fit: "C1 21.1 / C2 19.0"}
+  - id: sw_f100_l25
+    note: boosted full forward + 25% left
+    steps: [{t: 14, strafe_long: 1.0, strafe_lat: -0.25, boost: true}]
+    expect: {plateau_mps: "A 519"}
+  - id: sw_f100_l50
+    note: boosted full forward + 50% left (round 2 with up started moving; redo)
+    steps: [{t: 14, strafe_long: 1.0, strafe_lat: -0.5, boost: true}]
+    expect: {plateau_mps: "A 514"}
+  - id: sw_f100_l75
+    note: boosted full forward + 75% left
+    steps: [{t: 14, strafe_long: 1.0, strafe_lat: -0.75, boost: true}]
+    expect: {plateau_mps: "A 509"}
+  - id: sw_f25_l25
+    note: "boosted 25% + 25% (G = max-axis 5.3 vs per-axis sum 6.2)"
+    steps: [{t: 16, strafe_long: 0.25, strafe_lat: -0.25, boost: true}]
+    expect: {plateau_mps: "A 502", accel_G_fit: "C1/C2 6.2 (max-only 5.3)"}
+  - id: sw_f75_l75
+    note: "boosted 75% + 75% (G = max-axis 15.8 vs per-axis sum 18.5)"
+    steps: [{t: 14, strafe_long: 0.75, strafe_lat: -0.75, boost: true}]
+    expect: {plateau_mps: "A 502", accel_G_fit: "C1/C2 18.5 (max-only 15.8)"}
+
+  # --- C. Corkscrews at the wall, using LEFT/RIGHT strafe (round 2 used up and blacked out). --------
+  #        Round 2 (up): boosted full/full/full -> 514 m/s, G meter ~5.4 pulsing at 244 deg/s; SCM -> 225, 9.8 G.
+  - id: ck_f100_l100_r100
+    note: boosted full forward + full right + full roll
+    steps: [{t: 10, strafe_long: 1.0, strafe_lat: 1.0, roll: 1.0, boost: true}]
+    expect: {plateau_mps: 514, g_meter_mean_late: 5.4}
+  - id: ck_f100_l100_r025
+    note: boosted full forward + full right + 25% roll
+    steps: [{t: 10, strafe_long: 1.0, strafe_lat: 1.0, roll: 0.25, boost: true}]
+  - id: ck_f050_l100_r100
+    note: boosted 50% forward + full right + full roll (corkscrew below the nose wall)
+    steps: [{t: 10, strafe_long: 0.5, strafe_lat: 1.0, roll: 1.0, boost: true}]
+  - id: ck_f100_l050_r100
+    note: boosted full forward + 50% right + full roll
+    steps: [{t: 10, strafe_long: 1.0, strafe_lat: 0.5, roll: 1.0, boost: true}]
+  - id: ck_scm_f100_l100_r100
+    note: SCM full forward + full right + full roll
+    steps: [{t: 9, strafe_long: 1.0, strafe_lat: 1.0, roll: 1.0}]
+    expect: {plateau_mps: 225, g_meter_mean_late: 9.8}
+  - id: ck_scm_f050_l100_r100
+    note: SCM 50% forward + full right + full roll
+    steps: [{t: 9, strafe_long: 0.5, strafe_lat: 1.0, roll: 1.0}]
+
+  # --- D. Duel checks: does holding forward steal from a dodge at the wall? Do diagonals add G? -----
+  #        Each "wall" test first reaches the forward wall (nose on target), then dodges.
+  #        Read s2_g_first1s (dodge G right away) and s2_g_over1_s (how long the dodge keeps accelerating).
+  - id: dd_wall_lat
+    note: SCM - reach wall, then LEFT ONLY (model 9.95 G, accelerates ~3.5 s, then constant velocity)
+    steps: [{t: 6, strafe_long: 1.0}, {t: 6, strafe_lat: -1.0}]
+    expect: {s2_g_first1s: 9.95, s2_g_over1_s: "~3.5"}
+  - id: dd_wall_fwdlat
+    note: SCM - reach wall, then FORWARD + LEFT (9.95 G if the wall trims forward first, 8.0 if not; stops in ~1.4 s)
+    steps: [{t: 6, strafe_long: 1.0}, {t: 6, strafe_long: 1.0, strafe_lat: -1.0}]
+    expect: {s2_g_first1s: "9.95 or 8.0", s2_g_over1_s: "~1.4"}
+  - id: dd_wall_jink
+    note: SCM - reach wall, then left/right jinks every 1.5 s (keeps accelerating)
+    steps: [{t: 6, strafe_long: 1.0}, {t: 1.5, strafe_lat: -1.0}, {t: 1.5, strafe_lat: 1.0}, {t: 1.5, strafe_lat: -1.0}, {t: 1.5, strafe_lat: 1.0}]
+  - id: dd_wall_cork_nofwd
+    note: SCM - reach wall, then left + full roll WITHOUT forward (closing speed kept? full 9.95 G?)
+    steps: [{t: 6, strafe_long: 1.0}, {t: 6, strafe_lat: -1.0, roll: 1.0}]
+    expect: {s2_g_mean: 9.95, s2_speed_end: 225}
+  - id: dd_down_left
+    note: SCM from rest - DOWN + LEFT diagonal (cap rule 9.95 G vs adding 11.1 G; down alone is 4.97)
+    steps: [{t: 6, strafe_lat: -1.0, strafe_vert: -1.0}]
+    expect: {accel_G_fit: "C1 9.95 / sum 11.1"}
+  - id: dd_wall_lat_boost
+    note: boosted - reach nose wall, then LEFT ONLY
+    steps: [{t: 7, strafe_long: 1.0, boost: true}, {t: 7, strafe_lat: -1.0, boost: true}]
+  - id: dd_wall_fwdlat_boost
+    note: boosted - reach nose wall, then FORWARD + LEFT
+    steps: [{t: 7, strafe_long: 1.0, boost: true}, {t: 7, strafe_long: 1.0, strafe_lat: -1.0, boost: true}]
