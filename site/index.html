@@ -111,8 +111,9 @@ body.no-shortcuts kbd.sc { display: none; }
 @media (min-width: 1800px) {
   .app { max-width: 1760px; }
   .view { height: clamp(300px, 62vh, 760px); }
-  .mgrid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .maneuvers { grid-template-columns: 1fr 1fr; column-gap: 16px; } .maneuvers h2 { grid-column: 1 / -1; }
+  .maneuvers .mgrid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  /* each group's title becomes a row label on the left of its cards */
+  .maneuvers { grid-template-columns: 220px minmax(0, 1fr); column-gap: 16px; align-items: start; } .maneuvers h2 { grid-column: 1 / -1; } .maneuvers h3 { margin-top: 10px; line-height: 1.5; }
 }
 .ctl-label { font: 600 .62rem var(--font-data); letter-spacing: .09em; text-transform: uppercase; color: var(--muted); text-align: center; }
 .throttle { display: grid; justify-items: center; gap: 4px; }
@@ -309,13 +310,12 @@ footer p { margin: 0 0 4px; max-width: 75ch; }
           <button data-preset="dodge-nose">Dodge at top speed<small>Pinned at 520: how far do you get sideways in 2 s?</small></button>
           <button data-preset="dodge-mid">Dodge from mid-egg (300 m/s)<small>Same input, lower forward speed: compare the 2 s distance</small></button>
           <button data-preset="letoff">Ease off to make room<small>Let go of forward and strafe: speed drops to ~435 (in game), the dodge room opens</small></button>
-          <button data-preset="jink">Jink (no boost)<small>Strafe left, right, left… every reversal gets the full 9.9 G</small></button>
         </div>
         <h3>Corkscrews · roll while strafing so the shooter's lead is wrong</h3>
         <div class="mgrid">
-          <button data-preset="ck-escape">Best escape corkscrew<small>No boost, forward + up, roll ~110 °/s: biggest miss (model)</small></button>
+          <button data-preset="ck-escape">Escape corkscrew<small>Boost, forward + up, roll ~120 °/s: open the range while the spiral spoils their aim</small></button>
           <button data-preset="ck-shoot">Corkscrew and still shoot back<small>Boost, forward + up, slow roll ~27 °/s: the TVI holds still</small></button>
-          <button data-preset="ck-spin">Over-spinning (don't)<small>Full-rate roll: the spiral is smaller than the ship</small></button>
+          <button data-preset="ck-spin">Over-spinning (don't)<small>Full-rate roll: the spiral is far smaller than the ship</small></button>
         </div>
       </section>
   <div class="legend" aria-hidden="true"><span class="lg-egg">Amber egg: top speed with boost</span><span class="lg-scm">Blue ball: top speed without boost (225)</span><span class="lg-ring">White ring: dodge room left</span><span class="lg-dot">Dots: speeds measured in game</span><span class="lg-tvi">TVI (circle with wings): where you're really going</span></div>
@@ -612,7 +612,8 @@ function reset(pinned) {
 $('reset').onclick = () => reset(false);
 $('run-stop').onclick = () => { reset(false); $('runbar').hidden = true; };
 $('pin').onclick = () => reset(true);
-function togglePause() { ctl.paused = !ctl.paused; $('pause').setAttribute('aria-pressed', ctl.paused); $('pause').textContent = ctl.paused ? 'Resume' : 'Pause'; }
+// relabel only the text node, so the key hint stays
+function togglePause() { ctl.paused = !ctl.paused; const b = $('pause'); b.setAttribute('aria-pressed', ctl.paused); b.firstChild.textContent = ctl.paused ? 'Resume ' : 'Pause '; }
 $('pause').onclick = togglePause;
 
 // Maneuvers, condensed to what each one teaches. Each step: [start time s, inputs]; r/rf = roll direction and
@@ -630,15 +631,15 @@ const PRESETS = {
                   steps: [[0, { f: 0, l: 1, u: 0, boost: true }]] },
   letoff:       { title: 'Ease off to make room', result: { at: 5, sim: () => `lowest ${Math.round(run.min)} m/s`, game: 'lowest ~435 m/s' }, start: 'nose', watch: 'Forward released, strafe held: in game the speed falls from 519 to ~435 m/s (fixture; this model dips to ~415). The ship drops back into the egg and the dodge ring opens.',
                   steps: [[0, { f: 0, l: 1, u: 0, boost: true }]] },
-  jink:         { title: 'Jink', result: { at: 6, sim: () => `${run.peakG.toFixed(1)} G per leg`, game: '9.9 G' }, start: 'scm', dodge: true, watch: 'Each reversal drops you just inside the 225 sphere, so every leg gets the full 9.9 G (fixture). A jink keeps a shooter missing ~89 % of the time (research).',
-                  steps: [0, 1.5, 3, 4.5, 6, 7.5, 9, 10.5].map((t, i) => [t, { f: 0, l: i % 2 ? 1 : -1, u: 0, boost: false }]) },
-  'ck-escape':  { title: 'Best escape corkscrew', result: { at: 6, sim: () => `${Math.round(len(S.v))} m/s, TVI ${Math.round(run.tvi)}°`, game: '225 m/s, 9.8 G side' }, start: 'scm', watch: 'No boost, forward + up, roll ~110 °/s: keeps all 9.8 G of side push (fixture) and the TVI parks ~13° off the nose. Best miss: ~41 m vs ~34 m at full roll (research). Up strafe, not sideways: sideways + roll greyed pilots out in 2–3 s.',
-                  steps: [[0, { f: 1, l: 0, u: 1, boost: false, r: 1, rf: 110 / 199.9 }]] },
+  'ck-escape':  { title: 'Escape corkscrew', result: { at: 8, sim: () => `${Math.round(len(S.v))} m/s, spiral radius ~${Math.round(spiralR())} m`, game: '514 m/s at full roll; other rates: round 7' }, start: 'nose', watch: 'Boosted, forward + up, roll ~120 °/s (50 %): you keep ~515 m/s, opening the range on anyone not boosting, while the side push draws a spiral wide enough to spoil their lead. Slower roll = wider, steadier spiral; faster = tighter. Starting to grey out? Ease the strafe or the roll rate a little. Don\'t let go: the spiral stops and the speed bleeds. Up strafe, not sideways: sideways + roll greyed pilots out in 2–3 s (fixture).',
+                  steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: 0.5 }]] },
   'ck-shoot':   { title: 'Corkscrew and shoot back', result: { at: 6, sim: () => `TVI ${Math.round(run.tvi)}° off the nose`, game: 'rule of thumb ~13°' }, start: 'nose', watch: 'Boosted, forward + up, roll ~27 °/s: the TVI holds steady ~15° off the nose (this model; the research rule of thumb says ~13°), so your target doesn\'t spin and you can shoot back. ~27 m miss vs 16 m at full roll (research). Corkscrews measured at the nose ran 514–518 m/s (fixture).',
                   steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: 27 / 240 }]] },
-  'ck-spin':    { title: 'Over-spinning', result: { at: 6, sim: () => `${Math.round(len(S.v))} m/s, ${gSmooth.toFixed(1)} G`, game: '514 m/s, 5.4 G' }, start: 'nose', watch: 'Full-rate roll (240 °/s): the side push spins so fast the spiral is ~3 m across, smaller than the ship. It throws away ~40 % of the miss (research). In game: 514 m/s, 5.4 G side (fixture); this model: ~520 m/s, ~6 G.',
+  'ck-spin':    { title: 'Over-spinning', result: { at: 6, sim: () => `${Math.round(len(S.v))} m/s, ${gSmooth.toFixed(1)} G`, game: '514 m/s, 5.4 G' }, start: 'nose', watch: 'Full-rate roll (240 °/s): the side push spins so fast the spiral radius is only ~3 m (research), far smaller than the 20 m ship. It throws away ~40 % of the miss (research). In game: 514 m/s, 5.4 G side (fixture); this model: ~520 m/s, ~6 G.',
                   steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: 1 }]] },
 };
+// Corkscrew helix radius a/ω² (docs/RESEARCH.md), with a the current G and ω the roll rate the lesson is flying.
+function spiralR() { const w = ctl.rollFrac * gladius.boost.rotationDps.roll * Math.PI / 180; return w > 0.05 ? gSmooth * 9.80665 / (w * w) : 0; }
 let maneuver = null, dodge = null, run = null;   // run: what the running lesson has measured so far   // dodge: sideways distance covered in the first 2 s of a maneuver
 function markPreset(key) { document.querySelectorAll('[data-preset]').forEach(b => b.setAttribute('aria-pressed', b.dataset.preset === key)); }
 document.querySelectorAll('[data-preset]').forEach(b => b.onclick = () => {

@@ -20,6 +20,13 @@ class Test:
     expect: dict
     pre_s: float = 1.0
     post_s: float = 1.5
+    # What to do when the pilot greys out. "release": drop every input and end the test (safe default).
+    # "ease": scale the ease_axes down by ease_step each time the HUD dims, and keep flying, the way a pilot
+    # manages G-LOC; the level that stops the dimming is the sustainable one. Below ease_min, release.
+    gloc: str = "release"
+    ease_axes: tuple = ("strafe_lat", "strafe_long", "strafe_vert", "roll")
+    ease_step: float = 0.15
+    ease_min: float = 0.25
 
     @property
     def uses_boost(self) -> bool:
@@ -53,8 +60,16 @@ def parse(doc: dict, known_axes) -> list[Test]:
             if unknown:
                 raise ValueError(f"test {d['id']}: unknown controls {sorted(unknown)}")
             steps.append(Step(t, {k: float(v) for k, v in s.items()}, buttons))
+        gloc = d.get("gloc", "release")
+        if gloc not in ("release", "ease"):
+            raise ValueError(f"test {d['id']}: gloc must be 'release' or 'ease'")
+        ease_axes = tuple(d.get("ease_axes", Test.ease_axes))
+        unknown = set(ease_axes) - set(known_axes)
+        if unknown:
+            raise ValueError(f"test {d['id']}: unknown ease_axes {sorted(unknown)}")
         tests.append(Test(d["id"], d.get("note", ""), steps, d.get("expect", {}),
-                          float(d.get("pre_s", 1.0)), float(d.get("post_s", 1.5))))
+                          float(d.get("pre_s", 1.0)), float(d.get("post_s", 1.5)),
+                          gloc, ease_axes, float(d.get("ease_step", 0.15)), float(d.get("ease_min", 0.25))))
     ids = [t.id for t in tests]
     if len(ids) != len(set(ids)):
         raise ValueError("duplicate test ids")

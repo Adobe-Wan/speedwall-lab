@@ -1,0 +1,95 @@
+# Round 7 (Gladius, DECOUPLED, Arena Commander only): G-LOC and the corkscrews you'd actually fly.
+#   python run.py run --tests tests_round7.yaml        (14 tests, about 25 minutes with refills)
+#
+# Why: the fixture has only a qualitative G-LOC note ("lateral + roll greys out in 2-3 s; up + roll 4-7 s at
+# 10-13 G"). A held strafe can't test G-LOC: it pulls G only until it hits the wall (~2.3 s in SCM), then 0 G.
+# Sustained G needs a corkscrew (the side push keeps turning), so every G-LOC test here is one.
+#
+# gloc: ease  = when the HUD starts to grey, the harness eases the listed inputs by 15 % and keeps flying
+#               (what a pilot does), instead of letting go. The level that stops the grey-out is the
+#               sustainable one (meta.json "ease_events"; analyze reports "sustained_scale").
+# gloc: release (default) = let go on blackout. Used only where the onset time itself is the measurement.
+tests:
+  # --- A. Onset: how long a fixed G holds before grey-out, by axis. SCM, forward + one strafe + full roll.
+  #        Matched ~10 G: lateral 9.95, up 9.9; down is weaker (4.97), so compare it to up at 50 %.
+  - id: r7_onset_lat_scm
+    note: SCM forward + full right strafe + full roll 15 s; time to grey-out (fixture says 2-3 s)
+    steps: [{t: 15, strafe_long: 1.0, strafe_lat: 1.0, roll: 1.0}]
+    expect: {gloc_at_s: "2-3 (fixture note)"}
+  - id: r7_onset_up_scm
+    note: SCM forward + full up + full roll 15 s; time to grey-out (fixture says 4-7 s)
+    steps: [{t: 15, strafe_long: 1.0, strafe_vert: 1.0, roll: 1.0}]
+    expect: {gloc_at_s: "4-7 (fixture note)"}
+  - id: r7_onset_up50_scm
+    note: SCM forward + 50 % up + full roll 15 s (~5 G, matches full down)
+    steps: [{t: 15, strafe_long: 1.0, strafe_vert: 0.5, roll: 1.0}]
+    expect: {gloc_at_s: "compare with r7_onset_down_scm"}
+  - id: r7_onset_down_scm
+    note: SCM forward + full down + full roll 15 s (~5 G); is negative G (down) tolerated differently?
+    steps: [{t: 15, strafe_long: 1.0, strafe_vert: -1.0, roll: 1.0}]
+    expect: {gloc_at_s: "compare with r7_onset_up50_scm"}
+
+  # --- B. Managing it: the same corkscrews flown 20 s, easing instead of letting go. Two ways to ease:
+  #        the strafe (less G, same spin) or the roll rate (same G, slower spin; spiral radius = a / w^2).
+  - id: r7_manage_lat_ease_strafe
+    note: SCM forward + full right + full roll 20 s; ease the strafe on grey-out
+    gloc: ease
+    ease_axes: [strafe_lat]
+    steps: [{t: 20, strafe_long: 1.0, strafe_lat: 1.0, roll: 1.0}]
+    expect: {sustained_scale: "?"}
+  - id: r7_manage_lat_ease_roll
+    note: SCM forward + full right + full roll 20 s; ease the roll rate on grey-out
+    gloc: ease
+    ease_axes: [roll]
+    steps: [{t: 20, strafe_long: 1.0, strafe_lat: 1.0, roll: 1.0}]
+    expect: {sustained_scale: "?; if roll easing never clears the grey, G-LOC follows G, not spin"}
+  - id: r7_manage_up_ease_strafe
+    note: SCM forward + full up + full roll 20 s; ease the strafe on grey-out
+    gloc: ease
+    ease_axes: [strafe_vert]
+    steps: [{t: 20, strafe_long: 1.0, strafe_vert: 1.0, roll: 1.0}]
+    expect: {sustained_scale: "?"}
+
+  # --- C. The boosted escape corkscrew: pin at the nose (6 s), then forward + up + roll at four rates.
+  #        Records the speed you keep (separation from the shooter) and the side G (spiral size). Fixture:
+  #        roll 100 % ran 514 m/s at 5.4 G side. Roll needs the roll view (config roll_view: true).
+  - id: r7_escape_roll25_boost
+    note: pin at boosted nose 6 s, then forward + up + roll 25 % (60 deg/s) 12 s, ease on grey-out
+    gloc: ease
+    steps: [{t: 6, strafe_long: 1.0, boost: true}, {t: 12, strafe_long: 1.0, strafe_vert: 1.0, roll: 0.25, boost: true}]
+    expect: {speed_mps: "?", side_G: "?"}
+  - id: r7_escape_roll50_boost
+    note: same, roll 50 % (120 deg/s)
+    gloc: ease
+    steps: [{t: 6, strafe_long: 1.0, boost: true}, {t: 12, strafe_long: 1.0, strafe_vert: 1.0, roll: 0.5, boost: true}]
+    expect: {speed_mps: "?", side_G: "?"}
+  - id: r7_escape_roll75_boost
+    note: same, roll 75 % (180 deg/s)
+    gloc: ease
+    steps: [{t: 6, strafe_long: 1.0, boost: true}, {t: 12, strafe_long: 1.0, strafe_vert: 1.0, roll: 0.75, boost: true}]
+    expect: {speed_mps: "?", side_G: "?"}
+  - id: r7_escape_lat_roll50_boost
+    note: same with lateral strafe instead of up, roll 50 % (does the lateral G-LOC penalty hold when boosted?)
+    gloc: ease
+    steps: [{t: 6, strafe_long: 1.0, boost: true}, {t: 12, strafe_long: 1.0, strafe_lat: 1.0, roll: 0.5, boost: true}]
+    expect: {speed_mps: "?", side_G: "?"}
+
+  # --- D. Dodging from mid-egg: about 300 m/s forward, then full strafe without forward. The lesson shows
+  #        it from the model only ("not measured").
+  - id: r7_dodge_mid_boost
+    note: boosted forward 1.6 s (~300 m/s), then full right strafe, boost held, 4 s
+    steps: [{t: 1.6, strafe_long: 1.0, boost: true}, {t: 4, strafe_lat: 1.0, boost: true}]
+    expect: {side_G: "~10-12.9 (model)", lateral_m_2s: "~180 (model)"}
+
+  # --- E. Boost tank: drain to empty, keep holding (does boost return at 25 %?), then refill.
+  #        Drain/regen rates are in the fixture without provenance; the 25 % red zone is the author's description.
+  - id: r7_tank_cycle
+    note: boost + full right strafe until the tank is empty (~21 s), hold boost 10 s more, release 25 s
+    steps: [{t: 31, strafe_lat: 1.0, boost: true}, {t: 25}]
+    expect: {drain_pct_s: 4.8, regen_pct_s: 4.0, reenable_pct: 25}
+
+  # --- F. Spacebrake from the boosted nose: the deceleration the alpha uses is not measured.
+  - id: r7_spacebrake_nose
+    note: pin at boosted nose 6 s, then spacebrake 8 s
+    steps: [{t: 6, strafe_long: 1.0, boost: true}, {t: 8, brake: true}]
+    expect: {decel_G: "?"}

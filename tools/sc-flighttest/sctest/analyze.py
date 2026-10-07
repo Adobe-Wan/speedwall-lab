@@ -93,6 +93,10 @@ def summarize(d: Path) -> dict:
     t, t_on, t_off = active_window(cols, meta)
     out = {"test": meta["id"], "fps": meta.get("fps_actual"),
            "start_speed": meta.get("start_speed"), "gloc_at": meta.get("gloc_at")}
+    if meta.get("ease_events"):
+        out["ease_events"] = meta["ease_events"]                # [s after inputs start, input scale]
+        if meta.get("gloc_at") is None:
+            out["sustained_scale"] = meta["ease_events"][-1][1] # the level the pilot could hold
     if meta.get("gloc_at") is not None:
         t_off = min(t_off, t_on + meta["gloc_at"])           # nothing after a blackout is valid
     sp = cols.get("speed")

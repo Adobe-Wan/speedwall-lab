@@ -72,12 +72,13 @@ Results go to `results\<date-time>\<test id>\`.
 
 **Map boundary.** After braking, the ship yaws about 180° before the next test, so tests alternate direction and the run stays near where it started. A yaw reverses both forward and left/right, so nothing accumulates. Start in the middle of the map. If the turn is badly over- or under-shot, set `turnaround_s` in `config.yaml` (180 ÷ yaw rate). Round 3's `rg_yaw_100` measures the yaw rate.
 
-**Blackouts (G-LOC).** If the HUD digits fade (grey-out or blackout), the harness:
-- releases every input and ends that test early;
-- marks it in the results;
-- waits for your vision to come back, plus 8 s, before the next test.
+**Blackouts (G-LOC).** Each test picks how the harness reacts when the HUD digits fade:
+- `gloc: release` (the default): on a blackout (HUD below 50 % brightness), let go of every input, mark it in the results (`gloc_at`), and end the test early.
+- `gloc: ease`: the way a pilot flies it. On a grey-out (HUD below 80 %), cut the test's `ease_axes` by `ease_step` (15 %) and keep flying, at most once every 1.5 s. The level that stops the grey-out is the sustainable one (`ease_events`, and `sustained_scale` in `analyze`). It still lets go on a blackout, or once the inputs are below `ease_min` (25 %).
 
-Sustained **up** strafe is what blacks you out, so round 3 pushes sideways with left/right strafe.
+After a let-go, the run waits for your vision to come back, plus 8 s, before the next test.
+
+A held strafe only pulls G until it reaches the wall (about 2.3 s in SCM), so it can't black you out. Sustained G comes from corkscrews (strafe + roll). Round 3 found lateral + roll greys out in 2–3 s and up + roll in 4–7 s; round 7 measures it.
 
 ### How rotation is measured (no sky camera)
 In decoupled mode, a strafe thrust is fixed to the ship. Rotating the ship spins that thrust vector, so the velocity traces a circle and the HUD speed rises and falls once per full rotation. The period gives the rotation rate, and the size of the swing gives the thrust. A fit on round 2's roll + up test gave **239.9 °/s** and **12.9 G**, against a spec of 240 °/s and 12.9 G, with 0.25 m/s error. The `rg_*` tests use a gentle 25% strafe, so the G-load stays around 2–3 G.

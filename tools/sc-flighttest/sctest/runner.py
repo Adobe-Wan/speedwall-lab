@@ -94,14 +94,23 @@ def record(test, cfg, vj, grab, guard):
     """Hold the test's inputs and capture the HUD every frame.
 
     G-LOC guard: the brightest pixels of the speed/G readouts are tracked. If they drop below
-    gloc_dim_frac of their pre-test level for gloc_hold_s while inputs are active (grey-out / blackout),
-    every input is released and the test ends early. Returns (t, cmds, frames, lum, gloc_at, baseline)."""
+    gloc_dim_frac of their pre-test level for gloc_hold_s while inputs are active (blackout), every input
+    is released and the test ends early.
+
+    With test.gloc == "ease", an earlier grey-out (below gloc_ease_frac) scales the test's ease_axes down by
+    ease_step instead, at most once per gloc_ease_wait_s, and the test flies on: a pilot reduces the input
+    rather than letting go. The scale never comes back up within a test. Below ease_min, or a full blackout
+    anyway, falls back to the release above.
+    Returns (t, cmds, frames, lum, gloc_at, baseline, ease_events)."""
     period = 1.0 / cfg["target_fps"]
     frames = {k: [] for k in grab.boxes}
     ts, cmds, lum = [], [], []
     last_cmd = None
     base, dim_since, gloc_at = None, None, None
     dim_frac, hold_s = cfg.get("gloc_dim_frac", 0.5), cfg.get("gloc_hold_s", 0.25)
+    ease = test.gloc == "ease"
+    ease_frac, ease_wait = cfg.get("gloc_ease_frac", 0.8), cfg.get("gloc_ease_wait_s", 1.5)
+    scale, grey_since, last_ease, ease_events = 1.0, None, -1e9, []
     t0 = time.perf_counter()
     nxt = t0
     while True:
@@ -110,6 +119,8 @@ def record(test, cfg, vj, grab, guard):
         if t >= test.duration:
             break
         axes, buttons = test.inputs_at(t)
+        if scale < 1.0:
+            axes = {k: (v * scale if k in test.ease_axes else v) for k, v in axes.items()}
         if gloc_at is not None:
             axes, buttons = {}, {}
         cmd = ({k: axes.get(k, 0.0) for k in vj.axis_map}, {"boost": buttons.get("boost", False), "brake": False})
@@ -127,6 +138,17 @@ def record(test, cfg, vj, grab, guard):
         if now < test.pre_s:
             base = float(np.median(lum))                       # HUD brightness before any input
         elif base and base > 40 and gloc_at is None:
+            if ease and l < ease_frac * base:                  # greying out: ease off, don't let go
+                grey_since = now if grey_since is None else grey_since
+                if now - grey_since >= hold_s and now - last_ease >= ease_wait:
+                    scale = round(scale - test.ease_step, 3)
+                    last_ease = now
+                    ease_events.append([round(now - test.pre_s, 2), max(scale, 0.0)])
+                    if scale < test.ease_min:                  # eased as far as allowed: release
+                        dim_since = dim_since if dim_since is not None else grey_since
+                        l = 0.0
+            elif ease:
+                grey_since = None
             if l < dim_frac * base:
                 dim_since = now if dim_since is None else dim_since
                 if now - dim_since >= hold_s:
@@ -144,7 +166,7 @@ def record(test, cfg, vj, grab, guard):
         else:
             nxt = time.perf_counter()
     vj.center()
-    return np.array(ts), cmds, frames, np.array(lum), gloc_at, base
+    return np.array(ts), cmds, frames, np.array(lum), gloc_at, base, ease_events
 
 
 def save(outdir: Path, test, ts, cmds, frames, cfg, grab, lum=None, extra=None):
@@ -193,13 +215,16 @@ def run_tests(tests, cfg, session_dir: Path, dry_run=False, log=print):
                 if v0 is not None and v0 > start_max:
                     log(f"  SKIPPED {test.id}: still {v0} m/s")
                     continue
-            ts, cmds, frames, lum, gloc_at, base = record(test, cfg, vj, grab, guard)
+            ts, cmds, frames, lum, gloc_at, base, ease_events = record(test, cfg, vj, grab, guard)
             save(session_dir / test.id, test, ts, cmds, frames, cfg, grab, lum,
-                 {"start_speed": v0, "gloc_at": gloc_at, "hud_lum_base": base})
+                 {"start_speed": v0, "gloc_at": gloc_at, "hud_lum_base": base, "gloc_policy": test.gloc,
+                  "ease_events": ease_events})
             fps = len(ts) / max(ts[-1], 1e-6)
             log(f"  recorded {len(ts)} frames ({fps:.0f} fps)")
             if fps < 30:
                 log("  WARNING: below 30 fps. Run `python run.py fpscheck` and see README 'Troubleshooting'.")
+            for t_e, s_e in ease_events:
+                log(f"  grey-out at {t_e} s: eased {', '.join(test.ease_axes)} to {s_e:.0%}")
             if gloc_at is not None:
                 log(f"  G-LOC: HUD faded {gloc_at} s into the inputs; inputs released, test ended early.")
                 wait_hud_recovered(cfg, grab, guard, log, base)

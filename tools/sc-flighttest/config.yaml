@@ -46,5 +46,9 @@ turnaround_s: 3.6     # seconds of full yaw for ~180 deg (Gladius SCM yaw ~52 de
 # gloc_hold_s, all inputs are released and the test ends early; then the run waits for the HUD.
 gloc_dim_frac: 0.5
 gloc_hold_s: 0.25
+# Tests with `gloc: ease` react earlier, at this fraction (grey-out), by easing their inputs instead of
+# releasing them; at most one ease step per gloc_ease_wait_s so the pilot has time to recover.
+gloc_ease_frac: 0.8
+gloc_ease_wait_s: 1.5
 gloc_recover_max_s: 40
 gloc_rest_s: 8
