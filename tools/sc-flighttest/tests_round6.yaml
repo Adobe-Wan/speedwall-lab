@@ -1,0 +1,19 @@
+# Round 6 (Gladius, DECOUPLED, SCM mode): the full boost-release tail, from the nose back to the 225 SCM cap.
+#   python run.py run --tests tests_round6.yaml        (3 tests, about 2 minutes)
+#
+# Why: the fixture's boostRelease trace stops at 393 m/s, 1.4 s after release. The fitted quadratic
+# (k·(v − 225)², 18.8 G → 6.9 G) fades to nothing near the cap, so the model now assumes a floor at the SCM retro
+# rating (4.24 G) and reaches 225 about 5 s after release. These tests replace that assumption with the real tail.
+tests:
+  - id: r6_release_all
+    note: pin at boosted nose 8 s, release everything, record speed and G for 12 s
+    steps: [{t: 8, strafe_long: 1.0, boost: true}, {t: 12}]
+    expect: {time_to_226_s: "model ~5", g_meter_tail: "model >= 4.2 until 225"}
+  - id: r6_release_fwd_held
+    note: same, but keep full forward held after letting go of boost (does forward thrust slow the bleed?)
+    steps: [{t: 8, strafe_long: 1.0, boost: true}, {t: 12, strafe_long: 1.0}]
+    expect: {time_to_226_s: "model ~5"}
+  - id: r6_release_from_mid
+    note: boosted forward to ~350 (2.5 s from rest), release everything; checks the tail on its own
+    steps: [{t: 2.5, strafe_long: 1.0, boost: true}, {t: 8}]
+    expect: {time_to_226_s: "model ~3"}

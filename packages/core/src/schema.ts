@@ -53,6 +53,7 @@ export const flightProfileSchema = z
         letOffBleed: z.object({ G: num.nonnegative(), side: num.min(0).max(1), fromFwd: num, toFwd: num }).strict(),
         retroEaseK: num.nonnegative(),
         releaseK: num.nonnegative(),
+        releaseFloorG: num.nonnegative().optional(),
       })
       .strict(),
     provenance: z.record(z.string(), provenanceEntrySchema),

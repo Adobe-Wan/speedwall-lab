@@ -134,8 +134,9 @@ export function step(s: State, u: Input, p: FlightProfile, dt: number = DT): Sta
     // (3) what's left must be held by real thrust, bank by bank (e.g. retros bleeding forward speed in a dodge)
     if (atWall || releasing) a = bankLimit(a, n, Math.min(limit, a[0] * n[0] + a[1] * n[1] + a[2] * n[2]), boosted ? p.boost.G : p.scm.G);
     if (releasing) {
-      // Boost released (or tank empty) above the SCM cap: IFCS bleeds the excess (fitted).
-      const dec = W.releaseK * (sp - scm) ** 2;
+      // Boost released (or tank empty) above the SCM cap: IFCS bleeds the excess (fitted), never weaker than
+      // the floor (assumed), and stops at the cap instead of overshooting below it.
+      const dec = Math.min(Math.max(W.releaseK * (sp - scm) ** 2, (W.releaseFloorG ?? 0) * G0), (sp - scm) / dt);
       a = [a[0] - dec * n[0], a[1] - dec * n[1], a[2] - dec * n[2]];
     }
   } else {
