@@ -112,6 +112,11 @@ export interface WallParams {
   retroEaseK: number;
   /** Boost released above the SCM cap: deceleration = k·(speed − SCM cap)², in 1/m. */
   releaseK: number;
+  /**
+   * Boost released: the bleed never falls below this many G until the speed is back at the SCM cap. Without it
+   * the quadratic tail would leave you above SCM for 20+ s. Omitted = 0 (pure quadratic).
+   */
+  releaseFloorG?: number;
 }
 
 export interface Readouts {

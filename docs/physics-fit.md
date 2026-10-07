@@ -2,7 +2,7 @@
 
 The core model (`packages/core/src/physics.ts`) follows PLAN.md §4. Its wall and transient behaviour has six constants, fitted to `research/gladius-v1-fixture.json` by `tools/fit-gladius.mjs` (`pnpm fit`). Everything else is copied from the fixture.
 
-## Acceptance: 197 of 230 checks pass
+## Acceptance: 189 of 222 checks pass
 
 | Check (PLAN.md §4) | Result |
 |---|---|
@@ -27,10 +27,13 @@ Notes:
 | `letOffBleed.G`, `side`, ramp | 5.15 G, side × 0.625, ramping in over 0–520 m/s forward | Boosted with the forward stick released: IFCS bleeds forward speed, and side thrust is reduced | `dd_wall_lat_boost`: 519 → 435 m/s |
 | `retroEaseK` | 1.02 /s | In a dodge past 45° off the nose, the retros bleed forward speed at full rating, easing as it runs out | `dd_wall_lat`: G meter holds 4.2 (the back thrust) for ~2 s |
 | `releaseK` | 0.002275 /m | Boost released above 225: deceleration = k·(speed − 225)² | `boostRelease`: 18.8 G falling to 6.9 G |
+| `releaseFloorG` | 4.24 G (**assumed**) | …but never less than the SCM retro rating, until the speed is back at 225 | Not fitted. The trace ends at 393 m/s (1.4 s), and the quadratic alone would leave you at 246 m/s 20 s later. Round 6 measures the tail. |
 
 Plus the measured soft-wall gain K = 1.3 /s (fixture).
 
 ## What still misses, and why
+
+- **The release tail (below ~360 m/s) is assumed.** A pilot reported that after letting go of boost the speed stayed above SCM. The fitted quadratic matches the measured 1.4 s, but it fades to nothing near 225 (still 263 m/s after 10 s). The model now brakes at least at the SCM retro rating (4.24 G, measured), so it reaches 225 about 5 s after release from the nose. `tools/sc-flighttest/tests_round6.yaml` measures the real tail.
 
 - **`dd_wall_fwdlat` (SCM, forward + strafe at the wall): 10 samples.** The G meter jumps between ~1 and ~5 G every ~1.75 s (2.0, 2.25, 3.75, 4.0, 6.0 s), and stays at 1–1.7 G after the model has settled. No smooth model reproduces that. It may be IFCS hunting, or OCR. A repeat run would tell.
 - **`dd_wall_lat_boost` (boosted, forward released, strafe): 21 samples.** The model follows the speed dip (519 → 435) within 10 m/s for most of the run. It rises too fast after 6.5 s and reads 1.5–2.6 G low throughout.

@@ -46,6 +46,7 @@ export function profileFromFixture(f: Fixture): FlightProfile {
   set("thrustRule.fullStrafeForwardCurve.effectiveForwardG", "fitted", "derived from the settled speeds (limaçon inverse), per fixture note");
   const fit = "fitted to the fixture's wall and release traces by tools/fit-gladius.mjs";
   for (const k of ["slewGps", "boostSide", "letOffBleed", "retroEaseK", "releaseK"]) set(`wall.${k}`, "fitted", fit);
+  set("wall.releaseFloorG", "assumed", "after boost release the IFCS brakes at least at the measured SCM retro rating (scm.G.back) until back at the SCM cap; the fixture's boostRelease trace ends at 393 m/s (1.4 s), so the tail is not measured (round 6)");
   set("lateralRoomTable", "fitted", "fixture lateralRoom.boost (limaçon cross-section, tabulated)");
   set("dimensionsM", "assumed", "author-specified 20 x 17 x 5.5 m (fixture dimensions_note)");
 
@@ -78,7 +79,7 @@ export function profileFromFixture(f: Fixture): FlightProfile {
       },
     },
     lateralRoomTable: f.lateralRoom.boost.map(([a, b]) => [a, b]),
-    wall: structuredClone(FITTED_WALL),
+    wall: { ...structuredClone(FITTED_WALL), releaseFloorG: scm.G.back },
     provenance,
   };
 }
