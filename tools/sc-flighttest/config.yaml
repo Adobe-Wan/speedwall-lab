@@ -47,8 +47,10 @@ turnaround_s: 2.8     # seconds of full deflection for 180 deg: pitch 68 deg/s -
 mirror_lateral: true  # a pitch flip leaves left/right alone, so fly every second lateral test with strafe_lat negated
                       # (the ship is left/right symmetric; the sideways drift then cancels). false = never mirror.
 
-# G-LOC guard: if the HUD digits fade below this fraction of their pre-test brightness for
-# gloc_hold_s, all inputs are released and the test ends early; then the run waits for the HUD.
+# HUD-based vision guard. The HUD digits exist only in the COCKPIT view and for ~1 s after cutting back to it, so these
+# thresholds are applied to cockpit frames only. For tests with `gloc: release` (the old behaviour) the HUD fading below
+# gloc_dim_frac of its pre-test brightness for gloc_hold_s lets go of all inputs and ends the test; tests with `hold` or
+# `reverse` only record it (hud_black_at). A black screen is NOT the end of a test: a pilot can regain vision by counter-strafing.
 gloc_dim_frac: 0.5
 gloc_hold_s: 0.25
 # Tests with `gloc: ease` react earlier, at this fraction (grey-out), by easing their inputs instead of
@@ -56,13 +58,29 @@ gloc_hold_s: 0.25
 gloc_ease_frac: 0.8
 gloc_ease_wait_s: 1.5
 
-# Camera-key probe (tests with `probe: <seconds>`): the vJoy `view` button is pressed this often while inputs are held,
-# and once more in the dark after a blackout. `python run.py camcheck` tells you whether it works and what to set here.
+# Camera-key probe (tests with `probe: <seconds>`): the vJoy `view` button (bound to Star Citizen's camera cycle) is pressed
+# every probe_gap_s while in an external view and after probe_cockpit_dwell_s in the cockpit view. The camera cycles
+# `probe_views` views (cockpit, external A, external B). Whenever the screen is suspected black, a BLACK CHECK press is made
+# at once and every probe_check_gap_s: camera switched = not truly blacked out; nothing = a true blackout.
+# `python run.py camcheck` tells you whether it works and what to set here.
 probe_pulse_s: 0.12        # how long each press is held
-probe_dark_delay_s: 0.5    # the first press in the dark comes this long after the let-go
-probe_dark_mean: 14        # a centre-of-screen frame darker than this (0-255) counts as black
-probe_settle_s: 3.0        # wait this long before checking the camera when you did not black out
-cam_downscale: 96          # width in pixels of the saved probe frames
-cam_state_thr: 0.3         # frames further apart than this are different camera views (camcheck suggests a value)
+probe_views: 3             # views the camera key cycles through (camcheck counts them)
+probe_cut_thr: 0.5         # consecutive-frame distance that counts as a camera cut (real cuts score 1.0+, motion 0.15 at most)
+probe_cut_window_s: 0.8    # a press must cut within this long
+probe_ignore_n: 2          # this many ignored presses in a row = the key has stopped working
+probe_dark_frac: 0.5       # the screen is dark below this fraction of the cockpit view's own brightness...
+probe_dark_abs: 60         # ...or below this (0-255), whichever is lower
+probe_dark_hold_s: 0.5     # dark this long = suspected blackout (a camera fade-out is dark for only ~0.2 s)
+probe_blind_max: 24        # a frame whose brightest pixel is below this is pure black: a cut could not show
+probe_cockpit_thr: 0.55    # distance to the cockpit reference under which a bright frame is the cockpit view
+probe_hud_settle_s: 1.2    # HUD digits are trusted this long after cutting back to the cockpit
+probe_gap_s: 1.0           # seconds between presses while in an external view
+probe_cockpit_dwell_s: 2.0 # seconds in the cockpit view before the next press (HUD / darkness samples)
+probe_check_gap_s: 0.7     # seconds between black-check presses while the screen stays black
+cam_downscale: 96          # width in pixels of the saved centre-of-screen frames (colour)
+# Whole-screen pictures for the vision gradient (centre vs edge darkness, red tint): one every full_every_s, full_w px wide.
+# 0 turns them off. Each costs about one dropped frame at 4K.
+full_every_s: 0.5
+full_w: 128
 gloc_recover_max_s: 40
 gloc_rest_s: 8

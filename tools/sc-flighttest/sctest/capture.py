@@ -54,11 +54,10 @@ class Grabber:
         self.single = bool(self.union) and self.union["width"] * self.union["height"] <= UNION_MAX_PX
 
     def _post(self, k, img):
-        if k == "cam":                                    # centre of the screen, small and grey: the camera-key probe
-            import cv2
-            g = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            h = max(4, int(round(g.shape[0] * self.cam_w / g.shape[1])))
-            return cv2.resize(g, (self.cam_w, h), interpolation=cv2.INTER_AREA)
+        if k == "cam":                                    # centre of the screen, small, in colour: the camera-key probe
+            import cv2                                    # (colour, so the red-out tint can be measured)
+            h = max(4, int(round(img.shape[0] * self.cam_w / img.shape[1])))
+            return cv2.resize(img, (self.cam_w, h), interpolation=cv2.INTER_AREA)
         if k == "view":
             import cv2
             g = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -82,6 +81,13 @@ class Grabber:
     def full_frame(self):
         return np.asarray(self.sct.grab(self.mon))[:, :, :3]
 
+    def full_thumb(self, w: int = 128):
+        """The whole game screen as a small colour picture (BGR): the vision gradient (centre vs edge darkness, red tint)."""
+        import cv2
+        img = self.full_frame()
+        h = max(4, int(round(img.shape[0] * w / img.shape[1])))
+        return cv2.resize(img, (w, h), interpolation=cv2.INTER_AREA)
+
 
 def brightness(img) -> float:
     """Brightness of the brightest pixels in a crop (98th percentile, 0-255): the HUD digits.
@@ -89,14 +95,36 @@ def brightness(img) -> float:
     return float(np.percentile(np.asarray(img).max(axis=-1) if np.ndim(img) == 3 else img, 98))
 
 
+def cam_gray(img):
+    """Grey version (float32) of a probe frame; accepts the old grey frames and the new colour (BGR) ones."""
+    a = np.asarray(img, dtype=np.float32)
+    if a.ndim == 3:
+        return 0.114 * a[..., 0] + 0.587 * a[..., 1] + 0.299 * a[..., 2]
+    return a
+
+
 def cam_mean(img) -> float:
     """Average brightness (0-255) of a probe frame: near 0 means the screen is black."""
-    return float(np.mean(img))
+    return float(np.mean(cam_gray(img)))
 
 
 def cam_dist(a, b) -> float:
     """How different two probe frames look, ignoring overall brightness: mean absolute difference of the two
-    frames after each is divided by its own mean. About 0.05 for the same view a moment apart; a switch between
-    the cockpit and the external camera is several times that. Meaningless when either frame is nearly black."""
-    a = np.asarray(a, dtype=np.float32); b = np.asarray(b, dtype=np.float32)
+    frames after each is divided by its own mean. About 0.03 for the same view a frame apart; a camera cut is
+    1.1 or more. Meaningless when either frame is nearly black."""
+    a = cam_gray(a); b = cam_gray(b)
     return float(np.mean(np.abs(a / max(a.mean(), 8.0) - b / max(b.mean(), 8.0))))
+
+
+def cam_red(img, edge: float = 0.0) -> float:
+    """Red share of a colour probe frame: sum(R) / sum(R+G+B), 0.33 for grey, towards 1 for a red-out tint.
+    edge > 0 uses only that fraction of columns at each side (the periphery, where a tint may start). Returns nan
+    for grey frames or near-black ones, where it means nothing."""
+    a = np.asarray(img, dtype=np.float32)
+    if a.ndim != 3:
+        return float("nan")
+    if edge > 0:
+        w = max(1, int(a.shape[1] * edge))
+        a = np.concatenate([a[:, :w], a[:, -w:]], axis=1)
+    tot = float(a.sum())
+    return float(a[..., 2].sum() / tot) if tot > a.size * 2.0 else float("nan")
