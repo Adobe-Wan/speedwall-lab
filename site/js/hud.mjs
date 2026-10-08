@@ -15,8 +15,8 @@
 //   speed (signed: < 0 when flying backwards), speedCap, throttle (−1..1), g, gPeak,
 //   tank, redZone, boostActive, boostLocked, unlimited, mode ('SCM' | 'BOOST'),
 //   roll, pitch, yaw (°/s),
-//   hfovDeg (default 90), keepOutDeg (default 22): the bars and the G readout have a FIXED layout (the bars the same
-//     distance either side of the crosshair, 0.11 of the view width); only the maneuver label avoids
+//   hfovDeg (default 100), keepOutDeg (default 22): the bars and the G readout have a FIXED layout measured from an
+//     in-game screenshot at 100° FOV and scaled with the view width and tan(hfov/2); only the maneuver label avoids
 //     the cone keepOutDeg around the nose, where the corkscrew lessons park the TVI,
 //   anchorRollDps (number | null), guideDeg: "HOLD TVI @13°: 27 °/s" under the G readout,
 //   maneuver (string): small caps label at the top centre, hidden when empty.
@@ -41,6 +41,19 @@ const EDGE = 8;          // keep everything this far inside the view
 const GAP = 4;           // minimum gap between HUD blocks
 const TVI_PAD = 20;      // clearance beyond the keep-out radius (the TVI glyph's wings reach ±22 px)
 const TVI_LBL = [14, 66, 10, 26]; // the page's "TVI 13°" label box relative to the TVI centre (x0, x1, y0, y1)
+
+// Reference layout: measured from a 1456 x 819 in-game screenshot at 100° FOV, in px from the crosshair centre
+// (x right, y down). Everything scales by k = (view width / REF_W) * tan(50°) / tan(hfov / 2), so the HUD keeps its
+// place relative to the view at any window size or FOV, like the game's projected HUD.
+const REF_W = 1456, REF_H = 819, REF_HFOV = 100;
+const REF = {
+  thrX: -140.5,  // throttle (speed) bar centre
+  abX: 159,      // afterburner bar centre (the game's bars are not mirror images)
+  barY: -15.5,   // both bars are centred this far above the crosshair
+  barH: 101,
+  gRight: 272.5, // right edge of the G value
+  gBase: -6.5,   // baseline of the G value
+};
 
 let hudSeq = 0;
 
@@ -229,7 +242,7 @@ export function createHud(svg) {
   const M = label(root, Object.assign(txtAttrs(WHITE), { 'letter-spacing': '0.12em', 'font-weight': '600', 'fill-opacity': '0.92', display: 'none' }), '');
 
   // Layout, recomputed in resize() and when hfovDeg / keepOutDeg change.
-  const Lo = { ready: false, w: 0, h: 0, hfov: 90, keep: 22 };
+  const Lo = { ready: false, w: 0, h: 0, hfov: 100, keep: 22 };
   let last = null;
   let visible = true;
   let badgeMode = '';
@@ -244,10 +257,11 @@ export function createHud(svg) {
 
   // Local geometry of the three side blocks for bar height H and an anchor hint on 1, 2 or 3 lines.
   function geom(H, lines) {
-    const { u, fsS, fsM, fsN, fsL, bw } = Lo;
+    const { fsS, fsM, fsN, fsL, bw, k } = Lo;
+    const u = k * REF_H / 100;             // the old "1 % of the view height" unit, now tied to the reference scale
     const top = -H / 2, bot = H / 2;
     const tl = Math.max(3, 0.7 * u), midExt = 0.9 * u + 3, tri = Math.max(4, 1.0 * u), zt = Math.max(3, 0.8 * u);
-    const spdY = bot + 1.2 * u + fsM, unitY = spdY + fsS * 1.15;
+    const spdY = bot + Math.max(19 * k, 0.95 * fsM + 3), unitY = spdY + fsS * 1.15; // digits baseline 19 px under the bar (reference)
     // left
     const numHalf = 2 * CW * fsM;                      // "−520"
     const revH = fsS * 1.35, revW = 3 * (CW + 0.06) * fsS + fsS * 0.8;
@@ -289,13 +303,14 @@ export function createHud(svg) {
     if (!w || !h) return;
     const S = Math.min(w, h), u = S / 100;
     const cx = w / 2, cy = h / 2;
-    const fsS = Math.max(11.5, 1.9 * u);   // small labels (≥ 11.5 px so they stay readable on phones)
-    const fsM = Math.max(13, 2.7 * u);     // numbers under the bars
+    const k = (w / REF_W) * Math.tan((REF_HFOV / 2) * RAD) / Math.tan((hfov / 2) * RAD);
+    const fsS = Math.max(11.5, 8.5 * k);   // small labels (never below 11.5 px so they stay readable)
+    const fsM = Math.max(13, 12.5 * k);    // numbers under the bars
     const fsN = Math.max(13, fsS);         // small numbers (G peak, rates, anchor roll)
-    const fsL = Math.max(17, 4.0 * u);     // G value
-    const bw = Math.max(6, 1.5 * u);       // bar width
-    const ins = Math.max(1.5, 0.28 * u);   // fill inset
-    Object.assign(Lo, { ready: true, S, u, cx, cy, fsS, fsM, fsN, fsL, bw, ins });
+    const fsL = Math.max(17, 16.5 * k);    // G value
+    const bw = Math.max(5, 4.5 * k);       // bar width
+    const ins = Math.max(1, 0.9 * k);      // fill inset
+    Object.assign(Lo, { ready: true, S, u, k, cx, cy, fsS, fsM, fsN, fsL, bw, ins });
 
     // crosshair
     const r = Math.max(5, 1.3 * u), gap = Math.max(3, 0.8 * u), len = Math.max(6, 1.8 * u);
@@ -311,15 +326,13 @@ export function createHud(svg) {
     const rK = f * Math.tan(keep * RAD);
     Lo.rK = rK; Lo.xhR = r + gap + len;
 
-    // Fixed layout, like the game's Advanced HUD: the throttle bar and the AB bar sit the same distance either side of
-    // the crosshair, both centred on its row, with the G readout beside the AB bar. The distance is 0.11 of the view
-    // width (the AB readout sits about 0.11 screen-widths from the centre in game; docs/PLAN.md "FOV matching"), but never
-    // so close that a bar touches the crosshair ticks. Nothing moves to dodge the TVI: the TVI is drawn above the HUD.
-    const H0 = Math.max(84, 23 * u);
-    const g = geom(H0, 3);
-    const D = Math.max(0.11 * w, Lo.xhR + 24);
-    const l = [cx - D, cy], rr = [cx + D, cy];
-    const gp = [rr[0] + bw / 2 + g.zt + Math.max(10, 2 * u), rr[1] + 0.05 * g.H + 0.35 * fsL];
+    // Fixed layout measured from the game's Advanced HUD (REF above): the bars sit just above the crosshair's row and
+    // the G readout beside the AB bar. Never so close that a bar touches the crosshair ticks. Nothing moves to dodge the
+    // TVI: the TVI is drawn above the HUD.
+    const g = geom(Math.max(60, REF.barH * k), 3);
+    const dl = Math.max(-REF.thrX * k, Lo.xhR + 24), dr = Math.max(REF.abX * k, Lo.xhR + 24);
+    const l = [cx - dl, cy + REF.barY * k], rr = [cx + dr, cy + REF.barY * k];
+    const gp = [Math.max(cx + REF.gRight * k - g.gx, rr[0] + bw / 2 + g.zt + 8), cy + REF.gBase * k];
     const obs = [];
     for (const [rects, [tx, ty]] of [[g.Lr, l], [g.Rr, rr], [g.Gr, gp]]) for (const rc of rects) obs.push([rc[0] + tx, rc[1] + ty, rc[2] + tx, rc[3] + ty]);
     apply({ g, l, r: rr, gp, obs });
@@ -435,7 +448,7 @@ export function createHud(svg) {
     if (!Lo.ready || !visible || !s) return;
 
     // --- view geometry: re-layout when the FOV or the keep-out cone changes
-    const hf = clamp(fin(s.hfovDeg, 90), 10, 170), ko = clamp(fin(s.keepOutDeg, 22), 0, 85);
+    const hf = clamp(fin(s.hfovDeg, 100), 10, 170), ko = clamp(fin(s.keepOutDeg, 22), 0, 85);
     if (hf !== Lo.hfov || ko !== Lo.keep) { Lo.hfov = hf; Lo.keep = ko; layout(); }
 
     const { top, bot, H } = Lo;

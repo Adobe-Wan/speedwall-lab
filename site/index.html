@@ -375,7 +375,7 @@ footer p { margin: 0 0 4px; max-width: 75ch; }
       </div>
       <div class="set">
         <span>Roll rate</span><input type="range" id="rollrate" min="5" max="100" value="100" aria-label="Roll rate, percent of full stick"><output id="rollrate-v"></output>
-        <span>FOV</span><input type="range" id="fov" min="60" max="120" value="90" aria-label="Pilot view horizontal field of view"><output id="fov-v">90°</output>
+        <span>FOV</span><input type="range" id="fov" min="60" max="120" value="100" aria-label="Pilot view horizontal field of view"><output id="fov-v">100°</output>
         <span>Guide ring</span><input type="range" id="ring" min="2" max="30" value="13" aria-label="TVI guide ring angle"><output id="ring-v">13°</output>
       </div>
       <div class="row">
@@ -1048,7 +1048,7 @@ const pilot = !hasWebGL ? stubView : (() => {
     fragment: FS_LINE, uniforms: { uColor: { value: [0.6, 0.66, 0.78] }, uAlpha: { value: 0.55 } }, transparent: true, depthTest: false });
   new Mesh(gl, { geometry: new Geometry(gl, { position: { size: 3, data: new Float32Array(stars) } }), program: starProg, mode: gl.POINTS, frustumCulled: false }).setParent(world);
 
-  let dustOn = !reduceMotion, ringOn = true, hfov = 90, ringDeg = 13, lastKey = '';
+  let dustOn = !reduceMotion, ringOn = true, hfov = 100, ringDeg = 13, lastKey = '';
   if (!dustOn) { streaks.visible = dots.visible = false; $('t-dust').setAttribute('aria-pressed', 'false'); }
   $('t-dust').onclick = e => { dustOn = !dustOn; e.target.setAttribute('aria-pressed', dustOn); streaks.visible = dots.visible = dustOn; };
   $('t-ring').onclick = e => { ringOn = !ringOn; e.target.setAttribute('aria-pressed', ringOn); };
