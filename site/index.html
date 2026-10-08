@@ -314,9 +314,9 @@ footer p { margin: 0 0 4px; max-width: 75ch; }
         <h3>Room to dodge</h3>
         <div class="mgrid">
           <button data-preset="rest">Strafe from a stop<small>The most dodge you'll ever have: 394 m/s sideways</small></button>
-          <button data-preset="dodge-nose">Dodge at top speed<small>Pinned at 520: how far do you get sideways in 2 s?</small></button>
-          <button data-preset="dodge-mid">Dodge from mid-egg (300 m/s)<small>Same input, lower forward speed: compare the 2 s distance</small></button>
-          <button data-preset="letoff">Ease off to make room<small>Let go of forward and strafe: speed drops to ~435 (in game), the dodge room opens</small></button>
+          <button data-preset="dodge-nose">Dodge at top speed<small>Build up to 520, then strafe: how far do you get sideways in 2 s?</small></button>
+          <button data-preset="dodge-mid">Dodge from mid-egg (300 m/s)<small>Build up to 300, then strafe: compare the 2 s distance</small></button>
+          <button data-preset="letoff">Ease off to make room<small>Build up to the nose, then let go of forward and strafe: speed drops to ~435 (in game), the dodge room opens</small></button>
         </div>
         <h3>Corkscrews · roll while strafing so the shooter's lead is wrong</h3>
         <div class="mgrid">
@@ -623,27 +623,28 @@ $('pin').onclick = () => reset(true);
 function togglePause() { ctl.paused = !ctl.paused; const b = $('pause'); b.setAttribute('aria-pressed', ctl.paused); b.firstChild.textContent = ctl.paused ? 'Resume ' : 'Pause '; }
 $('pause').onclick = togglePause;
 
-// Maneuvers, condensed to what each one teaches. Each step: [start time s, inputs]; r/rf = roll direction and
-// fraction of full roll rate; p/y = pitch/yaw stick. start: where it begins (rest, the boosted nose, the SCM wall,
-// or a boosted forward speed). watch: what to look at, with the in-game result and its source. dodge: show the
-// sideways distance covered in the first 2 s.
+// Maneuvers, condensed to what each one teaches. Every one starts from a standstill, so you see the speed build up:
+// the first step is the approach, and `go` is when the maneuver proper starts (result times, the 2 s dodge distance
+// and the lowest speed are all measured from there). Each step: [start time s, inputs]; r/rf = roll direction and
+// fraction of full roll rate; p/y = pitch/yaw stick. watch: what to look at, with the in-game result and its source.
+// dodge: show the sideways distance covered in the first 2 s of the maneuver.
 // Sources: fixture = research/gladius-v1-fixture.json (measured); research = docs/RESEARCH.md duel model
 // (miss distance against a shooter who leads your current velocity, 1 s projectile flight); model = this simulator.
 const PRESETS = {
-  rest:         { title: 'Strafe from a stop', result: { at: 6, sim: () => `${Math.round(Math.abs(S.v[1]))} m/s sideways`, game: '394 m/s' }, start: 'rest', watch: 'Boost + strafe from a stop: the ship slides straight out to 394 m/s sideways, the widest point of the egg (fixture).',
+  rest:         { title: 'Strafe from a stop', result: { at: 6, sim: () => `${Math.round(Math.abs(S.v[1]))} m/s sideways`, game: '394 m/s' }, start: 'rest', go: 0, watch: 'Boost + strafe from a stop: the ship slides straight out to 394 m/s sideways, the widest point of the egg (fixture).',
                   steps: [[0, { f: 0, l: 1, u: 0, boost: true }]] },
-  'dodge-nose': { title: 'Dodge at top speed', result: { at: 2, sim: () => `${Math.round(dodge.dist)} m in 2 s`, game: 'side push 3–6 G' }, start: 'nose', dodge: true, watch: 'At 520 m/s the egg is a thin tip: side thrust is ~3–6 G (fixture wall traces), so 2 s of strafing moves you only ~90 m (model).',
-                  steps: [[0, { f: 1, l: 1, u: 0, boost: true }]] },
-  'dodge-mid':  { title: 'Dodge from mid-egg', result: { at: 2, sim: () => `${Math.round(dodge.dist)} m in 2 s`, game: 'not measured' }, start: { vx: 300, boost: true }, dodge: true, watch: 'At 300 m/s forward you\'re in the fat middle of the egg: full ~10 G side push, ~180 m in 2 s, twice the nose (model).',
-                  steps: [[0, { f: 0, l: 1, u: 0, boost: true }]] },
-  letoff:       { title: 'Ease off to make room', result: { at: 5, sim: () => `lowest ${Math.round(run.min)} m/s`, game: 'lowest ~435 m/s' }, start: 'nose', watch: 'Forward released, strafe held: in game the speed falls from 519 to ~435 m/s (fixture; this model dips to ~415). The ship drops back into the egg and the dodge ring opens.',
-                  steps: [[0, { f: 0, l: 1, u: 0, boost: true }]] },
-  'ck-escape':  { title: 'Escape corkscrew', result: { at: 8, sim: () => `${Math.round(len(S.v))} m/s, spiral radius ~${Math.round(spiralR())} m`, game: '514 m/s at full roll; other rates: round 7' }, start: 'nose', watch: 'Boosted, forward + up, roll ~120 °/s (50 %): you keep ~515 m/s, opening the range on anyone not boosting, while the side push draws a spiral wide enough to spoil their lead. Slower roll = wider, steadier spiral; faster = tighter. Starting to grey out? Ease the strafe or the roll rate a little. Don\'t let go: the spiral stops and the speed bleeds. Up strafe, not sideways: sideways + roll greyed pilots out in 2–3 s (fixture).',
-                  steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: 0.5 }]] },
-  'ck-shoot':   { title: 'Corkscrew and shoot back', result: { at: 6, sim: () => `TVI ${Math.round(run.tvi)}° off the nose`, game: 'rule of thumb ~13°' }, start: 'nose', watch: 'Boosted, forward + up, roll ~27 °/s: the TVI holds steady ~15° off the nose (this model; the research rule of thumb says ~13°), so your target doesn\'t spin and you can shoot back. ~27 m miss vs 16 m at full roll (research). Corkscrews measured at the nose ran 514–518 m/s (fixture).',
-                  steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: 27 / 240 }]] },
-  'ck-spin':    { title: 'Over-spinning', result: { at: 6, sim: () => `${Math.round(len(S.v))} m/s, ${gSmooth.toFixed(1)} G`, game: '514 m/s, 5.4 G' }, start: 'nose', watch: 'Full-rate roll (240 °/s): the side push spins so fast the spiral radius is only ~3 m (research), far smaller than the 20 m ship. It throws away ~40 % of the miss (research). In game: 514 m/s, 5.4 G side (fixture); this model: ~520 m/s, ~6 G.',
-                  steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: 1 }]] },
+  'dodge-nose': { title: 'Dodge at top speed', result: { at: 2, sim: () => `${Math.round(dodge.dist)} m in 2 s`, game: 'side push 3–6 G' }, start: 'rest', go: 5.5, dodge: true, watch: 'At 520 m/s the egg is a thin tip: side thrust is ~3–6 G (fixture wall traces), so 2 s of strafing moves you only ~90 m (model).',
+                  steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [5.5, { f: 1, l: 1, u: 0, boost: true }]] },
+  'dodge-mid':  { title: 'Dodge from mid-egg', result: { at: 2, sim: () => `${Math.round(dodge.dist)} m in 2 s`, game: 'not measured' }, start: 'rest', go: 1.65, dodge: true, watch: 'At 300 m/s forward you\'re in the fat middle of the egg: full ~10 G side push, ~180 m in 2 s, twice the nose (model).',
+                  steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [1.65, { f: 0, l: 1, u: 0, boost: true }]] },
+  letoff:       { title: 'Ease off to make room', result: { at: 5, sim: () => `lowest ${Math.round(run.min)} m/s`, game: 'lowest ~435 m/s' }, start: 'rest', go: 6, watch: 'Forward released, strafe held: in game the speed falls from 519 to ~435 m/s (fixture; this model dips to ~425). The ship drops back into the egg and the dodge ring opens.',
+                  steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [6, { f: 0, l: 1, u: 0, boost: true }]] },
+  'ck-escape':  { title: 'Escape corkscrew', result: { at: 8, sim: () => `${Math.round(len(S.v))} m/s, spiral radius ~${Math.round(spiralR())} m`, game: '514 m/s at full roll; other rates: round 7' }, start: 'rest', go: 6, watch: 'Boosted, forward + up, roll ~120 °/s (50 %): you keep ~515 m/s, opening the range on anyone not boosting, while the side push draws a spiral wide enough to spoil their lead. Slower roll = wider, steadier spiral; faster = tighter. Starting to grey out? Ease the strafe or the roll rate a little. Don\'t let go: the spiral stops and the speed bleeds. Up strafe, not sideways: sideways + roll greyed pilots out in 2–3 s (fixture).',
+                  steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [6, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: 0.5 }]] },
+  'ck-shoot':   { title: 'Corkscrew and shoot back', result: { at: 6, sim: () => `TVI ${Math.round(run.tvi)}° off the nose`, game: 'rule of thumb ~13°' }, start: 'rest', go: 6, watch: 'Boosted, forward + up, roll ~27 °/s: the TVI holds steady ~15° off the nose (this model; the research rule of thumb says ~13°), so your target doesn\'t spin and you can shoot back. ~27 m miss vs 16 m at full roll (research). Corkscrews measured at the nose ran 514–518 m/s (fixture).',
+                  steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [6, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: 27 / 240 }]] },
+  'ck-spin':    { title: 'Over-spinning', result: { at: 6, sim: () => `${Math.round(len(S.v))} m/s, ${gSmooth.toFixed(1)} G`, game: '514 m/s, 5.4 G' }, start: 'rest', go: 6, watch: 'Full-rate roll (240 °/s): the side push spins so fast the spiral radius is only ~3 m (research), far smaller than the 20 m ship. It throws away ~40 % of the miss (research). In game: 514 m/s, 5.4 G side (fixture); this model: ~520 m/s, ~6 G.',
+                  steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [6, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: 1 }]] },
 };
 // Corkscrew helix radius a/ω² (docs/RESEARCH.md), with a the current G and ω the roll rate the lesson is flying.
 function spiralR() { const w = ctl.rollFrac * gladius.boost.rotationDps.roll * Math.PI / 180; return w > 0.05 ? gSmooth * 9.80665 / (w * w) : 0; }
@@ -653,7 +654,7 @@ function setNote(html) { $('lesson-note').innerHTML = html || NOTE_IDLE; }
 let maneuver = null, dodge = null, run = null;   // run: what the running lesson has measured so far   // dodge: sideways distance covered in the first 2 s of a maneuver
 function markPreset(key) { document.querySelectorAll('[data-preset]').forEach(b => b.setAttribute('aria-pressed', b.dataset.preset === key)); }
 document.querySelectorAll('[data-preset]').forEach(b => b.onclick = () => {
-  const key = b.dataset.preset, p = PRESETS[key]; reset(p.start); script = { t: 0, steps: p.steps, i: -1 }; maneuver = key; markPreset(key);
+  const key = b.dataset.preset, p = PRESETS[key]; reset(p.start); script = { t: 0, go: p.go || 0, steps: p.steps, i: -1 }; maneuver = key; markPreset(key);
   dodge = p.dodge ? { t: 0, dist: 0 } : null;
   run = { t: 0, min: Infinity, peakG: 0, tvi: 0, shown: false };
   $('run-name').textContent = p.title; $('run-result').textContent = ''; $('run-msg').hidden = false; $('runbar').hidden = false;
@@ -1098,7 +1099,7 @@ function derive(st, inp) {
 }
 function teach(el, d) {
   let w = script && maneuver ? PRESETS[maneuver].watch : '';
-  if (w && dodge) w += ` · ${dodge.t < 2 ? 'so far' : 'after 2 s'}: <b>${Math.round(dodge.dist)} m sideways</b>`;
+  if (w && dodge && script && script.t >= script.go) w += ` · ${dodge.t < 2 ? 'so far' : 'after 2 s'}: <b>${Math.round(dodge.dist)} m sideways</b>`;
   const html = `${caption(d)}${w ? `<span class="watch">${w}</span>` : ''}`;
   if (el._h !== html) { el._h = html; el.innerHTML = html; }
 }
@@ -1146,16 +1147,18 @@ function frame(now) {
       const vw = qRot(qAtt, S.v);   // position in the world frame (for the dust)
       S.x = [x0[0] + vw[0] * DT, x0[1] + vw[1] * DT, x0[2] + vw[2] * DT];
       S.roll = live.roll * R.roll; S.pitch = live.pitch * R.pitch; S.yaw = live.yaw * R.yaw;
-      if (dodge && dodge.t < 2) { dodge.t += DT; dodge.dist += Math.hypot(S.v[1], S.v[2]) * DT; }
+      if (dodge && dodge.t < 2 && (!script || script.t >= script.go)) { dodge.t += DT; dodge.dist += Math.hypot(S.v[1], S.v[2]) * DT; }
     }
     // a ~3 s trail: one point per 1/60 s of sim time, whatever the frame rate
     trailT += dt; while (trailT > 1 / 60) { trailT -= 1 / 60; trail.push(R3(...S.v)); if (trail.length > 180) trail.shift(); }
   }
   const inp = currentInput(), d = derive(S, inp);
   if (run && maneuver && script && !ctl.paused) { // lesson progress and its result vs the game
-    const P = PRESETS[maneuver], R = P.result;
-    run.t = script.t; run.min = Math.min(run.min, d.speed); run.peakG = Math.max(run.peakG, d.g); run.tvi = d.tviDeg;
-    $('run-prog').style.width = `${Math.min(100, run.t / R.at * 100)}%`;
+    const P = PRESETS[maneuver], R = P.result, go = script.go, on = script.t >= go;
+    const stage = on ? '' : ' · building speed'; if (run.stage !== stage) { run.stage = stage; $('run-name').textContent = P.title + stage; }
+    run.t = script.t - go;                                    // seconds into the maneuver itself (negative while building speed)
+    if (on) { run.min = Math.min(run.min, d.speed); run.peakG = Math.max(run.peakG, d.g); run.tvi = d.tviDeg; }
+    $('run-prog').style.width = `${Math.max(0, Math.min(100, script.t / (go + R.at) * 100))}%`;
     if (!run.shown && run.t >= R.at) { run.shown = true; $('run-msg').hidden = true;
       $('run-result').textContent = `Simulator: ${R.sim()} · In game: ${R.game}`; }
   }
