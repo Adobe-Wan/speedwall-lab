@@ -25,16 +25,16 @@ Everything below is **measured** unless marked *model* (computed from measured c
 | Quantity | Value | Source | Replaces |
 |---|---|---|---|
 | Boosted backward acceleration | **5.96 G** (plateau 268) | `r4_boost_back` | spviewer 5.9 |
-| Boosted down acceleration | **6.6 G** (G meter 6.7) | `r4_boost_down` | spviewer 6.6 |
+| Boosted down acceleration | **6.8 G** (6.77–6.79 by speed slope; G meter 6.7) | `r4_boost_down` | spviewer 6.6 |
 | Boosted up acceleration | 12.99 G (plateau 394) | `r4_boost_up` | confirms 12.9 |
 | SCM up acceleration | 10.02 G (plateau 226) | `r4_scm_up` | confirms 9.9 |
 | Boosted egg radius by heading | 408 m/s at the sweep's end heading; limaçon predicts 406 | `r5_yawsweep_left/right` | confirms r(θ) = 394 + 126 cos θ |
 | Nose slide (forward + strafe at the boosted wall) | 519 → 506 m/s; "slide continues" predicted 501, "stalls" 515 | `r5_nose_slide_long` | settles physics-fit.md's open question: it keeps sliding, slower than the model |
 | Boost release, from the nose (519) | 225 m/s after **5.2 s**; 12.6–13.0 G in the first second, then **4.26 G** from 300 to 235 | `r6_release_all`, `_fwd_held` | `releaseFloorG` 4.24 was *assumed*; now measured (4.26) |
 | Boost release with a lateral strafe held | 7.6 s to 225; only 2.2 G below 300 | `r6_release_fwd_lat` | new |
-| Boost release from 406 / 294 | 4.9 s / 3.8 s to 225 | `r6_release_450/350` | new |
+| Boost released at 440 / 338 (peaks 457 / 367) | 4.8 s / 3.7 s to 225 | `r6_release_450/350` | new |
 | **Spacebrake at the boosted nose** | **identical to just releasing** (5.2 s to 225, 4.27 G tail) | `r7_spacebrake_nose` | new: the spacebrake does not stop you faster above SCM |
-| Boost tank | drain 5.0 %/s, regen 3.75 %/s | round 7 | fixture still says 4.8 / 4.0 |
+| Boost tank | drain 5.0 %/s, regen 3.75 %/s; boost re-engages at 25 % | `r7_tank_cycle` | regen was 4.0; the 25 % red zone was assumed |
 | Yaw at 15 % stick, boosted | 16.2 °/s, linear would be 9.4 | `r5_yawcal_15_boost` | **unexplained**; round 10 A re-measures low-stick yaw and pitch |
 
 ### Vision (round 9: cockpit view throughout, no camera presses)
@@ -60,10 +60,9 @@ What it says:
 - **Down strafes red out**, up and lateral grey out. The red share reached 0.89 in the SCM forward + down corkscrew.
 - **Up is the most tolerant direction** (grey at 6.8 s at 9.5 G), then lateral (3.75 s at 9.1 G); down greys/reds at
   half the G (5 G).
-- **Boosting roughly halves the time to grey-out, at a *lower* G-meter reading** (lateral: 1.77 s at 6.6 G boosted vs
-  3.75 s at 9.1 G in SCM). *Hypothesis*: the pilot model counts something the HUD G meter does not show (the forward
-  thrust at the nose wall, or a boost multiplier). Round 10 D's equal-G pairs (from rest, no forward thrust) separate
-  "boost" from "forward thrust".
+- **Correction (fact-check):** the boosted rows grey out during the **boosted run-up from rest, at ~19–21 G forward**;
+  their G column is the later side G at the nose. Forward (eyeballs-in) G counts; boost itself does not (round 10's
+  equal-G pairs agree within 0.25 s). See HANDOFF-REPLY.md §4 Q1.
 - Darkness closes in from the edge first in most tests (edge t50 before centre t50), which the pilot view can draw as a
   vignette that tightens, then a full fade.
 
@@ -79,7 +78,7 @@ What it says:
 | Pitch / yaw / roll | 68 / 52 / 200 | 68.0 / 52.1 / 199.9 |
 | Boosted pitch / yaw / roll | 82 / 62 / 240 (×1.2) | 81.6 / 62.7 / 240 |
 | Boost accel multipliers | fwd 1.55, back 1.4, lateral 1.3, up 1.3, down 1.35 | 21.2/13.7 = 1.55, 5.96/4.24 = 1.41, 12.9/9.95 = 1.30, 12.99/10.02 = 1.30, 6.6/4.97 = 1.33 |
-| Boost tank | capacity 20, idle cost 1/s, regen 0.75/s → 5.0 %/s, 3.75 %/s | 5.0 %/s, 3.75 %/s |
+| Boost tank | capacity 20, idle cost 1/s, regen 0.75/s → 5.0 %/s, 3.75 %/s; threshold 0.25 | 5.0 %/s, 3.75 %/s, re-engage at 25 % |
 | Boost ramp | up 0.6 s, down 0.3 s | consistent with the boost-forward slope note |
 | Angular boost cost | 0 (turning does not drain the tank faster) | not measured |
 
@@ -157,10 +156,11 @@ Rules for the trainer:
 ### Corkscrew escapes (rounds 8 and 9)
 - **Boosted corkscrews hold ~513–517 m/s** (forward 100 % + any strafe + any roll); SCM ones hold 225.
 - **Side G at the boosted nose is small** (3.7–6.8 G vs 9–10 G in SCM), so the corkscrew's sideways displacement is
-  smaller, but you **grey out about twice as fast** while boosting (≈1.7–2.2 s vs 3.75–6.8 s).
+  smaller, but a boosted start from rest greys you out at ≈1.7–2.2 s from the ~21 G launch, not from the corkscrew itself.
 - Up + roll is the corkscrew you can hold longest; down + roll red-outs fastest.
-- For a 101 lesson: boosted forward + up strafe + roll 25–50 %, released (or eased) before ~2 s to stay out of the grey.
-  The exact "ideal" mix needs round 10 D's dose curve; do not publish a number before it.
+- For a 101 lesson: a boosted escape started from a standstill greys out from the ~21 G launch at ~2 s and clears
+  near the nose; the corkscrew at the nose (~6 G side) held without further grey in round 9. A corkscrew started at
+  speed has not been measured on its own.
 
 ## 5. What we still can't model, and the round that fixes it
 
@@ -183,7 +183,7 @@ suggests near-instant), coupled mode, G-safe on, other ships, ship-to-ship scena
 ## 6. Suggested implementation order for the app
 
 1. **Fixture update** (`research/gladius-v1-fixture.json`): boost back 5.96 G and down 6.6 G as *measured* (drop the
-   spviewer provenance for those two, update NOTICE.md); tank 5.0 / 3.75 %/s; `releaseFloorG` 4.26 measured with the
+   spviewer provenance for those two, update NOTICE.md); tank drain 5.0 and regen 3.75 %/s, red zone 25 % measured; `releaseFloorG` 4.26 measured with the
    round-6 curves as new acceptance traces; add the spacebrake-equals-release fact.
 2. **P6 rotation** with per-axis linear rates (table in PLAN.md), boost ×1.2, and the rotated velocity checked against
    the egg each step (that is what produces the turning speed loss). Leave the combination rule as a flag
@@ -205,7 +205,7 @@ An earlier attempt (`20261008-171610`) flew with the throttle axis inverted and 
 |---|---|---|
 | `r10_turn90_boost`: at 510, boosted pitch ~90°, boost held | bled 510 → **394** in ~4 s (excess shrinks ~e-fold per second) | 394 at 90° |
 | `r10_turn180_boost`: at 510, boosted flip ~180° | 510 → 286 after 6 s, still falling slowly (~4 G of bleed) | 268 at 180° |
-| `r10_turn90_release`: same 90° turn, boost released | 510 → **223** in ~2.5 s | SCM sphere 225 |
+| `r10_turn90_release`: same 90° turn, boost released | 510 → **225** about 3.0 s after the release | SCM sphere 225 |
 | `r10_turn90_scm`: SCM at 225, pitch 90° | **no loss** (224) | sphere |
 | `r10_turn90_boost_fwd`: 90° turn with full throttle held | dips to 442, then climbs back to 483 as forward thrust drags the velocity onto the new nose | — |
 | `r10_flip_and_burn`: flip at 510, then throttle + boost | 363 → 63 m/s in ~1.5 s (≈20 G: the boosted forward rating), then re-accelerates | — |
