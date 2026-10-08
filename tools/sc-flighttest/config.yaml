@@ -5,7 +5,7 @@ vjoy_device: 1
 # (see README "Bindings"). Use `python run.py bind <control>` to wiggle one axis while SC listens.
 axes:
   strafe_lat:  x     # + = right    -> SC "Strafe Left / Right (abs.)"
-  strafe_long: y     # + = forward  -> SC "Strafe Forward / Backward (abs.)"
+  strafe_long: y     # + = forward  -> SC "Throttle - Forward / Back" (the game has no forward strafe binding)
   strafe_vert: z     # + = up       -> SC "Strafe Up / Down (abs.)"
   roll:        rz    # + = right    -> SC "Roll"
   pitch:       rx    # + = up       -> SC "Pitch"

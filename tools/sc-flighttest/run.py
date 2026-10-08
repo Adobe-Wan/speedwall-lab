@@ -95,6 +95,7 @@ def main():
     h = sub.add_parser("hold"); h.add_argument("control"); h.add_argument("value", type=float); h.add_argument("seconds", type=float)
     sub.add_parser("dircheck")
     sub.add_parser("camcheck")
+    sub.add_parser("throttlecheck")
     cs = sub.add_parser("camstrip"); cs.add_argument("session"); cs.add_argument("test")
     ca = sub.add_parser("calibrate"); ca.add_argument("--monitor", type=int)
     sub.add_parser("ocrcheck")
@@ -119,6 +120,9 @@ def main():
     elif args.cmd == "hold":
         from sctest.bind import hold
         hold(c, args.control, args.value, args.seconds)
+    elif args.cmd == "throttlecheck":
+        from sctest.throttlecheck import throttlecheck
+        throttlecheck(c)
     elif args.cmd == "camcheck":
         from sctest.camcheck import camcheck
         camcheck(c)

@@ -44,7 +44,7 @@ In Star Citizen: **Options → Keybindings → Advanced Controls Customization**
 
 | Control | Star Citizen action | Command |
 |---|---|---|
-| strafe_long | Strafe Forward / Backward (abs.) | `python run.py bind strafe_long` |
+| strafe_long | **Throttle - Forward / Back** (this game version has no forward strafe binding; the throttle is what moves the ship forward) | `python run.py bind strafe_long` |
 | strafe_lat | Strafe Left / Right (abs.) | `python run.py bind strafe_lat` |
 | strafe_vert | Strafe Up / Down (abs.) | `python run.py bind strafe_vert` |
 | roll | Roll | `python run.py bind roll` |
