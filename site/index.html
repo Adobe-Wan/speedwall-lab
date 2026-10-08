@@ -279,6 +279,7 @@ footer p { margin: 0 0 4px; max-width: 75ch; }
           <button id="t-follow" aria-pressed="false" title="Chase cam: rides behind the ship and keeps your dodge room and the wall in frame. Starts by itself with each lesson.">Chase</button>
         </span>
         <button id="t-meas" aria-pressed="true" title="Top speeds measured in game, placed on the egg">In-game tests</button>
+        <button id="t-frame" aria-pressed="true" title="On: the egg and the ship turn with the ship, and your velocity stays put in space (pitch the nose up and the 520 end goes up with it). Off: the view stays attached to the ship, so the velocity moves instead.">Egg turns with ship</button>
       </div>
       <canvas class="inset" id="c-inset" aria-hidden="true"></canvas>
       <div class="caption" id="cap-egg"></div>
@@ -825,6 +826,10 @@ function gladiusGeometry(gl) {
 }
 const VS_SHIP = `attribute vec3 position; attribute vec3 normal; attribute vec3 color; uniform mat4 modelViewMatrix, projectionMatrix; uniform mat3 normalMatrix;
 varying vec3 vN; varying vec3 vC; void main(){ vN = normalize(normalMatrix*normal); vC = color; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }`;
+// Rotate a render-frame vector by a render-frame quaternion [x, y, z, w]: v' = v + 2·u×(u×v + w·v).
+const qrotv = (q, v) => { const [x, y, z, w] = q, [a, b, c] = v;
+  const tx = y * c - z * b + w * a, ty = z * a - x * c + w * b, tz = x * b - y * a + w * c;
+  return [a + 2 * (y * tz - z * ty), b + 2 * (z * tx - x * tz), c + 2 * (x * ty - y * tx)]; };
 const FS_SHIP = `precision mediump float; varying vec3 vN; varying vec3 vC;
 void main(){ float d = 0.35 + 0.65*abs(dot(normalize(vN), normalize(vec3(0.4,0.8,0.5)))); gl_FragColor = vec4(vC*d, 1.0); }`;
 
@@ -841,6 +846,10 @@ const egg = !hasWebGL ? stubView : (() => {
   const canvas = $('c-egg'), renderer = makeRenderer(canvas), gl = renderer.gl;
   const camera = new Camera(gl, { fov: 38, near: 5, far: 8000 });
   const scene = new Transform();
+  // Everything ship-fixed (the egg, its rings, the sideways-room disc, the ship, the velocity point and its lines) hangs
+  // under shipT, which turns with the ship's attitude: the egg's 520 end follows the nose, the ship rolls with the
+  // roll, and your velocity stays put in space. (Render frame: x nose, y up, z right.)
+  const shipT = new Transform(); shipT.setParent(scene);
   let aspect = 1.3;
   // Camera views. 3/4: behind and above (default). Side: square-on profile, which shows the egg's true shape:
   // the ship (rest) sits off-centre toward the tail, 520 to the nose and 268 to the tail.
@@ -852,9 +861,9 @@ const egg = !hasWebGL ? stubView : (() => {
   home();
   const orbit = new Orbit(camera, { target: new Vec3(130, 0, 0), element: canvas, ease: 0.2, inertia: 0.8, minDistance: 140, maxDistance: 3200, enablePan: false });
 
-  shell(gl, eggGeometry(gl, 520, 268), COL.boost, 0.035, 0.34, 10).forEach(m => m.setParent(scene));
+  shell(gl, eggGeometry(gl, 520, 268), COL.boost, 0.035, 0.34, 10).forEach(m => m.setParent(shipT));
   const scmShell = shell(gl, eggGeometry(gl, 225, 225, 40, 40), COL.scm, 0.045, 0.3, 20);
-  scmShell.forEach(m => m.setParent(scene));
+  scmShell.forEach(m => m.setParent(shipT));
 
   // latitude rings every 100 m/s of forward speed + 4 meridians + the nose axis (one static line mesh)
   const ring = [];
@@ -864,27 +873,27 @@ const egg = !hasWebGL ? stubView : (() => {
     const seg = [i, i + 1].map(n => { const t = Math.PI * n / 72, r = 394 + 126 * Math.cos(t); return R3(r*Math.cos(t), r*Math.sin(t)*Math.cos(p), r*Math.sin(t)*Math.sin(p)); });
     ring.push(...seg[0], ...seg[1]); } }
   ring.push(...R3(-320, 0, 0), ...R3(600, 0, 0));
-  const staticLines = colorLines(gl, ring.length / 3 + 6); staticLines.setParent(scene);
+  const staticLines = colorLines(gl, ring.length / 3 + 6); staticLines.setParent(shipT);
   staticLines.begin();
   for (let i = 0; i < ring.length; i += 6) staticLines.seg(ring.slice(i, i + 3), ring.slice(i + 3, i + 6), COL.boost, 0.16);
   for (const [a, b] of [[[-14,0,0],[14,0,0]], [[0,-14,0],[0,14,0]], [[0,0,-14],[0,0,14]]]) staticLines.seg(a, b, COL.grey, 0.7); // rest cross
   staticLines.end();
 
   // sideways-room disc: unit circle in the render Y-Z plane, moved to the current forward speed
-  const discT = new Transform(); discT.setParent(scene);
+  const discT = new Transform(); discT.setParent(shipT);
   const circ = [], fan = [0, 0, 0];
   for (let j = 0; j <= 96; j++) { const a = 2 * Math.PI * j / 96; circ.push(0, Math.sin(a), Math.cos(a)); fan.push(0, Math.sin(a), Math.cos(a)); }
   const discFill = new Mesh(gl, { geometry: new Geometry(gl, { position: { size: 3, data: new Float32Array(fan) } }), program: lineProgram(gl, COL.white, 0.07, { cullFace: false }), mode: gl.TRIANGLE_FAN, frustumCulled: false });
   discFill.renderOrder = 30; discFill.setParent(discT);
   const UNIT = []; for (let j = 0; j <= 96; j++) { const a = 2 * Math.PI * j / 96; UNIT.push([Math.sin(a), Math.cos(a)]); } void circ;
 
-  const glyphT = new Transform(); glyphT.setParent(scene);
+  const glyphT = new Transform(); glyphT.setParent(shipT);
   const glyph = new Mesh(gl, { geometry: gladiusGeometry(gl), program: new Program(gl, { vertex: VS_SHIP, fragment: FS_SHIP }) });
   // The ship rides on the velocity point: in velocity space, where the ship sits IS how fast it is going.
   glyph.setParent(glyphT);   // true size: 20 m long
   // Everything that moves (velocity arrow, trail, settle ray, thrust and dead-thrust arrows, the dodge ring and its
   // reach lines) is one coloured line mesh: one draw call.
-  const dyn = colorLines(gl, 1024); dyn.renderOrder = 40; dyn.setParent(scene);
+  const dyn = colorLines(gl, 1024); dyn.renderOrder = 40; dyn.setParent(shipT);
 
   // Measured settle speeds, drawn on the egg. Each sits at its measured speed along the direction the model
   // says it settles (the thrust direction), so a dot on the shell means the egg shape agrees with the game.
@@ -897,7 +906,7 @@ const egg = !hasWebGL ? stubView : (() => {
     const geo = new Geometry(gl, { position: { size: 3, data: new Float32Array(pts.flat()) } });
     const prog = new Program(gl, { vertex: `attribute vec3 position; uniform mat4 modelViewMatrix, projectionMatrix; void main(){ gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); gl_PointSize = 7.0; }`,
       fragment: `precision mediump float; void main(){ vec2 c = gl_PointCoord - 0.5; float d = length(c); if (d > 0.5) discard; gl_FragColor = d > 0.32 ? vec4(0.03,0.04,0.07,1.0) : vec4(1.0,0.93,0.8,1.0); }`, depthTest: false, transparent: true });
-    const m = new Mesh(gl, { geometry: geo, program: prog, mode: gl.POINTS, frustumCulled: false }); m.renderOrder = 50; m.setParent(scene); return m;
+    const m = new Mesh(gl, { geometry: geo, program: prog, mode: gl.POINTS, frustumCulled: false }); m.renderOrder = 50; m.setParent(shipT); return m;
   })();
   let showMeas = true;
   $('t-meas').onclick = e => { showMeas = !showMeas; e.target.setAttribute('aria-pressed', showMeas); measured.visible = showMeas; };
@@ -919,11 +928,13 @@ const egg = !hasWebGL ? stubView : (() => {
   // speed), and the distance is chosen so the whole ring and the wall ahead stay in frame, so the ship is always
   // seen against its limits: tight at the nose, wide mid-egg. You can still orbit it with the mouse.
   let follow = false, chaseD = 600, autoChase = false, prevMode = '34'; const HOME_T = [130, 0, 0];
+  let qView = [0, 0, 0, 1], worldFrame = true;    // the attitude the egg is drawn with (identity in the ship-fixed view)
+  $('t-frame').onclick = e => { worldFrame = !worldFrame; e.currentTarget.setAttribute('aria-pressed', worldFrame); lastKey = ''; };
   const setCam = (m, auto = false) => { camMode = m; follow = m === 'follow'; autoChase = follow && auto;
     for (const [id, k] of [['cam-34', '34'], ['cam-side', 'side'], ['t-follow', 'follow']]) $(id).setAttribute('aria-pressed', m === k);
-    if (!follow) { touched = false; orbit.target.set(...HOME_T); home(); orbit.forcePosition(); return; }
+    if (!follow) { touched = false; orbit.target.set(...qrotv(qView, HOME_T)); home(); orbit.forcePosition(); return; }
     // start behind, a little above and to the side, looking up the nose
-    const p = R3(S.v[0], 0, 0); chaseD = Math.hypot(camera.position.x - p[0], camera.position.y - p[1], camera.position.z - p[2]);
+    const p = qrotv(qView, R3(S.v[0], 0, 0)); chaseD = Math.hypot(camera.position.x - p[0], camera.position.y - p[1], camera.position.z - p[2]);
     orbit.target.set(...p); camera.position.set(p[0] - 0.93 * chaseD, p[1] + 0.27 * chaseD, p[2] + 0.17 * chaseD); orbit.forcePosition(); touched = true; };
   $('cam-34').onclick = () => setCam('34'); $('cam-side').onclick = () => setCam('side');
   $('t-follow').onclick = () => setCam(follow ? '34' : 'follow');
@@ -933,10 +944,16 @@ const egg = !hasWebGL ? stubView : (() => {
 
   let lastKey = '', frameW = 0;
   function resize() { const w = canvas.parentElement.clientWidth, h = canvas.parentElement.clientHeight; if (!w || !h) return; renderer.setSize(w, h); aspect = w / h; camera.perspective({ aspect }); if (!touched) { home(); orbit.forcePosition(); } frameW = w * 10000 + h; lastKey = ''; }
-  function draw(st, d) {
+  function draw(st, d, att) {
     const [vx, vy, vz] = st.v, room = d.room;
-    { // ease the orbit target toward the ring's centre (chase) or home; moving the target carries the camera along
-      const want = follow ? R3(vx, 0, 0) : HOME_T, t = orbit.target, k = follow ? 0.25 : 0.08;
+    // attitude as a render-frame quaternion (page frame x nose, y left, z up -> render x, z, -y)
+    const qReal = [att[0], att[2], -att[1], att[3]];
+    qView = worldFrame ? qReal : [0, 0, 0, 1];
+    shipT.quaternion.set(...qView);
+    const rot = pt => qrotv(qView, pt);
+    { // ease the orbit target toward the ring's centre (chase) or the egg's centre; moving the target carries the camera along
+      // (the camera keeps its orientation in space: it follows where the ship is, not which way it points)
+      const want = rot(follow ? R3(vx, 0, 0) : HOME_T), t = orbit.target, k = follow ? 0.25 : 0.08;
       const dx = (want[0] - t.x) * k, dy = (want[1] - t.y) * k, dz = (want[2] - t.z) * k;
       if (Math.abs(dx) + Math.abs(dy) + Math.abs(dz) > 1e-3) { t.set(t.x + dx, t.y + dy, t.z + dz); camera.position.set(camera.position.x + dx, camera.position.y + dy, camera.position.z + dz); }
     }
@@ -949,7 +966,7 @@ const egg = !hasWebGL ? stubView : (() => {
       if (Math.abs(chaseD - l) > 0.5) { camera.position.set(t.x + dx / l * chaseD, t.y + dy / l * chaseD, t.z + dz / l * chaseD); orbit.forcePosition(); }
     }
     // Render on demand (PLAN.md §9): skip the frame when nothing visible changed.
-    const cp = camera.position, key = [vx, vy, vz, cp.x, cp.y, cp.z, room, d.pinned, trail.length, st.a[0], st.a[1], st.a[2], showMeas, follow, frameW]
+    const cp = camera.position, key = [vx, vy, vz, cp.x, cp.y, cp.z, room, d.pinned, trail.length, st.a[0], st.a[1], st.a[2], showMeas, follow, frameW, ...qView]
       .map(x => (typeof x === 'number' ? x.toFixed(2) : x)).join();
     if (key === lastKey) return;
     lastKey = key;
@@ -958,7 +975,9 @@ const egg = !hasWebGL ? stubView : (() => {
     glyphT.position.set(...pv);
     dyn.begin();
     dyn.seg([0, 0, 0], pv, COL.tvi, 1);                                       // velocity arrow
-    for (let i = 1; i < trail.length; i++) dyn.seg(trail[i - 1], trail[i], COL.tvi, 0.45);   // 3 s trail
+    { // 3 s trail: kept in world space, so turn it back into the ship's current frame (shipT turns it forward again)
+      const inv = [-qReal[0], -qReal[1], -qReal[2], qReal[3]]; let prev = null;
+      for (const w of trail) { const pt = qrotv(inv, w); if (prev) dyn.seg(prev, pt, COL.tvi, 0.45); prev = pt; } }
     const ringCol = d.pinned ? COL.warn : COL.white;                         // the dodge ring at your forward speed
     for (let j = 1; j < UNIT.length; j++) dyn.seg(R3(vx, UNIT[j-1][1] * room, UNIT[j-1][0] * room), R3(vx, UNIT[j][1] * room, UNIT[j][0] * room), ringCol, 0.85);
     // reach lines: from the ship to the edge of the sideways-room disc along each strafe axis
@@ -979,18 +998,18 @@ const egg = !hasWebGL ? stubView : (() => {
     if (d.pinned && d.req && len(d.req) > 0.5) { const k = 9 / g0, q = d.req; dyn.seg(pv, R3(vx + q[0]*k, vy + q[1]*k, vz + q[2]*k), COL.grey, 0.8); } // dead thrust
     dyn.end();
     renderer.render({ scene, camera, sort: true });
-    place(labels.nose, R3(520, 0, -70)); place(labels.tail, R3(-300, 0, 0)); place(labels.side, R3(0, 0, 420));
-    place(labels.scm, R3(0, -160, -170));
-    place(labels.room, R3(vx, -room * 0.71, room * 0.71 + 18)); labels.room.textContent = `dodge ${Math.round(room)}`;
-    place(labels.rest, R3(0, 0, -26)); if (d.speed > 5) labels.rest.hidden = true;
+    place(labels.nose, rot(R3(520, 0, -70))); place(labels.tail, rot(R3(-300, 0, 0))); place(labels.side, rot(R3(0, 0, 420)));
+    place(labels.scm, rot(R3(0, -160, -170)));
+    place(labels.room, rot(R3(vx, -room * 0.71, room * 0.71 + 18))); labels.room.textContent = `dodge ${Math.round(room)}`;
+    place(labels.rest, rot(R3(0, 0, -26))); if (d.speed > 5) labels.rest.hidden = true;
     const leftRoom = Math.max(0, yMax - vy), rightRoom = Math.max(0, yMax + vy);
-    if (room > 60 && d.speed > 5) { place(labels.reachL, ends.L); labels.reachL.textContent = `◂ ${Math.round(leftRoom)}`;
-      place(labels.reachR, ends.R); labels.reachR.textContent = `${Math.round(rightRoom)} ▸`; }
+    if (room > 60 && d.speed > 5) { place(labels.reachL, rot(ends.L)); labels.reachL.textContent = `◂ ${Math.round(leftRoom)}`;
+      place(labels.reachR, rot(ends.R)); labels.reachR.textContent = `${Math.round(rightRoom)} ▸`; }
     else labels.reachL.hidden = labels.reachR.hidden = true;
     const sv = d.settle, far = sv && Math.hypot(sv.p[0] - vx, sv.p[1] - vy, sv.p[2] - vz) > 25;
-    if (far) { place(labels.settle, R3(sv.p[0] - 40, sv.p[1], sv.p[2] - 40)); labels.settle.textContent = `ends ~${Math.round(sv.speed)} · ${Math.round(sv.side)} sideways`; }
+    if (far) { place(labels.settle, rot(R3(sv.p[0] - 40, sv.p[1], sv.p[2] - 40))); labels.settle.textContent = `ends ~${Math.round(sv.speed)} · ${Math.round(sv.side)} sideways`; }
     else labels.settle.hidden = true;
-    place(tviIcon, pv); tviIcon.hidden = tviIcon.hidden || d.speed < 3;
+    place(tviIcon, rot(pv)); tviIcon.hidden = tviIcon.hidden || d.speed < 3;
   }
   return { resize, draw, chase };
 })();
@@ -1174,7 +1193,7 @@ function frame(now) {
       if (dodge && dodge.t < 2 && (!script || script.t >= script.go)) { dodge.t += DT; dodge.dist += Math.hypot(S.v[1], S.v[2]) * DT; }
     }
     // a ~3 s trail: one point per 1/60 s of sim time, whatever the frame rate
-    trailT += dt; while (trailT > 1 / 60) { trailT -= 1 / 60; trail.push(R3(...S.v)); if (trail.length > 180) trail.shift(); }
+    trailT += dt; while (trailT > 1 / 60) { trailT -= 1 / 60; trail.push(R3(...qRot(qAtt, S.v))); if (trail.length > 180) trail.shift(); }
   }
   const inp = currentInput(), d = derive(S, inp);
   if (run && maneuver && script && !ctl.paused) { // lesson progress and its result vs the game
@@ -1189,7 +1208,7 @@ function frame(now) {
   gSmooth += (d.g - gSmooth) * 0.15;
   gPeak = Math.max(gSmooth, gPeak - dt * 1.5);   // peak hold, falling 1.5 G/s
   bBtn.classList.toggle('active', d.boost); bBtn.setAttribute('aria-pressed', d.boost);
-  if (visible('egg')) { egg.draw(S, d); drawSlice($('c-inset'), S, d, false); teach($('cap-egg'), d); }
+  if (visible('egg')) { egg.draw(S, d, qAtt); drawSlice($('c-inset'), S, d, false); teach($('cap-egg'), d); }
   if (visible('pilot')) { pilot.draw(S, d);
     pilot.hud({ speed: d.fwd < -1 ? -d.speed : d.speed, speedCap: d.r, throttle: inp.u.f, g: gSmooth, gPeak, tank: S.tank, redZone: gladius.boost.redZonePct,
       boostActive: d.boost, boostLocked: !!S.c.boostLocked && !ctl.unlimited, unlimited: ctl.unlimited, mode: d.boost ? 'BOOST' : 'SCM',
