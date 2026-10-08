@@ -1,0 +1,14 @@
+Throttle check. Arena Commander free flight, decoupled, SCM, ship STOPPED, window focused. Starting in 5 s. F12 aborts.
+Watch the HUD throttle line while this runs and tell me what it does.
+
+1) Forward axis +0.5 for 3 s, then back to centre, spacebrake released.
+   speed while pushing : 0.0 12.0 28.0 46.0 63.0 81.0 98.0 116.0 133.0 151.0 167.0 185.0
+   speed after centring: 202.0 210.0 210.0 210.0 210.0 210.0 210.0 210.0 210.0 210.0 210.0 210.0
+   -> THROTTLE LATCHED: the ship keeps going with the stick centred.
+
+2) Latch again (+0.5 for 3 s), brake to a stop, then try: full back, tap (-1.0 for 0.15 s)
+   speed with the brake released: 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+   -> CLEARED the throttle (peak 0.0)
+
+Result: use  full back, tap (-1.0 for 0.15 s)  -> throttle_reset: {value: -1.0, seconds: 0.15}
+Inputs released. Saved to C:\Users\alexs\sc-flighttest\v2\throttlecheck.log

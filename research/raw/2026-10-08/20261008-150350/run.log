@@ -1,0 +1,926 @@
+15:03:50 Capture: one region per frame; speed, g, ab, cam
+15:03:50 Focus the Star Citizen window. Starting in 5 s. Press F12 at any time to abort.
+15:03:55 [1/73] r8_scm_f0_up_r25: SCM, forward 0 % + full up strafe + roll 25 % (50 deg/s), 14 s
+15:03:56   braked to 0.0 m/s in 1.0 s
+15:04:15   recorded 713 frames (43 fps)
+15:04:15   camera key: 4 of 8 presses switched the view; black checks 0 worked / 1 did nothing; TRUE blackout from 7.66 s; key stopped at 7.66 s
+15:04:15 [2/73] r8_scm_f0_up_r100: SCM, forward 0 % + full up strafe + roll 100 % (200 deg/s), 14 s
+15:04:21   braked to 0.0 m/s in 5.9 s
+15:04:26   flipped (2.8 s of full pitch)
+15:04:44   recorded 709 frames (43 fps)
+15:04:44   camera key: 7 of 9 presses switched the view; black checks 1 worked / 1 did nothing; TRUE blackout from 9.00 s; key stopped at 9.00 s
+15:04:45   camera back to the cockpit view after 1 press(es)
+15:04:45 [3/73] r8_scm_f0_lat_r25: SCM, forward 0 % + full right strafe + roll 25 % (50 deg/s), 14 s
+15:04:50   braked to 0.0 m/s in 4.6 s
+15:04:55   flipped (2.8 s of full pitch)
+15:05:12   recorded 732 frames (44 fps)
+15:05:12   grey-out began 14.97 s into the inputs
+15:05:12   camera key: 4 of 12 presses switched the view; black checks 0 worked / 1 did nothing; TRUE blackout from 11.56 s
+15:05:13   HUD back after 0.9 s; resting 8 s
+15:05:21 [4/73] r8_scm_f0_lat_r100 (strafe mirrored): SCM, forward 0 % + full right strafe + roll 100 % (200 deg/s), 14 s
+15:05:25   braked to 0.0 m/s in 4.3 s
+15:05:30   flipped (2.8 s of full pitch)
+15:05:47   recorded 694 frames (42 fps)
+15:05:47   camera key: 6 of 9 presses switched the view; black checks 2 worked / 0 did nothing; key stopped at 6.63 s
+15:05:48 [5/73] r8_scm_f50_up_r25: SCM, forward 50 % + full up strafe + roll 25 % (50 deg/s), 14 s
+15:05:52   braked to 0.0 m/s in 4.3 s
+15:05:57   flipped (2.8 s of full pitch)
+15:06:15   recorded 678 frames (41 fps)
+15:06:15   camera key: 9 of 9 presses switched the view; black checks 0 worked / 0 did nothing
+15:06:15   camera back to the cockpit view after 1 press(es)
+15:06:15 [6/73] r8_scm_f50_up_r100: SCM, forward 50 % + full up strafe + roll 100 % (200 deg/s), 14 s
+15:06:24   braked to 0.0 m/s in 8.2 s
+15:06:28   flipped (2.8 s of full pitch)
+15:06:46   recorded 675 frames (41 fps)
+15:06:46   grey-out began 14.45 s into the inputs, HUD gone at 14.45 s
+15:06:46   camera key: 7 of 8 presses switched the view; black checks 0 worked / 1 did nothing; TRUE blackout from 12.20 s
+15:06:50   camera back to the cockpit view after 2 press(es)
+15:06:50   HUD back after 0.9 s; resting 8 s
+15:06:58 [7/73] r8_scm_f50_lat_r25: SCM, forward 50 % + full right strafe + roll 25 % (50 deg/s), 14 s
+15:07:07   braked to 0.0 m/s in 8.3 s
+15:07:12   flipped (2.8 s of full pitch)
+15:07:29   recorded 682 frames (41 fps)
+15:07:29   camera key: 4 of 8 presses switched the view; black checks 0 worked / 1 did nothing; TRUE blackout from 8.81 s; key stopped at 8.81 s
+15:07:30   camera back to the cockpit view after 1 press(es)
+15:07:30 [8/73] r8_scm_f50_lat_r100 (strafe mirrored): SCM, forward 50 % + full right strafe + roll 100 % (200 deg/s), 14 s
+15:07:38   braked to 0.0 m/s in 8.3 s
+15:07:43   flipped (2.8 s of full pitch)
+15:07:43   speed 106.0 m/s before start; braking again
+15:07:48   braked to 0.0 m/s in 4.6 s
+15:07:49   SKIPPED r8_scm_f50_lat_r100: still 64.0 m/s
+15:07:49 [9/73] r8_scm_f100_up_r25: SCM, forward 100 % + full up strafe + roll 25 % (50 deg/s), 14 s
+15:07:53   braked to 0.0 m/s in 4.6 s
+15:07:58   flipped (2.8 s of full pitch)
+15:07:58   speed 106.0 m/s before start; braking again
+15:08:03   braked to 0.0 m/s in 4.6 s
+15:08:04   SKIPPED r8_scm_f100_up_r25: still 65.0 m/s
+15:08:04 [10/73] r8_scm_f100_up_r100: SCM, forward 100 % + full up strafe + roll 100 % (200 deg/s), 14 s
+15:08:10   braked to 0.0 m/s in 5.6 s
+15:08:15   flipped (2.8 s of full pitch)
+15:08:15   speed 106.0 m/s before start; braking again
+15:08:19   braked to 0.0 m/s in 4.6 s
+15:08:20   SKIPPED r8_scm_f100_up_r100: still 67.0 m/s
+15:08:20 [11/73] r8_scm_f100_lat_r25: SCM, forward 100 % + full right strafe + roll 25 % (50 deg/s), 14 s
+15:08:25   braked to 0.0 m/s in 4.6 s
+15:08:30   flipped (2.8 s of full pitch)
+15:08:30   speed 106.0 m/s before start; braking again
+15:08:35   braked to 1.0 m/s in 4.6 s
+15:08:36   SKIPPED r8_scm_f100_lat_r25: still 66.0 m/s
+15:08:36 [12/73] r8_scm_f100_lat_r100 (strafe mirrored): SCM, forward 100 % + full right strafe + roll 100 % (200 deg/s), 14 s
+15:08:40   braked to 0.0 m/s in 4.6 s
+15:08:45   flipped (2.8 s of full pitch)
+15:08:45   speed 106.0 m/s before start; braking again
+15:08:50   braked to 0.0 m/s in 4.6 s
+15:08:51   SKIPPED r8_scm_f100_lat_r100: still 64.0 m/s
+15:08:51 [13/73] r8_bst_f0_up_r25: boosted, at the sides (394 m/s): forward 0 % + full up strafe + roll 25 % (60 deg/s), 14 s
+15:08:56   braked to 0.0 m/s in 4.6 s
+15:09:00   flipped (2.8 s of full pitch)
+15:09:00   boost tank 100.0% after 0.0 s
+15:09:00   speed 106.0 m/s before start; braking again
+15:09:05   braked to 1.0 m/s in 4.6 s
+15:09:06   SKIPPED r8_bst_f0_up_r25: still 65.0 m/s
+15:09:06 [14/73] r8_bst_f0_up_r100: boosted, at the sides (394 m/s): forward 0 % + full up strafe + roll 100 % (240 deg/s), 14 s
+15:09:11   braked to 0.0 m/s in 5.0 s
+15:09:16   flipped (2.8 s of full pitch)
+15:09:16   boost tank 100.0% after 0.0 s
+15:09:16   speed 105.0 m/s before start; braking again
+15:09:21   braked to 0.0 m/s in 4.6 s
+15:09:22   SKIPPED r8_bst_f0_up_r100: still 66.0 m/s
+15:09:22 [15/73] r8_bst_f0_lat_r25: boosted, at the sides (394 m/s): forward 0 % + full right strafe + roll 25 % (60 deg/s), 14 s
+15:09:26   braked to 0.0 m/s in 4.6 s
+15:09:31   flipped (2.8 s of full pitch)
+15:09:31   boost tank 100.0% after 0.0 s
+15:09:31   speed 105.0 m/s before start; braking again
+15:09:36   braked to 0.0 m/s in 4.6 s
+15:09:37   SKIPPED r8_bst_f0_lat_r25: still 68.0 m/s
+15:09:37 [16/73] r8_bst_f0_lat_r100 (strafe mirrored): boosted, at the sides (394 m/s): forward 0 % + full right strafe + roll 100 % (240 deg/s), 14 s
+15:09:42   braked to 0.0 m/s in 4.6 s
+15:09:47   flipped (2.8 s of full pitch)
+15:09:47   boost tank 100.0% after 0.0 s
+15:09:47   speed 105.0 m/s before start; braking again
+15:09:51   braked to 0.0 m/s in 4.6 s
+15:09:52   SKIPPED r8_bst_f0_lat_r100: still 66.0 m/s
+15:09:52 [17/73] r8_bst_f25_up_r25: boosted, off-axis (~441 m/s): forward 25 % + full up strafe + roll 25 % (60 deg/s), 14 s
+15:09:57   braked to 1.0 m/s in 4.6 s
+15:10:02   flipped (2.8 s of full pitch)
+15:10:02   boost tank 100.0% after 0.0 s
+15:10:20   recorded 662 frames (40 fps)
+15:10:20   grey-out began 5.43 s into the inputs, HUD gone at 5.47 s
+15:10:20   camera key: 7 of 10 presses switched the view; black checks 3 worked / 2 did nothing; TRUE blackout from 6.75 s; key stopped at 6.75 s
+15:10:21   camera back to the cockpit view after 1 press(es)
+15:10:22   HUD back after 0.9 s; resting 8 s
+15:10:30 [18/73] r8_bst_f25_up_r100: boosted, off-axis (~441 m/s): forward 25 % + full up strafe + roll 100 % (240 deg/s), 14 s
+15:10:38   braked to 0.0 m/s in 8.2 s
+15:10:43   flipped (2.8 s of full pitch)
+15:10:43   boost tank 100.0% after 0.0 s
+15:11:00   recorded 675 frames (41 fps)
+15:11:00   camera key: 6 of 10 presses switched the view; black checks 1 worked / 0 did nothing
+15:11:01   camera back to the cockpit view after 1 press(es)
+15:11:01 [19/73] r8_bst_f25_lat_r25: boosted, off-axis (~441 m/s): forward 25 % + full right strafe + roll 25 % (60 deg/s), 14 s
+15:11:11   braked to 0.0 m/s in 9.3 s
+15:11:16   flipped (2.8 s of full pitch)
+15:11:16   boost tank 100.0% after 0.0 s
+15:11:33   recorded 677 frames (41 fps)
+15:11:33   camera key: 5 of 8 presses switched the view; black checks 1 worked / 0 did nothing; key stopped at 7.26 s
+15:11:34   camera back to the cockpit view after 1 press(es)
+15:11:34 [20/73] r8_bst_f25_lat_r100 (strafe mirrored): boosted, off-axis (~441 m/s): forward 25 % + full right strafe + roll 100 % (240 deg/s), 14 s
+15:11:43   braked to 0.0 m/s in 9.6 s
+15:11:48   flipped (2.8 s of full pitch)
+15:11:48   boost tank 100.0% after 0.0 s
+15:12:06   recorded 670 frames (41 fps)
+15:12:06   camera key: 6 of 9 presses switched the view; black checks 1 worked / 0 did nothing; key stopped at 6.65 s
+15:12:06 [21/73] r8_bst_f50_up_r25: boosted, mid-way (~455 m/s): forward 50 % + full up strafe + roll 25 % (60 deg/s), 14 s
+15:12:15   braked to 0.0 m/s in 8.9 s
+15:12:20   flipped (2.8 s of full pitch)
+15:12:20   boost tank 100.0% after 0.0 s
+15:12:37   recorded 682 frames (41 fps)
+15:12:37   grey-out began 14.02 s into the inputs, HUD gone at 14.02 s
+15:12:37   camera key: 7 of 11 presses switched the view; black checks 5 worked / 1 did nothing; TRUE blackout from 11.00 s
+15:12:38   HUD back after 0.9 s; resting 8 s
+15:12:46 [22/73] r8_bst_f50_up_r100: boosted, mid-way (~455 m/s): forward 50 % + full up strafe + roll 100 % (240 deg/s), 14 s
+15:12:55   braked to 0.0 m/s in 8.3 s
+15:13:00   flipped (2.8 s of full pitch)
+15:13:00   boost tank 100.0% after 0.0 s
+15:13:00   speed 105.0 m/s before start; braking again
+15:13:04   braked to 0.0 m/s in 4.6 s
+15:13:05   SKIPPED r8_bst_f50_up_r100: still 66.0 m/s
+15:13:05 [23/73] r8_bst_f50_lat_r25: boosted, mid-way (~455 m/s): forward 50 % + full right strafe + roll 25 % (60 deg/s), 14 s
+15:13:10   braked to 0.0 m/s in 4.6 s
+15:13:15   flipped (2.8 s of full pitch)
+15:13:15   boost tank 100.0% after 0.0 s
+15:13:15   speed 103.0 m/s before start; braking again
+15:13:20   braked to 0.0 m/s in 4.7 s
+15:13:21   SKIPPED r8_bst_f50_lat_r25: still 67.0 m/s
+15:13:21 [24/73] r8_bst_f50_lat_r100 (strafe mirrored): boosted, mid-way (~455 m/s): forward 50 % + full right strafe + roll 100 % (240 deg/s), 14 s
+15:13:25   braked to 0.0 m/s in 4.6 s
+15:13:30   flipped (2.8 s of full pitch)
+15:13:30   boost tank 100.0% after 0.0 s
+15:13:30   speed 104.0 m/s before start; braking again
+15:13:35   braked to 0.0 m/s in 4.7 s
+15:13:36   SKIPPED r8_bst_f50_lat_r100: still 65.0 m/s
+15:13:36 [25/73] r8_bst_f100_up_r25: boosted, toward the nose (~501 m/s): forward 100 % + full up strafe + roll 25 % (60 deg/s), 14 s
+15:13:41   braked to 0.0 m/s in 4.7 s
+15:13:46   flipped (2.8 s of full pitch)
+15:13:46   boost tank 100.0% after 0.0 s
+15:13:46   speed 105.0 m/s before start; braking again
+15:13:51   braked to 0.0 m/s in 4.6 s
+15:13:52   SKIPPED r8_bst_f100_up_r25: still 66.0 m/s
+15:13:52 [26/73] r8_bst_f100_up_r50: boosted, toward the nose (~501 m/s): forward 100 % + full up strafe + roll 50 % (120 deg/s), 14 s
+15:13:56   braked to 0.0 m/s in 4.6 s
+15:14:01   flipped (2.8 s of full pitch)
+15:14:01   boost tank 100.0% after 0.0 s
+15:14:01   speed 104.0 m/s before start; braking again
+15:14:06   braked to 0.0 m/s in 4.7 s
+15:14:07   SKIPPED r8_bst_f100_up_r50: still 66.0 m/s
+15:14:07 [27/73] r8_bst_f100_up_r100: boosted, toward the nose (~501 m/s): forward 100 % + full up strafe + roll 100 % (240 deg/s), 14 s
+15:14:12   braked to 0.0 m/s in 4.6 s
+15:14:16   flipped (2.8 s of full pitch)
+15:14:17   boost tank 100.0% after 0.0 s
+15:14:17   speed 105.0 m/s before start; braking again
+15:14:21   braked to 0.0 m/s in 4.7 s
+15:14:22   SKIPPED r8_bst_f100_up_r100: still 66.0 m/s
+15:14:22 [28/73] r8_bst_f100_lat_r25: boosted, toward the nose (~501 m/s): forward 100 % + full right strafe + roll 25 % (60 deg/s), 14 s
+15:14:27   braked to 0.0 m/s in 4.7 s
+15:14:32   flipped (2.8 s of full pitch)
+15:14:32   boost tank 100.0% after 0.0 s
+15:14:32   speed 105.0 m/s before start; braking again
+15:14:37   braked to 0.0 m/s in 4.6 s
+15:14:38   SKIPPED r8_bst_f100_lat_r25: still 68.0 m/s
+15:14:38 [29/73] r8_bst_f100_lat_r50 (strafe mirrored): boosted, toward the nose (~501 m/s): forward 100 % + full right strafe + roll 50 % (120 deg/s), 14 s
+15:14:42   braked to 0.0 m/s in 4.6 s
+15:14:47   flipped (2.8 s of full pitch)
+15:14:47   boost tank 100.0% after 0.0 s
+15:14:47   speed 103.0 m/s before start; braking again
+15:14:52   braked to 0.0 m/s in 4.6 s
+15:14:53   SKIPPED r8_bst_f100_lat_r50: still 65.0 m/s
+15:14:53 [30/73] r8_bst_f100_lat_r100: boosted, toward the nose (~501 m/s): forward 100 % + full right strafe + roll 100 % (240 deg/s), 14 s
+15:14:58   braked to 0.0 m/s in 4.6 s
+15:15:03   flipped (2.8 s of full pitch)
+15:15:03   boost tank 100.0% after 0.0 s
+15:15:03   speed 104.0 m/s before start; braking again
+15:15:07   braked to 0.0 m/s in 4.6 s
+15:15:08   SKIPPED r8_bst_f100_lat_r100: still 65.0 m/s
+15:15:08 [31/73] r8_bst_f100_up_r75: boosted escape from rest: forward 100 % + full up + roll 75 % (180 deg/s), 14 s
+15:15:13   braked to 0.0 m/s in 4.6 s
+15:15:18   flipped (2.8 s of full pitch)
+15:15:18   boost tank 100.0% after 0.0 s
+15:15:18   speed 105.0 m/s before start; braking again
+15:15:23   braked to 0.0 m/s in 4.6 s
+15:15:24   SKIPPED r8_bst_f100_up_r75: still 64.0 m/s
+15:15:24 [32/73] r8_bst_f100_lat_r75 (strafe mirrored): boosted escape from rest: forward 100 % + full right + roll 75 % (180 deg/s), 14 s
+15:15:28   braked to 0.0 m/s in 4.6 s
+15:15:33   flipped (2.8 s of full pitch)
+15:15:33   boost tank 100.0% after 0.0 s
+15:15:33   speed 104.0 m/s before start; braking again
+15:15:38   braked to 0.0 m/s in 4.6 s
+15:15:39   SKIPPED r8_bst_f100_lat_r75: still 67.0 m/s
+15:15:39 [33/73] r8_bst_f100_down_r25: boosted escape from rest: forward 100 % + full DOWN + roll 25 % (60 deg/s), 14 s (red-out?)
+15:15:44   braked to 0.0 m/s in 4.6 s
+15:15:49   flipped (2.8 s of full pitch)
+15:15:49   boost tank 100.0% after 0.0 s
+15:15:49   speed 103.0 m/s before start; braking again
+15:15:53   braked to 0.0 m/s in 4.6 s
+15:15:54   SKIPPED r8_bst_f100_down_r25: still 64.0 m/s
+15:15:54 [34/73] r8_bst_f100_down_r50: boosted escape from rest: forward 100 % + full DOWN + roll 50 % (120 deg/s), 14 s (red-out?)
+15:15:59   braked to 0.0 m/s in 4.6 s
+15:16:04   flipped (2.8 s of full pitch)
+15:16:04   boost tank 100.0% after 0.0 s
+15:16:04   speed 104.0 m/s before start; braking again
+15:16:09   braked to 0.0 m/s in 4.6 s
+15:16:10   SKIPPED r8_bst_f100_down_r50: still 66.0 m/s
+15:16:10 [35/73] r8_bst_f100_down_r100: boosted escape from rest: forward 100 % + full DOWN + roll 100 % (240 deg/s), 14 s (red-out?)
+15:16:14   braked to 0.0 m/s in 4.6 s
+15:16:19   flipped (2.8 s of full pitch)
+15:16:19   boost tank 100.0% after 0.0 s
+15:16:19   speed 105.0 m/s before start; braking again
+15:16:24   braked to 0.0 m/s in 4.6 s
+15:16:25   SKIPPED r8_bst_f100_down_r100: still 66.0 m/s
+15:16:25 [36/73] r8_late_bst_lat_r50: running start: boosted forward 1.6 s (~300 m/s), then forward + full right + roll 50 %, 12 s
+15:16:30   braked to 0.0 m/s in 4.6 s
+15:16:35   flipped (2.8 s of full pitch)
+15:16:35   boost tank 100.0% after 0.0 s
+15:16:35   speed 106.0 m/s before start; braking again
+15:16:39   braked to 0.0 m/s in 4.6 s
+15:16:40   SKIPPED r8_late_bst_lat_r50: still 66.0 m/s
+15:16:40 [37/73] r8_late_bst_up_r50: running start: boosted forward 1.6 s (~300 m/s), then forward + full up + roll 50 %, 12 s
+15:16:45   braked to 0.0 m/s in 4.6 s
+15:16:50   flipped (2.8 s of full pitch)
+15:16:50   boost tank 100.0% after 0.0 s
+15:16:50   speed 106.0 m/s before start; braking again
+15:16:55   braked to 0.0 m/s in 4.6 s
+15:16:56   SKIPPED r8_late_bst_up_r50: still 66.0 m/s
+15:16:56 [38/73] r8_late_bst_down_r50: running start: boosted forward 1.6 s (~300 m/s), then forward + full DOWN + roll 50 %, 12 s (red-out?)
+15:17:01   braked to 0.0 m/s in 5.3 s
+15:17:06   flipped (2.8 s of full pitch)
+15:17:06   boost tank 100.0% after 0.0 s
+15:17:06   speed 105.0 m/s before start; braking again
+15:17:11   braked to 0.0 m/s in 4.6 s
+15:17:12   SKIPPED r8_late_bst_down_r50: still 66.0 m/s
+15:17:12 [39/73] r8_scm_f0_down_r25: SCM, forward 0 % + full DOWN strafe + roll 25 % (50 deg/s), 14 s
+15:17:17   braked to 0.0 m/s in 5.0 s
+15:17:22   flipped (2.8 s of full pitch)
+15:17:22   speed 105.0 m/s before start; braking again
+15:17:26   braked to 0.0 m/s in 4.6 s
+15:17:27   SKIPPED r8_scm_f0_down_r25: still 66.0 m/s
+15:17:27 [40/73] r8_scm_f0_down_r50: SCM, forward 0 % + full DOWN strafe + roll 50 % (100 deg/s), 14 s
+15:17:32   braked to 0.0 m/s in 4.7 s
+15:17:37   flipped (2.8 s of full pitch)
+15:17:37   speed 106.0 m/s before start; braking again
+15:17:42   braked to 0.0 m/s in 4.6 s
+15:17:43   SKIPPED r8_scm_f0_down_r50: still 65.0 m/s
+15:17:43 [41/73] r8_scm_f0_down_r100: SCM, forward 0 % + full DOWN strafe + roll 100 % (200 deg/s), 14 s
+15:17:47   braked to 0.0 m/s in 4.7 s
+15:17:52   flipped (2.8 s of full pitch)
+15:17:52   speed 107.0 m/s before start; braking again
+15:17:57   braked to 0.0 m/s in 4.6 s
+15:17:58   SKIPPED r8_scm_f0_down_r100: still 67.0 m/s
+15:17:58 [42/73] r8_scm_f100_down_r100: SCM, forward 100 % + full DOWN strafe + roll 100 % (200 deg/s), 14 s
+15:18:03   braked to 0.0 m/s in 4.6 s
+15:18:08   flipped (2.8 s of full pitch)
+15:18:08   speed 106.0 m/s before start; braking again
+15:18:12   braked to 0.0 m/s in 4.6 s
+15:18:13   SKIPPED r8_scm_f100_down_r100: still 65.0 m/s
+15:18:13 [43/73] r8_hold_down_scm: SCM full DOWN strafe held 9 s (accelerates ~4.6 s, then constant speed)
+15:18:18   braked to 0.0 m/s in 4.6 s
+15:18:23   flipped (2.8 s of full pitch)
+15:18:23   speed 107.0 m/s before start; braking again
+15:18:28   braked to 0.0 m/s in 4.6 s
+15:18:29   SKIPPED r8_hold_down_scm: still 65.0 m/s
+15:18:29 [44/73] r8_hold_down_boost: boosted full DOWN strafe held 10 s (accelerates ~6 s at 6.6 G)
+15:18:33   braked to 0.0 m/s in 4.6 s
+15:18:38   flipped (2.8 s of full pitch)
+15:18:38   boost tank 100.0% after 0.0 s
+15:18:38   speed 106.0 m/s before start; braking again
+15:18:43   braked to 0.0 m/s in 4.6 s
+15:18:44   SKIPPED r8_hold_down_boost: still 66.0 m/s
+15:18:44 [45/73] r8_onset_lat_scm (strafe mirrored): SCM forward + full right + full roll 15 s, held through any blackout
+15:18:49   braked to 0.0 m/s in 5.0 s
+15:18:54   flipped (2.8 s of full pitch)
+15:18:54   speed 107.0 m/s before start; braking again
+15:18:59   braked to 0.0 m/s in 4.6 s
+15:19:00   SKIPPED r8_onset_lat_scm: still 65.0 m/s
+15:19:00 [46/73] r8_onset_up_scm: SCM forward + full up + full roll 15 s, held through any blackout
+15:19:04   braked to 0.0 m/s in 4.7 s
+15:19:09   flipped (2.8 s of full pitch)
+15:19:09   speed 106.0 m/s before start; braking again
+15:19:14   braked to 0.0 m/s in 4.7 s
+15:19:15   SKIPPED r8_onset_up_scm: still 66.0 m/s
+15:19:15 [47/73] r8_onset_up50_scm: SCM forward + 50 % up + full roll 15 s (~5 G, matches full down)
+15:19:20   braked to 0.0 m/s in 4.6 s
+15:19:24   flipped (2.8 s of full pitch)
+15:19:25   speed 105.0 m/s before start; braking again
+15:19:29   braked to 0.0 m/s in 4.7 s
+15:19:30   SKIPPED r8_onset_up50_scm: still 67.0 m/s
+15:19:30 [48/73] r8_onset_down_scm: SCM forward + full DOWN + full roll 15 s (~5 G)
+15:19:35   braked to 0.0 m/s in 4.6 s
+15:19:40   flipped (2.8 s of full pitch)
+15:19:40   speed 104.0 m/s before start; braking again
+15:19:45   braked to 0.0 m/s in 4.6 s
+15:19:46   SKIPPED r8_onset_down_scm: still 64.0 m/s
+15:19:46 [49/73] r8_cm_lat_scm: countermeasure: SCM forward + full right + full roll, reverse the corkscrew when practically black, 18 s
+15:19:50   braked to 0.0 m/s in 4.6 s
+15:19:55   flipped (2.8 s of full pitch)
+15:19:55   speed 105.0 m/s before start; braking again
+15:20:00   braked to 0.0 m/s in 4.7 s
+15:20:01   SKIPPED r8_cm_lat_scm: still 66.0 m/s
+15:20:01 [50/73] r8_cm_up_scm: countermeasure: SCM forward + full up + full roll, reverse when practically black, 18 s
+15:20:06   braked to 0.0 m/s in 4.7 s
+15:20:10   flipped (2.8 s of full pitch)
+15:20:11   speed 105.0 m/s before start; braking again
+15:20:15   braked to 0.0 m/s in 4.6 s
+15:20:16   SKIPPED r8_cm_up_scm: still 65.0 m/s
+15:20:16 [51/73] r8_cm_down_scm: countermeasure against RED-out: SCM forward + full DOWN + full roll, reverse when practically black, 18 s
+15:20:21   braked to 0.0 m/s in 4.6 s
+15:20:26   flipped (2.8 s of full pitch)
+15:20:26   speed 105.0 m/s before start; braking again
+15:20:30   braked to 0.0 m/s in 4.6 s
+15:20:32   SKIPPED r8_cm_down_scm: still 64.0 m/s
+15:20:32 [52/73] r8_cm_lat_boost (strafe mirrored): countermeasure: boosted escape forward + full right + full roll, reverse when practically black, 14 s
+15:20:37   braked to 0.0 m/s in 5.0 s
+15:20:41   flipped (2.8 s of full pitch)
+15:20:41   boost tank 100.0% after 0.0 s
+15:20:42   speed 102.0 m/s before start; braking again
+15:20:46   braked to 0.0 m/s in 4.7 s
+15:20:47   SKIPPED r8_cm_lat_boost: still 65.0 m/s
+15:20:47 [53/73] r8_cm_down_boost: countermeasure against RED-out: boosted escape forward + full DOWN + full roll, reverse when practically black, 14 s
+15:20:52   braked to 0.0 m/s in 4.6 s
+15:20:57   flipped (2.8 s of full pitch)
+15:20:57   boost tank 100.0% after 0.0 s
+15:20:57   speed 104.0 m/s before start; braking again
+15:21:02   braked to 0.0 m/s in 4.6 s
+15:21:03   SKIPPED r8_cm_down_boost: still 66.0 m/s
+15:21:03 [54/73] r9_vis_scm_f100_lat_r100: vision gradient: SCM forward 100 % + full right + roll 100 %, 16 s, cockpit view throughout
+15:21:08   braked to 0.0 m/s in 5.0 s
+15:21:13   flipped (2.8 s of full pitch)
+15:21:13   speed 105.0 m/s before start; braking again
+15:21:18   braked to 0.0 m/s in 4.9 s
+15:21:19   SKIPPED r9_vis_scm_f100_lat_r100: still 66.0 m/s
+15:21:19 [55/73] r9_vis_scm_f100_up_r100: vision gradient: SCM forward 100 % + full up + roll 100 %, 16 s
+15:21:24   braked to 0.0 m/s in 5.3 s
+15:21:29   flipped (2.8 s of full pitch)
+15:21:29   speed 107.0 m/s before start; braking again
+15:21:34   braked to 0.0 m/s in 4.6 s
+15:21:35   SKIPPED r9_vis_scm_f100_up_r100: still 66.0 m/s
+15:21:35 [56/73] r9_vis_scm_f100_down_r100: vision gradient (RED-out): SCM forward 100 % + full DOWN + roll 100 %, 16 s
+15:21:39   braked to 0.0 m/s in 4.6 s
+15:21:44   flipped (2.8 s of full pitch)
+15:21:44   speed 105.0 m/s before start; braking again
+15:21:49   braked to 0.0 m/s in 4.6 s
+15:21:50   SKIPPED r9_vis_scm_f100_down_r100: still 64.0 m/s
+15:21:50 [57/73] r9_vis_scm_f0_lat_r50 (strafe mirrored): vision gradient: SCM forward 0 % + full right + roll 50 %, 16 s
+15:21:55   braked to 0.0 m/s in 4.6 s
+15:21:59   flipped (2.8 s of full pitch)
+15:21:59   speed 105.0 m/s before start; braking again
+15:22:04   braked to 0.0 m/s in 4.6 s
+15:22:05   SKIPPED r9_vis_scm_f0_lat_r50: still 65.0 m/s
+15:22:05 [58/73] r9_vis_scm_f0_up_r50: vision gradient: SCM forward 0 % + full up + roll 50 %, 16 s
+15:22:10   braked to 0.0 m/s in 4.6 s
+15:22:15   flipped (2.8 s of full pitch)
+15:22:15   speed 105.0 m/s before start; braking again
+15:22:19   braked to 0.0 m/s in 4.7 s
+15:22:20   SKIPPED r9_vis_scm_f0_up_r50: still 65.0 m/s
+15:22:20 [59/73] r9_vis_scm_f0_down_r50: vision gradient (RED-out): SCM forward 0 % + full DOWN + roll 50 %, 16 s
+15:22:25   braked to 0.0 m/s in 4.7 s
+15:22:30   flipped (2.8 s of full pitch)
+15:22:30   speed 105.0 m/s before start; braking again
+15:22:35   braked to 0.0 m/s in 4.6 s
+15:22:36   SKIPPED r9_vis_scm_f0_down_r50: still 66.0 m/s
+15:22:36 [60/73] r9_vis_bst_f100_lat_r50: vision gradient: boosted escape from rest, forward 100 % + full right + roll 50 %, 14 s
+15:22:40   braked to 0.0 m/s in 4.6 s
+15:22:45   flipped (2.8 s of full pitch)
+15:22:45   boost tank 100.0% after 0.0 s
+15:22:45   speed 105.0 m/s before start; braking again
+15:22:50   braked to 0.0 m/s in 4.6 s
+15:22:51   SKIPPED r9_vis_bst_f100_lat_r50: still 66.0 m/s
+15:22:51 [61/73] r9_vis_bst_f100_up_r50: vision gradient: boosted escape from rest, forward 100 % + full up + roll 50 %, 14 s
+15:22:56   braked to 0.0 m/s in 4.6 s
+15:23:01   flipped (2.8 s of full pitch)
+15:23:01   boost tank 100.0% after 0.0 s
+15:23:01   speed 104.0 m/s before start; braking again
+15:23:05   braked to 0.0 m/s in 4.6 s
+15:23:07   SKIPPED r9_vis_bst_f100_up_r50: still 67.0 m/s
+15:23:07 [62/73] r9_vis_bst_f100_down_r50: vision gradient (RED-out): boosted escape from rest, forward 100 % + full DOWN + roll 50 %, 14 s
+15:23:11   braked to 0.0 m/s in 4.6 s
+15:23:16   flipped (2.8 s of full pitch)
+15:23:16   boost tank 100.0% after 0.0 s
+15:23:16   speed 105.0 m/s before start; braking again
+15:23:21   braked to 0.0 m/s in 4.6 s
+15:23:22   SKIPPED r9_vis_bst_f100_down_r50: still 66.0 m/s
+15:23:22 [63/73] r9_vis_hold_down_scm: vision gradient (RED-out): SCM full DOWN strafe held 10 s, no roll
+15:23:26   braked to 0.0 m/s in 4.6 s
+15:23:31   flipped (2.8 s of full pitch)
+15:23:31   speed 107.0 m/s before start; braking again
+15:23:36   braked to 1.0 m/s in 4.6 s
+15:23:37   SKIPPED r9_vis_hold_down_scm: still 65.0 m/s
+15:23:37 [64/73] r9_vis_hold_down_boost: vision gradient (RED-out): boosted full DOWN strafe held 12 s, no roll
+15:23:42   braked to 0.0 m/s in 4.6 s
+15:23:47   flipped (2.8 s of full pitch)
+15:23:47   boost tank 100.0% after 0.0 s
+15:23:47   speed 106.0 m/s before start; braking again
+15:23:51   braked to 0.0 m/s in 4.6 s
+15:23:52   SKIPPED r9_vis_hold_down_boost: still 65.0 m/s
+15:23:52 [65/73] r5_yawcal_15_boost (strafe mirrored): yaw 15 %, boosted, + 25 % right strafe; measures the slow yaw rate (linear would be 9.4 deg/s)
+15:23:57   braked to 0.0 m/s in 4.6 s
+15:24:02   flipped (2.8 s of full pitch)
+15:24:02   boost tank 100.0% after 0.0 s
+15:24:02   speed 106.0 m/s before start; braking again
+15:24:07   braked to 0.0 m/s in 4.6 s
+15:24:08   SKIPPED r5_yawcal_15_boost: still 66.0 m/s
+15:24:08 [66/73] r5_yawsweep_right: pin at boosted nose 6 s, release translation, yaw right 15 % for 10 s (~94 deg); speed traces r(heading)
+15:24:13   braked to 0.0 m/s in 5.0 s
+15:24:18   flipped (2.8 s of full pitch)
+15:24:18   boost tank 100.0% after 0.0 s
+15:24:18   speed 105.0 m/s before start; braking again
+15:24:22   braked to 1.0 m/s in 4.6 s
+15:24:23   SKIPPED r5_yawsweep_right: still 66.0 m/s
+15:24:23 [67/73] r5_yawsweep_left: same, yawing left (checks symmetry and the yaw sign)
+15:24:28   braked to 0.0 m/s in 4.6 s
+15:24:33   flipped (2.8 s of full pitch)
+15:24:33   boost tank 100.0% after 0.0 s
+15:24:33   speed 105.0 m/s before start; braking again
+15:24:38   braked to 0.0 m/s in 4.6 s
+15:24:39   SKIPPED r5_yawsweep_left: still 66.0 m/s
+15:24:39 [68/73] r5_nose_slide_long: pin at boosted nose 6 s, then forward + full left strafe 13 s (round 3 trace was 7 s)
+15:24:43   braked to 0.0 m/s in 4.6 s
+15:24:48   flipped (2.8 s of full pitch)
+15:24:48   boost tank 100.0% after 0.0 s
+15:24:48   speed 106.0 m/s before start; braking again
+15:24:53   braked to 0.0 m/s in 4.9 s
+15:24:54   SKIPPED r5_nose_slide_long: still 66.0 m/s
+15:24:54 [69/73] r5_fwd_lat_rest (strafe mirrored): boosted forward + full left strafe from rest
+15:24:59   braked to 0.0 m/s in 4.6 s
+15:25:04   flipped (2.8 s of full pitch)
+15:25:04   boost tank 100.0% after 0.0 s
+15:25:04   speed 106.0 m/s before start; braking again
+15:25:09   braked to 1.0 m/s in 4.6 s
+15:25:10   SKIPPED r5_fwd_lat_rest: still 65.0 m/s
+15:25:10 [70/73] r4_boost_back: boosted full reverse from rest (spviewer 5.9 G; plateau 267)
+15:25:14   braked to 0.0 m/s in 4.6 s
+15:25:19   flipped (2.8 s of full pitch)
+15:25:19   boost tank 100.0% after 0.0 s
+15:25:19   speed 105.0 m/s before start; braking again
+15:25:24   braked to 0.0 m/s in 4.6 s
+15:25:25   SKIPPED r4_boost_back: still 66.0 m/s
+15:25:25 [71/73] r4_boost_down: boosted full down from rest (spviewer 6.6 G; plateau 391)
+15:25:30   braked to 0.0 m/s in 5.0 s
+15:25:35   flipped (2.8 s of full pitch)
+15:25:35   boost tank 100.0% after 0.0 s
+15:25:35   speed 104.0 m/s before start; braking again
+15:25:40   braked to 0.0 m/s in 4.7 s
+15:25:41   SKIPPED r4_boost_down: still 65.0 m/s
+15:25:41 [72/73] r4_boost_up: boosted full up from rest (repeat check, 12.9 G; plateau 394)
+15:25:46   braked to 0.0 m/s in 5.0 s
+15:25:51   flipped (2.8 s of full pitch)
+15:25:51   boost tank 100.0% after 0.0 s
+15:25:51   speed 105.0 m/s before start; braking again
+15:25:55   braked to 0.0 m/s in 4.6 s
+15:25:56   SKIPPED r4_boost_up: still 65.0 m/s
+15:25:56 [73/73] r4_scm_up: SCM full up from rest (9.9 G; plateau 225)
+15:26:01   braked to 0.0 m/s in 5.0 s
+15:26:06   flipped (2.8 s of full pitch)
+15:26:06   speed 105.0 m/s before start; braking again
+15:26:11   braked to 0.0 m/s in 4.6 s
+15:26:12   SKIPPED r4_scm_up: still 66.0 m/s
+15:50:40 Capture: one region per frame; speed, g, ab, cam
+15:50:40 Focus the Star Citizen window. Starting in 5 s. Press F12 at any time to abort.
+15:50:45 [1/61] r8_scm_f50_lat_r100: SCM, forward 50 % + full right strafe + roll 100 % (200 deg/s), 14 s
+15:50:46   braked to 0.0 m/s in 1.0 s
+15:51:05   recorded 744 frames (45 fps)
+15:51:05   camera key: 6 of 13 presses switched the view; black checks 1 worked / 1 did nothing; TRUE blackout from 14.98 s
+15:51:06   HUD back after 0.9 s; resting 8 s
+15:51:14 [2/61] r8_scm_f100_up_r25: SCM, forward 100 % + full up strafe + roll 25 % (50 deg/s), 14 s
+15:51:22   braked to 0.0 m/s in 8.3 s
+15:51:27   flipped (2.8 s of full pitch)
+15:51:27   speed 107.0 m/s before start; braking again
+15:51:34   braked to 0.0 m/s in 7.0 s
+15:51:35   SKIPPED r8_scm_f100_up_r25: still 66.0 m/s
+15:51:35 [3/61] r8_scm_f100_up_r100: SCM, forward 100 % + full up strafe + roll 100 % (200 deg/s), 14 s
+15:51:41   braked to 0.0 m/s in 5.3 s
+15:51:45   flipped (2.8 s of full pitch)
+15:51:45   speed 107.0 m/s before start; braking again
+15:51:50   braked to 0.0 m/s in 4.6 s
+15:51:51   SKIPPED r8_scm_f100_up_r100: still 65.0 m/s
+15:51:51 ABORTED: 2 tests in a row could not start: the ship still reads 65.0 m/s after braking. It is probably out of bounds (being pushed back), destroyed or at the respawn menu. Respawn or fly back to the middle of the arena, then continue with: run_campaign.bat --resume <this session's folder name>. All inputs released.
+16:01:19 Capture: one region per frame; speed, g, ab, cam
+16:01:19 Focus the Star Citizen window. Starting in 5 s. Press F12 at any time to abort.
+16:01:24 [1/60] r8_scm_f100_up_r25: SCM, forward 100 % + full up strafe + roll 25 % (50 deg/s), 14 s
+16:01:34   braked to 0.0 m/s in 10.4 s
+16:01:53   recorded 721 frames (44 fps)
+16:01:53   camera key: 8 of 8 presses switched the view; black checks 0 worked / 0 did nothing
+16:01:53 [2/60] r8_scm_f100_up_r100: SCM, forward 100 % + full up strafe + roll 100 % (200 deg/s), 14 s
+16:02:01   braked to 0.0 m/s in 8.2 s
+16:02:06   flipped (2.8 s of full pitch)
+16:02:24   recorded 726 frames (44 fps)
+16:02:24   camera key: 8 of 10 presses switched the view; black checks 5 worked / 1 did nothing; TRUE blackout from 11.40 s; key stopped at 11.40 s
+16:02:25   camera back to the cockpit view after 1 press(es)
+16:02:26   HUD back after 1.3 s; resting 8 s
+16:02:34 [3/60] r8_scm_f100_lat_r25: SCM, forward 100 % + full right strafe + roll 25 % (50 deg/s), 14 s
+16:02:43   braked to 0.0 m/s in 8.8 s
+16:02:48   flipped (2.8 s of full pitch)
+16:02:48   speed 175.0 m/s before start; braking again
+16:02:53   braked to 0.0 m/s in 5.6 s
+16:03:12   recorded 718 frames (44 fps)
+16:03:12   camera key: 9 of 9 presses switched the view; black checks 0 worked / 0 did nothing
+16:03:13   camera back to the cockpit view after 1 press(es)
+16:03:13 [4/60] r8_scm_f100_lat_r100 (strafe mirrored): SCM, forward 100 % + full right strafe + roll 100 % (200 deg/s), 14 s
+16:03:22   braked to 0.0 m/s in 8.2 s
+16:03:27   flipped (2.8 s of full pitch)
+16:03:44   recorded 732 frames (44 fps)
+16:03:44   camera key: 8 of 11 presses switched the view; black checks 5 worked / 0 did nothing; key stopped at 8.91 s
+16:03:45   HUD back after 0.9 s; resting 8 s
+16:03:53 [5/60] r8_bst_f0_up_r25: boosted, at the sides (394 m/s): forward 0 % + full up strafe + roll 25 % (60 deg/s), 14 s
+16:04:02   braked to 0.0 m/s in 8.2 s
+16:04:07   flipped (2.8 s of full pitch)
+16:04:07   boost tank 100.0% after 0.0 s
+16:04:24   recorded 741 frames (45 fps)
+16:04:24   grey-out began 4.41 s into the inputs, HUD gone at 4.41 s
+16:04:24   camera key: 6 of 12 presses switched the view; black checks 3 worked / 2 did nothing; TRUE blackout from 4.59 s
+16:04:57   camera back to the cockpit view after 1 press(es)
+16:04:58   HUD back after 0.9 s; resting 8 s
+16:05:06 [6/60] r8_bst_f0_up_r100: boosted, at the sides (394 m/s): forward 0 % + full up strafe + roll 100 % (240 deg/s), 14 s
+16:05:19   braked to 0.0 m/s in 12.5 s
+16:05:23   flipped (2.8 s of full pitch)
+16:05:23   boost tank 100.0% after 0.0 s
+16:05:41   recorded 751 frames (45 fps)
+16:05:41   camera key: 5 of 11 presses switched the view; black checks 5 worked / 6 did nothing; TRUE blackout from 5.26 s; key stopped at 5.26 s
+16:05:58   HUD back after 0.9 s; resting 8 s
+16:06:06 [7/60] r8_bst_f0_lat_r25: boosted, at the sides (394 m/s): forward 0 % + full right strafe + roll 25 % (60 deg/s), 14 s
+16:06:07   braked to 0.0 m/s in 0.7 s
+16:06:11   flipped (2.8 s of full pitch)
+16:06:11   boost tank 100.0% after 0.0 s
+16:06:29   recorded 727 frames (44 fps)
+16:06:29   camera key: 5 of 9 presses switched the view; black checks 2 worked / 0 did nothing; key stopped at 6.20 s
+16:06:30   camera back to the cockpit view after 1 press(es)
+16:06:30 [8/60] r8_bst_f0_lat_r100 (strafe mirrored): boosted, at the sides (394 m/s): forward 0 % + full right strafe + roll 100 % (240 deg/s), 14 s
+16:06:45   braked to 0.0 m/s in 14.7 s
+16:06:50   flipped (2.8 s of full pitch)
+16:06:50   boost tank 100.0% after 0.0 s
+16:07:07   recorded 744 frames (45 fps)
+16:07:07   camera key: 7 of 14 presses switched the view; black checks 6 worked / 1 did nothing; TRUE blackout from 11.16 s
+16:07:21   HUD back after 0.9 s; resting 8 s
+16:07:29 [9/60] r8_bst_f50_up_r100: boosted, mid-way (~455 m/s): forward 50 % + full up strafe + roll 100 % (240 deg/s), 14 s
+16:07:37   braked to 1.0 m/s in 8.2 s
+16:07:42   flipped (2.8 s of full pitch)
+16:07:42   boost tank 100.0% after 0.0 s
+16:08:00   recorded 745 frames (45 fps)
+16:08:00   camera key: 10 of 12 presses switched the view; black checks 8 worked / 0 did nothing
+16:08:01   HUD back after 0.9 s; resting 8 s
+16:08:09 [10/60] r8_bst_f50_lat_r25: boosted, mid-way (~455 m/s): forward 50 % + full right strafe + roll 25 % (60 deg/s), 14 s
+16:08:18   braked to 0.0 m/s in 9.2 s
+16:08:23   flipped (2.8 s of full pitch)
+16:08:23   boost tank 100.0% after 0.0 s
+16:08:23   speed 106.0 m/s before start; braking again
+16:08:28   braked to 0.0 m/s in 4.9 s
+16:08:29   SKIPPED r8_bst_f50_lat_r25: still 66.0 m/s
+16:08:29 ABORTED: 1 tests in a row could not start: the ship still reads 66.0 m/s after braking. It is probably out of bounds (being pushed back), destroyed or at the respawn menu. Respawn or fly back to the middle of the arena, then continue with: run_campaign.bat --resume <this session's folder name>. All inputs released.
+16:14:35 Capture: one region per frame; speed, g, ab, cam
+16:14:35 Focus the Star Citizen window. Starting in 5 s. Press F12 at any time to abort.
+16:14:40 [1/51] r8_bst_f50_lat_r25: boosted, mid-way (~455 m/s): forward 50 % + full right strafe + roll 25 % (60 deg/s), 14 s
+16:14:41   braked to 0.0 m/s in 1.0 s
+16:14:43   boost tank 100.0% after 0.0 s
+16:15:01   recorded 726 frames (44 fps)
+16:15:01   grey-out began 4.64 s into the inputs, HUD gone at 4.64 s
+16:15:01   camera key: 5 of 8 presses switched the view; black checks 1 worked / 0 did nothing; key stopped at 7.23 s
+16:15:02   camera back to the cockpit view after 1 press(es)
+16:15:03   HUD back after 0.9 s; resting 8 s
+16:15:11 [2/51] r8_bst_f50_lat_r100 (strafe mirrored): boosted, mid-way (~455 m/s): forward 50 % + full right strafe + roll 100 % (240 deg/s), 14 s
+16:15:19   braked to 1.0 m/s in 8.1 s
+16:15:25   flipped (2.8 s of full pitch)
+16:15:25   boost tank 100.0% after 0.0 s
+16:15:42   recorded 744 frames (45 fps)
+16:15:42   camera key: 4 of 11 presses switched the view; black checks 1 worked / 0 did nothing
+16:15:43   camera back to the cockpit view after 1 press(es)
+16:15:43 [3/51] r8_bst_f100_up_r25: boosted, toward the nose (~501 m/s): forward 100 % + full up strafe + roll 25 % (60 deg/s), 14 s
+16:15:52   braked to 1.0 m/s in 9.2 s
+16:15:58   flipped (2.8 s of full pitch)
+16:15:58   boost tank 100.0% after 0.0 s
+16:16:16   recorded 715 frames (43 fps)
+16:16:16   camera key: 11 of 11 presses switched the view; black checks 3 worked / 0 did nothing
+16:16:17   camera back to the cockpit view after 1 press(es)
+16:16:17 [4/51] r8_bst_f100_up_r50: boosted, toward the nose (~501 m/s): forward 100 % + full up strafe + roll 50 % (120 deg/s), 14 s
+16:16:27   braked to 0.0 m/s in 10.5 s
+16:16:33   flipped (2.8 s of full pitch)
+16:16:33   boost tank 100.0% after 0.0 s
+16:16:51   recorded 728 frames (44 fps)
+16:16:51   camera key: 10 of 10 presses switched the view; black checks 8 worked / 0 did nothing
+16:16:52   HUD back after 0.9 s; resting 8 s
+16:17:00 [5/51] r8_bst_f100_up_r100: boosted, toward the nose (~501 m/s): forward 100 % + full up strafe + roll 100 % (240 deg/s), 14 s
+16:17:09   braked to 0.0 m/s in 8.2 s
+16:17:14   flipped (2.8 s of full pitch)
+16:17:14   boost tank 100.0% after 0.0 s
+16:17:32   recorded 713 frames (43 fps)
+16:17:32   camera key: 8 of 8 presses switched the view; black checks 0 worked / 0 did nothing
+16:17:32 [6/51] r8_bst_f100_lat_r25: boosted, toward the nose (~501 m/s): forward 100 % + full right strafe + roll 25 % (60 deg/s), 14 s
+16:17:43   braked to 0.0 m/s in 10.5 s
+16:17:48   flipped (2.8 s of full pitch)
+16:17:49   boost tank 100.0% after 0.0 s
+16:18:06   recorded 722 frames (44 fps)
+16:18:06   grey-out began 8.98 s into the inputs, HUD gone at 8.98 s
+16:18:06   camera key: 9 of 9 presses switched the view; black checks 3 worked / 0 did nothing
+16:18:40   HUD back after 0.9 s; resting 8 s
+16:18:48 [7/51] r8_bst_f100_lat_r50 (strafe mirrored): boosted, toward the nose (~501 m/s): forward 100 % + full right strafe + roll 50 % (120 deg/s), 14 s
+16:18:57   braked to 0.0 m/s in 8.2 s
+16:19:02   flipped (2.8 s of full pitch)
+16:19:02   boost tank 100.0% after 0.0 s
+16:19:20   recorded 730 frames (44 fps)
+16:19:20   camera key: 8 of 8 presses switched the view; black checks 0 worked / 0 did nothing
+16:19:20 [8/51] r8_bst_f100_lat_r100: boosted, toward the nose (~501 m/s): forward 100 % + full right strafe + roll 100 % (240 deg/s), 14 s
+16:19:31   braked to 0.0 m/s in 10.5 s
+16:19:37   flipped (2.8 s of full pitch)
+16:19:37   boost tank 100.0% after 0.0 s
+16:19:55   recorded 716 frames (43 fps)
+16:19:55   camera key: 10 of 10 presses switched the view; black checks 5 worked / 0 did nothing
+16:19:55 [9/51] r8_bst_f100_up_r75: boosted escape from rest: forward 100 % + full up + roll 75 % (180 deg/s), 14 s
+16:20:05   braked to 0.0 m/s in 10.1 s
+16:20:11   flipped (2.8 s of full pitch)
+16:20:11   boost tank 100.0% after 0.0 s
+16:20:28   recorded 712 frames (43 fps)
+16:20:28   camera key: 9 of 9 presses switched the view; black checks 0 worked / 0 did nothing
+16:20:45 [10/51] r8_bst_f100_lat_r75 (strafe mirrored): boosted escape from rest: forward 100 % + full right + roll 75 % (180 deg/s), 14 s
+16:20:54   braked to 0.0 m/s in 8.2 s
+16:20:59   flipped (2.8 s of full pitch)
+16:20:59   boost tank 100.0% after 0.0 s
+16:21:17   recorded 726 frames (44 fps)
+16:21:17   camera key: 11 of 11 presses switched the view; black checks 7 worked / 0 did nothing
+16:21:17   camera back to the cockpit view after 1 press(es)
+16:21:19   HUD back after 1.6 s; resting 8 s
+16:21:27 [11/51] r8_bst_f100_down_r25: boosted escape from rest: forward 100 % + full DOWN + roll 25 % (60 deg/s), 14 s (red-out?)
+16:21:35   braked to 0.0 m/s in 8.2 s
+16:21:41   flipped (2.8 s of full pitch)
+16:21:41   boost tank 100.0% after 0.0 s
+16:21:59   recorded 713 frames (43 fps)
+16:21:59   camera key: 8 of 8 presses switched the view; black checks 2 worked / 0 did nothing
+16:22:00   HUD back after 0.9 s; resting 8 s
+16:22:08 [12/51] r8_bst_f100_down_r50: boosted escape from rest: forward 100 % + full DOWN + roll 50 % (120 deg/s), 14 s (red-out?)
+16:22:39   braked to 0.0 m/s in 30.8 s
+16:22:45   flipped (2.8 s of full pitch)
+16:22:45   boost tank 100.0% after 0.0 s
+16:22:45   speed 9.0 m/s before start; braking again
+16:22:47   braked to 0.0 m/s in 2.3 s
+16:23:06   recorded 730 frames (44 fps)
+16:23:06   grey-out began 1.68 s into the inputs
+16:23:06   camera key: 10 of 10 presses switched the view; black checks 4 worked / 0 did nothing
+16:23:08   HUD back after 0.9 s; resting 8 s
+16:23:16 [13/51] r8_bst_f100_down_r100: boosted escape from rest: forward 100 % + full DOWN + roll 100 % (240 deg/s), 14 s (red-out?)
+16:23:24   braked to 0.0 m/s in 8.2 s
+16:23:30   flipped (2.8 s of full pitch)
+16:23:30   boost tank 100.0% after 0.0 s
+16:23:47   recorded 685 frames (41 fps)
+16:23:47   camera key: 10 of 10 presses switched the view; black checks 0 worked / 0 did nothing
+16:23:48 [14/51] r8_late_bst_lat_r50: running start: boosted forward 1.6 s (~300 m/s), then forward + full right + roll 50 %, 12 s
+16:23:58   braked to 0.0 m/s in 10.5 s
+16:24:04   flipped (2.8 s of full pitch)
+16:24:04   boost tank 100.0% after 0.0 s
+16:24:21   recorded 714 frames (44 fps)
+16:24:21   camera key: 9 of 9 presses switched the view; black checks 6 worked / 0 did nothing
+16:24:22   camera back to the cockpit view after 1 press(es)
+16:24:22 [15/51] r8_late_bst_up_r50: running start: boosted forward 1.6 s (~300 m/s), then forward + full up + roll 50 %, 12 s
+16:24:32   braked to 0.0 m/s in 10.2 s
+16:24:38   flipped (2.8 s of full pitch)
+16:24:38   boost tank 100.0% after 0.0 s
+16:24:55   recorded 671 frames (42 fps)
+16:24:55   camera key: 8 of 8 presses switched the view; black checks 0 worked / 0 did nothing
+16:24:55 [16/51] r8_late_bst_down_r50: running start: boosted forward 1.6 s (~300 m/s), then forward + full DOWN + roll 50 %, 12 s (red-out?)
+16:25:06   braked to 0.0 m/s in 10.5 s
+16:25:12   flipped (2.8 s of full pitch)
+16:25:12   boost tank 100.0% after 0.0 s
+16:25:29   recorded 669 frames (42 fps)
+16:25:29   camera key: 9 of 9 presses switched the view; black checks 7 worked / 0 did nothing
+16:25:30   camera back to the cockpit view after 1 press(es)
+16:25:30 [17/51] r8_scm_f0_down_r25: SCM, forward 0 % + full DOWN strafe + roll 25 % (50 deg/s), 14 s
+16:25:40   braked to 0.0 m/s in 10.2 s
+16:25:46   flipped (2.8 s of full pitch)
+16:26:03   recorded 705 frames (43 fps)
+16:26:03   camera key: 6 of 11 presses switched the view; black checks 1 worked / 0 did nothing
+16:26:04   camera back to the cockpit view after 1 press(es)
+16:26:05   HUD back after 0.9 s; resting 8 s
+16:26:13 [18/51] r8_scm_f0_down_r50: SCM, forward 0 % + full DOWN strafe + roll 50 % (100 deg/s), 14 s
+16:26:18   braked to 1.0 m/s in 4.6 s
+16:26:23   flipped (2.8 s of full pitch)
+16:26:41   recorded 699 frames (42 fps)
+16:26:41   camera key: 5 of 9 presses switched the view; black checks 0 worked / 1 did nothing; TRUE blackout from 7.51 s; key stopped at 7.51 s
+16:26:42   HUD back after 0.9 s; resting 8 s
+16:26:50 [19/51] r8_scm_f0_down_r100: SCM, forward 0 % + full DOWN strafe + roll 100 % (200 deg/s), 14 s
+16:26:54   braked to 0.0 m/s in 4.0 s
+16:27:00   flipped (2.8 s of full pitch)
+16:27:17   recorded 687 frames (42 fps)
+16:27:17   camera key: 6 of 10 presses switched the view; black checks 2 worked / 0 did nothing
+16:27:18 [20/51] r8_scm_f100_down_r100: SCM, forward 100 % + full DOWN strafe + roll 100 % (200 deg/s), 14 s
+16:27:20   braked to 0.0 m/s in 2.7 s
+16:27:26   flipped (2.8 s of full pitch)
+16:27:44   recorded 688 frames (42 fps)
+16:27:44   camera key: 9 of 9 presses switched the view; black checks 4 worked / 0 did nothing
+16:27:45   camera back to the cockpit view after 1 press(es)
+16:27:45 [21/51] r8_hold_down_scm: SCM full DOWN strafe held 9 s (accelerates ~4.6 s, then constant speed)
+16:27:53   braked to 0.0 m/s in 8.2 s
+16:27:59   flipped (2.8 s of full pitch)
+16:28:11   recorded 477 frames (41 fps)
+16:28:11   camera key: 5 of 5 presses switched the view; black checks 0 worked / 0 did nothing
+16:28:12   camera back to the cockpit view after 1 press(es)
+16:28:12 [22/51] r8_hold_down_boost: boosted full DOWN strafe held 10 s (accelerates ~6 s at 6.6 G)
+16:28:18   braked to 0.0 m/s in 5.9 s
+16:28:23   flipped (2.8 s of full pitch)
+16:28:23   boost tank 100.0% after 0.0 s
+16:28:37   recorded 524 frames (42 fps)
+16:28:37   grey-out began 1.71 s into the inputs
+16:28:37   camera key: 3 of 6 presses switched the view; black checks 0 worked / 1 did nothing; TRUE blackout from 5.01 s; key stopped at 5.01 s
+16:28:38   HUD back after 0.9 s; resting 8 s
+16:28:46 [23/51] r8_onset_lat_scm (strafe mirrored): SCM forward + full right + full roll 15 s, held through any blackout
+16:28:52   braked to 0.0 m/s in 5.9 s
+16:28:58   flipped (2.8 s of full pitch)
+16:29:16   recorded 741 frames (42 fps)
+16:29:16   camera key: 6 of 13 presses switched the view; black checks 1 worked / 0 did nothing
+16:29:17   camera back to the cockpit view after 1 press(es)
+16:29:18   HUD back after 1.4 s; resting 8 s
+16:29:26 [24/51] r8_onset_up_scm: SCM forward + full up + full roll 15 s, held through any blackout
+16:29:34   braked to 0.0 m/s in 8.2 s
+16:29:40   flipped (2.8 s of full pitch)
+16:29:58   recorded 735 frames (42 fps)
+16:29:58   camera key: 7 of 9 presses switched the view; black checks 2 worked / 0 did nothing; key stopped at 13.64 s
+16:30:00   camera back to the cockpit view after 1 press(es)
+16:30:01   HUD back after 0.9 s; resting 8 s
+16:30:09 [25/51] r8_onset_up50_scm: SCM forward + 50 % up + full roll 15 s (~5 G, matches full down)
+16:30:17   braked to 0.0 m/s in 8.3 s
+16:30:17   throttle still set (ship sped up to 10.0 m/s with the brake off): tapping it back
+16:30:21   throttle cleared after 1 tap(s)
+16:30:26   flipped (2.8 s of full pitch)
+16:30:44   recorded 735 frames (42 fps)
+16:30:44   camera key: 9 of 9 presses switched the view; black checks 1 worked / 0 did nothing
+16:30:45   camera back to the cockpit view after 1 press(es)
+16:30:45 [26/51] r8_onset_down_scm: SCM forward + full DOWN + full roll 15 s (~5 G)
+16:30:53   braked to 0.0 m/s in 8.2 s
+16:30:59   flipped (2.8 s of full pitch)
+16:31:17   recorded 726 frames (41 fps)
+16:31:17   grey-out began 15.79 s into the inputs, HUD gone at 15.79 s
+16:31:17   camera key: 12 of 12 presses switched the view; black checks 9 worked / 0 did nothing
+16:31:20   HUD back after 2.5 s; resting 8 s
+16:31:28 [27/51] r8_cm_lat_scm: countermeasure: SCM forward + full right + full roll, reverse the corkscrew when practically black, 18 s
+16:31:36   braked to 0.0 m/s in 8.2 s
+16:31:42   flipped (2.8 s of full pitch)
+16:32:03   recorded 873 frames (43 fps)
+16:32:03   grey-out began 4.71 s into the inputs
+16:32:03   reverse at 8.57 s (darkness None)
+16:32:03   resume at 12.58 s (darkness None)
+16:32:03   camera key: 7 of 14 presses switched the view; black checks 0 worked / 1 did nothing; TRUE blackout from 13.67 s
+16:32:05   camera back to the cockpit view after 1 press(es)
+16:32:06   HUD back after 0.9 s; resting 8 s
+16:32:14 [28/51] r8_cm_up_scm: countermeasure: SCM forward + full up + full roll, reverse when practically black, 18 s
+16:32:22   braked to 0.0 m/s in 8.3 s
+16:32:28   flipped (2.8 s of full pitch)
+16:32:49   recorded 861 frames (42 fps)
+16:32:49   grey-out began 8.69 s into the inputs, HUD gone at 8.69 s
+16:32:49   reverse at 11.87 s (darkness 1.0)
+16:32:49   resume at 15.63 s (darkness None)
+16:32:49   camera key: 11 of 16 presses switched the view; black checks 6 worked / 0 did nothing
+16:32:51   HUD back after 0.9 s; resting 8 s
+16:32:59 [29/51] r8_cm_down_scm: countermeasure against RED-out: SCM forward + full DOWN + full roll, reverse when practically black, 18 s
+16:33:07   braked to 0.0 m/s in 8.2 s
+16:33:12   flipped (2.8 s of full pitch)
+16:33:34   recorded 855 frames (42 fps)
+16:33:34   grey-out began 8.06 s into the inputs
+16:33:34   camera key: 9 of 11 presses switched the view; black checks 3 worked / 2 did nothing; TRUE blackout from 9.80 s
+16:33:37   camera back to the cockpit view after 2 press(es)
+16:33:38   HUD back after 0.9 s; resting 8 s
+16:33:46 [30/51] r8_cm_lat_boost (strafe mirrored): countermeasure: boosted escape forward + full right + full roll, reverse when practically black, 14 s
+16:33:55   braked to 0.0 m/s in 9.2 s
+16:33:55   throttle still set (ship sped up to 7.0 m/s with the brake off): tapping it back
+16:33:59   throttle cleared after 1 tap(s)
+16:34:04   flipped (2.8 s of full pitch)
+16:34:04   boost tank 100.0% after 0.0 s
+16:34:22   recorded 679 frames (41 fps)
+16:34:22   camera key: 8 of 8 presses switched the view; black checks 0 worked / 0 did nothing
+16:34:22 [31/51] r8_cm_down_boost: countermeasure against RED-out: boosted escape forward + full DOWN + full roll, reverse when practically black, 14 s
+16:34:33   braked to 0.0 m/s in 10.5 s
+16:34:38   flipped (2.8 s of full pitch)
+16:34:38   boost tank 100.0% after 0.0 s
+16:34:56   recorded 692 frames (42 fps)
+16:34:56   camera key: 8 of 8 presses switched the view; black checks 0 worked / 0 did nothing
+16:34:57   HUD back after 0.9 s; resting 8 s
+16:35:05 [32/51] r9_vis_scm_f100_lat_r100: vision gradient: SCM forward 100 % + full right + roll 100 %, 16 s, cockpit view throughout
+16:35:13   braked to 0.0 m/s in 8.3 s
+16:35:19   flipped (2.8 s of full pitch)
+16:35:38   recorded 797 frames (43 fps)
+16:35:38   grey-out began 3.75 s into the inputs, HUD gone at 5.58 s
+16:35:39   HUD back after 0.9 s; resting 8 s
+16:35:47 [33/51] r9_vis_scm_f100_up_r100: vision gradient: SCM forward 100 % + full up + roll 100 %, 16 s
+16:35:56   braked to 0.0 m/s in 8.3 s
+16:36:01   flipped (2.8 s of full pitch)
+16:36:20   recorded 791 frames (43 fps)
+16:36:20   grey-out began 6.8 s into the inputs, HUD gone at 8.37 s
+16:36:21   HUD back after 0.9 s; resting 8 s
+16:36:29 [34/51] r9_vis_scm_f100_down_r100: vision gradient (RED-out): SCM forward 100 % + full DOWN + roll 100 %, 16 s
+16:36:38   braked to 0.0 m/s in 8.2 s
+16:36:43   flipped (2.8 s of full pitch)
+16:37:03   recorded 799 frames (43 fps)
+16:37:03   grey-out began 5.43 s into the inputs, HUD gone at 9.35 s
+16:37:06   HUD back after 3.1 s; resting 8 s
+16:37:14 [35/51] r9_vis_scm_f0_lat_r50 (strafe mirrored): vision gradient: SCM forward 0 % + full right + roll 50 %, 16 s
+16:37:22   braked to 0.0 m/s in 8.2 s
+16:37:28   flipped (2.8 s of full pitch)
+16:37:47   recorded 788 frames (43 fps)
+16:37:47   grey-out began 2.0 s into the inputs, HUD gone at 3.32 s
+16:37:52   HUD back after 4.9 s; resting 8 s
+16:38:00 [36/51] r9_vis_scm_f0_up_r50: vision gradient: SCM forward 0 % + full up + roll 50 %, 16 s
+16:38:05   braked to 0.0 m/s in 4.6 s
+16:38:10   flipped (2.8 s of full pitch)
+16:38:30   recorded 774 frames (42 fps)
+16:38:30   grey-out began 4.2 s into the inputs, HUD gone at 5.87 s
+16:38:31   HUD back after 0.9 s; resting 8 s
+16:38:39 [37/51] r9_vis_scm_f0_down_r50: vision gradient (RED-out): SCM forward 0 % + full DOWN + roll 50 %, 16 s
+16:38:43   braked to 0.0 m/s in 4.7 s
+16:38:49   flipped (2.8 s of full pitch)
+16:39:08   recorded 802 frames (43 fps)
+16:39:08   grey-out began 2.76 s into the inputs, HUD gone at 4.86 s
+16:39:10   HUD back after 2.3 s; resting 8 s
+16:39:18 [38/51] r9_vis_bst_f100_lat_r50: vision gradient: boosted escape from rest, forward 100 % + full right + roll 50 %, 14 s
+16:39:22   braked to 0.0 m/s in 4.0 s
+16:39:28   flipped (2.8 s of full pitch)
+16:39:28   boost tank 100.0% after 0.0 s
+16:39:46   recorded 698 frames (42 fps)
+16:39:46   grey-out began 1.77 s into the inputs, HUD gone at 2.69 s
+16:39:47   HUD back after 0.9 s; resting 8 s
+16:39:55 [39/51] r9_vis_bst_f100_up_r50: vision gradient: boosted escape from rest, forward 100 % + full up + roll 50 %, 14 s
+16:40:03   braked to 0.0 m/s in 8.2 s
+16:40:09   flipped (2.8 s of full pitch)
+16:40:09   boost tank 100.0% after 0.0 s
+16:40:26   recorded 691 frames (42 fps)
+16:40:26   grey-out began 2.21 s into the inputs, HUD gone at 3.32 s
+16:40:27   HUD back after 0.9 s; resting 8 s
+16:40:35 [40/51] r9_vis_bst_f100_down_r50: vision gradient (RED-out): boosted escape from rest, forward 100 % + full DOWN + roll 50 %, 14 s
+16:40:43   braked to 0.0 m/s in 8.2 s
+16:40:49   flipped (2.8 s of full pitch)
+16:40:49   boost tank 100.0% after 0.0 s
+16:41:07   recorded 690 frames (42 fps)
+16:41:07   grey-out began 1.68 s into the inputs, HUD gone at 2.25 s
+16:41:08   HUD back after 0.9 s; resting 8 s
+16:41:16 [41/51] r9_vis_hold_down_scm: vision gradient (RED-out): SCM full DOWN strafe held 10 s, no roll
+16:41:24   braked to 0.0 m/s in 8.2 s
+16:41:30   flipped (2.8 s of full pitch)
+16:41:43   recorded 514 frames (41 fps)
+16:41:43   grey-out began 2.87 s into the inputs
+16:41:44   HUD back after 0.9 s; resting 8 s
+16:41:52 [42/51] r9_vis_hold_down_boost: vision gradient (RED-out): boosted full DOWN strafe held 12 s, no roll
+16:41:58   braked to 0.0 m/s in 5.9 s
+16:42:04   flipped (2.8 s of full pitch)
+16:42:04   boost tank 100.0% after 0.0 s
+16:42:19   recorded 622 frames (43 fps)
+16:42:19   grey-out began 1.71 s into the inputs, HUD gone at 2.97 s
+16:42:20   HUD back after 0.9 s; resting 8 s
+16:42:28 [43/51] r5_yawcal_15_boost (strafe mirrored): yaw 15 %, boosted, + 25 % right strafe; measures the slow yaw rate (linear would be 9.4 deg/s)
+16:42:34   braked to 0.0 m/s in 6.0 s
+16:42:40   flipped (2.8 s of full pitch)
+16:42:40   boost tank 100.0% after 0.0 s
+16:42:57   recorded 690 frames (42 fps)
+16:42:57 [44/51] r5_yawsweep_right: pin at boosted nose 6 s, release translation, yaw right 15 % for 10 s (~94 deg); speed traces r(heading)
+16:43:03   braked to 0.0 m/s in 5.6 s
+16:43:09   flipped (2.8 s of full pitch)
+16:43:14   boost tank 100.0% after 5.2 s
+16:43:34   recorded 793 frames (42 fps)
+16:43:35   HUD back after 0.9 s; resting 8 s
+16:43:43 [45/51] r5_yawsweep_left: same, yawing left (checks symmetry and the yaw sign)
+16:43:49   braked to 0.0 m/s in 5.9 s
+16:43:55   flipped (2.8 s of full pitch)
+16:43:55   boost tank 100.0% after 0.0 s
+16:44:15   recorded 777 frames (41 fps)
+16:44:15   grey-out began 2.55 s into the inputs
+16:44:16   HUD back after 0.9 s; resting 8 s
+16:44:24 [46/51] r5_nose_slide_long: pin at boosted nose 6 s, then forward + full left strafe 13 s (round 3 trace was 7 s)
+16:44:30   braked to 0.0 m/s in 5.9 s
+16:44:36   flipped (2.8 s of full pitch)
+16:44:36   boost tank 100.0% after 0.0 s
+16:44:59   recorded 879 frames (41 fps)
+16:44:59   grey-out began 2.47 s into the inputs
+16:45:00   HUD back after 0.9 s; resting 8 s
+16:45:08 [47/51] r5_fwd_lat_rest (strafe mirrored): boosted forward + full left strafe from rest
+16:45:16   braked to 0.0 m/s in 8.2 s
+16:45:22   flipped (2.8 s of full pitch)
+16:45:22   boost tank 100.0% after 0.0 s
+16:45:40   recorded 678 frames (41 fps)
+16:45:40   grey-out began 1.74 s into the inputs
+16:45:41   HUD back after 0.9 s; resting 8 s
+16:45:49 [48/51] r4_boost_back: boosted full reverse from rest (spviewer 5.9 G; plateau 267)
+16:45:57   braked to 0.0 m/s in 8.2 s
+16:46:03   flipped (2.8 s of full pitch)
+16:46:03   boost tank 100.0% after 0.0 s
+16:46:20   recorded 668 frames (41 fps)
+16:46:20 [49/51] r4_boost_down: boosted full down from rest (spviewer 6.6 G; plateau 391)
+16:46:27   braked to 0.0 m/s in 6.3 s
+16:46:27   throttle still set (ship sped up to 17.0 m/s with the brake off): tapping it back
+16:46:31   throttle still set (ship sped up to 14.0 m/s with the brake off): tapping it back
+16:46:36   throttle still set (ship sped up to 9.0 m/s with the brake off): tapping it back
+16:46:41   throttle cleared after 3 tap(s)
+16:46:45   flipped (2.8 s of full pitch)
+16:47:07   boost tank 100.0% after 21.8 s
+16:47:12   recorded 194 frames (40 fps)
+16:47:12   grey-out began 1.69 s into the inputs, HUD gone at 2.8 s
+16:47:12   HUD gone 2.8 s into the inputs (policy release): inputs released, test ended early.
+16:47:16   HUD back after 3.2 s; resting 8 s
+16:47:24 [50/51] r4_boost_up: boosted full up from rest (repeat check, 12.9 G; plateau 394)
+16:47:29   braked to 0.0 m/s in 5.6 s
+16:47:35   flipped (2.8 s of full pitch)
+16:47:35   boost tank 100.0% after 0.0 s
+16:47:48   recorded 513 frames (41 fps)
+16:47:48 [51/51] r4_scm_up: SCM full up from rest (9.9 G; plateau 225)
+16:48:21   braked to 1.0 m/s in 32.3 s
+16:48:26   flipped (2.8 s of full pitch)
+16:48:35   recorded 351 frames (41 fps)

@@ -26,7 +26,7 @@ sys.path.insert(0, str(ROOT))
 
 # Outstanding rounds, in the order worth flying them (docs/flight-model-tests.md).
 CAMPAIGN = {"6": "tests_round6.yaml", "7": "tests_round7.yaml", "8": "tests_round8.yaml", "9": "tests_round9.yaml",
-            "5": "tests_round5.yaml", "4": "tests_round4.yaml"}
+            "5": "tests_round5.yaml", "4": "tests_round4.yaml", "10": "tests_round10.yaml"}
 
 
 def cfg():
@@ -106,7 +106,7 @@ def main():
     p = sub.add_parser("process"); p.add_argument("session"); p.add_argument("--stride", type=int, default=1)
     a = sub.add_parser("analyze"); a.add_argument("session")
     cp = sub.add_parser("campaign")
-    cp.add_argument("--rounds", nargs="+", default=list(CAMPAIGN), choices=list(CAMPAIGN), help="default: 6 7 8 9 5 4")
+    cp.add_argument("--rounds", nargs="+", default=["10"], choices=list(CAMPAIGN), help="default: 10 (rounds 4-9 are done)")
     cp.add_argument("--resume", metavar="SESSION", help="continue a session: skip the tests it already has and save new ones into it")
     cp.add_argument("--yes", action="store_true", help="don't wait for Enter before starting")
     cp.add_argument("--dry-run", action="store_true")

@@ -1,0 +1,141 @@
+{
+ "presses": 11,
+ "cuts": 11,
+ "ignored": 0,
+ "blind": 0,
+ "black_checks": 7,
+ "black_checks_worked": 7,
+ "black_checks_dead": 0,
+ "true_blackout_at": null,
+ "true_blackout_doubt": false,
+ "resyncs": [
+  {
+   "t": 7.235,
+   "counted": 0,
+   "seen": "external"
+  },
+  {
+   "t": 9.479,
+   "counted": 2,
+   "seen": "cockpit"
+  }
+ ],
+ "conscious_dark_at": 2.1964,
+ "key_lost_at": null,
+ "key_back_at": null,
+ "stray_cuts": [
+  2.658,
+  3.685,
+  4.691,
+  5.702,
+  7.745,
+  8.581,
+  8.665,
+  9.802,
+  11.856,
+  13.805
+ ],
+ "log": [
+  {
+   "t": 2.1964,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 2.363,
+   "idx_after": 1
+  },
+  {
+   "t": 3.3932,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 3.554,
+   "idx_after": 0
+  },
+  {
+   "t": 4.2218,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 4.4,
+   "idx_after": 2
+  },
+  {
+   "t": 5.4295,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 5.61,
+   "idx_after": 1
+  },
+  {
+   "t": 6.2356,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 6.427,
+   "idx_after": 0
+  },
+  {
+   "t": 8.3333,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 8.517,
+   "idx_after": 0
+  },
+  {
+   "t": 10.3136,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 10.485,
+   "idx_after": 2
+  },
+  {
+   "t": 11.5169,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 11.68,
+   "idx_after": 0
+  },
+  {
+   "t": 12.3558,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 12.545,
+   "idx_after": 2
+  },
+  {
+   "t": 13.5706,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 13.761,
+   "idx_after": 0
+  },
+  {
+   "t": 14.2884,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 14.462,
+   "idx_after": 2
+  }
+ ],
+ "base_mean": 17.551816940307617,
+ "dark_thr": 8.775908470153809
+}

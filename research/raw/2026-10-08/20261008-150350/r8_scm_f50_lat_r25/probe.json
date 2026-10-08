@@ -1,0 +1,98 @@
+{
+ "presses": 8,
+ "cuts": 4,
+ "ignored": 4,
+ "blind": 0,
+ "black_checks": 1,
+ "black_checks_worked": 0,
+ "black_checks_dead": 1,
+ "true_blackout_at": 8.828,
+ "true_blackout_doubt": false,
+ "resyncs": [
+  {
+   "t": 6.529,
+   "counted": 0,
+   "seen": "external"
+  }
+ ],
+ "conscious_dark_at": null,
+ "key_lost_at": 8.828,
+ "key_back_at": null,
+ "stray_cuts": [],
+ "log": [
+  {
+   "t": 3.0351,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 3.218,
+   "idx_after": 1
+  },
+  {
+   "t": 4.2418,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 4.446,
+   "idx_after": 2
+  },
+  {
+   "t": 5.4745,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 5.726,
+   "idx_after": 0
+  },
+  {
+   "t": 7.7801,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 7.979,
+   "idx_after": 2
+  },
+  {
+   "t": 8.828,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "ignored",
+   "cut_t": null,
+   "idx_after": 2
+  },
+  {
+   "t": 10.6401,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "ignored",
+   "cut_t": null,
+   "idx_after": 2
+  },
+  {
+   "t": 12.4572,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "ignored",
+   "cut_t": null,
+   "idx_after": 2
+  },
+  {
+   "t": 14.2742,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "ignored",
+   "cut_t": null,
+   "idx_after": 2
+  }
+ ],
+ "base_mean": 6.3750529289245605,
+ "dark_thr": 3.1875264644622803
+}

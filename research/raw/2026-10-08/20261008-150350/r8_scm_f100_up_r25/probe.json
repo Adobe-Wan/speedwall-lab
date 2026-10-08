@@ -1,0 +1,118 @@
+{
+ "presses": 8,
+ "cuts": 8,
+ "ignored": 0,
+ "blind": 0,
+ "black_checks": 0,
+ "black_checks_worked": 0,
+ "black_checks_dead": 0,
+ "true_blackout_at": null,
+ "true_blackout_doubt": false,
+ "resyncs": [
+  {
+   "t": 1.462,
+   "counted": 0,
+   "seen": "external"
+  },
+  {
+   "t": 5.283,
+   "counted": 0,
+   "seen": "external"
+  },
+  {
+   "t": 8.792,
+   "counted": 0,
+   "seen": "external"
+  },
+  {
+   "t": 12.22,
+   "counted": 0,
+   "seen": "external"
+  },
+  {
+   "t": 15.737,
+   "counted": 0,
+   "seen": "external"
+  }
+ ],
+ "conscious_dark_at": null,
+ "key_lost_at": null,
+ "key_back_at": null,
+ "stray_cuts": [],
+ "log": [
+  {
+   "t": 3.0204,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 3.237,
+   "idx_after": 2
+  },
+  {
+   "t": 4.27,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 4.467,
+   "idx_after": 0
+  },
+  {
+   "t": 6.5007,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 6.766,
+   "idx_after": 2
+  },
+  {
+   "t": 7.7998,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 7.991,
+   "idx_after": 0
+  },
+  {
+   "t": 10.0103,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 10.212,
+   "idx_after": 2
+  },
+  {
+   "t": 11.2499,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 11.419,
+   "idx_after": 0
+  },
+  {
+   "t": 13.4434,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 13.62,
+   "idx_after": 2
+  },
+  {
+   "t": 14.6512,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 14.919,
+   "idx_after": 0
+  }
+ ],
+ "base_mean": 8.880224227905273,
+ "dark_thr": 4.440112113952637
+}

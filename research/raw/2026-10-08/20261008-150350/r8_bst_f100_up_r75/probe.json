@@ -1,0 +1,137 @@
+{
+ "presses": 9,
+ "cuts": 9,
+ "ignored": 0,
+ "blind": 0,
+ "black_checks": 0,
+ "black_checks_worked": 0,
+ "black_checks_dead": 0,
+ "true_blackout_at": null,
+ "true_blackout_doubt": false,
+ "resyncs": [
+  {
+   "t": 1.438,
+   "counted": 0,
+   "seen": "external"
+  },
+  {
+   "t": 6.63,
+   "counted": 0,
+   "seen": "external"
+  },
+  {
+   "t": 8.796,
+   "counted": 0,
+   "seen": "external"
+  },
+  {
+   "t": 13.664,
+   "counted": 0,
+   "seen": "external"
+  }
+ ],
+ "conscious_dark_at": null,
+ "key_lost_at": null,
+ "key_back_at": null,
+ "stray_cuts": [
+  1.64,
+  2.657,
+  3.535,
+  3.664,
+  3.787,
+  4.685,
+  5.697,
+  5.819,
+  10.294,
+  10.819,
+  11.595,
+  11.838,
+  12.864,
+  15.424
+ ],
+ "log": [
+  {
+   "t": 3.0307,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 3.205,
+   "idx_after": 1
+  },
+  {
+   "t": 4.2389,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 4.419,
+   "idx_after": 2
+  },
+  {
+   "t": 5.4473,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 5.61,
+   "idx_after": 1
+  },
+  {
+   "t": 6.6302,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 6.801,
+   "idx_after": 2
+  },
+  {
+   "t": 7.8307,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 7.994,
+   "idx_after": 0
+  },
+  {
+   "t": 9.0301,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 9.27,
+   "idx_after": 2
+  },
+  {
+   "t": 11.322,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 11.501,
+   "idx_after": 2
+  },
+  {
+   "t": 12.5376,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 12.701,
+   "idx_after": 2
+  },
+  {
+   "t": 13.7238,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 13.947,
+   "idx_after": 2
+  }
+ ],
+ "base_mean": 56.035945892333984,
+ "dark_thr": 28.017972946166992
+}
