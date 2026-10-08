@@ -83,6 +83,9 @@ cam_downscale: 96          # width in pixels of the saved centre-of-screen frame
 full_every_s: 0.5
 full_w: 128
 gloc_recover_max_s: 40
+# The forward axis is the game's throttle, which keeps its setting at centre. After each brake the harness checks the
+# ship stays put with the brake off; if it creeps off, it taps the axis back (found with `python run.py throttlecheck`).
+throttle_reset: {value: -1.0, seconds: 0.15, watch_s: 0.8, tries: 3}
 abort_after_skips: 2        # stop the run when this many tests in a row cannot start (ship still moving after braking)
 probe_restore_tries: 8      # camera-key presses allowed to get back to the cockpit view before the run stops
 gloc_rest_s: 8

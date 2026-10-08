@@ -43,8 +43,51 @@ def brake_to_stop(cfg, vj, grab, guard, log):
     finally:
         vj.set(buttons={"brake": False})
     log(f"  braked to {last} m/s in {time.perf_counter()-t0:.1f} s")
+    settle_throttle(cfg, vj, grab, guard, log)
     _sleep_guarded(guard, 1.0)
     return last
+
+
+def settle_throttle(cfg, vj, grab, guard, log):
+    """The forward axis is the game's THROTTLE, which keeps its setting when the axis returns to centre: after a test
+    with forward thrust the ship takes off again as soon as the spacebrake is let go. With the brake released, watch
+    the speed briefly; if it climbs, hold the brake and tap the forward axis back (throttle_reset, found by
+    `python run.py throttlecheck`), then check again. Never taps when the throttle is already at 0."""
+    tr = cfg.get("throttle_reset") or {}
+    if not tr or "speed" not in grab.boxes or "strafe_long" not in vj.axis_map:
+        return
+    limit = cfg.get("start_max_mps", 3.0)
+    for attempt in range(int(tr.get("tries", 3)) + 1):
+        t0, peak = time.perf_counter(), 0.0
+        while time.perf_counter() - t0 < float(tr.get("watch_s", 0.8)):
+            guard.check()
+            sp = ocr.read_number(grab.grab()["speed"])
+            if sp is not None:
+                peak = max(peak, sp)
+            if peak > limit:
+                break
+            _sleep_guarded(guard, 0.1)
+        if peak <= limit:
+            if attempt:
+                log(f"  throttle cleared after {attempt} tap(s)")
+            return
+        if attempt >= int(tr.get("tries", 3)):
+            break
+        log(f"  throttle still set (ship sped up to {peak} m/s with the brake off): tapping it back")
+        vj.set(buttons={"brake": True})
+        try:
+            vj.set(axes={"strafe_long": float(tr.get("value", -1.0))})
+            _sleep_guarded(guard, float(tr.get("seconds", 0.15)))
+            vj.set(axes={"strafe_long": 0.0})
+            t1, ok = time.perf_counter(), 0
+            while time.perf_counter() - t1 < 15.0 and ok < 3:
+                guard.check()
+                sp = ocr.read_number(grab.grab()["speed"])
+                ok = ok + 1 if (sp is not None and sp <= cfg["brake_until_mps"]) else 0
+                _sleep_guarded(guard, 0.25)
+        finally:
+            vj.set(axes={"strafe_long": 0.0}, buttons={"brake": False})
+    raise Abort("the throttle stays set after tapping it back: set it to 0 by hand (S), then continue with --resume")
 
 
 def turn_around(cfg, vj, guard, log):
