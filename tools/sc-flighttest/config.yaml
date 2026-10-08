@@ -83,5 +83,6 @@ cam_downscale: 96          # width in pixels of the saved centre-of-screen frame
 full_every_s: 0.5
 full_w: 128
 gloc_recover_max_s: 40
+abort_after_skips: 2        # stop the run when this many tests in a row cannot start (ship still moving after braking)
 probe_restore_tries: 8      # camera-key presses allowed to get back to the cockpit view before the run stops
 gloc_rest_s: 8

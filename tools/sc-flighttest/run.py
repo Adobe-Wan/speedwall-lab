@@ -50,6 +50,15 @@ def campaign(c, args):
     ids = [t.id for t in ts]
     if len(ids) != len(set(ids)):
         sys.exit("duplicate test ids across rounds")
+    session = ROOT / "results" / (args.resume or time.strftime("%Y%m%d-%H%M%S"))
+    if args.resume:
+        if not session.is_dir():
+            sys.exit(f"no such session folder: {session}")
+        done = {x.name for x in session.iterdir() if (x / "frames.npz").exists()}
+        ts = [t for t in ts if t.id not in done]
+        print(f"Resuming {session.name}: {len(done)} tests already recorded, {len(ts)} left.")
+        if not ts:
+            sys.exit("nothing left to run")
     flying = sum(t.duration for t in ts)
     between = len(ts) * 35                                       # braking from speed, the flip, the boost refill: a rough allowance
     print(f"Rounds {', '.join(args.rounds)}: {len(ts)} tests, about {(flying + between) / 60:.0f} minutes (more if you grey out: "
@@ -58,7 +67,6 @@ def campaign(c, args):
     print("G-safe OFF, nothing ahead of you, you at the keyboard. F12 releases everything and stops.")
     if not (args.yes or args.dry_run):
         input("Press Enter when ready... ")
-    session = ROOT / "results" / time.strftime("%Y%m%d-%H%M%S")
     run_tests(ts, c, session, dry_run=args.dry_run)
     if args.dry_run:
         return
@@ -98,6 +106,7 @@ def main():
     a = sub.add_parser("analyze"); a.add_argument("session")
     cp = sub.add_parser("campaign")
     cp.add_argument("--rounds", nargs="+", default=list(CAMPAIGN), choices=list(CAMPAIGN), help="default: 6 7 8 9 5 4")
+    cp.add_argument("--resume", metavar="SESSION", help="continue a session: skip the tests it already has and save new ones into it")
     cp.add_argument("--yes", action="store_true", help="don't wait for Enter before starting")
     cp.add_argument("--dry-run", action="store_true")
     pk = sub.add_parser("pack"); pk.add_argument("session"); pk.add_argument("--with-frames", action="store_true")

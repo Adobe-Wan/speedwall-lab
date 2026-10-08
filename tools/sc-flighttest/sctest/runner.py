@@ -374,6 +374,7 @@ def run_tests(tests, cfg, session_dir: Path, dry_run=False, log=print):
     start_max = cfg.get("start_max_mps", 3.0)
     try:
         lateral_runs = 0
+        skips_in_a_row = 0
         for i, test in enumerate(tests, 1):
             mirrored = False
             if cfg.get("mirror_lateral", True) and test.uses_lateral:
@@ -394,7 +395,13 @@ def run_tests(tests, cfg, session_dir: Path, dry_run=False, log=print):
                 v0 = read_speed(grab)
                 if v0 is not None and v0 > start_max:
                     log(f"  SKIPPED {test.id}: still {v0} m/s")
+                    skips_in_a_row += 1
+                    if skips_in_a_row >= int(cfg.get("abort_after_skips", 2)):
+                        raise Abort(f"{skips_in_a_row} tests in a row could not start: the ship still reads {v0} m/s after braking. "
+                                    "It is probably out of bounds (being pushed back), destroyed or at the respawn menu. Respawn or fly "
+                                    "back to the middle of the arena, then continue with: run_campaign.bat --resume <this session's folder name>")
                     continue
+            skips_in_a_row = 0
             rec = record(test, cfg, vj, grab, guard)
             ts, base, gloc_at = rec["ts"], rec["base"], rec["gloc_at"]
             psum = rec["probe"]
