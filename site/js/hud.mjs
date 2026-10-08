@@ -219,7 +219,9 @@ export function createHud(svg) {
   const gPeak = label(G, Object.assign(txtAttrs(WHITE, 'end'), { 'fill-opacity': '0.8' }), '0.0');
   const gPeakLbl = label(G, txtAttrs(MINT, 'start'), 'pk');
   const anc = label(G, Object.assign(txtAttrs(MINT, 'start'), { display: 'none' }), 'HOLD TVI: ');
-  const ancV = el(anc, 'tspan', { fill: WHITE });
+  const ancG = el(anc, 'tspan', { fill: MINT });   // "@13°" (the guide ring)
+  ancG.appendChild(document.createTextNode(''));
+  const ancV = el(anc, 'tspan', { fill: WHITE });  // "29 °/s"
   ancV.appendChild(document.createTextNode('0 °/s'));
 
   // ---------- maneuver label (top centre) ----------
@@ -239,7 +241,7 @@ export function createHud(svg) {
     if (last) update(last);
   }
 
-  // Local geometry of the three side blocks for bar height H and an anchor line on 1 or 2 lines.
+  // Local geometry of the three side blocks for bar height H and an anchor hint on 1, 2 or 3 lines.
   function geom(H, lines) {
     const { u, fsS, fsM, fsN, fsL, bw } = Lo;
     const top = -H / 2, bot = H / 2;
@@ -271,8 +273,8 @@ export function createHud(svg) {
     // G
     const gx = 4 * CW * fsL;                          // "12.3"
     const ruleY = 0.5 * u + 3, peakY = ruleY + 1.2 * fsN, ancY = peakY + 1.45 * fsS;
-    const ancW = lines === 1 ? 15 * CW * fsS + 8 * CW * fsN : Math.max(15 * CW * fsS, 8 * CW * fsN);
-    const ancBot = (lines === 1 ? ancY : ancY + 1.2 * fsN) + 0.3 * fsN + HALO;
+    const ancW = lines === 1 ? 15 * CW * fsS + 8 * CW * fsN : lines === 2 ? Math.max(15 * CW * fsS, 8 * CW * fsN) : Math.max(9 * CW * fsS, 8 * CW * fsN);
+    const ancBot = ancY + (lines - 1) * 1.2 * fsN + 0.3 * fsN + HALO;
     const Gr = [
       [-HALO, -0.95 * fsL, gx + 0.25 * fsS + Math.max(CW * fsM, 2 * CW * fsS) + HALO, peakY + 0.3 * fsN + HALO],
       [-HALO, ancY - 0.95 * fsS, ancW + HALO, ancBot],
@@ -312,11 +314,11 @@ export function createHud(svg) {
 
     // Try progressively tighter layouts until all three blocks clear the band.
     const H0 = Math.max(84, 23 * u);
-    // [bar height, anchor line on 1 or 2 lines, also clear the page's TVI label, G attached to the AB bar]
+    // [bar height, anchor hint on 1-3 lines, also clear the page's TVI label, G attached to the AB bar]
     const Hs = Math.max(44, 0.55 * H0);
     const tiers = [
-      [H0, 1, true, true], [H0, 2, true, true], [H0, 1, false, true], [H0, 2, false, true],
-      [H0, 2, true, false], [H0, 2, false, false],
+      [H0, 1, true, true], [H0, 2, true, true], [H0, 3, true, true], [H0, 1, false, true], [H0, 2, false, true], [H0, 3, false, true],
+      [H0, 3, true, false], [H0, 3, false, false],
       [0.75 * H0, 2, false, true], [0.75 * H0, 2, false, false], [Hs, 2, false, true], [Hs, 2, false, false],
     ];
     let res = null;
@@ -339,7 +341,7 @@ export function createHud(svg) {
     const obs = [];
     E.obs = obs;
     const push = (rects, [tx, ty]) => { for (const r of rects) obs.push([r[0] + tx, r[1] + ty, r[2] + tx, r[3] + ty]); };
-    const yPref = E.cy - 0.05 * g.H;
+    const yPref = E.cy;   // both bars centred on the crosshair, as in the game
     const l = place({ rects: g.Lr, pref: [E.cx - E.side, yPref], side: -1, txMax: E.cx - Lo.bw }, E);
     if (!l) return null;
     push(g.Lr, l);
@@ -412,7 +414,9 @@ export function createHud(svg) {
     set(gPeak, 'x', q(gx)); set(gPeak, 'y', q(g.peakY)); set(gPeak, 'font-size', q(fsN));
     set(gPeakLbl, 'x', q(gx + 0.25 * fsS)); set(gPeakLbl, 'y', q(g.peakY)); set(gPeakLbl, 'font-size', q(fsS));
     set(anc, 'x', 0); set(anc, 'y', q(g.ancY)); set(anc, 'font-size', q(fsS));
-    set(ancV, 'font-size', q(fsN));
+    set(ancG, 'font-size', q(fsS)); set(ancV, 'font-size', q(fsN));
+    // 1 line: HOLD TVI @13°: 29 °/s   2 lines: HOLD TVI @13° / 29 °/s   3 lines: HOLD TVI / @13° / 29 °/s
+    if (g.lines === 3) { set(ancG, 'x', 0); set(ancG, 'dy', q(1.2 * fsN)); } else { set(ancG, 'x', null); set(ancG, 'dy', null); }
     if (g.lines === 1) { set(ancV, 'x', null); set(ancV, 'dy', null); }
     else { set(ancV, 'x', 0); set(ancV, 'dy', q(1.2 * fsN)); }
   }
@@ -544,8 +548,9 @@ export function createHud(svg) {
     const hasAnc = typeof ar === 'number' && Number.isFinite(ar);
     show(anc, hasAnc);
     if (hasAnc) {
-      const gd = s.guideDeg;
-      text(anc, typeof gd === 'number' && Number.isFinite(gd) ? `HOLD TVI @${Math.round(gd)}°: ` : 'HOLD TVI: ');
+      const gd = s.guideDeg, hasGd = typeof gd === 'number' && Number.isFinite(gd), n3 = Lo.g && Lo.g.lines === 3, n1 = Lo.g && Lo.g.lines === 1;
+      text(anc, n3 ? 'HOLD TVI' : 'HOLD TVI ');
+      text(ancG, hasGd ? `@${Math.round(gd)}°${n1 ? ': ' : ''}` : (n1 ? ': ' : ''));
       const v = Math.round(ar);
       text(ancV, (v < 0 ? '−' + -v : String(v)) + ' °/s');
     }
