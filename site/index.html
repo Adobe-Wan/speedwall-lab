@@ -97,6 +97,7 @@ kbd.hint { font: 600 .66rem var(--font-data); border: 1px solid var(--line-stron
 body.no-shortcuts kbd.sc { display: none; }
 /* lessons sit right under the views */
 .maneuvers h2 { margin: 2px 0 0; font-size: .95rem; }
+.lesson-note { display: none; margin: 0; font-size: .86rem; line-height: 1.4; color: var(--tvi); }
 /* the running maneuver */
 .runbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; background: #13213a; border: 1px solid var(--tvi); border-radius: 8px; padding: 6px 10px; margin-top: 8px; font-size: .84rem; }
 .run-name { font-weight: 700; color: var(--tvi); } .run-msg { color: var(--muted); }
@@ -234,6 +235,13 @@ footer p { margin: 0 0 4px; max-width: 75ch; }
   #pad { width: 110px; height: 110px; } #thr { height: 110px; }
   header .sub { display: none; }
 }
+/* Phones are for watching the lessons, not flying: no controls, no view tools, no overlay on the view. The
+   running lesson's explanation sits under it instead. */
+@media (pointer: coarse) and (max-width: 979px), (pointer: coarse) and (orientation: landscape) and (max-height: 540px) {
+  .deck, .vtools, .caption, #ctl-open, #fly, .run-msg { display: none !important; }
+  .app { padding-bottom: 12px; }
+  .lesson-note { display: block; }
+}
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
 </style>
 </head>
@@ -263,14 +271,12 @@ footer p { margin: 0 0 4px; max-width: 75ch; }
       <div class="overlay" id="o-egg"></div>
       <div class="vtitle">Speed limits · 3D</div>
       <div class="vtools">
-        <button id="t-scm" aria-pressed="true">SCM sphere</button>
         <span class="seg" role="group" aria-label="Camera">
           <button id="cam-34" aria-pressed="true" title="Three-quarter view from behind and above">Overview</button>
           <button id="cam-side" aria-pressed="false" title="Side profile: the egg's real shape">Side</button>
           <button id="t-follow" aria-pressed="false" title="Ride behind the ship, looking up the nose">Close-up</button>
         </span>
         <button id="t-meas" aria-pressed="true" title="Top speeds measured in game, placed on the egg">In-game tests</button>
-        <button id="t-scale" aria-pressed="false">Real ship size</button>
       </div>
       <canvas class="inset" id="c-inset" aria-hidden="true"></canvas>
       <div class="caption" id="cap-egg"></div>
@@ -304,6 +310,7 @@ footer p { margin: 0 0 4px; max-width: 75ch; }
   </div>
   <section class="maneuvers" id="lessons" aria-labelledby="lessons-h">
         <h2 id="lessons-h">Lessons: pick a maneuver, watch the ship in the egg</h2>
+        <p class="lesson-note" id="lesson-note" role="status">Pick a lesson to watch the ship move inside the egg.</p>
         <h3>Room to dodge</h3>
         <div class="mgrid">
           <button data-preset="rest">Strafe from a stop<small>The most dodge you'll ever have: 394 m/s sideways</small></button>
@@ -445,7 +452,7 @@ let script = null;
 function endManeuver(resetOnScreen) {
   if (!script && !maneuver) return;
   script = null; maneuver = null; dodge = null; markPreset(null); ctl.rollHold = 0;
-  if (!run || !run.shown) $('runbar').hidden = true; else $('run-msg').textContent = 'You have the controls.';
+  if (!run || !run.shown) { $('runbar').hidden = true; setNote(''); } else $('run-msg').textContent = 'You have the controls.';
   run = null;
   if (resetOnScreen) { setThr(0); ctl.padL = ctl.padU = 0; ctl.padSticky = false; drawKnob(); setLock(false); }
 }
@@ -610,7 +617,7 @@ function reset(pinned) {
   trail.length = 0; setThr(pinned ? 100 : 0); setLock(pinned === true); ctl.padL = ctl.padU = 0; ctl.padSticky = false; drawKnob();
 }
 $('reset').onclick = () => reset(false);
-$('run-stop').onclick = () => { reset(false); $('runbar').hidden = true; };
+$('run-stop').onclick = () => { reset(false); $('runbar').hidden = true; setNote(''); };
 $('pin').onclick = () => reset(true);
 // relabel only the text node, so the key hint stays
 function togglePause() { ctl.paused = !ctl.paused; const b = $('pause'); b.setAttribute('aria-pressed', ctl.paused); b.firstChild.textContent = ctl.paused ? 'Resume ' : 'Pause '; }
@@ -640,6 +647,9 @@ const PRESETS = {
 };
 // Corkscrew helix radius a/ω² (docs/RESEARCH.md), with a the current G and ω the roll rate the lesson is flying.
 function spiralR() { const w = ctl.rollFrac * gladius.boost.rotationDps.roll * Math.PI / 180; return w > 0.05 ? gSmooth * 9.80665 / (w * w) : 0; }
+// Phones show the lesson's explanation here, under the view (the view's own caption is hidden there).
+const NOTE_IDLE = $('lesson-note').textContent;
+function setNote(html) { $('lesson-note').innerHTML = html || NOTE_IDLE; }
 let maneuver = null, dodge = null, run = null;   // run: what the running lesson has measured so far   // dodge: sideways distance covered in the first 2 s of a maneuver
 function markPreset(key) { document.querySelectorAll('[data-preset]').forEach(b => b.setAttribute('aria-pressed', b.dataset.preset === key)); }
 document.querySelectorAll('[data-preset]').forEach(b => b.onclick = () => {
@@ -647,8 +657,7 @@ document.querySelectorAll('[data-preset]').forEach(b => b.onclick = () => {
   dodge = p.dodge ? { t: 0, dist: 0 } : null;
   run = { t: 0, min: Infinity, peakG: 0, tvi: 0, shown: false };
   $('run-name').textContent = p.title; $('run-result').textContent = ''; $('run-msg').hidden = false; $('runbar').hidden = false;
-  // a corkscrew circle at the nose is only tens of m/s across: ride along behind the ship to see it
-  egg.camera(key.startsWith('ck-') || key === 'dodge-nose' ? 'follow' : null);
+  setNote(p.watch);
   // the maneuver buttons sit below the views on phones: bring the views back into sight to watch it
   const v = document.querySelector('.views'), r = v.getBoundingClientRect();
   if (r.top < 0 || r.bottom > innerHeight + 40) v.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
@@ -771,7 +780,7 @@ function makeRenderer(canvas) {
 }
 
 /* ───────────────────────── egg view ───────────────────────── */
-const stubView = { resize() {}, draw() {}, camera() {}, hud() {} };
+const stubView = { resize() {}, draw() {}, hud() {} };
 const egg = !hasWebGL ? stubView : (() => {
   const canvas = $('c-egg'), renderer = makeRenderer(canvas), gl = renderer.gl;
   const camera = new Camera(gl, { fov: 38, near: 5, far: 8000 });
@@ -816,8 +825,7 @@ const egg = !hasWebGL ? stubView : (() => {
   const glyphT = new Transform(); glyphT.setParent(scene);
   const glyph = new Mesh(gl, { geometry: dartGeometry(gl), program: new Program(gl, { vertex: VS_SHELL, fragment: FS_LAMBERT, uniforms: { uColor: { value: COL.glyph } } }) });
   // The ship rides on the velocity point: in velocity space, where the ship sits IS how fast it is going.
-  const GLYPH_READABLE = 3;
-  glyph.setParent(glyphT); glyphT.scale.set(GLYPH_READABLE);
+  glyph.setParent(glyphT);   // true size: the dart is the Gladius's 20 m
   // Everything that moves (velocity arrow, trail, settle ray, thrust and dead-thrust arrows, the dodge ring and its
   // reach lines) is one coloured line mesh: one draw call.
   const dyn = colorLines(gl, 1024); dyn.renderOrder = 40; dyn.setParent(scene);
@@ -851,16 +859,10 @@ const egg = !hasWebGL ? stubView : (() => {
   function place(el, p) { v3.set(...p); camera.project(v3); const w = canvas.parentElement.clientWidth, h = canvas.parentElement.clientHeight;
     const on = v3.z < 1 && v3.z > -1; el.hidden = !on; if (on) { el.style.left = `${(v3.x + 1) / 2 * w}px`; el.style.top = `${(1 - v3.y) / 2 * h}px`; } }
 
-  let showScm = true, trueScale = false;
-  $('t-scm').onclick = e => { showScm = !showScm; e.target.setAttribute('aria-pressed', showScm); scmShell.forEach(m => m.visible = showScm); labels.scm.hidden = !showScm; };
-  // Following up close, a readable-size glyph would be wider than the nose's sideways room, so use true scale there.
-  const glyphScale = () => glyphT.scale.set(trueScale || follow ? 1 : GLYPH_READABLE);
-  $('t-scale').onclick = e => { trueScale = !trueScale; e.target.setAttribute('aria-pressed', trueScale); glyphScale(); };
   // Follow: the orbit target rides with the ship, so you can zoom in on it squeezed into the egg's nose.
   let follow = false; const HOME_T = [130, 0, 0];
   const setCam = m => { camMode = m; follow = m === 'follow';
     for (const [id, k] of [['cam-34', '34'], ['cam-side', 'side'], ['t-follow', 'follow']]) $(id).setAttribute('aria-pressed', m === k);
-    glyphScale();
     if (!follow) { touched = false; orbit.target.set(...HOME_T); home(); orbit.forcePosition(); return; }
     // Look up the nose from behind the ship: the sideways-room ring faces you, with the ship inside it.
     const p = R3(...S.v); orbit.target.set(...p); camera.position.set(p[0] - 430, p[1] + 110, p[2] + 70); orbit.forcePosition(); touched = true; };
@@ -879,7 +881,7 @@ const egg = !hasWebGL ? stubView : (() => {
     }
     orbit.update();
     // Render on demand (PLAN.md §9): skip the frame when nothing visible changed.
-    const cp = camera.position, key = [vx, vy, vz, cp.x, cp.y, cp.z, room, d.pinned, trail.length, st.a[0], st.a[1], st.a[2], showScm, showMeas, trueScale, follow, frameW]
+    const cp = camera.position, key = [vx, vy, vz, cp.x, cp.y, cp.z, room, d.pinned, trail.length, st.a[0], st.a[1], st.a[2], showMeas, follow, frameW]
       .map(x => (typeof x === 'number' ? x.toFixed(2) : x)).join();
     if (key === lastKey) return;
     lastKey = key;
@@ -910,7 +912,7 @@ const egg = !hasWebGL ? stubView : (() => {
     dyn.end();
     renderer.render({ scene, camera, sort: true });
     place(labels.nose, R3(520, 0, -70)); place(labels.tail, R3(-300, 0, 0)); place(labels.side, R3(0, 0, 420));
-    if (showScm) place(labels.scm, R3(0, -160, -170));
+    place(labels.scm, R3(0, -160, -170));
     place(labels.room, R3(vx, -room * 0.71, room * 0.71 + 18)); labels.room.textContent = `dodge ${Math.round(room)}`;
     place(labels.rest, R3(0, 0, -26)); if (d.speed > 5) labels.rest.hidden = true;
     const leftRoom = Math.max(0, yMax - vy), rightRoom = Math.max(0, yMax + vy);
@@ -922,7 +924,7 @@ const egg = !hasWebGL ? stubView : (() => {
     else labels.settle.hidden = true;
     place(tviIcon, pv); tviIcon.hidden = tviIcon.hidden || d.speed < 3;
   }
-  return { resize, draw, camera: m => { if (m) setCam(m); else if (follow) setCam('34'); } };
+  return { resize, draw };
 })();
 
 /* ───────────────────────── pilot view: dust + crosshair + TVI ───────────────────────── */
