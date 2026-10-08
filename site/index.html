@@ -758,44 +758,66 @@ function shell(gl, geometry, color, alpha, rim, order) {
   }
   return meshes;
 }
-/* A low-poly Gladius, drawn here for this project from its 20 x 17 x 5.5 m size (fixture) and a general idea of the
-   ship: a tapered fuselage with a canopy, swept wings and two tail fins. It is an approximation, not CIG's model. Built
-   in render coordinates (x nose, y up, z right) as convex pieces; each piece's faces come from its convex hull. */
-const SHIP_PLAN = [[0, 10], [0.7, 6.5], [1.5, 2.6], [1.7, 2.0], [8.5, -4.0], [8.5, -8.8], [2.0, -9.0], [1.5, -9.4]]; // right half, top-down: [z, x]
+/* A low-poly Gladius, drawn here for this project from its 20 x 17 x 5.5 m size (fixture) and the proportions of a
+   public fan data sheet of the ship; it is an approximation, not CIG's model (nothing was extracted from the game).
+   Parts: a flat, wedge-shaped lifting body with a raised canopy and dorsal spine; trapezoid wings with a little
+   dihedral; at each wing tip a pod with an upward and a downward fin; two tall swept tail fins canted outward; two
+   long rear engine nacelles. Built in render coordinates (x nose, y up, z right) as convex pieces; each piece's faces
+   come from its convex hull. SHIP_PLAN is the top-down outline of the right half, [z, x], for the 2D views. */
+const SHIP_PLAN = [[0, 10], [1, 7], [1.9, 4], [2.8, 1], [3, 0.2], [7.3, -2.3], [7.3, -6.5], [3.7, -8.6], [3.7, -10], [1.7, -10], [1.7, -9.6], [0, -9.6]];
 function gladiusGeometry(gl) {
   const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
   const cross = (u, v) => [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
   const dot = (u, v) => u[0] * v[0] + u[1] * v[1] + u[2] * v[2];
   const pos = [], nor = [], col = [];
-  // every supporting triangle of a convex point set, wound so its normal points outward
+  // The faces of a convex point set: every supporting plane once, its coplanar points ordered around the face and
+  // fanned into triangles, wound so the normal points outward.
   function piece(pts, color) {
-    const n = pts.length;
+    const n = pts.length, planes = new Map();
     for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) for (let k = j + 1; k < n; k++) {
-      let nm = cross(sub(pts[j], pts[i]), sub(pts[k], pts[i])); const l = Math.hypot(...nm); if (l < 1e-6) continue;
+      const nm = cross(sub(pts[j], pts[i]), sub(pts[k], pts[i])); const l = Math.hypot(...nm); if (l < 1e-6) continue;
       let front = 0, back = 0;
       for (let m = 0; m < n; m++) if (m !== i && m !== j && m !== k) { const d = dot(nm, sub(pts[m], pts[i])) / l; if (d > 1e-4) front++; else if (d < -1e-4) back++; }
-      if (front && back) continue;                          // not a face of the hull
-      if (!front && !back) continue;                        // everything coplanar
-      let [a, b, c] = [pts[i], pts[j], pts[k]];
-      if (front) { [b, c] = [c, b]; nm = nm.map(x => -x); }
-      pos.push(...a, ...b, ...c); nor.push(...nm.map(x => x / l), ...nm.map(x => x / l), ...nm.map(x => x / l)); col.push(...color, ...color, ...color);
+      if ((front && back) || (!front && !back)) continue;   // not a face of the hull / everything coplanar
+      const o = front ? -1 : 1, nn = nm.map(x => o * x / l);  // outward unit normal
+      const key = [...nn.map(x => Math.round(x * 500)), Math.round(dot(nn, pts[i]) * 200)].join();
+      if (!planes.has(key)) planes.set(key, { nn, ids: new Set() });
+      const f = planes.get(key); f.ids.add(i); f.ids.add(j); f.ids.add(k);
+    }
+    for (const { nn, ids } of planes.values()) {
+      const P = [...ids].map(i => pts[i]), c = P.reduce((q, v) => [q[0] + v[0] / P.length, q[1] + v[1] / P.length, q[2] + v[2] / P.length], [0, 0, 0]);
+      const u0 = sub(P[0], c), u = u0.map(x => x / Math.hypot(...u0)), v = cross(nn, u);
+      P.sort((p, q) => Math.atan2(dot(sub(p, c), v), dot(sub(p, c), u)) - Math.atan2(dot(sub(q, c), v), dot(sub(q, c), u)));   // counter-clockwise seen from outside
+      for (let t = 1; t < P.length - 1; t++) {
+        pos.push(...P[0], ...P[t], ...P[t + 1]); for (let r = 0; r < 3; r++) { nor.push(...nn); col.push(...color); }
+      }
     }
   }
-  const HULL = [0.78, 0.82, 0.90], WING = [0.66, 0.72, 0.84], CANOPY = [0.30, 0.62, 0.86], ENGINE = [0.42, 0.46, 0.54];
-  // fuselage: rings [x, half-width, top, bottom] from the nose tip back
-  const ring = (x, w, t, b) => [[x, t, 0], [x, 0.6 * t, 0.75 * w], [x, -0.2 * b, w], [x, -b, 0.7 * w], [x, -b, -0.7 * w], [x, -0.2 * b, -w], [x, 0.6 * t, -0.75 * w]];
-  piece([[10, -0.15, 0], ...ring(6.5, 0.7, 0.55, 0.45), ...ring(2, 1.5, 1.0, 0.9), ...ring(-4, 1.9, 1.1, 1.0), ...ring(-9.4, 1.5, 0.9, 0.8)], HULL);
-  piece([[5.6, 0.6, 0], [0.8, 1.0, 0.85], [0.8, 1.0, -0.85], [2.6, 1.9, 0], [-0.6, 1.2, 0]], CANOPY);
+  const HULL = [0.78, 0.82, 0.90], WING = [0.64, 0.70, 0.82], CANOPY = [0.30, 0.62, 0.86], ENGINE = [0.42, 0.46, 0.54], DARK = [0.26, 0.29, 0.36];
+  // lifting body: flat and wide, rings [x, half-width, top, bottom] from the nose tip back
+  const body = (x, w, t, b) => [[x, t, 0], [x, 0.8 * t, 0.6 * w], [x, 0, w], [x, -0.8 * b, 0.75 * w], [x, -b, 0.3 * w], [x, -b, -0.3 * w], [x, -0.8 * b, -0.75 * w], [x, 0, -w], [x, 0.8 * t, -0.6 * w]];
+  piece([[10, -0.3, 0], ...body(7, 1.0, 0.35, 0.55), ...body(4, 1.9, 0.7, 0.7), ...body(1, 2.8, 0.9, 0.85),
+         ...body(-3, 3.4, 1.0, 0.9), ...body(-7, 2.9, 1.0, 0.8), ...body(-9.6, 2.2, 0.9, 0.7)], HULL);
+  piece([[6.6, 0.4, 0], [5.0, 0.6, 0.7], [5.0, 0.6, -0.7], [1.4, 0.95, 1.1], [1.4, 0.95, -1.1], [3.8, 1.75, 0], [0.6, 1.25, 0]], CANOPY);
+  piece([[0.5, 0.9, 0.6], [0.5, 0.9, -0.6], [-3, 1.3, 0.8], [-3, 1.3, -0.8], [-9.6, 1.6, 0.9], [-9.6, 1.6, -0.9],
+         [-9.6, 0.8, 0.9], [-9.6, 0.8, -0.9], [-3, 0.8, 0.8], [-3, 0.8, -0.8]], WING);     // dorsal spine between the engines
+  const hex = (x, rad, yc, zc) => [0, 1, 2, 3, 4, 5].map(k => [x, yc + rad * Math.cos(k * Math.PI / 3), zc + rad * Math.sin(k * Math.PI / 3)]);
   for (const sd of [1, -1]) {
-    // wing: swept back, slightly drooped, thicker at the root
+    // wing: trapezoid, thick at the root, tips raised (dihedral)
     const w = (x, z, y, th) => [[x, y + th, sd * z], [x, y - th, sd * z]];
-    piece([...w(2.0, 1.2, 0, 0.28), ...w(-4.0, 8.5, -0.5, 0.1), ...w(-8.8, 8.5, -0.5, 0.1), ...w(-9.0, 1.2, 0, 0.26)], WING);
-    // tail fin, canted outward
-    const f = (x, y, z) => [[x, y, sd * (z - 0.12)], [x, y, sd * (z + 0.12)]];
-    piece([...f(-5.2, 0.9, 1.2), ...f(-9.4, 0.9, 1.4), ...f(-9.8, 2.7, 2.4), ...f(-7.2, 2.6, 2.2)], WING);
-    // engine pod
-    piece([[-8.0, 0.7, sd * 0.5], [-8.0, 0.7, sd * 1.7], [-8.0, -0.7, sd * 0.5], [-8.0, -0.7, sd * 1.7],
-           [-10.0, 0.5, sd * 0.6], [-10.0, 0.5, sd * 1.6], [-10.0, -0.5, sd * 0.6], [-10.0, -0.5, sd * 1.6]], ENGINE);
+    piece([...w(0.2, 2.6, 0, 0.3), ...w(-2.3, 7.3, 0.9, 0.1), ...w(-6.5, 7.3, 0.9, 0.1), ...w(-8.6, 2.6, 0, 0.28)], WING);
+    // wing-tip pod: a slim forward-pointing body at the tip
+    piece([[-0.8, 0.9, sd * 7.3], ...hex(-2.6, 0.4, 0.9, sd * 7.3), ...hex(-6.6, 0.5, 0.9, sd * 7.3)], ENGINE);
+    // tip fins: one up and out, one down and out
+    const tf = (x, y, z) => [[x, y, sd * (z - 0.08)], [x, y, sd * (z + 0.08)]];
+    piece([...tf(-3.8, 0.9, 7.3), ...tf(-6.6, 0.9, 7.3), ...tf(-5.6, 3.0, 8.2), ...tf(-7.3, 3.0, 8.4)], WING);
+    piece([...tf(-3.8, 0.9, 7.3), ...tf(-6.6, 0.9, 7.3), ...tf(-5.2, -1.4, 8.0), ...tf(-6.8, -1.4, 8.2)], WING);
+    // tail fin: tall, swept back, canted outward
+    const ff = (x, y, z) => [[x, y, sd * (z - 0.1)], [x, y, sd * (z + 0.1)]];
+    piece([...ff(-3.0, 1.0, 2.4), ...ff(-9.8, 1.0, 2.6), ...ff(-8.3, 4.2, 3.8), ...ff(-9.9, 4.2, 3.9)], WING);
+    // engine nacelle: tapered intake at the front, full diameter aft, dark nozzle
+    piece([[-0.5, 0.95, sd * 2.7], ...hex(-2.5, 0.55, 0.95, sd * 2.7), ...hex(-6, 0.95, 0.95, sd * 2.7), ...hex(-10, 0.85, 0.95, sd * 2.7)], ENGINE);
+    piece([...hex(-10, 0.7, 0.95, sd * 2.7), ...hex(-10.2, 0.55, 0.95, sd * 2.7)], DARK);
   }
   return new Geometry(gl, { position: { size: 3, data: new Float32Array(pos) }, normal: { size: 3, data: new Float32Array(nor) }, color: { size: 3, data: new Float32Array(col) } });
 }
@@ -1082,7 +1104,7 @@ function drawSlice(canvas, st, d, big) {
   c.beginPath(); SHIP_PLAN.forEach(([z, x], i) => i ? c.lineTo(z * g, -x * g) : c.moveTo(z * g, -x * g));
   for (let i = SHIP_PLAN.length - 1; i >= 0; i--) c.lineTo(-SHIP_PLAN[i][0] * g, -SHIP_PLAN[i][1] * g);
   c.closePath(); c.fillStyle = '#c7d1e5'; c.fill(); c.strokeStyle = 'rgba(7,11,17,.9)'; c.lineWidth = 1; c.stroke();
-  c.fillStyle = '#4aa3d8'; c.beginPath(); c.ellipse(0, -3.4 * g, 0.85 * g, 2.5 * g, 0, 0, 2 * Math.PI); c.fill(); c.restore();
+  c.fillStyle = '#4aa3d8'; c.beginPath(); c.ellipse(0, -3.8 * g, 0.9 * g, 2.6 * g, 0, 0, 2 * Math.PI); c.fill(); c.restore();
   if (big) { c.font = '600 12px ui-monospace, Menlo, monospace'; c.fillStyle = '#f2a33a'; c.textAlign = 'center';
     c.fillText('nose 520', ...P(0, 532)); c.fillText('tail 268', ...P(0, -284)); c.textAlign = 'left'; c.fillText('394', ...P(398, 6)); c.fillStyle = '#5aa9e6'; c.fillText('SCM 225', ...P(150, 190));
     c.fillStyle = d.pinned ? '#ff6a55' : '#e7edf5'; c.fillText(`room ${Math.round(room)}`, ...P(room + 8, fwd - 4)); }
