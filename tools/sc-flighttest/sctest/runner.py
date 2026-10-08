@@ -7,6 +7,7 @@ import numpy as np
 from .safety import Guard, Abort
 from .vjoy_out import VJoy
 from .capture import Grabber, brightness, cam_dist, cam_mean
+from .viewprobe import ViewProbe, params as vp_params
 from . import ocr
 
 
@@ -42,8 +43,51 @@ def brake_to_stop(cfg, vj, grab, guard, log):
     finally:
         vj.set(buttons={"brake": False})
     log(f"  braked to {last} m/s in {time.perf_counter()-t0:.1f} s")
+    settle_throttle(cfg, vj, grab, guard, log)
     _sleep_guarded(guard, 1.0)
     return last
+
+
+def settle_throttle(cfg, vj, grab, guard, log):
+    """The forward axis is the game's THROTTLE, which keeps its setting when the axis returns to centre: after a test
+    with forward thrust the ship takes off again as soon as the spacebrake is let go. With the brake released, watch
+    the speed briefly; if it climbs, hold the brake and tap the forward axis back (throttle_reset, found by
+    `python run.py throttlecheck`), then check again. Never taps when the throttle is already at 0."""
+    tr = cfg.get("throttle_reset") or {}
+    if not tr or "speed" not in grab.boxes or "strafe_long" not in vj.axis_map:
+        return
+    limit = cfg.get("start_max_mps", 3.0)
+    for attempt in range(int(tr.get("tries", 3)) + 1):
+        t0, peak = time.perf_counter(), 0.0
+        while time.perf_counter() - t0 < float(tr.get("watch_s", 0.8)):
+            guard.check()
+            sp = ocr.read_number(grab.grab()["speed"])
+            if sp is not None:
+                peak = max(peak, sp)
+            if peak > limit:
+                break
+            _sleep_guarded(guard, 0.1)
+        if peak <= limit:
+            if attempt:
+                log(f"  throttle cleared after {attempt} tap(s)")
+            return
+        if attempt >= int(tr.get("tries", 3)):
+            break
+        log(f"  throttle still set (ship sped up to {peak} m/s with the brake off): tapping it back")
+        vj.set(buttons={"brake": True})
+        try:
+            vj.set(axes={"strafe_long": float(tr.get("value", -1.0))})
+            _sleep_guarded(guard, float(tr.get("seconds", 0.15)))
+            vj.set(axes={"strafe_long": 0.0})
+            t1, ok = time.perf_counter(), 0
+            while time.perf_counter() - t1 < 15.0 and ok < 3:
+                guard.check()
+                sp = ocr.read_number(grab.grab()["speed"])
+                ok = ok + 1 if (sp is not None and sp <= cfg["brake_until_mps"]) else 0
+                _sleep_guarded(guard, 0.25)
+        finally:
+            vj.set(axes={"strafe_long": 0.0}, buttons={"brake": False})
+    raise Abort("the throttle stays set after tapping it back: set it to 0 by hand (S), then continue with --resume")
 
 
 def turn_around(cfg, vj, guard, log):
@@ -95,41 +139,47 @@ def wait_boost_full(cfg, vj, grab, guard, log):
 
 
 def record(test, cfg, vj, grab, guard):
-    """Hold the test's inputs and capture the HUD every frame.
+    """Hold the test's inputs and capture the HUD, the centre of the screen and (slowly) the whole screen.
 
-    G-LOC guard: the brightest pixels of the speed/G readouts are tracked. If they drop below
-    gloc_dim_frac of their pre-test level for gloc_hold_s while inputs are active (blackout), every input
-    is released and the test ends early.
+    What a blackout is, and is not: a black screen is NOT the end of a test. A pilot whose screen goes dark can still
+    regain vision by counter-strafing, and what decides whether he is TRULY blacked out is whether the camera key
+    still switches the view. So (with test.probe > 0) the vJoy "view" button is pressed on a cadence, and as soon as
+    the screen is suspected black (dark for probe_dark_hold_s, or the HUD digits gone) a black check is pressed at
+    once and every probe_check_gap_s while it lasts: camera switched = not truly blacked out; no switch = real
+    blackout (see viewprobe.py). The camera cycles three views, and the HUD digits exist only in the cockpit view,
+    so HUD-based decisions use only the frames where the cockpit is up and settled.
 
-    With test.gloc == "ease", an earlier grey-out (below gloc_ease_frac) scales the test's ease_axes down by
-    ease_step instead, at most once per gloc_ease_wait_s, and the test flies on: a pilot reduces the input
-    rather than letting go. The scale never comes back up within a test. Below ease_min, or a full blackout
-    anyway, falls back to the release above.
-    grey_at is the first time the HUD stayed below gloc_ease_frac for gloc_hold_s (the grey-out), whatever the
-    policy; gloc_at - grey_at is how long the pilot kept control while greyed out.
+    gloc policies (see schedule.Test): "release" lets go at a HUD blackout and ends the test; "ease" cuts ease_axes
+    by ease_step per grey-out and flies on; "reverse" flips reverse_axes when the screen is practically black and
+    flips them back when vision returns; "hold" never intervenes. In every policy grey_at (HUD < gloc_ease_frac of
+    its pre-test level, held gloc_hold_s) and hud_black_at (< gloc_dim_frac) are recorded, and a darkness level
+    (1 - centre brightness / its cockpit baseline, 0 clear .. 1 black) is saved with every frame.
 
-    Camera-key probe (test.probe > 0): the vJoy "view" button is pressed for probe_pulse_s every test.probe seconds
-    while the inputs are held. The last centre-of-screen frame that was not black is kept. After a blackout, once
-    inputs are released, the button is pressed once or twice more in the dark (so that the number of presses since that
-    last visible frame is odd) and run_tests checks afterwards, with vision back, whether the camera differs from that
-    last visible frame: it does only if an odd number of those presses took effect.
-    Returns (t, cmds, frames, lum, gloc_at, baseline, ease_events, grey_at, probe) where probe is
-    {"presses": [s after inputs start], "dark_press_at": s or None, "dark_presses": n, "since_bright": n,
-     "cam_at_dark": last visible frame or None, "cam_base": frame or None}."""
+    Returns a dict: ts, cmds, frames (per-frame crops, 'full' = whole-screen thumbnails with times t_full), lum
+    (HUD brightness, nan when the HUD can't be read), dark (darkness level, nan outside the cockpit), gloc_at, base,
+    ease_events, grey_at, hud_black_at, reversals, probe (summary of the camera-key probe) and probe_cfg."""
     period = 1.0 / cfg["target_fps"]
     frames = {k: [] for k in grab.boxes}
-    ts, cmds, lum = [], [], []
+    ts, cmds, lum, dark_series = [], [], [], []
+    thumbs, t_thumbs = [], []
+    full_every = float(cfg.get("full_every_s", 0.5))
+    next_full = 0.0
     last_cmd = None
-    base, dim_since, gloc_at = None, None, None
+    base, dim_since, gloc_at, hud_black_at = None, None, None, None
     dim_frac, hold_s = cfg.get("gloc_dim_frac", 0.5), cfg.get("gloc_hold_s", 0.25)
+    legacy = test.gloc in ("release", "ease")
     ease = test.gloc == "ease"
     ease_frac, ease_wait = cfg.get("gloc_ease_frac", 0.8), cfg.get("gloc_ease_wait_s", 1.5)
     scale, grey_since, last_ease, ease_events, grey_at = 1.0, None, -1e9, [], None
-    pulse, dark_delay = cfg.get("probe_pulse_s", 0.12), cfg.get("probe_dark_delay_s", 0.5)
+    pulse = cfg.get("probe_pulse_s", 0.12)
     t_inputs_end = test.pre_s + sum(s.t for s in test.steps)
-    press_until, next_press, presses, dark_press_at, cam_base = -1.0, test.pre_s + test.probe, [], None, None
-    dark_mean = cfg.get("probe_dark_mean", 14.0)
-    cam_bright, t_bright, dark_plan, dark_done, since_bright = None, 0.0, None, 0, 0
+    press_until = -1.0
+    probing = test.probe > 0 and "cam" in grab.boxes
+    vp, cam_base, cam_base_mean = None, None, None
+    pcfg = vp_params(cfg)
+    dark_level, dark_ema = float("nan"), None
+    black_since, reversing_since, flip, cooldown_until, rec_since = None, None, 1.0, 0.0, None
+    reversals = []
     t0 = time.perf_counter()
     nxt = t0
     while True:
@@ -140,18 +190,19 @@ def record(test, cfg, vj, grab, guard):
         axes, buttons = test.inputs_at(t)
         if scale < 1.0:
             axes = {k: (v * scale if k in test.ease_axes else v) for k, v in axes.items()}
+        if flip < 0:
+            axes = {k: (-v if k in test.reverse_axes else v) for k, v in axes.items()}
         if gloc_at is not None:
             axes, buttons = {}, {}
-        if test.probe > 0:
-            if gloc_at is None and next_press <= t < t_inputs_end:           # a press every test.probe seconds
-                press_until = t + pulse; next_press += test.probe; presses.append(round(t - test.pre_s, 2))
-            elif gloc_at is not None:
-                if dark_plan is None:                                              # how many presses since the screen went black?
-                    since_bright = sum(1 for p in presses if p + test.pre_s >= t_bright - 0.05)
-                    dark_plan = [gloc_at + dark_delay + 0.4 * i for i in range(1 if since_bright % 2 == 0 else 2)]
-                if dark_done < len(dark_plan) and t - test.pre_s >= dark_plan[dark_done]:
-                    press_until = t + pulse; dark_done += 1                       # a press in the dark
-                    dark_press_at = dark_press_at if dark_press_at is not None else round(t - test.pre_s, 2)
+        inputs_on = gloc_at is None and test.pre_s <= t < t_inputs_end
+        if probing and vp is not None and inputs_on:
+            suspected = vp.dark_sustained or (hud_black_at is not None and dim_since is not None and t - dim_since >= hold_s)
+            if vp.check_due(t, suspected):
+                press_until = t + pulse
+                vp.press(t, "check", None if np.isnan(dark_level) else round(float(dark_level), 3))
+            elif vp.due(t):
+                press_until = t + pulse
+                vp.press(t, "cycle", None if np.isnan(dark_level) else round(float(dark_level), 3))
         pad = {"boost": buttons.get("boost", False), "brake": False}
         if "view" in vj.button_map:
             pad["view"] = t < press_until
@@ -161,42 +212,83 @@ def record(test, cfg, vj, grab, guard):
             last_cmd = cmd
         g = grab.grab()
         now = time.perf_counter() - t0
-        l = max(brightness(g[k]) for k in ("speed", "g") if k in g) if ("speed" in g or "g" in g) else 255.0
+        raw_l = max(brightness(g[k]) for k in ("speed", "g") if k in g) if ("speed" in g or "g" in g) else 255.0
+        if full_every > 0 and now >= next_full:
+            thumbs.append(grab.full_thumb(int(cfg.get("full_w", 128)))); t_thumbs.append(now)
+            next_full = now + full_every
+        cam = g.get("cam")
+        # --- the camera-key probe and the darkness level ---------------------------------------------------
+        hud_ok = True
+        if probing and cam is not None and now >= test.pre_s:
+            if vp is None:
+                cam_base = np.median(np.stack([np.asarray(f, np.float32) for f in frames["cam"]]), axis=0)
+                vp = ViewProbe(cfg, cam_base, first_press_at=test.pre_s + pcfg["probe_cockpit_dwell_s"])
+                cam_base_mean = vp.base_mean
+            vp.update(now, cam)
+            hud_ok = vp.hud_valid(now)
+        elif cam is not None and now >= test.pre_s and cam_base_mean is None:
+            cam_base_mean = max(cam_mean(np.median(np.stack([np.asarray(f, np.float32) for f in frames["cam"]]), axis=0)), 1.0) if frames["cam"] else None
+        if cam is not None and cam_base_mean and now >= test.pre_s:
+            cockpit_now = vp.cockpit and vp.hud_valid(now) if vp is not None else True
+            lvl = float(np.clip(1.0 - cam_mean(cam) / cam_base_mean, 0.0, 1.0))
+            dark_ema = lvl if dark_ema is None else 0.6 * dark_ema + 0.4 * lvl
+            dark_level = dark_ema if cockpit_now else float("nan")
+        l = raw_l if hud_ok else float("nan")
         ts.append(now)
         cmds.append({**cmd[0], "boost": int(cmd[1]["boost"]), "view": int(cmd[1].get("view", False))})
         lum.append(l)
+        dark_series.append(dark_level)
         for k, v in g.items():
             frames[k].append(v)
-        if "cam" in g and cam_mean(g["cam"]) >= dark_mean:
-            cam_bright, t_bright = g["cam"], now                      # the last frame with anything to see
         if now < test.pre_s:
-            base = float(np.median(lum))                       # HUD brightness before any input
-            if frames.get("cam"):
-                cam_base = np.median(np.stack(frames["cam"]), axis=0)
+            base = float(np.nanmedian(lum))                    # HUD brightness before any input
         elif base and base > 40 and gloc_at is None:
-            if l < ease_frac * base:                           # greying out
-                grey_since = now if grey_since is None else grey_since
-                if grey_at is None and now - grey_since >= hold_s:
-                    grey_at = round(grey_since - test.pre_s, 2)
-                if ease and now - grey_since >= hold_s and now - last_ease >= ease_wait:   # ease off, don't let go
-                    scale = round(scale - test.ease_step, 3)
-                    last_ease = now
-                    ease_events.append([round(now - test.pre_s, 2), max(scale, 0.0)])
-                    if scale < test.ease_min:                  # eased as far as allowed: release
-                        dim_since = dim_since if dim_since is not None else grey_since
-                        l = 0.0
+            if not hud_ok:                                     # camera not in the cockpit view: no HUD to read
+                grey_since, dim_since = None, None
             else:
-                grey_since = None
-            if l < dim_frac * base:
-                dim_since = now if dim_since is None else dim_since
-                if now - dim_since >= hold_s:
-                    gloc_at = round(dim_since - test.pre_s, 2)  # seconds after inputs started
-                    vj.center()
-                    last_cmd = None
+                if l < ease_frac * base:                       # greying out
+                    grey_since = now if grey_since is None else grey_since
+                    if grey_at is None and now - grey_since >= hold_s:
+                        grey_at = round(grey_since - test.pre_s, 2)
+                    if ease and now - grey_since >= hold_s and now - last_ease >= ease_wait:
+                        scale = round(scale - test.ease_step, 3)
+                        last_ease = now
+                        ease_events.append([round(now - test.pre_s, 2), max(scale, 0.0)])
+                        if scale < test.ease_min:              # eased as far as allowed: release
+                            dim_since = dim_since if dim_since is not None else grey_since
+                            l = 0.0
+                else:
+                    grey_since = None
+                if l < dim_frac * base:
+                    dim_since = now if dim_since is None else dim_since
+                    if now - dim_since >= hold_s:
+                        if hud_black_at is None:
+                            hud_black_at = round(dim_since - test.pre_s, 2)
+                        if legacy:                             # old behaviour: let go and end the test
+                            gloc_at = hud_black_at
+                            vj.center()
+                            last_cmd = None
+                else:
+                    dim_since = None
+        # --- reverse policy: counter-strafe to stay conscious --------------------------------------------
+        if test.gloc == "reverse" and gloc_at is None and test.pre_s <= now < t_inputs_end and cam_base_mean:
+            black = (not np.isnan(dark_level) and dark_level >= test.reverse_at) or (vp is not None and vp.dark_sustained)
+            clear = (not np.isnan(dark_level) and dark_level < 0.3) or (vp is not None and not vp.dark and np.isnan(dark_level))
+            if flip > 0:
+                black_since = (now if black_since is None else black_since) if black else None
+                if (black_since is not None and now - black_since >= test.reverse_delay_s and now >= cooldown_until
+                        and sum(1 for r in reversals if r["action"] == "reverse") < test.reverse_max):
+                    flip = -1.0
+                    reversing_since, rec_since = now, None
+                    reversals.append({"t": round(now - test.pre_s, 2), "action": "reverse",
+                                      "level": None if np.isnan(dark_level) else round(float(dark_level), 3)})
             else:
-                dim_since = None
-        keep = dark_delay + 0.4 * len(dark_plan or [0]) + 1.0 if test.probe > 0 else 1.0   # after a blackout: 1 s, or until the dark presses are done
-        if gloc_at is not None and now - test.pre_s - gloc_at > keep:
+                rec_since = (now if rec_since is None else rec_since) if clear else None
+                if (rec_since is not None and now - rec_since >= 0.4) or now - reversing_since >= test.reverse_hold_s:
+                    flip, black_since, cooldown_until = 1.0, None, now + 1.0
+                    reversals.append({"t": round(now - test.pre_s, 2), "action": "resume",
+                                      "level": None if np.isnan(dark_level) else round(float(dark_level), 3)})
+        if gloc_at is not None and now - test.pre_s - gloc_at > 1.0:
             break
         nxt += period
         d = nxt - time.perf_counter()
@@ -205,51 +297,82 @@ def record(test, cfg, vj, grab, guard):
         else:
             nxt = time.perf_counter()
     vj.center()
-    return (np.array(ts), cmds, frames, np.array(lum), gloc_at, base, ease_events, grey_at,
-            {"presses": presses, "dark_press_at": dark_press_at, "dark_presses": dark_done, "since_bright": since_bright,
-             "cam_at_dark": None if cam_bright is None else cam_bright.copy(), "cam_base": cam_base})
+    psum = None
+    if vp is not None:
+        psum = vp.summary()
+        psum["final_view_idx"] = vp.view_idx
+        psum["base_mean"] = vp.base_mean
+        psum["dark_thr"] = vp.dark_thr
+    if thumbs:
+        frames["full"] = thumbs
+    return {"ts": np.array(ts), "cmds": cmds, "frames": frames, "lum": np.array(lum), "dark": np.array(dark_series),
+            "gloc_at": gloc_at, "base": base, "ease_events": ease_events, "grey_at": grey_at, "hud_black_at": hud_black_at,
+            "reversals": reversals, "probe": psum, "probe_cfg": pcfg, "t_full": np.array(t_thumbs), "vp": vp,
+            "cam_base_mean": cam_base_mean}
 
 
 def press_view(vj, guard, cfg):
     vj.set(buttons={"view": True}); _sleep_guarded(guard, cfg.get("probe_pulse_s", 0.12)); vj.set(buttons={"view": False})
 
 
-def probe_aftermath(test, cfg, vj, grab, guard, log, probe, blacked_out):
-    """After a probe test, once vision is back: did the press made in the dark take effect (the camera now differs from
-    the view just before it), and put the camera back to the cockpit view so the next test reads the HUD again.
-    Returns fields for meta.json. Raises Abort if the camera can't be restored."""
-    thr = cfg.get("cam_state_thr", 0.3)
-    _sleep_guarded(guard, 1.0 if blacked_out else cfg.get("probe_settle_s", 3.0))
-    out = {"probe_presses": len(probe["presses"]), "dark_press_at": probe["dark_press_at"],
-           "dark_presses": probe["dark_presses"], "presses_since_black": probe["since_bright"]}
-    cur = grab.grab().get("cam")
-    if cur is None:
+def _hud_readable(crops) -> bool:
+    """Cockpit view test that ignores the scenery: the speed, G and boost digits all parse."""
+    try:
+        return all(ocr.read_number(crops[k], kind) is not None
+                   for k, kind in (("speed", "int"), ("g", "g"), ("ab", "pct")) if k in crops)
+    except Exception:
+        return False
+
+
+def probe_recover(cfg, vj, grab, guard, log, rec):
+    """After a probe test: wait until the screen is visible again, then press the camera key until the cockpit view
+    is back (the next test reads the HUD there). Returns fields for meta.json. Raises Abort if the camera can't be
+    restored."""
+    vp = rec["vp"]
+    out = {}
+    if vp is None:
         return out
-    if probe["dark_presses"] and probe["cam_at_dark"] is not None:
-        d = cam_dist(cur, probe["cam_at_dark"])
-        out.update(dark_press_worked=bool(d > thr), dark_press_dist=round(d, 3))
-        log(f"  presses made after the screen went black ({probe['since_bright'] + probe['dark_presses']} in all, odd on purpose) "
-            f"{'DID' if d > thr else 'did not'} change the camera (distance {d:.2f}, threshold {thr})")
-    if probe["cam_base"] is None:
-        return out
-    d0 = cam_dist(cur, probe["cam_base"]); tries = 0
-    while d0 > thr and tries < 4:                              # not in the starting view: press until it is
-        press_view(vj, guard, cfg); _sleep_guarded(guard, 1.2)
-        cur = grab.grab()["cam"]; d0 = cam_dist(cur, probe["cam_base"]); tries += 1
-    out.update(cam_restore_presses=tries, cam_final_dist=round(d0, 3))
+    thr = vp.p["probe_cockpit_thr"]
+    t0 = time.perf_counter()
+    tries, last_press = 0, -1e9
+    ok_frames = 0
+    max_tries = int(cfg.get("probe_restore_tries", 8))
+    while time.perf_counter() - t0 < cfg.get("gloc_recover_max_s", 40):
+        guard.check()
+        crops = grab.grab()
+        cur = crops["cam"]
+        settled = time.perf_counter() - last_press > 1.6
+        # The cockpit view is recognised by its HUD readouts (speed, G and boost all readable), which does not depend on
+        # the scenery. Comparing the picture with the pre-test cockpit frame fails when a planet or moon has moved in
+        # the view, which is what aborted the first campaign.
+        hud_ok = _hud_readable(crops)
+        bright = cam_mean(cur) >= 0.5 * vp.base_mean or cam_mean(cur) >= 30
+        same_picture = bright and cam_dist(cur, vp.base) < thr
+        if hud_ok or same_picture:
+            ok_frames += 1
+            if ok_frames >= 3:
+                break
+        else:
+            ok_frames = 0
+            if settled and bright:
+                if tries >= max_tries:
+                    raise Abort("could not get the camera back to the cockpit view after %d presses (is the vJoy view button bound "
+                                "to the camera key? run `python run.py camcheck`). Fix it by hand and re-run the remaining tests" % tries)
+                press_view(vj, guard, cfg); last_press = time.perf_counter(); tries += 1
+        _sleep_guarded(guard, 0.1)
+    out.update(cam_restore_presses=tries, cam_recover_s=round(time.perf_counter() - t0, 1))
     if tries:
         log(f"  camera back to the cockpit view after {tries} press(es)")
-    if d0 > thr:
-        raise Abort("could not get the camera back to the cockpit view (is the vJoy view button bound to the camera key? "
-                    "run `python run.py camcheck`). Fix it by hand and re-run the remaining tests")
     return out
 
 
-def save(outdir: Path, test, ts, cmds, frames, cfg, grab, lum=None, extra=None):
+def save(outdir: Path, test, ts, cmds, frames, cfg, grab, lum=None, extra=None, arrays_extra=None):
     outdir.mkdir(parents=True, exist_ok=True)
-    arrays = {k: np.stack(v) for k, v in frames.items() if v}
+    arrays = {k: np.stack(v) for k, v in frames.items() if len(v)}
     if lum is not None:
         arrays["hud_lum"] = lum
+    for k, v in (arrays_extra or {}).items():
+        arrays[k] = v
     np.savez_compressed(outdir / "frames.npz", t=ts, **arrays)
     meta = {"id": test.id, "note": test.note, "expect": test.expect,
             "steps": [{"t": s.t, **s.axes, **s.buttons} for s in test.steps],
@@ -257,7 +380,7 @@ def save(outdir: Path, test, ts, cmds, frames, cfg, grab, lum=None, extra=None):
             "fps_actual": round(len(ts) / max(ts[-1], 1e-6), 1) if len(ts) else 0,
             "monitor": grab.mon, "roi": cfg["roi"], "recorded": time.strftime("%Y-%m-%d %H:%M:%S"),
             **(extra or {})}
-    (outdir / "meta.json").write_text(json.dumps(meta, indent=1))
+    (outdir / "meta.json").write_text(json.dumps(meta, indent=1, default=lambda o: o.item() if hasattr(o, "item") else str(o)))
     with open(outdir / "commands.csv", "w") as f:
         keys = list(cmds[0].keys()) if cmds else []
         f.write("t," + ",".join(keys) + "\n")
@@ -265,16 +388,46 @@ def save(outdir: Path, test, ts, cmds, frames, cfg, grab, lum=None, extra=None):
             f.write(f"{t:.4f}," + ",".join(str(c[k]) for k in keys) + "\n")
 
 
+def forward_check(cfg, vj, grab, guard, log):
+    """Before a run: push the throttle +0.3 for 1 s from rest and check the ship goes FORWARD. Forward is rated 13.7 G
+    and backward 4.24 G, so +0.3 for 1 s reaches ~40 m/s forward but only ~12 m/s if the axis is inverted in game."""
+    fc = cfg.get("forward_check", {"value": 0.3, "seconds": 1.0, "min_mps": 25.0})
+    if not fc or "speed" not in grab.boxes or "strafe_long" not in vj.axis_map:
+        return
+    brake_to_stop(cfg, vj, grab, guard, log)
+    vj.set(axes={"strafe_long": float(fc.get("value", 0.3))})
+    try:
+        _sleep_guarded(guard, float(fc.get("seconds", 1.0)))
+    finally:
+        vj.set(axes={"strafe_long": 0.0})
+    v = read_speed(grab)
+    log(f"Forward check: throttle +{fc.get('value', 0.3)} for {fc.get('seconds', 1.0)} s -> {v} m/s")
+    brake_to_stop(cfg, vj, grab, guard, log)
+    if v is None or v < float(fc.get("min_mps", 25.0)):
+        raise Abort(f"forward check failed ({v} m/s): the throttle axis looks INVERTED (or unbound) in Star Citizen. "
+                    "Fix it in Keybindings (vJoy Y, Throttle - Forward / Back, invert off) and run again")
+
+
 def run_tests(tests, cfg, session_dir: Path, dry_run=False, log=print):
+    session_dir.mkdir(parents=True, exist_ok=True)
+    _console = log
+    def log(msg=""):                                   # every line also goes to run.log, so an abort is never lost
+        _console(msg)
+        try:
+            with open(session_dir / "run.log", "a", encoding="utf-8") as fh:
+                fh.write(f"{time.strftime('%H:%M:%S')} {msg}\n")
+        except OSError:
+            pass
     guard = Guard(cfg["window_title_contains"], cfg["abort_key"], enabled=not dry_run)
     vj = VJoy(cfg["vjoy_device"], cfg["axes"], cfg["buttons"], dry_run=dry_run)
     probing = any(t.probe > 0 for t in tests)
+    need_cam = probing or any(t.gloc in ("reverse", "hold") for t in tests)
     if probing and "view" not in cfg["buttons"]:
         raise SystemExit("Probe tests press a vJoy 'view' button: add `view: 3` under `buttons:` in config.yaml, bind button 3 "
                          "to Star Citizen's camera cycle (F4), then run `python run.py camcheck`.")
-    if probing:
+    if need_cam:
         cfg["roi"].setdefault("cam", [0.25, 0.20, 0.50, 0.50])
-    rois = {k: v for k, v in cfg["roi"].items() if k != "cam" or probing}   # the centre-of-screen frames only when probed
+    rois = {k: v for k, v in cfg["roi"].items() if k != "cam" or need_cam}   # the centre-of-screen frames only when needed
     grab = Grabber(cfg["monitor"], rois, cfg.get("view_downscale", 480), cfg.get("view_max_px", 450_000),
                    use_view=cfg.get("roll_view", False), cam_w=cfg.get("cam_downscale", 96))
     log(f"Capture: {'one region per frame' if grab.single else 'separate regions (slower)'}; "
@@ -283,7 +436,10 @@ def run_tests(tests, cfg, session_dir: Path, dry_run=False, log=print):
     time.sleep(5)
     start_max = cfg.get("start_max_mps", 3.0)
     try:
+        if not dry_run and any(t.uses_forward for t in tests):
+            forward_check(cfg, vj, grab, guard, log)
         lateral_runs = 0
+        skips_in_a_row = 0
         for i, test in enumerate(tests, 1):
             mirrored = False
             if cfg.get("mirror_lateral", True) and test.uses_lateral:
@@ -304,26 +460,52 @@ def run_tests(tests, cfg, session_dir: Path, dry_run=False, log=print):
                 v0 = read_speed(grab)
                 if v0 is not None and v0 > start_max:
                     log(f"  SKIPPED {test.id}: still {v0} m/s")
+                    skips_in_a_row += 1
+                    if skips_in_a_row >= int(cfg.get("abort_after_skips", 2)):
+                        raise Abort(f"{skips_in_a_row} tests in a row could not start: the ship still reads {v0} m/s after braking. "
+                                    "It is probably out of bounds (being pushed back), destroyed or at the respawn menu. Respawn or fly "
+                                    "back to the middle of the arena, then continue with: run_campaign.bat --resume <this session's folder name>")
                     continue
-            ts, cmds, frames, lum, gloc_at, base, ease_events, grey_at, probe = record(test, cfg, vj, grab, guard)
-            save(session_dir / test.id, test, ts, cmds, frames, cfg, grab, lum,
-                 {"start_speed": v0, "gloc_at": gloc_at, "grey_at": grey_at, "hud_lum_base": base,
-                  "gloc_policy": test.gloc, "ease_events": ease_events, "lat_mirrored": mirrored,
-                  "probe_every": test.probe, "probe_press_times": probe["presses"]})
+            skips_in_a_row = 0
+            rec = record(test, cfg, vj, grab, guard)
+            ts, base, gloc_at = rec["ts"], rec["base"], rec["gloc_at"]
+            psum = rec["probe"]
+            meta_extra = {"start_speed": v0, "gloc_at": gloc_at, "grey_at": rec["grey_at"], "hud_black_at": rec["hud_black_at"],
+                          "hud_lum_base": base, "gloc_policy": test.gloc, "ease_events": rec["ease_events"],
+                          "reversals": rec["reversals"], "lat_mirrored": mirrored, "probe_every": test.probe,
+                          "probe_cfg": rec["probe_cfg"] if test.probe > 0 else None, "cam_base_mean": rec["cam_base_mean"],
+                          "probe": None if psum is None else {k: v for k, v in psum.items() if k != "log"},
+                          "probe_log": None if psum is None else psum["log"],
+                          "full_every_s": cfg.get("full_every_s", 0.5)}
+            arrays_extra = {"dark_level": rec["dark"]}
+            if len(rec["t_full"]):
+                arrays_extra["t_full"] = rec["t_full"]
+            save(session_dir / test.id, test, ts, rec["cmds"], rec["frames"], cfg, grab, rec["lum"], meta_extra, arrays_extra)
             fps = len(ts) / max(ts[-1], 1e-6)
             log(f"  recorded {len(ts)} frames ({fps:.0f} fps)")
             if fps < 30:
                 log("  WARNING: below 30 fps. Run `python run.py fpscheck` and see README 'Troubleshooting'.")
-            for t_e, s_e in ease_events:
+            for t_e, s_e in rec["ease_events"]:
                 log(f"  grey-out at {t_e} s: eased {', '.join(test.ease_axes)} to {s_e:.0%}")
-            if grey_at is not None:
-                log(f"  grey-out began {grey_at} s into the inputs" + (f", blackout at {gloc_at} s" if gloc_at is not None else ""))
+            if rec["grey_at"] is not None:
+                log(f"  grey-out began {rec['grey_at']} s into the inputs"
+                    + (f", HUD gone at {rec['hud_black_at']} s" if rec["hud_black_at"] is not None else ""))
+            for r in rec["reversals"]:
+                log(f"  {r['action']} at {r['t']} s (darkness {r['level']})")
+            if psum:
+                log(f"  camera key: {psum['cuts']} of {psum['presses']} presses switched the view; black checks "
+                    f"{psum['black_checks_worked']} worked / {psum['black_checks_dead']} did nothing"
+                    + (f"; TRUE blackout from {psum['true_blackout_at']:.2f} s" if psum["true_blackout_at"] is not None else "")
+                    + (f"; key stopped at {psum['key_lost_at']:.2f} s" if psum["key_lost_at"] is not None else ""))
             extra = {}
             if gloc_at is not None:
-                log(f"  G-LOC: HUD faded {gloc_at} s into the inputs; inputs released, test ended early.")
-                extra["recovery_s"] = round(wait_hud_recovered(cfg, grab, guard, log, base), 1)   # vision back after the let-go
-            if test.probe > 0 and "cam" in grab.boxes:
-                extra.update(probe_aftermath(test, cfg, vj, grab, guard, log, probe, gloc_at is not None))
+                log(f"  HUD gone {gloc_at} s into the inputs (policy {test.gloc}): inputs released, test ended early.")
+            if test.probe > 0 and rec["vp"] is not None:
+                extra.update(probe_recover(cfg, vj, grab, guard, log, rec))
+            affected = (gloc_at is not None or rec["hud_black_at"] is not None or rec["grey_at"] is not None
+                        or (len(rec["dark"]) and np.nanmax(np.where(np.isnan(rec["dark"]), 0, rec["dark"])) >= 0.3))
+            if affected and base:
+                extra["recovery_s"] = round(wait_hud_recovered(cfg, grab, guard, log, base), 1)   # vision back after the let-go / the test
             if extra:
                 mp = session_dir / test.id / "meta.json"
                 meta = json.loads(mp.read_text()); meta.update(extra)

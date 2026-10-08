@@ -1,0 +1,135 @@
+{
+ "presses": 11,
+ "cuts": 11,
+ "ignored": 0,
+ "blind": 0,
+ "black_checks": 3,
+ "black_checks_worked": 3,
+ "black_checks_dead": 0,
+ "true_blackout_at": null,
+ "true_blackout_doubt": false,
+ "resyncs": [
+  {
+   "t": 1.543,
+   "counted": 0,
+   "seen": "external"
+  },
+  {
+   "t": 7.151,
+   "counted": 2,
+   "seen": "cockpit"
+  },
+  {
+   "t": 10.314,
+   "counted": 0,
+   "seen": "external"
+  }
+ ],
+ "conscious_dark_at": 4.9716,
+ "key_lost_at": null,
+ "key_back_at": null,
+ "stray_cuts": [],
+ "log": [
+  {
+   "t": 3.0341,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 3.229,
+   "idx_after": 2
+  },
+  {
+   "t": 4.2467,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 4.424,
+   "idx_after": 0
+  },
+  {
+   "t": 4.9716,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 5.129,
+   "idx_after": 1
+  },
+  {
+   "t": 6.1491,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 6.337,
+   "idx_after": 2
+  },
+  {
+   "t": 7.3671,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 7.549,
+   "idx_after": 1
+  },
+  {
+   "t": 8.0793,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 8.317,
+   "idx_after": 2
+  },
+  {
+   "t": 9.3375,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 9.514,
+   "idx_after": 0
+  },
+  {
+   "t": 11.5494,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 11.747,
+   "idx_after": 2
+  },
+  {
+   "t": 12.7746,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 12.946,
+   "idx_after": 0
+  },
+  {
+   "t": 13.5295,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 13.704,
+   "idx_after": 1
+  },
+  {
+   "t": 14.7356,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 14.965,
+   "idx_after": 2
+  }
+ ],
+ "base_mean": 44.365516662597656,
+ "dark_thr": 22.182758331298828
+}

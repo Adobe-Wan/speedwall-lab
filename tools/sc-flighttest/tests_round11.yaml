@@ -1,0 +1,50 @@
+# Round 11 (Gladius, DECOUPLED, Arena Commander free flight only, G-safe OFF): close the boosted egg, settle the fast flip.
+#   python run.py campaign --rounds 11        (8 tests, about 9 minutes)
+#
+# Egg: boost to the nose wall, turn the nose a known angle with boost held, then hold boost and let the IFCS bleed the speed
+# to the egg's radius at that heading (round 10 showed this works: 90 deg -> 394). Pitch UP puts the velocity below the
+# ship (the DOWN side), pitch DOWN puts it above (the UP side), yaw puts it to the side.
+# Rotation: pitch + yaw rotate the ship about an axis at right angles to the nose, so a light FORWARD thrust spins fully
+# with the ship and nothing drifts (round 10's up-strafe method drifted along the axis and masked the period).
+tests:
+  - id: r11_redout_stairs
+    note: "boosted full DOWN strafe from rest, held 18 s through red-out. Round 9 showed thrust stops while you are out
+      (speed frozen at 229 for ~4.5 s), then resumes: expect a staircase. The down RADIUS comes from r10_turn90_boost (394)."
+    gloc: hold
+    steps: [{t: 18, strafe_vert: -1.0, boost: true}]
+    expect: {plateau_mps: "staircase toward 394"}
+  - id: r11_turn90_pitchdown
+    note: "boost to the nose wall 4 s, pitch DOWN 1.1 s (~90 deg, velocity ends on the UP side), boost only 5 s (limacon 394)"
+    gloc: hold
+    steps: [{t: 4, strafe_long: 1.0, boost: true}, {t: 1.1, pitch: -1.0, boost: true}, {t: 5, boost: true}]
+    expect: {end_speed: 394}
+  - id: r11_turn120_boost
+    note: "boost to the nose wall 4 s, pitch up 1.47 s (~120 deg), boost only 6 s (limacon 331)"
+    gloc: hold
+    steps: [{t: 4, strafe_long: 1.0, boost: true}, {t: 1.47, pitch: 1.0, boost: true}, {t: 6, boost: true}]
+    expect: {end_speed: 331}
+  - id: r11_turn150_boost
+    note: "boost to the nose wall 4 s, pitch up 1.84 s (~150 deg), boost only 7 s (limacon 285)"
+    gloc: hold
+    steps: [{t: 4, strafe_long: 1.0, boost: true}, {t: 1.84, pitch: 1.0, boost: true}, {t: 7, boost: true}]
+    expect: {end_speed: 285}
+  - id: r11_turn135_yaw_boost
+    note: "boost to the nose wall 4 s, yaw right 2.15 s (~135 deg, a side-rear heading), boost only 7 s (limacon 305)"
+    gloc: hold
+    steps: [{t: 4, strafe_long: 1.0, boost: true}, {t: 2.15, yaw: 1.0, boost: true}, {t: 7, boost: true}]
+    expect: {end_speed: 305}
+  - id: r11_rot_pitch_fwd
+    note: "pitch 100 % + 25 % throttle, 8 s: calibrates the forward-thrust rotation gauge (68 deg/s)"
+    gloc: hold
+    steps: [{t: 8, pitch: 1.0, strafe_long: 0.25}]
+    expect: {rot_dps_osc: 68}
+  - id: r11_rot_pitchyaw_fwd
+    note: "pitch 100 % + yaw 100 % + 25 % throttle, 8 s. Independent axes -> 85.7 deg/s; capped -> 68"
+    gloc: hold
+    steps: [{t: 8, pitch: 1.0, yaw: 1.0, strafe_long: 0.25}]
+    expect: {rot_dps_osc: "85.7 if independent, 68 if capped"}
+  - id: r11_rot_pitchyaw_fwd_boost
+    note: "pitch + yaw 100 % + 25 % throttle, boosted, 8 s. Independent -> 102.9; capped -> 81.6"
+    gloc: hold
+    steps: [{t: 8, pitch: 1.0, yaw: 1.0, strafe_long: 0.25, boost: true}]
+    expect: {rot_dps_osc: "102.9 if independent, 81.6 if capped"}

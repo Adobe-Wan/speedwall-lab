@@ -1,6 +1,6 @@
 """Test definitions: a test is a list of timed steps holding exact inputs."""
 from __future__ import annotations
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 BUTTONS = ("boost", "brake", "view")
 
@@ -20,10 +20,21 @@ class Test:
     expect: dict
     pre_s: float = 1.0
     post_s: float = 1.5
-    # What to do when the pilot greys out. "release": drop every input and end the test (safe default).
-    # "ease": scale the ease_axes down by ease_step each time the HUD dims, and keep flying, the way a pilot
-    # manages G-LOC; the level that stops the dimming is the sustainable one. Below ease_min, release.
+    # What to do when the pilot greys out / blacks out / reds out:
+    #  "release": drop every input on a HUD blackout and end the test (the old default; a black screen is NOT the end
+    #     for a real pilot, so use it only where the onset time is all you want).
+    #  "ease": scale the ease_axes down by ease_step each time the HUD dims, and keep flying, the way a pilot
+    #     manages G-LOC; the level that stops the dimming is the sustainable one. Below ease_min, release.
+    #  "reverse": when the screen is practically black, wait reverse_delay_s (the black checks run meanwhile), then flip the
+    #     direction of reverse_axes (a pilot counter-strafes and reverses the roll to stay conscious), hold that until
+    #     vision is back (or reverse_hold_s), resume, and repeat up to reverse_max times. Logged in meta "reversals".
+    #  "hold": never intervene; only record (the inputs run to the end of the test whatever the screen looks like).
     gloc: str = "release"
+    reverse_axes: tuple = ("strafe_lat", "strafe_vert", "roll")
+    reverse_at: float = 0.6        # darkness (0 clear .. 1 black, from the cockpit view) at which the screen counts as practically black
+    reverse_delay_s: float = 0.8
+    reverse_hold_s: float = 4.0
+    reverse_max: int = 4
     ease_axes: tuple = ("strafe_lat", "strafe_long", "strafe_vert", "roll")
     ease_step: float = 0.15
     ease_min: float = 0.25
@@ -37,6 +48,10 @@ class Test:
         return any(s.buttons.get("boost") for s in self.steps)
 
     @property
+    def uses_forward(self) -> bool:
+        return any(s.axes.get("strafe_long") for s in self.steps)
+
+    @property
     def uses_lateral(self) -> bool:
         return any(s.axes.get("strafe_lat") for s in self.steps)
 
@@ -44,8 +59,7 @@ class Test:
         """Same test with left/right strafe swapped. The ship is left/right symmetric, so results are the same; flying
         every second lateral test mirrored cancels the sideways drift that a pitch flip does not."""
         steps = [Step(s.t, {k: (-v if k == "strafe_lat" else v) for k, v in s.axes.items()}, dict(s.buttons)) for s in self.steps]
-        return Test(self.id, self.note, steps, self.expect, self.pre_s, self.post_s,
-                    self.gloc, self.ease_axes, self.ease_step, self.ease_min, self.probe)
+        return replace(self, steps=steps)
 
     @property
     def duration(self) -> float:
@@ -76,16 +90,20 @@ def parse(doc: dict, known_axes) -> list[Test]:
                 raise ValueError(f"test {d['id']}: unknown controls {sorted(unknown)}")
             steps.append(Step(t, {k: float(v) for k, v in s.items()}, buttons))
         gloc = d.get("gloc", "release")
-        if gloc not in ("release", "ease"):
-            raise ValueError(f"test {d['id']}: gloc must be 'release' or 'ease'")
+        if gloc not in ("release", "ease", "reverse", "hold"):
+            raise ValueError(f"test {d['id']}: gloc must be 'release', 'ease', 'reverse' or 'hold'")
         ease_axes = tuple(d.get("ease_axes", Test.ease_axes))
-        unknown = set(ease_axes) - set(known_axes)
+        rev_axes = tuple(d.get("reverse_axes", Test.reverse_axes))
+        unknown = (set(ease_axes) | set(rev_axes)) - set(known_axes)
         if unknown:
-            raise ValueError(f"test {d['id']}: unknown ease_axes {sorted(unknown)}")
-        tests.append(Test(d["id"], d.get("note", ""), steps, d.get("expect", {}),
-                          float(d.get("pre_s", 1.0)), float(d.get("post_s", 1.5)),
-                          gloc, ease_axes, float(d.get("ease_step", 0.15)), float(d.get("ease_min", 0.25)),
-                          float(d.get("probe", 0.0))))
+            raise ValueError(f"test {d['id']}: unknown ease_axes/reverse_axes {sorted(unknown)}")
+        tests.append(Test(id=d["id"], note=d.get("note", ""), steps=steps, expect=d.get("expect", {}),
+                          pre_s=float(d.get("pre_s", 1.0)), post_s=float(d.get("post_s", 1.5)),
+                          gloc=gloc, ease_axes=ease_axes, ease_step=float(d.get("ease_step", 0.15)),
+                          ease_min=float(d.get("ease_min", 0.25)), probe=float(d.get("probe", 0.0)),
+                          reverse_axes=rev_axes, reverse_at=float(d.get("reverse_at", 0.6)),
+                          reverse_delay_s=float(d.get("reverse_delay_s", 0.8)),
+                          reverse_hold_s=float(d.get("reverse_hold_s", 4.0)), reverse_max=int(d.get("reverse_max", 4))))
     ids = [t.id for t in tests]
     if len(ids) != len(set(ids)):
         raise ValueError("duplicate test ids")

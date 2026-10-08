@@ -1,0 +1,129 @@
+{
+ "presses": 10,
+ "cuts": 10,
+ "ignored": 0,
+ "blind": 0,
+ "black_checks": 6,
+ "black_checks_worked": 6,
+ "black_checks_dead": 0,
+ "true_blackout_at": null,
+ "true_blackout_doubt": false,
+ "resyncs": [
+  {
+   "t": 15.703,
+   "counted": 1,
+   "seen": "cockpit"
+  }
+ ],
+ "conscious_dark_at": 2.6687,
+ "key_lost_at": null,
+ "key_back_at": null,
+ "stray_cuts": [
+  2.065,
+  2.156,
+  3.685,
+  5.198,
+  5.909,
+  6.716,
+  7.334,
+  8.312,
+  11.145,
+  12.848,
+  13.517,
+  14.892
+ ],
+ "log": [
+  {
+   "t": 2.6687,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 2.848,
+   "idx_after": 0
+  },
+  {
+   "t": 4.885,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 5.064,
+   "idx_after": 2
+  },
+  {
+   "t": 5.7293,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 5.834,
+   "idx_after": 1
+  },
+  {
+   "t": 6.855,
+   "kind": "cycle",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 7.025,
+   "idx_after": 1
+  },
+  {
+   "t": 8.0595,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 8.144,
+   "idx_after": 0
+  },
+  {
+   "t": 10.1681,
+   "kind": "cycle",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 10.358,
+   "idx_after": 2
+  },
+  {
+   "t": 11.3785,
+   "kind": "cycle",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 11.555,
+   "idx_after": 1
+  },
+  {
+   "t": 12.5748,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 12.755,
+   "idx_after": 2
+  },
+  {
+   "t": 13.3456,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 13.366,
+   "idx_after": 1
+  },
+  {
+   "t": 14.3958,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 14.578,
+   "idx_after": 0
+  }
+ ],
+ "base_mean": 20.95265769958496,
+ "dark_thr": 10.47632884979248
+}

@@ -1,0 +1,136 @@
+{
+ "presses": 12,
+ "cuts": 10,
+ "ignored": 0,
+ "blind": 2,
+ "black_checks": 10,
+ "black_checks_worked": 8,
+ "black_checks_dead": 0,
+ "true_blackout_at": null,
+ "true_blackout_doubt": false,
+ "resyncs": [],
+ "conscious_dark_at": 2.697,
+ "key_lost_at": null,
+ "key_back_at": null,
+ "stray_cuts": [
+  2.176,
+  2.888,
+  3.704,
+  4.342,
+  5.296,
+  6.611,
+  10.855
+ ],
+ "log": [
+  {
+   "t": 2.697,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 2.83,
+   "idx_after": 2
+  },
+  {
+   "t": 3.8541,
+   "kind": "cycle",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 4.037,
+   "idx_after": 2
+  },
+  {
+   "t": 5.0674,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 5.239,
+   "idx_after": 1
+  },
+  {
+   "t": 6.2669,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 6.434,
+   "idx_after": 0
+  },
+  {
+   "t": 7.1405,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 7.338,
+   "idx_after": 2
+  },
+  {
+   "t": 8.3696,
+   "kind": "cycle",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 8.557,
+   "idx_after": 0
+  },
+  {
+   "t": 9.0745,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 9.254,
+   "idx_after": 1
+  },
+  {
+   "t": 10.2274,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 10.411,
+   "idx_after": 2
+  },
+  {
+   "t": 11.3701,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 11.882,
+   "idx_after": 1
+  },
+  {
+   "t": 12.9118,
+   "kind": "cycle",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 13.078,
+   "idx_after": 2
+  },
+  {
+   "t": 13.6152,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "blind",
+   "cut_t": null,
+   "idx_after": 2
+  },
+  {
+   "t": 14.4732,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "blind",
+   "cut_t": null,
+   "idx_after": 2
+  }
+ ],
+ "base_mean": 19.692384719848633,
+ "dark_thr": 9.846192359924316
+}

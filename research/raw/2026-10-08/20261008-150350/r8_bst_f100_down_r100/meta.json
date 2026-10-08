@@ -1,0 +1,229 @@
+{
+ "id": "r8_bst_f100_down_r100",
+ "note": "boosted escape from rest: forward 100 % + full DOWN + roll 100 % (240 deg/s), 14 s (red-out?)",
+ "expect": {
+  "red_at": "?",
+  "true_blackout_at": "?"
+ },
+ "steps": [
+  {
+   "t": 14.0,
+   "strafe_long": 1.0,
+   "strafe_vert": -1.0,
+   "roll": 1.0,
+   "boost": true
+  }
+ ],
+ "pre_s": 1.0,
+ "post_s": 1.5,
+ "fps_target": 60,
+ "fps_actual": 41.5,
+ "monitor": {
+  "left": 0,
+  "top": 0,
+  "width": 3840,
+  "height": 2160,
+  "is_primary": true,
+  "name": "Generic PnP Monitor",
+  "unique_id": "\\\\?\\DISPLAY#AUS32F4#5&10c0ae1&1&UID4352#{e6f07b5f-ee97-4a90-b076-33f57bf4eaa7}"
+ },
+ "roi": {
+  "speed": [
+   0.3944,
+   0.5467,
+   0.0194,
+   0.0211
+  ],
+  "g": [
+   0.6637,
+   0.4667,
+   0.0225,
+   0.0222
+  ],
+  "ab": [
+   0.5981,
+   0.5456,
+   0.0231,
+   0.0244
+  ],
+  "view": [
+   0.65,
+   0.09,
+   0.3,
+   0.27
+  ],
+  "cam": [
+   0.25,
+   0.2,
+   0.5,
+   0.5
+  ]
+ },
+ "recorded": "2026-10-08 16:23:47",
+ "start_speed": 0.0,
+ "gloc_at": null,
+ "grey_at": null,
+ "hud_black_at": null,
+ "hud_lum_base": 255.0,
+ "gloc_policy": "hold",
+ "ease_events": [],
+ "reversals": [],
+ "lat_mirrored": false,
+ "probe_every": 1.0,
+ "probe_cfg": {
+  "probe_views": 3.0,
+  "probe_cut_thr": 0.5,
+  "probe_cut_window_s": 0.8,
+  "probe_ignore_n": 2.0,
+  "probe_dark_abs": 60.0,
+  "probe_dark_frac": 0.5,
+  "probe_dark_hold_s": 0.5,
+  "probe_cockpit_thr": 0.55,
+  "probe_hud_settle_s": 1.2,
+  "probe_gap_s": 1.0,
+  "probe_cockpit_dwell_s": 2.0,
+  "probe_check_gap_s": 0.7,
+  "probe_blind_max": 24.0
+ },
+ "cam_base_mean": 51.35590744018555,
+ "probe": {
+  "presses": 10,
+  "cuts": 10,
+  "ignored": 0,
+  "blind": 0,
+  "black_checks": 0,
+  "black_checks_worked": 0,
+  "black_checks_dead": 0,
+  "true_blackout_at": null,
+  "true_blackout_doubt": false,
+  "resyncs": [
+   {
+    "t": 1.459,
+    "counted": 0,
+    "seen": "external"
+   },
+   {
+    "t": 14.775,
+    "counted": 0,
+    "seen": "external"
+   }
+  ],
+  "conscious_dark_at": null,
+  "key_lost_at": null,
+  "key_back_at": null,
+  "stray_cuts": [
+   2.144,
+   2.66,
+   3.204,
+   3.669,
+   3.786,
+   5.207,
+   6.792,
+   7.256,
+   8.28,
+   10.378,
+   11.351,
+   11.876,
+   12.872,
+   14.938
+  ],
+  "final_view_idx": 2,
+  "base_mean": 51.35590744018555,
+  "dark_thr": 25.677953720092773
+ },
+ "probe_log": [
+  {
+   "t": 3.0069230000081006,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 3.16,
+   "idx_after": 1
+  },
+  {
+   "t": 4.1680763000040315,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 4.367,
+   "idx_after": 2
+  },
+  {
+   "t": 5.368802900004084,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 5.568,
+   "idx_after": 1
+  },
+  {
+   "t": 6.575818400000571,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 6.752,
+   "idx_after": 2
+  },
+  {
+   "t": 7.761069200001657,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 7.938,
+   "idx_after": 2
+  },
+  {
+   "t": 8.939964400007739,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 9.127,
+   "idx_after": 1
+  },
+  {
+   "t": 10.127823600007105,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 10.336,
+   "idx_after": 2
+  },
+  {
+   "t": 11.351644399997895,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 11.555,
+   "idx_after": 2
+  },
+  {
+   "t": 12.567685700007132,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 12.754,
+   "idx_after": 1
+  },
+  {
+   "t": 13.767625899999985,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 13.971,
+   "idx_after": 0
+  }
+ ],
+ "full_every_s": 0.5,
+ "cam_restore_presses": 0,
+ "cam_recover_s": 0.3
+}

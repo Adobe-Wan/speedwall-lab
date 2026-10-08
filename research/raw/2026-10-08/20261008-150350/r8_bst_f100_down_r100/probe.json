@@ -1,0 +1,136 @@
+{
+ "presses": 10,
+ "cuts": 10,
+ "ignored": 0,
+ "blind": 0,
+ "black_checks": 0,
+ "black_checks_worked": 0,
+ "black_checks_dead": 0,
+ "true_blackout_at": null,
+ "true_blackout_doubt": false,
+ "resyncs": [
+  {
+   "t": 1.459,
+   "counted": 0,
+   "seen": "external"
+  },
+  {
+   "t": 14.775,
+   "counted": 0,
+   "seen": "external"
+  }
+ ],
+ "conscious_dark_at": null,
+ "key_lost_at": null,
+ "key_back_at": null,
+ "stray_cuts": [
+  2.144,
+  2.66,
+  3.204,
+  3.669,
+  3.786,
+  5.207,
+  6.792,
+  7.256,
+  8.28,
+  10.378,
+  11.351,
+  11.876,
+  12.872,
+  14.938
+ ],
+ "log": [
+  {
+   "t": 3.0266,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 3.16,
+   "idx_after": 1
+  },
+  {
+   "t": 4.1893,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 4.367,
+   "idx_after": 2
+  },
+  {
+   "t": 5.3897,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 5.568,
+   "idx_after": 1
+  },
+  {
+   "t": 6.597,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 6.752,
+   "idx_after": 2
+  },
+  {
+   "t": 7.7832,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 7.938,
+   "idx_after": 2
+  },
+  {
+   "t": 8.961,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 9.127,
+   "idx_after": 1
+  },
+  {
+   "t": 10.1493,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 10.336,
+   "idx_after": 2
+  },
+  {
+   "t": 11.3729,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 11.555,
+   "idx_after": 2
+  },
+  {
+   "t": 12.5893,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 12.754,
+   "idx_after": 1
+  },
+  {
+   "t": 13.7874,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 13.971,
+   "idx_after": 0
+  }
+ ],
+ "base_mean": 51.35590744018555,
+ "dark_thr": 25.677953720092773
+}

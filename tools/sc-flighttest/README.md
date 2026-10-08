@@ -31,7 +31,7 @@ Repeatable Star Citizen flight tests. A virtual joystick (vJoy) holds **exact** 
 2. Copy the XML into `...\StarCitizen\LIVE\user\client\0\controls\mappings\` (create the folder if it isn't there).
 3. In game: **Options → Keybindings → Advanced Controls Customization**, then the profile list at the bottom, select `speedwall-vjoy-js4`, **Load**.
 4. Select the **vJoy** device and set **deadzone 0, curve linear, saturation 100 %** on every axis. The file can't set these.
-5. For round 8 only: `python run.py camcheck` (cockpit view, ship stopped). It presses vJoy button 3 twice, compares the middle of the screen before and after, and says whether the camera key works and which `cam_state_thr` to set. If the middle of your screen looks the same in both views, drag a better `cam` box with `python run.py calibrate`.
+5. For rounds 8 and 9: `python run.py camcheck` (cockpit view, ship stopped). It presses vJoy button 3 until the cockpit view comes back, shows each press's fade and cut, counts the views (Star Citizen's cycle has three: cockpit, external A, external B) and tells you what `probe_views` to set. If the cuts score low, drag a better `cam` box with `python run.py calibrate`.
 6. In free flight, decoupled, SCM, ship stopped: `python run.py dircheck`. It pushes each axis in turn and tells you what the ship must do. Invert in game any axis that went the wrong way; never change `config.yaml`.
 
 CIG doesn't document this file format; the profile is written from community knowledge and the app's importer reads it back correctly, but I couldn't try it in the game. If Star Citizen ignores it, or your vJoy isn't joystick 4 (the number is in the `js4_` names and `instance="4"`; find-and-replace it), use the manual steps below.
@@ -44,7 +44,7 @@ In Star Citizen: **Options → Keybindings → Advanced Controls Customization**
 
 | Control | Star Citizen action | Command |
 |---|---|---|
-| strafe_long | Strafe Forward / Backward (abs.) | `python run.py bind strafe_long` |
+| strafe_long | **Throttle - Forward / Back** (this game version has no forward strafe binding; the throttle is what moves the ship forward) | `python run.py bind strafe_long` |
 | strafe_lat | Strafe Left / Right (abs.) | `python run.py bind strafe_lat` |
 | strafe_vert | Strafe Up / Down (abs.) | `python run.py bind strafe_vert` |
 | roll | Roll | `python run.py bind roll` |
@@ -81,7 +81,7 @@ Then run `python run.py fpscheck`. "one grab per frame" should read **30 fps or 
 3. In a terminal: `python run.py list --tests tests_round3.yaml` to see the tests, then `python run.py run --tests tests_round3.yaml` (29 tests, about 25 minutes) or a few by id.
 4. Click back into Star Citizen within 5 seconds. Hands off.
 
-**All the outstanding rounds at once:** `run_campaign.bat` (or `python run.py campaign`). It flies rounds 6, 7, 5 and 4 as one list, processes and analyzes them, and zips the results. `--rounds 6 7` picks some. See `docs/flight-model-tests.md` for the order and what each round settles.
+**All the outstanding rounds at once:** `run_campaign.bat` (or `python run.py campaign`). It flies rounds 6, 7, 8, 9, 5 and 4 as one list, processes and analyzes them, and zips the results. `--rounds 8 9 5 4` picks some. See `docs/flight-model-tests.md` for the order and what each round settles.
 
 Each test:
 1. Spacebrakes until the speed reads 0–1 m/s three times in a row.
@@ -94,17 +94,38 @@ Results go to `results\<date-time>\<test id>\`.
 
 **Map boundary.** After braking, the ship yaws about 180° before the next test, so tests alternate direction and the run stays near where it started. A yaw reverses both forward and left/right, so nothing accumulates. Start in the middle of the map. If the turn is badly over- or under-shot, set `turnaround_s` in `config.yaml` (180 ÷ yaw rate). Round 3's `rg_yaw_100` measures the yaw rate.
 
-**Blackouts (G-LOC).** Each test picks how the harness reacts when the HUD digits fade:
-- `gloc: release` (the default): on a blackout (HUD below 50 % brightness), let go of every input, mark it in the results (`gloc_at`), and end the test early.
-- `gloc: ease`: the way a pilot flies it. On a grey-out (HUD below 80 %), cut the test's `ease_axes` by `ease_step` (15 %) and keep flying, at most once every 1.5 s. The level that stops the grey-out is the sustainable one (`ease_events`, and `sustained_scale` in `analyze`). It still lets go on a blackout, or once the inputs are below `ease_min` (25 %).
+**Vision: grey-out, black-out, red-out (G-LOC).** A pilot's vision dims under sustained G (grey-out, black-out) and, when the blood is
+pushed up the body by a down strafe, turns red (red-out). A black screen is **not** the end: a pilot can regain vision by counter-strafing
+(reversing the strafe and the roll). So the harness no longer lets go at a blackout unless a test asks for it. Each test picks a policy
+(`gloc:` in the test file):
+- `hold` (used by almost every corkscrew test): never intervene; the inputs run to the end. This is the 101/201 behaviour: one direction, no reversing.
+- `reverse` (only the five "countermeasure" tests in round 8, an advanced tactic): when the screen is practically black the harness waits 0.8 s, flips the
+  strafe and roll direction, holds that until vision is back, resumes, and repeats up to 4 times. Every flip is logged with the darkness level.
+- `ease`: on a grey-out cut the chosen inputs by 15 % and keep flying (the level that stops the grey-out is the sustainable one).
+- `release`: let go at a HUD blackout and end the test (the old default; use only where the onset time is all you want).
 
-After a let-go, the run waits for your vision to come back, plus 8 s, before the next test.
+**What is recorded.** In every test: the HUD digits' brightness (cockpit view only: the digits are not drawn in the external views), the centre of
+the screen in colour at 60 fps (darkness, red share), and a small picture of the **whole** screen every 0.5 s. `process` turns these into
+`vision.csv` per test: how dark the centre, the middle ring and the edge of the screen are (0 clear .. 1 black, each against its own pre-test level, so
+tunnel vision shows as the edge running ahead of the centre), how red they are, the HUD fade, and your inputs, one row per picture, with a `valid` flag
+(1 only while the cockpit view is up and settled). That is the data the simulator's pilot view draws. Round 9 flies the main stimuli without any camera
+presses so the cockpit view, and so `vision.csv`, is continuous.
 
-A held strafe only pulls G until it reaches the wall (about 2.3 s in SCM), so it can't black you out. Sustained G comes from corkscrews (strafe + roll). Round 3 found lateral + roll greys out in 2–3 s and up + roll in 4–7 s; round 7 measures it.
+**Camera-key probe (round 8): the arbiter of a TRUE blackout.** Star Citizen's camera key cycles **three** views (cockpit, external A, external B). Each
+press fades out, **cuts** (the picture changes completely: frame-to-frame distance above 1.0, against 0.15 at most for any roll or drift) and fades in. Tests
+with `probe: 1.0` press vJoy button 3 (the camera key) about every second, longer in the cockpit view. The moment the screen is suspected black (dark for
+0.5 s, or the HUD gone) a **black check** is pressed at once and every 0.7 s while it lasts: if the camera switches, the pilot was **not** truly blacked out;
+if it does nothing, the blackout is real. `analyze` reports `probe_true_blackout_s` (first black-screen press that did nothing),
+`probe_conscious_dark_s` (first black-screen press that did switch the camera), `probe_key_lost_s` (the key stopped working: 2 ignored presses in a row),
+`probe_black_checks_worked/dead`, and `probe_outcomes` (each press: `c`ycle or `c`heck with `D` if the screen was dark, then cut/ignored/blind).
+`probe_true_blackout_doubt` means the camera state disagreed with the picture afterwards, so a "dead" press may have worked unseen: look at it with
+`python run.py camstrip <session> <test>`. The same code reads the recording offline, so thresholds can be re-tuned and the data re-read.
+After a probe test the harness presses the key until the cockpit view is back, then waits for the HUD, before the next test.
 
-**Camera-key probe (round 8).** A pilot who is greying out can still switch to the external camera until fully blacked out; after that the key stops working. Tests with `probe: 0.6` press vJoy button 3 (Star Citizen's camera cycle) every 0.6 s while the inputs are held, and the harness records the middle of the screen, small and grey. From those frames `analyze` classifies every press as `toggled` (the view changed clearly more than it changes between presses), `no_change`, or `dark` (screen black, can't tell), and reports `probe_last_toggle_s` and `probe_control_lost_s`. Because a black screen can't show whether a key worked, there is a second check: after the blackout the harness presses once or twice more in the dark (so that the number of presses since the screen went black is odd), waits for vision to return, and compares the camera with the last frame that was visible. `dark_press_worked: true` means the key still worked in the dark; `false` means it didn't, which is what you describe. It then presses until the cockpit view is back, so the next test can read the HUD. `python run.py camstrip <session> <test>` draws the frames around every press so you can check the detection by eye the first time. This assumes the key toggles between two views (`camcheck` warns if it doesn't). If your `config.yaml` was calibrated before this, add `view: 3` under `buttons:` and the `cam`, `cam_*`, `probe_*` lines from the default one.
-
-**What the harness can and can't know.** It sees only the HUD digits' brightness. It marks two moments in every test: the **grey-out** (HUD below 80 %, `grey_at`) and the **blackout** (below 50 %, `gloc_at`). The gap between them (`grey_to_black_s`) is how long you keep useful control while greying out. After a let-go, `recovery_s` is how long vision took to come back. Star Citizen's actual G-LOC rule isn't published and isn't assumed anywhere: the onset times, the `ease` levels and the recovery times are the data from which the simulator's model gets built.
+**What the harness can and can't know.** It sees the HUD digits (cockpit only), a colour crop of the middle of the screen and a small whole-screen picture.
+Star Citizen's actual G-LOC rule isn't published and isn't assumed anywhere: the onset times, the darkness curves, the red tint, the key's verdict and the
+recovery times are the data from which the simulator's model gets built. The red tint is detected as a rise in the red share of the picture
+(`RED_EXCESS` in `analyze.py`, 0.06 as a first guess); `red_peak` is reported so it can be tuned.
 
 ### How rotation is measured (no sky camera)
 In decoupled mode, a strafe thrust is fixed to the ship. Rotating the ship spins that thrust vector, so the velocity traces a circle and the HUD speed rises and falls once per full rotation. The period gives the rotation rate, and the size of the swing gives the thrust. A fit on round 2's roll + up test gave **239.9 °/s** and **12.9 G**, against a spec of 240 °/s and 12.9 G, with 0.25 m/s error. The `rg_*` tests use a gentle 25% strafe, so the G-load stays around 2–3 G.

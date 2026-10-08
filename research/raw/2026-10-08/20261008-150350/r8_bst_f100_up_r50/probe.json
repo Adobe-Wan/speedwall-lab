@@ -1,0 +1,128 @@
+{
+ "presses": 10,
+ "cuts": 10,
+ "ignored": 0,
+ "blind": 0,
+ "black_checks": 9,
+ "black_checks_worked": 9,
+ "black_checks_dead": 0,
+ "true_blackout_at": null,
+ "true_blackout_doubt": false,
+ "resyncs": [
+  {
+   "t": 4.726,
+   "counted": 2,
+   "seen": "cockpit"
+  },
+  {
+   "t": 10.686,
+   "counted": 0,
+   "seen": "external"
+  },
+  {
+   "t": 13.606,
+   "counted": 0,
+   "seen": "external"
+  }
+ ],
+ "conscious_dark_at": 2.997,
+ "key_lost_at": null,
+ "key_back_at": null,
+ "stray_cuts": [
+  7.025
+ ],
+ "log": [
+  {
+   "t": 2.997,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 3.23,
+   "idx_after": 1
+  },
+  {
+   "t": 3.7271,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 3.897,
+   "idx_after": 2
+  },
+  {
+   "t": 4.9334,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 5.106,
+   "idx_after": 1
+  },
+  {
+   "t": 6.1313,
+   "kind": "cycle",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 6.301,
+   "idx_after": 2
+  },
+  {
+   "t": 6.8349,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 6.933,
+   "idx_after": 0
+  },
+  {
+   "t": 8.9545,
+   "kind": "cycle",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 9.134,
+   "idx_after": 2
+  },
+  {
+   "t": 9.6756,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 9.876,
+   "idx_after": 0
+  },
+  {
+   "t": 11.9092,
+   "kind": "cycle",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 12.102,
+   "idx_after": 2
+  },
+  {
+   "t": 12.6088,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 12.788,
+   "idx_after": 0
+  },
+  {
+   "t": 14.8228,
+   "kind": "cycle",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 14.993,
+   "idx_after": 2
+  }
+ ],
+ "base_mean": 19.745107650756836,
+ "dark_thr": 9.872553825378418
+}

@@ -1,0 +1,91 @@
+# sc-flighttest configuration. Run `python run.py calibrate` to fill in the screen regions.
+vjoy_device: 1
+
+# Logical control -> vJoy axis. Bind each vJoy axis to the matching Star Citizen action
+# (see README "Bindings"). Use `python run.py bind <control>` to wiggle one axis while SC listens.
+axes:
+  strafe_lat:  x     # + = right    -> SC "Strafe Left / Right (abs.)"
+  strafe_long: y     # + = forward  -> SC "Strafe Forward / Backward (abs.)"
+  strafe_vert: z     # + = up       -> SC "Strafe Up / Down (abs.)"
+  roll:        rz    # + = right    -> SC "Roll"
+  pitch:       rx    # + = up       -> SC "Pitch"
+  yaw:         ry    # + = right    -> SC "Yaw"
+buttons:
+  boost: 1           # -> SC "Afterburner" (hold)
+  brake: 2           # -> SC "Spacebrake" (hold)
+  view: 3            # -> SC "Cycle camera view" (default key F4), pressed by the G-LOC camera-key probe
+
+# Safety
+window_title_contains: "Star Citizen"   # inputs are only sent while this window is focused
+abort_key: F12                          # press to release all inputs and stop immediately
+
+# Capture
+monitor: 1            # mss monitor index of the game screen (1 = primary). Calibrate sets this.
+target_fps: 60
+# Screen regions as FRACTIONS of the game monitor: [left, top, width, height].
+# Defaults come from a Gladius cockpit, default FOV, 16:9. `python run.py calibrate` lets you
+# drag new boxes if your HUD sits elsewhere (other ship, FOV, aspect ratio).
+roi:
+  speed: [0.3944, 0.5467, 0.0194, 0.0211]   # big speed digits ("225"), not the "m/s" label
+  g:     [0.6637, 0.4667, 0.0225, 0.0222]   # G number ("0.0"), not the "G" label
+  ab:    [0.5981, 0.5456, 0.0231, 0.0244]   # boost tank percent ("100%")
+  view:  [0.650, 0.090, 0.300, 0.270]   # optional sky patch, only used when roll_view: true
+  cam:   [0.250, 0.200, 0.500, 0.500]   # middle of the screen: looks very different in the cockpit and in the external camera (G-LOC probe)
+roll_view: false      # camera roll tracking is no longer needed: rotation rates come from the speed readout
+view_downscale: 480
+view_max_px: 450000
+
+# Between tests
+brake_until_mps: 1.0  # spacebrake until OCR speed is below this (falls back to brake_max_s)
+brake_max_s: 45
+refill_until_pct: 99  # after a test, idle until the AB (boost) readout is at least this
+refill_max_s: 60      # ...or this long, whichever comes first
+start_max_mps: 3.0  # a test never starts above this speed (brakes again, else skips the test)
+turnaround: true      # flip the ship 180 deg between tests so the run doesn't drift out of the arena
+turnaround_axis: pitch  # pitch (reverses forward + up/down) or yaw (reverses forward + left/right)
+turnaround_s: 2.8     # seconds of full deflection for 180 deg: pitch 68 deg/s -> 2.65 s (yaw 52.1 deg/s -> 3.6 s)
+mirror_lateral: true  # a pitch flip leaves left/right alone, so fly every second lateral test with strafe_lat negated
+                      # (the ship is left/right symmetric; the sideways drift then cancels). false = never mirror.
+
+# HUD-based vision guard. The HUD digits exist only in the COCKPIT view and for ~1 s after cutting back to it, so these
+# thresholds are applied to cockpit frames only. For tests with `gloc: release` (the old behaviour) the HUD fading below
+# gloc_dim_frac of its pre-test brightness for gloc_hold_s lets go of all inputs and ends the test; tests with `hold` or
+# `reverse` only record it (hud_black_at). A black screen is NOT the end of a test: a pilot can regain vision by counter-strafing.
+gloc_dim_frac: 0.5
+gloc_hold_s: 0.25
+# Tests with `gloc: ease` react earlier, at this fraction (grey-out), by easing their inputs instead of
+# releasing them; at most one ease step per gloc_ease_wait_s so the pilot has time to recover.
+gloc_ease_frac: 0.8
+gloc_ease_wait_s: 1.5
+
+# Camera-key probe (tests with `probe: <seconds>`): the vJoy `view` button (bound to Star Citizen's camera cycle) is pressed
+# every probe_gap_s while in an external view and after probe_cockpit_dwell_s in the cockpit view. The camera cycles
+# `probe_views` views (cockpit, external A, external B). Whenever the screen is suspected black, a BLACK CHECK press is made
+# at once and every probe_check_gap_s: camera switched = not truly blacked out; nothing = a true blackout.
+# `python run.py camcheck` tells you whether it works and what to set here.
+probe_pulse_s: 0.12        # how long each press is held
+probe_views: 3             # views the camera key cycles through (camcheck counts them)
+probe_cut_thr: 0.5         # consecutive-frame distance that counts as a camera cut (real cuts score 1.0+, motion 0.15 at most)
+probe_cut_window_s: 0.8    # a press must cut within this long
+probe_ignore_n: 2          # this many ignored presses in a row = the key has stopped working
+probe_dark_frac: 0.5       # the screen is dark below this fraction of the cockpit view's own brightness...
+probe_dark_abs: 60         # ...or below this (0-255), whichever is lower
+probe_dark_hold_s: 0.5     # dark this long = suspected blackout (a camera fade-out is dark for only ~0.2 s)
+probe_blind_max: 24        # a frame whose brightest pixel is below this is pure black: a cut could not show
+probe_cockpit_thr: 0.55    # distance to the cockpit reference under which a bright frame is the cockpit view
+probe_hud_settle_s: 1.2    # HUD digits are trusted this long after cutting back to the cockpit
+probe_gap_s: 1.0           # seconds between presses while in an external view
+probe_cockpit_dwell_s: 2.0 # seconds in the cockpit view before the next press (HUD / darkness samples)
+probe_check_gap_s: 0.7     # seconds between black-check presses while the screen stays black
+cam_downscale: 96          # width in pixels of the saved centre-of-screen frames (colour)
+# Whole-screen pictures for the vision gradient (centre vs edge darkness, red tint): one every full_every_s, full_w px wide.
+# 0 turns them off. Each costs about one dropped frame at 4K.
+full_every_s: 0.5
+full_w: 128
+gloc_recover_max_s: 40
+# The forward axis is the game throttle, which keeps its setting at centre. After each brake the harness checks the
+# ship stays put with the brake off; if it creeps off, it taps the axis back (found with `python run.py throttlecheck`).
+throttle_reset: {value: -1.0, seconds: 0.15, watch_s: 0.8, tries: 3}
+abort_after_skips: 1        # stop the run when this many tests in a row cannot start (ship still moving after braking)
+probe_restore_tries: 8      # camera-key presses allowed to get back to the cockpit view before the run stops
+gloc_rest_s: 8

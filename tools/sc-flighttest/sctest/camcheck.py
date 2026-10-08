@@ -15,41 +15,65 @@ def _median_frame(grab, n=10, gap=0.08):
     return np.median(np.stack(fr), axis=0)
 
 
+def _watch(grab, seconds, fps=60.0):
+    """Frames and times for `seconds` (centre-of-screen probe frames, colour)."""
+    t0 = time.perf_counter(); fr, ts = [], []
+    while time.perf_counter() - t0 < seconds:
+        fr.append(grab.grab()["cam"]); ts.append(time.perf_counter() - t0)
+        time.sleep(max(0.0, 1.0 / fps - 0.004))
+    return ts, fr
+
+
 def camcheck(cfg: dict):
-    """Press the view button twice and compare the centre-of-screen frames. In Arena Commander, ship stopped, cockpit view.
-    Prints whether the key works and a cam_state_thr to put in config.yaml."""
+    """Press the camera key until the cockpit view comes back, watching the centre of the screen at about 60 fps. In Arena
+    Commander, ship stopped, COCKPIT view, window focused. For each press it prints the fade, the cut (the picture changing
+    completely: the probe's sign that the key worked) and the brightness of the view it landed on, then how many views the
+    key cycles through. Star Citizen's key cycles three (cockpit, external A, external B); the harness expects the setting
+    `probe_views: 3` and a cut score above probe_cut_thr (0.5)."""
     roi = cfg["roi"].get("cam") or [0.25, 0.20, 0.50, 0.50]
     grab = Grabber(cfg["monitor"], {"cam": roi}, cam_w=cfg.get("cam_downscale", 96))
     if "view" not in cfg["buttons"]:
         raise SystemExit("Add `view: 3` under `buttons:` in config.yaml and bind vJoy button 3 to Star Citizen's camera cycle (F4).")
     vj = VJoy(cfg["vjoy_device"], cfg["axes"], cfg["buttons"])
     pulse = cfg.get("probe_pulse_s", 0.12)
-
-    def press():
-        vj.set(buttons={"view": True}); time.sleep(pulse); vj.set(buttons={"view": False}); time.sleep(2.0)
-
+    thr = float(cfg.get("probe_cut_thr", 0.5))
     try:
         print("Camera check. Arena Commander free flight, ship stopped, COCKPIT view, window focused. Starting in 5 s.")
         time.sleep(5)
-        a1 = _median_frame(grab); time.sleep(1.0); a2 = _median_frame(grab)
-        same = cam_dist(a1, a2)
-        press(); b = _median_frame(grab)
-        press(); c = _median_frame(grab)
-        d_ab, d_ac, d_bc = cam_dist(a1, b), cam_dist(a1, c), cam_dist(b, c)
-        print(f"  same view a second apart : {same:.3f}")
-        print(f"  after 1 press (A -> B)   : {d_ab:.3f}   mean brightness {cam_mean(a1):.0f} -> {cam_mean(b):.0f}")
-        print(f"  after 2 presses (A -> C) : {d_ac:.3f}   (should be close to the 'same view' number if the key toggles two views)")
-        print(f"  B versus C               : {d_bc:.3f}")
-        if d_ab < max(0.15, 3 * same):
-            print("RESULT: the view did not change clearly. Check that vJoy button 3 is bound to the camera cycle (F4 by default) in Star "
-                  "Citizen, and that the ship is in a cockpit view. If it did switch, drag a better `cam` box with `python run.py calibrate` "
-                  "(a box whose content differs a lot between the two views).")
+        _, quiet = _watch(grab, 1.5)
+        base = np.median(np.stack([np.asarray(f, np.float32) for f in quiet]), axis=0)
+        noise = max(cam_dist(quiet[i], quiet[i - 1]) for i in range(1, len(quiet)))
+        print(f"  cockpit view: brightness {cam_mean(base):.1f}; largest frame-to-frame change while nothing happens {noise:.3f}")
+        views, cut_scores, n_views = [("cockpit", base)], [], None
+        for k in range(1, 6):
+            vj.set(buttons={"view": True}); t_press = time.perf_counter()
+            time.sleep(pulse); vj.set(buttons={"view": False})
+            ts, fr = _watch(grab, 2.6)
+            steps = [cam_dist(fr[i], fr[i - 1]) for i in range(1, len(fr))]
+            i_cut = int(np.argmax(steps)) if steps else 0
+            score = steps[i_cut] if steps else 0.0
+            means = [cam_mean(f) for f in fr]
+            landed = np.median(np.stack([np.asarray(f, np.float32) for f in fr[-20:]]), axis=0)
+            d_base = cam_dist(landed, base)
+            cut_scores.append(score)
+            print(f"  press {k}: cut {score:.2f} at +{ts[i_cut + 1] if i_cut + 1 < len(ts) else 0:.2f} s "
+                  f"(darkest during the switch {min(means):.1f}), landed on a view of brightness {cam_mean(landed):.1f}, "
+                  f"distance to the cockpit view {d_base:.2f}")
+            if d_base < float(cfg.get("probe_cockpit_thr", 0.55)):
+                n_views = k
+                print(f"  -> the cockpit view is back after {k} presses: the key cycles through {k} views")
+                break
+        if n_views is None:
+            print("RESULT: the cockpit view did not come back within 5 presses. Check that vJoy button 3 is bound to the camera cycle "
+                  "key (F4 by default) and that the ship is in a cockpit view; if it did switch, drag a better `cam` box with "
+                  "`python run.py calibrate`.")
         else:
-            thr = round((max(same, d_ac) + d_ab) / 2, 2)
-            print(f"RESULT: the key works and the views differ clearly. Set `cam_state_thr: {thr}` in config.yaml.")
-            if d_ac > 0.5 * d_ab:
-                print("  Note: two presses did not bring the cockpit view back, so the camera cycles through more than two views. The harness "
-                      "presses until the starting view returns (up to 4 times).")
+            print(f"RESULT: set `probe_views: {n_views}` in config.yaml" + ("" if n_views == int(cfg.get('probe_views', 3)) else "  (it is not that now)") + ".")
+            if min(cut_scores) < thr * 1.4:
+                print(f"  WARNING: the weakest cut scored {min(cut_scores):.2f}, close to the detection threshold {thr}. Lower probe_cut_thr "
+                      f"(the quiet-scene noise above is {noise:.2f}) or drag a `cam` box whose content differs more between the views.")
+            else:
+                print(f"  Every press cut clearly (weakest {min(cut_scores):.2f}, threshold {thr}); nothing to tune.")
     finally:
         vj.close()
 
@@ -74,7 +98,8 @@ def camstrip(session: Path, test_id: str):
         for dt in (-0.1, 0.3, 0.7):
             i = int(np.argmin(np.abs(t - (t[e] + dt))))
             im = cv2.resize(cam[i], None, fx=3, fy=3, interpolation=cv2.INTER_NEAREST)
-            im = cv2.cvtColor(im, cv2.COLOR_GRAY2BGR)
+            if im.ndim == 2:
+                im = cv2.cvtColor(im, cv2.COLOR_GRAY2BGR)
             cv2.putText(im, f"{t[e] + dt:.1f}s", (4, 14), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 255, 255), 1)
             row.append(im)
         tiles.append(np.hstack(row))

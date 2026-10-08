@@ -25,8 +25,8 @@ ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 
 # Outstanding rounds, in the order worth flying them (docs/flight-model-tests.md).
-CAMPAIGN = {"6": "tests_round6.yaml", "7": "tests_round7.yaml", "8": "tests_round8.yaml",
-            "5": "tests_round5.yaml", "4": "tests_round4.yaml"}
+CAMPAIGN = {"6": "tests_round6.yaml", "7": "tests_round7.yaml", "8": "tests_round8.yaml", "9": "tests_round9.yaml",
+            "5": "tests_round5.yaml", "4": "tests_round4.yaml", "10": "tests_round10.yaml", "11": "tests_round11.yaml"}
 
 
 def cfg():
@@ -50,6 +50,15 @@ def campaign(c, args):
     ids = [t.id for t in ts]
     if len(ids) != len(set(ids)):
         sys.exit("duplicate test ids across rounds")
+    session = ROOT / "results" / (args.resume or time.strftime("%Y%m%d-%H%M%S"))
+    if args.resume:
+        if not session.is_dir():
+            sys.exit(f"no such session folder: {session}")
+        done = {x.name for x in session.iterdir() if (x / "frames.npz").exists()}
+        ts = [t for t in ts if t.id not in done]
+        print(f"Resuming {session.name}: {len(done)} tests already recorded, {len(ts)} left.")
+        if not ts:
+            sys.exit("nothing left to run")
     flying = sum(t.duration for t in ts)
     between = len(ts) * 35                                       # braking from speed, the flip, the boost refill: a rough allowance
     print(f"Rounds {', '.join(args.rounds)}: {len(ts)} tests, about {(flying + between) / 60:.0f} minutes (more if you grey out: "
@@ -58,7 +67,6 @@ def campaign(c, args):
     print("G-safe OFF, nothing ahead of you, you at the keyboard. F12 releases everything and stops.")
     if not (args.yes or args.dry_run):
         input("Press Enter when ready... ")
-    session = ROOT / "results" / time.strftime("%Y%m%d-%H%M%S")
     run_tests(ts, c, session, dry_run=args.dry_run)
     if args.dry_run:
         return
@@ -87,6 +95,7 @@ def main():
     h = sub.add_parser("hold"); h.add_argument("control"); h.add_argument("value", type=float); h.add_argument("seconds", type=float)
     sub.add_parser("dircheck")
     sub.add_parser("camcheck")
+    sub.add_parser("throttlecheck")
     cs = sub.add_parser("camstrip"); cs.add_argument("session"); cs.add_argument("test")
     ca = sub.add_parser("calibrate"); ca.add_argument("--monitor", type=int)
     sub.add_parser("ocrcheck")
@@ -97,7 +106,8 @@ def main():
     p = sub.add_parser("process"); p.add_argument("session"); p.add_argument("--stride", type=int, default=1)
     a = sub.add_parser("analyze"); a.add_argument("session")
     cp = sub.add_parser("campaign")
-    cp.add_argument("--rounds", nargs="+", default=list(CAMPAIGN), choices=list(CAMPAIGN), help="default: 6 7 8 5 4")
+    cp.add_argument("--rounds", nargs="+", default=["11"], choices=list(CAMPAIGN), help="default: 11 (rounds 4-10 are done)")
+    cp.add_argument("--resume", metavar="SESSION", help="continue a session: skip the tests it already has and save new ones into it")
     cp.add_argument("--yes", action="store_true", help="don't wait for Enter before starting")
     cp.add_argument("--dry-run", action="store_true")
     pk = sub.add_parser("pack"); pk.add_argument("session"); pk.add_argument("--with-frames", action="store_true")
@@ -110,6 +120,9 @@ def main():
     elif args.cmd == "hold":
         from sctest.bind import hold
         hold(c, args.control, args.value, args.seconds)
+    elif args.cmd == "throttlecheck":
+        from sctest.throttlecheck import throttlecheck
+        throttlecheck(c)
     elif args.cmd == "camcheck":
         from sctest.camcheck import camcheck
         camcheck(c)

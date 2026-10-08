@@ -1,0 +1,149 @@
+# Round 10 (Gladius, DECOUPLED, Arena Commander free flight only, G-safe OFF): the questions a trainer has to answer.
+#   python run.py campaign --rounds 10        (37 tests: 11 min of flying, about 35 min with braking, flips and rests)
+#
+# A. Do rotations ADD when combined? (pitch + yaw together: 85.7 deg/s if each axis keeps its own limit, 68 if the
+#    game caps the combined rate). This decides the fastest flip. Method: the rg_* rotation gauge from round 3 (a 25 %
+#    strafe spins with the ship; the period of the speed oscillation gives the rotation rate about ANY axis).
+# B. Turning while boosting: how much speed you keep when the nose leaves the velocity (limacon 394 + 126 cos(angle)?)
+#    and how fast the IFCS bleeds the excess. SCM twin: the SCM egg is a sphere, so the model predicts NO loss.
+# C. Partial throttle: the forward axis is the game's THROTTLE (it keeps its setting at centre). What 25 / 50 / 100 %
+#    hold, and what the ship does after the stick returns to centre.
+# D. G tolerance at partial G: strafe + full roll from rest keeps a constant G in a fixed direction for as long as you
+#    hold it. Four levels per direction, plus equal-G pairs with and without boost (round 9 hinted that boost blacks
+#    you out ~2x faster at LOWER G-meter readings).
+# E. Recovery: black out, let go for 1.5 / 3 / 6 s, go again. How much G stress carries over.
+# F. Reference manoeuvres held back for validating the simulator (never used for fitting).
+#
+# All tests: gloc hold, no camera presses (cockpit view throughout, vision.csv continuous), pre 1 s, post 1.5 s.
+# Distance: the B tests reach ~520 m/s; each flies 3-4 km. The harness flips 180 deg between tests, so consecutive
+# tests mostly cancel, but if your arena is small run this round in two halves (A+C+D, then B+E+F).
+tests:
+  # ---------------------------------------------------------------- A. rotation combinations
+  - id: r10_rot_pitchyaw_100
+    note: "pitch 100 % + yaw 100 % + 25 % up strafe. Independent axes -> 85.7 deg/s; capped -> 68"
+    gloc: hold
+    steps: [{t: 10, pitch: 1.0, yaw: 1.0, strafe_vert: 0.25}]
+    expect: {rot_dps_osc: "85.7 if independent, 68 if capped"}
+  - id: r10_rot_pitchyaw_100_boost
+    note: "pitch + yaw 100 %, boosted. Independent -> 102.9; capped -> 81.6"
+    gloc: hold
+    steps: [{t: 10, pitch: 1.0, yaw: 1.0, strafe_vert: 0.25, boost: true}]
+    expect: {rot_dps_osc: "102.9 if independent, 81.6 if capped"}
+  - id: r10_rot_pitchroll_100
+    note: "pitch 100 % + roll 100 % + 25 % up strafe. Independent -> 211.2; capped -> 199.9"
+    gloc: hold
+    steps: [{t: 8, pitch: 1.0, roll: 1.0, strafe_vert: 0.25}]
+    expect: {rot_dps_osc: "211.2 if independent, 199.9 if capped"}
+  - id: r10_rot_all_100
+    note: "pitch + yaw + roll 100 % + 25 % up strafe. Independent -> 217.5; capped -> 199.9"
+    gloc: hold
+    steps: [{t: 8, pitch: 1.0, yaw: 1.0, roll: 1.0, strafe_vert: 0.25}]
+    expect: {rot_dps_osc: "217.5 if independent, 199.9 if capped"}
+  - id: r10_rot_pitch050_yaw100
+    note: "pitch 50 % + yaw 100 % + 25 % up strafe. Independent -> 62.2; capped -> 52.1"
+    gloc: hold
+    steps: [{t: 12, pitch: 0.5, yaw: 1.0, strafe_vert: 0.25}]
+    expect: {rot_dps_osc: "62.2 if independent, 52.1 if capped"}
+  - id: r10_rot_yaw_050
+    note: "yaw 50 % + 25 % right strafe (linear -> 26.1). Round 5's 15 % boosted yaw read 16.2 instead of 9.4"
+    gloc: hold
+    steps: [{t: 16, yaw: 0.5, strafe_lat: 0.25}]
+    expect: {rot_dps_osc: 26.1}
+  - id: r10_rot_yaw_025
+    note: "yaw 25 % + 25 % right strafe (linear -> 13.0)"
+    gloc: hold
+    steps: [{t: 20, yaw: 0.25, strafe_lat: 0.25}]
+    expect: {rot_dps_osc: 13.0}
+  - id: r10_rot_pitch_025
+    note: "pitch 25 % + 25 % up strafe (linear -> 17.0)"
+    gloc: hold
+    steps: [{t: 20, pitch: 0.25, strafe_vert: 0.25}]
+    expect: {rot_dps_osc: 17.0}
+
+  # ---------------------------------------------------------------- B. turning at speed
+  - id: r10_turn90_boost
+    note: "boost to the nose wall (4 s), then pitch 100 % boosted for 1.1 s (~90 deg), then boost only for 4 s. Model: bleeds toward 394"
+    gloc: hold
+    steps: [{t: 4, strafe_long: 1.0, boost: true}, {t: 1.1, pitch: 1.0, boost: true}, {t: 4, boost: true}]
+    expect: {end_speed: 394}
+  - id: r10_turn90_boost_fwd
+    note: "same, but full throttle held through and after the turn. Does forward thrust drag the velocity back onto the nose?"
+    gloc: hold
+    steps: [{t: 4, strafe_long: 1.0, boost: true}, {t: 1.1, pitch: 1.0, strafe_long: 1.0, boost: true}, {t: 4, strafe_long: 1.0, boost: true}]
+    expect: {end_speed: "?"}
+  - id: r10_turn180_boost
+    note: "boost to the nose wall, then pitch 100 % boosted 2.2 s (~180 deg), then boost only 4 s. Model: bleeds toward 268"
+    gloc: hold
+    steps: [{t: 4, strafe_long: 1.0, boost: true}, {t: 2.2, pitch: 1.0, boost: true}, {t: 4, boost: true}]
+    expect: {end_speed: 268}
+  - id: r10_turn90_release
+    note: "boost to the nose wall, then pitch 90 deg with boost RELEASED, then nothing for 5 s. Model: back to 225 (SCM sphere)"
+    gloc: hold
+    steps: [{t: 4, strafe_long: 1.0, boost: true}, {t: 1.33, pitch: 1.0}, {t: 5}]
+    expect: {end_speed: 225}
+  - id: r10_turn90_scm
+    note: "SCM: full throttle to 225 (3 s), then pitch 1.33 s (~90 deg), then nothing 4 s. Model: no speed loss (sphere)"
+    gloc: hold
+    steps: [{t: 3, strafe_long: 1.0}, {t: 1.33, pitch: 1.0}, {t: 4}]
+    expect: {end_speed: 225}
+  - id: r10_flip_and_burn
+    note: "boost to 520, then boosted pitch flip 2.2 s, then full throttle + boost 4 s (thrusting against your own velocity)"
+    gloc: hold
+    steps: [{t: 4, strafe_long: 1.0, boost: true}, {t: 2.2, pitch: 1.0, boost: true}, {t: 4, strafe_long: 1.0, boost: true}]
+    expect: {decel_G: "?"}
+
+  # ---------------------------------------------------------------- C. partial throttle
+  - id: r10_thr_025
+    note: "throttle 25 % for 8 s, then centre for 6 s. Plateau while held? What happens at centre?"
+    gloc: hold
+    steps: [{t: 8, strafe_long: 0.25}, {t: 6}]
+    expect: {plateau_mps: "?"}
+  - id: r10_thr_050
+    note: "throttle 50 % for 8 s, then centre for 6 s"
+    gloc: hold
+    steps: [{t: 8, strafe_long: 0.5}, {t: 6}]
+    expect: {plateau_mps: "?"}
+  - id: r10_thr_100_release
+    note: "throttle 100 % for 5 s, then centre for 6 s (does it hold 225?)"
+    gloc: hold
+    steps: [{t: 5, strafe_long: 1.0}, {t: 6}]
+    expect: {plateau_mps: 225}
+
+  # ---------------------------------------------------------------- D. G tolerance by level (constant G, fixed direction)
+  - {id: r10_g_up_025, note: "up strafe 25 % + full roll from rest, 20 s (~2.5 G)", gloc: hold, steps: [{t: 20, strafe_vert: 0.25, roll: 1.0}], expect: {grey_at: "?"}}
+  - {id: r10_g_up_050, note: "up strafe 50 % + full roll, 20 s (~5 G)", gloc: hold, steps: [{t: 20, strafe_vert: 0.5, roll: 1.0}], expect: {grey_at: "?"}}
+  - {id: r10_g_up_075, note: "up strafe 75 % + full roll, 20 s (~7.5 G)", gloc: hold, steps: [{t: 20, strafe_vert: 0.75, roll: 1.0}], expect: {grey_at: "?"}}
+  - {id: r10_g_up_100, note: "up strafe 100 % + full roll, 20 s (~10 G)", gloc: hold, steps: [{t: 20, strafe_vert: 1.0, roll: 1.0}], expect: {grey_at: "?"}}
+  - {id: r10_g_lat_025, note: "right strafe 25 % + full roll, 20 s (~2.5 G)", gloc: hold, steps: [{t: 20, strafe_lat: 0.25, roll: 1.0}], expect: {grey_at: "?"}}
+  - {id: r10_g_lat_050, note: "right strafe 50 % + full roll, 20 s (~5 G)", gloc: hold, steps: [{t: 20, strafe_lat: 0.5, roll: 1.0}], expect: {grey_at: "?"}}
+  - {id: r10_g_lat_075, note: "right strafe 75 % + full roll, 20 s (~7.5 G)", gloc: hold, steps: [{t: 20, strafe_lat: 0.75, roll: 1.0}], expect: {grey_at: "?"}}
+  - {id: r10_g_down_050, note: "DOWN strafe 50 % + full roll, 20 s (~2.5 G, red-out side)", gloc: hold, steps: [{t: 20, strafe_vert: -0.5, roll: 1.0}], expect: {red_at: "?"}}
+  - {id: r10_g_down_075, note: "DOWN strafe 75 % + full roll, 20 s (~3.7 G)", gloc: hold, steps: [{t: 20, strafe_vert: -0.75, roll: 1.0}], expect: {red_at: "?"}}
+  - {id: r10_g_down_100, note: "DOWN strafe 100 % + full roll, 20 s (~5 G)", gloc: hold, steps: [{t: 20, strafe_vert: -1.0, roll: 1.0}], expect: {red_at: "?"}}
+  # equal-G pairs, SCM vs boost: does boost itself speed up blackout?
+  - {id: r10_geq_up_scm_065, note: "EQUAL-G pair: up 65 % SCM + roll (~6.4 G)", gloc: hold, steps: [{t: 20, strafe_vert: 0.65, roll: 1.0}], expect: {grey_at: "?"}}
+  - {id: r10_geq_up_bst_050, note: "EQUAL-G pair: up 50 % BOOSTED + roll (~6.5 G)", gloc: hold, steps: [{t: 20, strafe_vert: 0.5, roll: 1.0, boost: true}], expect: {grey_at: "?"}}
+  - {id: r10_geq_down_scm_100, note: "EQUAL-G pair: down 100 % SCM + roll (~5.0 G)", gloc: hold, steps: [{t: 20, strafe_vert: -1.0, roll: 0.8}], expect: {red_at: "?"}}
+  - {id: r10_geq_down_bst_075, note: "EQUAL-G pair: down 75 % BOOSTED + roll (~5.0 G)", gloc: hold, steps: [{t: 20, strafe_vert: -0.75, roll: 0.8, boost: true}], expect: {red_at: "?"}}
+
+  # ---------------------------------------------------------------- E. recovery and carry-over
+  - {id: r10_rec_lat_15, note: "full right + roll 7 s, let go 1.5 s, again 10 s: time to grey the second time", gloc: hold, steps: [{t: 7, strafe_lat: 1.0, roll: 1.0}, {t: 1.5}, {t: 10, strafe_lat: 1.0, roll: 1.0}], expect: {grey_at: "?"}}
+  - {id: r10_rec_lat_30, note: "same, let go 3 s", gloc: hold, steps: [{t: 7, strafe_lat: 1.0, roll: 1.0}, {t: 3}, {t: 10, strafe_lat: 1.0, roll: 1.0}], expect: {grey_at: "?"}}
+  - {id: r10_rec_lat_60, note: "same, let go 6 s", gloc: hold, steps: [{t: 7, strafe_lat: 1.0, roll: 1.0}, {t: 6}, {t: 10, strafe_lat: 1.0, roll: 1.0}], expect: {grey_at: "?"}}
+
+  # ---------------------------------------------------------------- F. reference manoeuvres (validation only)
+  - id: r10_ref_escape
+    note: "REFERENCE: boost forward 2 s, then boosted forward + up + roll 50 % for 6 s, then release everything 4 s"
+    gloc: hold
+    steps: [{t: 2, strafe_long: 1.0, boost: true}, {t: 6, strafe_long: 1.0, strafe_vert: 1.0, roll: 0.5, boost: true}, {t: 4}]
+    expect: {}
+  - id: r10_ref_jink
+    note: "REFERENCE: SCM full throttle 3 s, then jink right 1 s / left 1 s / up 1 s / down 1 s at full throttle"
+    gloc: hold
+    steps: [{t: 3, strafe_long: 1.0}, {t: 1, strafe_long: 1.0, strafe_lat: 1.0}, {t: 1, strafe_long: 1.0, strafe_lat: -1.0}, {t: 1, strafe_long: 1.0, strafe_vert: 1.0}, {t: 1, strafe_long: 1.0, strafe_vert: -1.0}]
+    expect: {}
+  - id: r10_ref_diag_turn
+    note: "REFERENCE: boost forward 3 s, then pitch 70 % + yaw 100 % boosted 1.5 s, then boost + full throttle 3 s"
+    gloc: hold
+    steps: [{t: 3, strafe_long: 1.0, boost: true}, {t: 1.5, pitch: 0.7, yaw: 1.0, boost: true}, {t: 3, strafe_long: 1.0, boost: true}]
+    expect: {}

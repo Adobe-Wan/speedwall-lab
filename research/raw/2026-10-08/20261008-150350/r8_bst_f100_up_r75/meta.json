@@ -1,0 +1,225 @@
+{
+ "id": "r8_bst_f100_up_r75",
+ "note": "boosted escape from rest: forward 100 % + full up + roll 75 % (180 deg/s), 14 s",
+ "expect": {
+  "true_blackout_at": "?",
+  "plateau_mps": "?"
+ },
+ "steps": [
+  {
+   "t": 14.0,
+   "strafe_long": 1.0,
+   "strafe_vert": 1.0,
+   "roll": 0.75,
+   "boost": true
+  }
+ ],
+ "pre_s": 1.0,
+ "post_s": 1.5,
+ "fps_target": 60,
+ "fps_actual": 43.1,
+ "monitor": {
+  "left": 0,
+  "top": 0,
+  "width": 3840,
+  "height": 2160,
+  "is_primary": true,
+  "name": "Generic PnP Monitor",
+  "unique_id": "\\\\?\\DISPLAY#AUS32F4#5&10c0ae1&1&UID4352#{e6f07b5f-ee97-4a90-b076-33f57bf4eaa7}"
+ },
+ "roi": {
+  "speed": [
+   0.3944,
+   0.5467,
+   0.0194,
+   0.0211
+  ],
+  "g": [
+   0.6637,
+   0.4667,
+   0.0225,
+   0.0222
+  ],
+  "ab": [
+   0.5981,
+   0.5456,
+   0.0231,
+   0.0244
+  ],
+  "view": [
+   0.65,
+   0.09,
+   0.3,
+   0.27
+  ],
+  "cam": [
+   0.25,
+   0.2,
+   0.5,
+   0.5
+  ]
+ },
+ "recorded": "2026-10-08 16:20:28",
+ "start_speed": 0.0,
+ "gloc_at": null,
+ "grey_at": null,
+ "hud_black_at": null,
+ "hud_lum_base": 255.0,
+ "gloc_policy": "hold",
+ "ease_events": [],
+ "reversals": [],
+ "lat_mirrored": false,
+ "probe_every": 1.0,
+ "probe_cfg": {
+  "probe_views": 3.0,
+  "probe_cut_thr": 0.5,
+  "probe_cut_window_s": 0.8,
+  "probe_ignore_n": 2.0,
+  "probe_dark_abs": 60.0,
+  "probe_dark_frac": 0.5,
+  "probe_dark_hold_s": 0.5,
+  "probe_cockpit_thr": 0.55,
+  "probe_hud_settle_s": 1.2,
+  "probe_gap_s": 1.0,
+  "probe_cockpit_dwell_s": 2.0,
+  "probe_check_gap_s": 0.7,
+  "probe_blind_max": 24.0
+ },
+ "cam_base_mean": 56.035945892333984,
+ "probe": {
+  "presses": 9,
+  "cuts": 9,
+  "ignored": 0,
+  "blind": 0,
+  "black_checks": 0,
+  "black_checks_worked": 0,
+  "black_checks_dead": 0,
+  "true_blackout_at": null,
+  "true_blackout_doubt": false,
+  "resyncs": [
+   {
+    "t": 1.438,
+    "counted": 0,
+    "seen": "external"
+   },
+   {
+    "t": 10.076,
+    "counted": 0,
+    "seen": "external"
+   },
+   {
+    "t": 14.76,
+    "counted": 0,
+    "seen": "external"
+   }
+  ],
+  "conscious_dark_at": null,
+  "key_lost_at": null,
+  "key_back_at": null,
+  "stray_cuts": [
+   1.64,
+   2.657,
+   3.535,
+   3.664,
+   3.787,
+   4.685,
+   5.697,
+   5.819,
+   10.294,
+   10.819,
+   11.595,
+   11.838,
+   12.864,
+   15.424
+  ],
+  "final_view_idx": 2,
+  "base_mean": 56.035945892333984,
+  "dark_thr": 28.017972946166992
+ },
+ "probe_log": [
+  {
+   "t": 3.0135194000031333,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 3.205,
+   "idx_after": 1
+  },
+  {
+   "t": 4.220183099998394,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 4.419,
+   "idx_after": 2
+  },
+  {
+   "t": 5.428548600000795,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 5.61,
+   "idx_after": 1
+  },
+  {
+   "t": 6.6135143999999855,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 6.801,
+   "idx_after": 1
+  },
+  {
+   "t": 7.811288400000194,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 7.994,
+   "idx_after": 2
+  },
+  {
+   "t": 9.011012899994967,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 9.27,
+   "idx_after": 0
+  },
+  {
+   "t": 11.302525599996443,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 11.501,
+   "idx_after": 1
+  },
+  {
+   "t": 12.518247699990752,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 12.701,
+   "idx_after": 1
+  },
+  {
+   "t": 13.706208299990976,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 13.947,
+   "idx_after": 0
+  }
+ ],
+ "full_every_s": 0.5,
+ "cam_restore_presses": 0,
+ "cam_recover_s": 17.0
+}

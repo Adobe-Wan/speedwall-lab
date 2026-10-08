@@ -21,6 +21,8 @@ def trim(img_bgr: np.ndarray, pad: int = 4) -> np.ndarray:
         return img_bgr
     mask = v > (v.min() + 0.5 * (v.max() - v.min()))
     ys, xs = np.where(mask)
+    if not len(ys):                                  # a flat crop (e.g. a uniformly bright hull in an external view)
+        return img_bgr
     y0, y1 = max(ys.min() - pad, 0), min(ys.max() + pad + 1, v.shape[0])
     x0, x1 = max(xs.min() - pad, 0), min(xs.max() + pad + 1, v.shape[1])
     return img_bgr[y0:y1, x0:x1]

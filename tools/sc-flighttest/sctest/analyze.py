@@ -133,56 +133,92 @@ def release_trace(cols, meta, t_on):
     return out
 
 
-PROBE_RATIO = 2.5     # a press "toggled" when the view changed this many times more than it does between presses...
-PROBE_MIN = 0.15      # ...and by at least this much (camera-probe distance, see capture.cam_dist)
-PROBE_DARK = 14.0     # a probe frame darker than this (0-255) is black: nothing can be seen either way
+RED_EXCESS = 0.06     # red share of the picture above its pre-test level that counts as red-out (check red_peak and tune)
+DARK_LEVELS = (0.2, 0.5, 0.8)
 
 
-def probe_report(cols, meta, t_on):
-    """Camera-key probe: for each press, did the view change? A pilot who is greying out can still switch camera until
-    fully blacked out, so the last press that took effect marks when control was lost.
+def _first(t, mask, n=3):
+    """First time at which mask holds for n consecutive samples (None if never)."""
+    run = 0
+    for k in range(len(mask)):
+        run = run + 1 if mask[k] else 0
+        if run >= n:
+            return float(t[k - n + 1])
+    return None
 
-    Each press is classified from the centre-of-screen frames: 'toggled' (the view changed clearly more than it changes
-    between presses), 'no_change', or 'dark' (the screen was black, so it can't be told). The press made in the dark after
-    the blackout is judged afterwards, by comparing the camera once vision is back (meta: dark_press_worked)."""
-    if "view" not in cols or "cam_chg" not in cols:
-        return {}
-    t, chg, mean = cols["t"], cols["cam_chg"], cols["cam_mean"]
-    view = cols["view"]
-    press_t = t[np.where((view[1:] > 0.5) & (view[:-1] <= 0.5))[0] + 1]
-    press_t = press_t[press_t >= t_on]
-    if not len(press_t):
-        return {}
-    quiet = (t >= t_on) & ~np.isnan(chg)
-    for tp in press_t:
-        quiet &= (t < tp) | (t > tp + 0.7)
-    noise = max(float(np.median(chg[quiet])) if quiet.sum() > 10 else 0.0, 0.03)
-    states = []
-    for tp in press_t:
-        w = (t >= tp + 0.15) & (t <= tp + 0.6) & ~np.isnan(chg)
-        if not w.any():
-            continue
-        score, bright = float(np.max(chg[w])), float(np.mean(mean[w]))
-        if bright < PROBE_DARK:
-            s = "dark"
-        else:
-            s = "toggled" if score >= PROBE_MIN and score / noise >= PROBE_RATIO else "no_change"
-        states.append((round(float(tp - t_on), 2), s))
-    out = {"probe_presses": len(states), "probe_toggled": sum(s == "toggled" for _, s in states),
-           "probe_noise": round(noise, 3), "probe_states": " ".join(f"{t:g}:{s}" for t, s in states)}
-    toggled = [t for t, s in states if s == "toggled"]
-    if toggled:
-        out["probe_last_toggle_s"] = toggled[-1]
-        lost = [t for t, s in states if t > toggled[0] and s in ("no_change", "dark")]
-        if lost:
-            out["probe_control_lost_s"] = lost[0]     # first press after control was working that did nothing (or couldn't be seen)
-    dark = [t for t, s in states if s == "dark"]
-    if dark:
-        out["probe_first_dark_s"] = dark[0]
-    for k in ("dark_press_at", "dark_presses", "presses_since_black", "dark_press_worked", "dark_press_dist", "cam_final_dist",
-              "cam_restore_presses"):
-        if meta.get(k) is not None:
-            out[k if k.startswith(("dark", "presses")) else f"probe_{k}"] = meta[k]
+
+def probe_report(d: Path, cols, meta, t_on):
+    """Camera-key probe and vision gradient. The probe was replayed offline by process.py (probe.json, same code as the
+    live run): every press either switched the view ('cut') or did nothing ('ignored'; 'blind' = the screen was pure
+    black, so it could not be told). A press made on a black screen is a BLACK CHECK: if the camera switched the pilot was
+    not truly blacked out (conscious_dark), if it did nothing the blackout is real (true_blackout_at).
+    The vision gradient comes from the centre-of-screen frames, only while the cockpit view is up and settled (the other
+    two views have no baseline): darkness 0 clear .. 1 black (dark_t20/50/80 = first time it reached that level), the red
+    tint (red_at, red_peak), and, from the whole-screen pictures (vision.csv), when the edge of the screen reached 50 %."""
+    out = {}
+    pj = d / "probe.json"
+    if pj.exists():
+        pr = json.loads(pj.read_text())
+        for k in ("presses", "cuts", "ignored", "blind", "black_checks", "black_checks_worked", "black_checks_dead"):
+            out["probe_" + k] = pr.get(k)
+        for k in ("true_blackout_at", "conscious_dark_at", "key_lost_at", "key_back_at"):
+            if pr.get(k) is not None:
+                out["probe_" + k.replace("_at", "_s")] = round(pr[k] - t_on, 2)
+        out["probe_resyncs"] = len(pr.get("resyncs") or [])
+        if pr.get("true_blackout_doubt"):
+            out["probe_true_blackout_doubt"] = True    # the view count disagreed with the picture afterwards: check with camstrip
+        out["probe_outcomes"] = " ".join(f"{e['t'] - t_on:.1f}:{e['kind'][0]}{'D' if e['dark'] else ''}:{e['outcome']}" for e in pr["log"])
+    t = cols["t"]
+    dl = cols.get("dark_level_cam")
+    if dl is not None:
+        valid = (cols["cam_hud_valid"] > 0.5) if "cam_hud_valid" in cols else np.ones(len(t), bool)
+        act = (t >= t_on) & valid
+        dls = np.where(act, dl, np.nan)
+        for lv in DARK_LEVELS:
+            hit = _first(t - t_on, np.nan_to_num(dls, nan=0.0) >= lv)
+            if hit is not None:
+                out[f"dark_t{int(lv * 100)}"] = round(hit, 2)
+        if np.any(~np.isnan(dls)):
+            k = int(np.nanargmax(dls))
+            out["dark_peak"] = round(float(dls[k]), 2)
+            out["dark_peak_t"] = round(float(t[k] - t_on), 2)
+        for name, key in (("red_at", "cam_red"), ("red_edge_at", "cam_red_edge")):
+            if key in cols:
+                pre = (t < t_on) & ~np.isnan(cols[key])
+                if pre.sum() > 5:
+                    ex = np.where(act, cols[key] - float(np.median(cols[key][pre])), np.nan)
+                    hit = _first(t - t_on, np.nan_to_num(ex, nan=0.0) >= RED_EXCESS)
+                    if hit is not None:
+                        out[name] = round(hit, 2)
+                    if name == "red_at" and np.any(~np.isnan(ex)):
+                        out["red_peak"] = round(float(np.nanmax(ex)), 3)
+        reds = [out[k] for k in ("red_at", "red_edge_at") if k in out]
+        if reds and (min(reds) <= out.get("dark_t50", 1e9) + 0.5):
+            out["vision_effect"] = "red"
+        elif "dark_t20" in out:
+            out["vision_effect"] = "grey"
+        for ev in meta.get("reversals") or []:               # how long vision took to come back after the first reversal
+            if ev["action"] == "reverse":
+                after = (t - t_on >= ev["t"]) & valid & ~np.isnan(dl)
+                back = _first(t - t_on, after & (dl < 0.3), 3)
+                if back is not None:
+                    out["vision_back_s"] = round(back - ev["t"], 2)
+                out["reversals"] = sum(1 for e in meta["reversals"] if e["action"] == "reverse")
+                break
+    vc = d / "vision.csv"
+    if vc.exists():
+        with open(vc) as f:
+            rows = [r for r in csv.DictReader(f) if r["valid"] == "1" and r["t_s"] != ""]
+        if rows:
+            ts = np.array([float(r["t_s"]) for r in rows])
+            for key, name in (("dark_edge", "edge_dark_t50"), ("dark_centre", "centre_dark_t50")):
+                v = np.array([float(r[key]) for r in rows])
+                hit = _first(ts, v >= 0.5, 2)
+                if hit is not None:
+                    out[name] = round(hit, 2)
+            out["edge_dark_peak"] = round(max(float(r["dark_edge"]) for r in rows), 2)
+            out["red_excess_edge_peak"] = round(max(float(r["red_excess_edge"]) for r in rows if r["red_excess_edge"] != "nan"), 3) \
+                if any(r["red_excess_edge"] not in ("nan", "") for r in rows) else None
     return out
 
 
@@ -192,9 +228,11 @@ def summarize(d: Path) -> dict:
     out = {"test": meta["id"], "fps": meta.get("fps_actual"),
            "start_speed": meta.get("start_speed"), "gloc_at": meta.get("gloc_at")}
     if meta.get("grey_at") is not None:
-        out["grey_at"] = meta["grey_at"]                        # HUD dimmed to 80 %: the grey-out
-        if meta.get("gloc_at") is not None:
-            out["grey_to_black_s"] = round(meta["gloc_at"] - meta["grey_at"], 2)   # control kept while greyed out
+        out["grey_at"] = meta["grey_at"]                        # HUD dimmed to 80 % (read in the cockpit view only)
+        if meta.get("hud_black_at") is not None:
+            out["grey_to_black_s"] = round(meta["hud_black_at"] - meta["grey_at"], 2)   # grey-out to HUD gone
+    if meta.get("hud_black_at") is not None:
+        out["hud_black_at"] = meta["hud_black_at"]              # HUD digits below 50 %
     if meta.get("recovery_s") is not None:
         out["recovery_s"] = meta["recovery_s"]                  # seconds for the HUD to come back after the let-go
     if meta.get("lat_mirrored"):
@@ -282,7 +320,7 @@ def summarize(d: Path) -> dict:
                 out[f"s{k}_g_over1_s"] = round(float(hi.sum() * np.nanmedian(np.diff(t))), 2)
             t0 = t1
     out.update(release_trace(cols, meta, t_on))
-    out.update(probe_report(cols, meta, t_on))
+    out.update(probe_report(d, cols, meta, t_on))
     for k, v in (meta.get("expect") or {}).items():
         out[f"expect_{k}"] = v
     return out

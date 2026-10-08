@@ -1,0 +1,246 @@
+{
+ "id": "r8_cm_down_boost",
+ "note": "countermeasure against RED-out: boosted escape forward + full DOWN + full roll, reverse when practically black, 14 s",
+ "expect": {
+  "reversals": "?",
+  "vision_back_s": "?"
+ },
+ "steps": [
+  {
+   "t": 14.0,
+   "strafe_long": 1.0,
+   "strafe_vert": -1.0,
+   "roll": 1.0,
+   "boost": true
+  }
+ ],
+ "pre_s": 1.0,
+ "post_s": 1.5,
+ "fps_target": 60,
+ "fps_actual": 41.9,
+ "monitor": {
+  "left": 0,
+  "top": 0,
+  "width": 3840,
+  "height": 2160,
+  "is_primary": true,
+  "name": "Generic PnP Monitor",
+  "unique_id": "\\\\?\\DISPLAY#AUS32F4#5&10c0ae1&1&UID4352#{e6f07b5f-ee97-4a90-b076-33f57bf4eaa7}"
+ },
+ "roi": {
+  "speed": [
+   0.3944,
+   0.5467,
+   0.0194,
+   0.0211
+  ],
+  "g": [
+   0.6637,
+   0.4667,
+   0.0225,
+   0.0222
+  ],
+  "ab": [
+   0.5981,
+   0.5456,
+   0.0231,
+   0.0244
+  ],
+  "view": [
+   0.65,
+   0.09,
+   0.3,
+   0.27
+  ],
+  "cam": [
+   0.25,
+   0.2,
+   0.5,
+   0.5
+  ]
+ },
+ "recorded": "2026-10-08 16:34:56",
+ "start_speed": 0.0,
+ "gloc_at": null,
+ "grey_at": null,
+ "hud_black_at": null,
+ "hud_lum_base": 246.0,
+ "gloc_policy": "reverse",
+ "ease_events": [],
+ "reversals": [],
+ "lat_mirrored": false,
+ "probe_every": 1.0,
+ "probe_cfg": {
+  "probe_views": 3.0,
+  "probe_cut_thr": 0.5,
+  "probe_cut_window_s": 0.8,
+  "probe_ignore_n": 2.0,
+  "probe_dark_abs": 60.0,
+  "probe_dark_frac": 0.5,
+  "probe_dark_hold_s": 0.5,
+  "probe_cockpit_thr": 0.55,
+  "probe_hud_settle_s": 1.2,
+  "probe_gap_s": 1.0,
+  "probe_cockpit_dwell_s": 2.0,
+  "probe_check_gap_s": 0.7,
+  "probe_blind_max": 24.0
+ },
+ "cam_base_mean": 4.451162338256836,
+ "probe": {
+  "presses": 8,
+  "cuts": 8,
+  "ignored": 0,
+  "blind": 0,
+  "black_checks": 0,
+  "black_checks_worked": 0,
+  "black_checks_dead": 0,
+  "true_blackout_at": null,
+  "true_blackout_doubt": false,
+  "resyncs": [
+   {
+    "t": 1.47,
+    "counted": 0,
+    "seen": "external"
+   },
+   {
+    "t": 1.581,
+    "counted": 1,
+    "seen": "cockpit"
+   },
+   {
+    "t": 2.521,
+    "counted": 0,
+    "seen": "external"
+   },
+   {
+    "t": 2.992,
+    "counted": 1,
+    "seen": "cockpit"
+   },
+   {
+    "t": 6.545,
+    "counted": 0,
+    "seen": "external"
+   },
+   {
+    "t": 9.071,
+    "counted": 0,
+    "seen": "external"
+   },
+   {
+    "t": 9.133,
+    "counted": 1,
+    "seen": "cockpit"
+   },
+   {
+    "t": 14.574,
+    "counted": 0,
+    "seen": "external"
+   },
+   {
+    "t": 14.674,
+    "counted": 1,
+    "seen": "cockpit"
+   },
+   {
+    "t": 15.089,
+    "counted": 0,
+    "seen": "external"
+   },
+   {
+    "t": 15.172,
+    "counted": 1,
+    "seen": "cockpit"
+   }
+  ],
+  "conscious_dark_at": null,
+  "key_lost_at": null,
+  "key_back_at": null,
+  "stray_cuts": [
+   6.746,
+   11.387,
+   12.856
+  ],
+  "final_view_idx": 0,
+  "base_mean": 4.451162338256836,
+  "dark_thr": 2.225581169128418
+ },
+ "probe_log": [
+  {
+   "t": 3.014781799996854,
+   "kind": "cycle",
+   "level": 0.219,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 3.25,
+   "idx_after": 1
+  },
+  {
+   "t": 4.253917100009858,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 4.462,
+   "idx_after": 2
+  },
+  {
+   "t": 5.47848370000429,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 5.738,
+   "idx_after": 0
+  },
+  {
+   "t": 7.754008999996586,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 7.953,
+   "idx_after": 0
+  },
+  {
+   "t": 9.957794900008594,
+   "kind": "cycle",
+   "level": 0.016,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 10.14,
+   "idx_after": 1
+  },
+  {
+   "t": 11.140377100004116,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 11.346,
+   "idx_after": 2
+  },
+  {
+   "t": 12.350179200002458,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 12.553,
+   "idx_after": 1
+  },
+  {
+   "t": 13.554963100003079,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 13.755,
+   "idx_after": 0
+  }
+ ],
+ "full_every_s": 0.5,
+ "cam_restore_presses": 0,
+ "cam_recover_s": 0.3,
+ "recovery_s": 0.9
+}

@@ -1,0 +1,129 @@
+{
+ "presses": 9,
+ "cuts": 9,
+ "ignored": 0,
+ "blind": 0,
+ "black_checks": 3,
+ "black_checks_worked": 3,
+ "black_checks_dead": 0,
+ "true_blackout_at": null,
+ "true_blackout_doubt": false,
+ "resyncs": [
+  {
+   "t": 1.835,
+   "counted": 0,
+   "seen": "external"
+  },
+  {
+   "t": 4.234,
+   "counted": 0,
+   "seen": "external"
+  },
+  {
+   "t": 5.881,
+   "counted": 2,
+   "seen": "cockpit"
+  },
+  {
+   "t": 11.332,
+   "counted": 1,
+   "seen": "cockpit"
+  },
+  {
+   "t": 13.725,
+   "counted": 2,
+   "seen": "cockpit"
+  }
+ ],
+ "conscious_dark_at": 2.6803,
+ "key_lost_at": null,
+ "key_back_at": null,
+ "stray_cuts": [
+  2.152
+ ],
+ "log": [
+  {
+   "t": 2.6803,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 2.876,
+   "idx_after": 0
+  },
+  {
+   "t": 4.9182,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 5.081,
+   "idx_after": 2
+  },
+  {
+   "t": 6.1223,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 6.29,
+   "idx_after": 1
+  },
+  {
+   "t": 7.3302,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 7.506,
+   "idx_after": 2
+  },
+  {
+   "t": 8.5477,
+   "kind": "cycle",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 8.767,
+   "idx_after": 0
+  },
+  {
+   "t": 10.3235,
+   "kind": "check",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 10.5,
+   "idx_after": 1
+  },
+  {
+   "t": 11.5275,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 11.694,
+   "idx_after": 1
+  },
+  {
+   "t": 12.7234,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 12.912,
+   "idx_after": 2
+  },
+  {
+   "t": 13.9416,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 14.121,
+   "idx_after": 1
+  }
+ ],
+ "base_mean": 19.76249885559082,
+ "dark_thr": 9.88124942779541
+}

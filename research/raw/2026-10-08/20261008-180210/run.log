@@ -1,0 +1,52 @@
+18:02:16 Capture: one region per frame; speed, g, ab, cam
+18:02:16 Focus the Star Citizen window. Starting in 5 s. Press F12 at any time to abort.
+18:02:24   braked to 0.0 m/s in 3.2 s
+18:02:27 Forward check: throttle +0.3 for 1.0 s -> 38.0 m/s
+18:02:32   braked to 0.0 m/s in 4.6 s
+18:02:33 [1/8] r11_boost_down_long: boosted full DOWN strafe from rest, 10 s: the boosted radius straight down (limacon 394)
+18:02:51   braked to 0.0 m/s in 17.8 s
+18:02:53   boost tank 100.0% after 0.0 s
+18:03:06   recorded 532 frames (43 fps)
+18:03:06   grey-out began 1.66 s into the inputs, HUD gone at 2.94 s
+18:03:07   HUD back after 0.9 s; resting 8 s
+18:03:15 [2/8] r11_turn90_pitchdown: boost to the nose wall 4 s, pitch DOWN 1.1 s (~90 deg, velocity ends on the UP side), boost only 5 s (limacon 394)
+18:03:22   braked to 0.0 m/s in 6.9 s
+18:03:28   flipped (2.8 s of full pitch)
+18:03:28   boost tank 100.0% after 0.0 s
+18:03:42   recorded 524 frames (42 fps)
+18:03:46   HUD back after 4.1 s; resting 8 s
+18:03:54 [3/8] r11_turn120_boost: boost to the nose wall 4 s, pitch up 1.47 s (~120 deg), boost only 6 s (limacon 331)
+18:04:01   braked to 0.0 m/s in 7.6 s
+18:04:07   flipped (2.8 s of full pitch)
+18:04:07   boost tank 100.0% after 0.0 s
+18:04:22   recorded 574 frames (41 fps)
+18:04:22   grey-out began 2.41 s into the inputs
+18:04:23   HUD back after 0.9 s; resting 8 s
+18:04:31 [4/8] r11_turn150_boost: boost to the nose wall 4 s, pitch up 1.84 s (~150 deg), boost only 7 s (limacon 285)
+18:04:37   braked to 0.0 m/s in 5.9 s
+18:04:42   flipped (2.8 s of full pitch)
+18:04:42   boost tank 100.0% after 0.0 s
+18:04:59   recorded 624 frames (41 fps)
+18:05:00   HUD back after 0.9 s; resting 8 s
+18:05:08 [5/8] r11_turn135_yaw_boost: boost to the nose wall 4 s, yaw right 2.15 s (~135 deg, a side-rear heading), boost only 7 s (limacon 305)
+18:05:13   braked to 0.0 m/s in 5.6 s
+18:05:19   flipped (2.8 s of full pitch)
+18:05:19   boost tank 100.0% after 0.0 s
+18:05:35   recorded 648 frames (41 fps)
+18:05:35   grey-out began 2.5 s into the inputs
+18:05:36   HUD back after 0.9 s; resting 8 s
+18:05:44 [6/8] r11_rot_pitch_fwd: pitch 100 % + 25 % throttle, 8 s: calibrates the forward-thrust rotation gauge (68 deg/s)
+18:05:50   braked to 0.0 m/s in 5.9 s
+18:05:56   flipped (2.8 s of full pitch)
+18:06:07   recorded 430 frames (41 fps)
+18:06:08   HUD back after 0.9 s; resting 8 s
+18:06:16 [7/8] r11_rot_pitchyaw_fwd: pitch 100 % + yaw 100 % + 25 % throttle, 8 s. Independent axes -> 85.7 deg/s; capped -> 68
+18:06:20   braked to 0.0 m/s in 4.3 s
+18:06:26   flipped (2.8 s of full pitch)
+18:06:37   recorded 447 frames (43 fps)
+18:06:37 [8/8] r11_rot_pitchyaw_fwd_boost: pitch + yaw 100 % + 25 % throttle, boosted, 8 s. Independent -> 102.9; capped -> 81.6
+18:06:42   braked to 0.0 m/s in 4.3 s
+18:06:47   flipped (2.8 s of full pitch)
+18:06:47   boost tank 100.0% after 0.0 s
+18:06:59   recorded 449 frames (43 fps)
+18:07:00   HUD back after 0.9 s; resting 8 s

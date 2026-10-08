@@ -1,0 +1,204 @@
+17:26:24 Capture: one region per frame; speed, g, ab, cam
+17:26:24 Focus the Star Citizen window. Starting in 5 s. Press F12 at any time to abort.
+17:26:30   braked to 0.0 m/s in 1.3 s
+17:26:33 Forward check: throttle +0.3 for 1.0 s -> 38.0 m/s
+17:26:37   braked to 0.0 m/s in 4.0 s
+17:26:39 [1/37] r10_rot_pitchyaw_100: pitch 100 % + yaw 100 % + 25 % up strafe. Independent axes -> 85.7 deg/s; capped -> 68
+17:26:40   braked to 0.0 m/s in 0.7 s
+17:26:55   recorded 490 frames (39 fps)
+17:26:56   HUD back after 0.9 s; resting 8 s
+17:27:04 [2/37] r10_rot_pitchyaw_100_boost: pitch + yaw 100 %, boosted. Independent -> 102.9; capped -> 81.6
+17:27:09   braked to 0.0 m/s in 4.9 s
+17:27:15   flipped (2.8 s of full pitch)
+17:27:15   boost tank 100.0% after 0.0 s
+17:27:28   recorded 504 frames (40 fps)
+17:27:29   HUD back after 0.9 s; resting 8 s
+17:27:37 [3/37] r10_rot_pitchroll_100: pitch 100 % + roll 100 % + 25 % up strafe. Independent -> 211.2; capped -> 199.9
+17:27:42   braked to 0.0 m/s in 5.6 s
+17:27:48   flipped (2.8 s of full pitch)
+17:27:59   recorded 420 frames (40 fps)
+17:27:59 [4/37] r10_rot_all_100: pitch + yaw + roll 100 % + 25 % up strafe. Independent -> 217.5; capped -> 199.9
+17:28:02   braked to 0.0 m/s in 3.0 s
+17:28:08   flipped (2.8 s of full pitch)
+17:28:19   recorded 424 frames (40 fps)
+17:28:20   HUD back after 0.9 s; resting 8 s
+17:28:28 [5/37] r10_rot_pitch050_yaw100: pitch 50 % + yaw 100 % + 25 % up strafe. Independent -> 62.2; capped -> 52.1
+17:28:32   braked to 0.0 m/s in 3.6 s
+17:28:38   flipped (2.8 s of full pitch)
+17:28:53   recorded 568 frames (39 fps)
+17:28:53 [6/37] r10_rot_yaw_050: yaw 50 % + 25 % right strafe (linear -> 26.1). Round 5's 15 % boosted yaw read 16.2 instead of 9.4
+17:29:01   braked to 0.0 m/s in 7.6 s
+17:29:07   flipped (2.8 s of full pitch)
+17:29:26   recorded 767 frames (41 fps)
+17:29:27   HUD back after 0.9 s; resting 8 s
+17:29:35 [7/37] r10_rot_yaw_025 (strafe mirrored): yaw 25 % + 25 % right strafe (linear -> 13.0)
+17:29:39   braked to 0.0 m/s in 3.9 s
+17:29:45   flipped (2.8 s of full pitch)
+17:30:09   recorded 923 frames (41 fps)
+17:30:10   HUD back after 0.9 s; resting 8 s
+17:30:18 [8/37] r10_rot_pitch_025: pitch 25 % + 25 % up strafe (linear -> 17.0)
+17:30:23   braked to 0.0 m/s in 5.3 s
+17:30:29   flipped (2.8 s of full pitch)
+17:30:53   recorded 914 frames (41 fps)
+17:30:54   HUD back after 0.9 s; resting 8 s
+17:31:02 [9/37] r10_turn90_boost: boost to the nose wall (4 s), then pitch 100 % boosted for 1.1 s (~90 deg), then boost only for 4 s. Model: bleeds toward 394
+17:31:05   braked to 1.0 m/s in 3.3 s
+17:31:11   flipped (2.8 s of full pitch)
+17:31:11   boost tank 100.0% after 0.0 s
+17:31:23   recorded 467 frames (40 fps)
+17:31:23   grey-out began 2.5 s into the inputs
+17:31:24   HUD back after 0.9 s; resting 8 s
+17:31:32 [10/37] r10_turn90_boost_fwd: same, but full throttle held through and after the turn. Does forward thrust drag the velocity back onto the nose?
+17:31:39   braked to 0.0 m/s in 6.3 s
+17:31:44   flipped (2.8 s of full pitch)
+17:31:44   boost tank 100.0% after 0.0 s
+17:31:57   recorded 461 frames (40 fps)
+17:31:58   HUD back after 0.9 s; resting 8 s
+17:32:06 [11/37] r10_turn180_boost: boost to the nose wall, then pitch 100 % boosted 2.2 s (~180 deg), then boost only 4 s. Model: bleeds toward 268
+17:32:14   braked to 0.0 m/s in 8.3 s
+17:32:20   flipped (2.8 s of full pitch)
+17:32:20   boost tank 100.0% after 0.0 s
+17:32:33   recorded 503 frames (40 fps)
+17:32:33   grey-out began 2.59 s into the inputs
+17:32:34   HUD back after 0.9 s; resting 8 s
+17:32:42 [12/37] r10_turn90_release: boost to the nose wall, then pitch 90 deg with boost RELEASED, then nothing for 5 s. Model: back to 225 (SCM sphere)
+17:32:48   braked to 0.0 m/s in 6.0 s
+17:32:54   flipped (2.8 s of full pitch)
+17:32:54   boost tank 100.0% after 0.0 s
+17:33:08   recorded 521 frames (41 fps)
+17:33:08   grey-out began 2.34 s into the inputs
+17:33:09   HUD back after 0.9 s; resting 8 s
+17:33:17 [13/37] r10_turn90_scm: SCM: full throttle to 225 (3 s), then pitch 1.33 s (~90 deg), then nothing 4 s. Model: no speed loss (sphere)
+17:33:23   braked to 0.0 m/s in 5.9 s
+17:33:29   flipped (2.8 s of full pitch)
+17:33:40   recorded 430 frames (40 fps)
+17:33:41   HUD back after 0.9 s; resting 8 s
+17:33:49 [14/37] r10_flip_and_burn: boost to 520, then boosted pitch flip 2.2 s, then full throttle + boost 4 s (thrusting against your own velocity)
+17:33:55   braked to 0.0 m/s in 6.0 s
+17:34:01   flipped (2.8 s of full pitch)
+17:34:01   boost tank 100.0% after 0.0 s
+17:34:15   recorded 509 frames (40 fps)
+17:34:15   grey-out began 2.59 s into the inputs, HUD gone at 9.81 s
+17:34:16   HUD back after 0.9 s; resting 8 s
+17:34:24 [15/37] r10_thr_025: throttle 25 % for 8 s, then centre for 6 s. Plateau while held? What happens at centre?
+17:34:32   braked to 0.0 m/s in 8.2 s
+17:34:38   flipped (2.8 s of full pitch)
+17:34:55   recorded 662 frames (40 fps)
+17:34:55 [16/37] r10_thr_050: throttle 50 % for 8 s, then centre for 6 s
+17:35:03   braked to 0.0 m/s in 8.3 s
+17:35:09   flipped (2.8 s of full pitch)
+17:35:27   recorded 664 frames (40 fps)
+17:35:27 [17/37] r10_thr_100_release: throttle 100 % for 5 s, then centre for 6 s (does it hold 225?)
+17:35:35   braked to 0.0 m/s in 8.6 s
+17:35:41   flipped (2.8 s of full pitch)
+17:35:55   recorded 540 frames (40 fps)
+17:35:55 [18/37] r10_g_up_025: up strafe 25 % + full roll from rest, 20 s (~2.5 G)
+17:36:06   braked to 0.0 m/s in 10.2 s
+17:36:11   flipped (2.8 s of full pitch)
+17:36:36   recorded 906 frames (40 fps)
+17:36:36 [19/37] r10_g_up_050: up strafe 50 % + full roll, 20 s (~5 G)
+17:36:38   braked to 0.0 m/s in 2.0 s
+17:36:43   flipped (2.8 s of full pitch)
+17:37:08   recorded 892 frames (40 fps)
+17:37:09   HUD back after 0.9 s; resting 8 s
+17:37:17 [20/37] r10_g_up_075: up strafe 75 % + full roll, 20 s (~7.5 G)
+17:37:21   braked to 0.0 m/s in 4.3 s
+17:37:27   flipped (2.8 s of full pitch)
+17:37:51   recorded 906 frames (40 fps)
+17:37:51 [21/37] r10_g_up_100: up strafe 100 % + full roll, 20 s (~10 G)
+17:37:54   braked to 0.0 m/s in 3.0 s
+17:38:00   flipped (2.8 s of full pitch)
+17:38:24   recorded 914 frames (41 fps)
+17:38:24   grey-out began 4.37 s into the inputs, HUD gone at 5.28 s
+17:38:25   HUD back after 1.6 s; resting 8 s
+17:38:33 [22/37] r10_g_lat_025: right strafe 25 % + full roll, 20 s (~2.5 G)
+17:38:37   braked to 0.0 m/s in 4.0 s
+17:38:43   flipped (2.8 s of full pitch)
+17:39:07   recorded 906 frames (40 fps)
+17:39:08   HUD back after 0.9 s; resting 8 s
+17:39:16 [23/37] r10_g_lat_050 (strafe mirrored): right strafe 50 % + full roll, 20 s (~5 G)
+17:39:19   braked to 0.0 m/s in 2.6 s
+17:39:24   flipped (2.8 s of full pitch)
+17:39:48   recorded 901 frames (40 fps)
+17:39:49   HUD back after 0.9 s; resting 8 s
+17:39:57 [24/37] r10_g_lat_075: right strafe 75 % + full roll, 20 s (~7.5 G)
+17:40:00   braked to 0.0 m/s in 3.0 s
+17:40:06   flipped (2.8 s of full pitch)
+17:40:30   recorded 910 frames (40 fps)
+17:40:30   grey-out began 7.41 s into the inputs, HUD gone at 16.09 s
+17:40:31   HUD back after 0.9 s; resting 8 s
+17:40:39 [25/37] r10_g_down_050: DOWN strafe 50 % + full roll, 20 s (~2.5 G, red-out side)
+17:40:42   braked to 0.0 m/s in 3.0 s
+17:40:47   flipped (2.8 s of full pitch)
+17:41:11   recorded 944 frames (42 fps)
+17:41:12   HUD back after 0.9 s; resting 8 s
+17:41:20 [26/37] r10_g_down_075: DOWN strafe 75 % + full roll, 20 s (~3.7 G)
+17:41:22   braked to 0.0 m/s in 2.0 s
+17:41:28   flipped (2.8 s of full pitch)
+17:41:52   recorded 903 frames (40 fps)
+17:41:53   HUD back after 0.9 s; resting 8 s
+17:42:01 [27/37] r10_g_down_100: DOWN strafe 100 % + full roll, 20 s (~5 G)
+17:42:03   braked to 0.0 m/s in 2.3 s
+17:42:09   flipped (2.8 s of full pitch)
+17:42:33   recorded 908 frames (40 fps)
+17:42:33   grey-out began 3.42 s into the inputs, HUD gone at 6.29 s
+17:42:34   HUD back after 1.8 s; resting 8 s
+17:42:42 [28/37] r10_geq_up_scm_065: EQUAL-G pair: up 65 % SCM + roll (~6.4 G)
+17:42:46   braked to 0.0 m/s in 3.3 s
+17:42:51   flipped (2.8 s of full pitch)
+17:43:15   recorded 880 frames (39 fps)
+17:43:16   HUD back after 0.9 s; resting 8 s
+17:43:24 [29/37] r10_geq_up_bst_050: EQUAL-G pair: up 50 % BOOSTED + roll (~6.5 G)
+17:43:27   braked to 1.0 m/s in 2.7 s
+17:43:33   flipped (2.8 s of full pitch)
+17:43:33   boost tank 100.0% after 0.0 s
+17:43:57   recorded 890 frames (40 fps)
+17:43:57 [30/37] r10_geq_down_scm_100: EQUAL-G pair: down 100 % SCM + roll (~5.0 G)
+17:44:00   braked to 0.0 m/s in 3.3 s
+17:44:06   flipped (2.8 s of full pitch)
+17:44:29   recorded 935 frames (42 fps)
+17:44:29   grey-out began 3.6 s into the inputs, HUD gone at 5.92 s
+17:44:32   HUD back after 3.4 s; resting 8 s
+17:44:40 [31/37] r10_geq_down_bst_075: EQUAL-G pair: down 75 % BOOSTED + roll (~5.0 G)
+17:44:43   braked to 0.0 m/s in 2.7 s
+17:44:49   flipped (2.8 s of full pitch)
+17:44:49   boost tank 100.0% after 0.0 s
+17:45:12   recorded 963 frames (43 fps)
+17:45:12   grey-out began 3.35 s into the inputs, HUD gone at 5.89 s
+17:45:15   HUD back after 2.7 s; resting 8 s
+17:45:23 [32/37] r10_rec_lat_15 (strafe mirrored): full right + roll 7 s, let go 1.5 s, again 10 s: time to grey the second time
+17:45:26   braked to 0.0 m/s in 3.6 s
+17:45:32   flipped (2.8 s of full pitch)
+17:45:54   recorded 836 frames (40 fps)
+17:45:54   grey-out began 1.99 s into the inputs, HUD gone at 3.77 s
+17:45:56   HUD back after 2.5 s; resting 8 s
+17:46:04 [33/37] r10_rec_lat_30: same, let go 3 s
+17:46:09   braked to 0.0 m/s in 4.3 s
+17:46:14   flipped (2.8 s of full pitch)
+17:46:37   recorded 911 frames (40 fps)
+17:46:37   grey-out began 1.71 s into the inputs, HUD gone at 3.36 s
+17:46:38   HUD back after 0.9 s; resting 8 s
+17:46:46 [34/37] r10_rec_lat_60 (strafe mirrored): same, let go 6 s
+17:46:51   braked to 1.0 m/s in 4.3 s
+17:46:56   flipped (2.8 s of full pitch)
+17:47:23   recorded 1035 frames (41 fps)
+17:47:23   grey-out began 2.07 s into the inputs, HUD gone at 3.8 s
+17:47:24   HUD back after 0.9 s; resting 8 s
+17:47:32 [35/37] r10_ref_escape: REFERENCE: boost forward 2 s, then boosted forward + up + roll 50 % for 6 s, then release everything 4 s
+17:47:36   braked to 0.0 m/s in 4.3 s
+17:47:42   flipped (2.8 s of full pitch)
+17:47:42   boost tank 100.0% after 0.0 s
+17:47:57   recorded 591 frames (41 fps)
+17:47:57   grey-out began 2.47 s into the inputs
+17:47:58   HUD back after 0.9 s; resting 8 s
+17:48:06 [36/37] r10_ref_jink: REFERENCE: SCM full throttle 3 s, then jink right 1 s / left 1 s / up 1 s / down 1 s at full throttle
+17:48:14   braked to 0.0 m/s in 8.2 s
+17:48:20   flipped (2.8 s of full pitch)
+17:48:30   recorded 386 frames (41 fps)
+17:48:30 [37/37] r10_ref_diag_turn: REFERENCE: boost forward 3 s, then pitch 70 % + yaw 100 % boosted 1.5 s, then boost + full throttle 3 s
+17:48:38   braked to 0.0 m/s in 8.2 s
+17:48:44   flipped (2.8 s of full pitch)
+17:48:44   boost tank 100.0% after 0.0 s
+17:48:55   recorded 399 frames (40 fps)
+17:48:55   grey-out began 2.42 s into the inputs
+17:48:56   HUD back after 0.9 s; resting 8 s

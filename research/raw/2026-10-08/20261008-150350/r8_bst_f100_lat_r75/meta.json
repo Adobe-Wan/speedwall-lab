@@ -1,0 +1,235 @@
+{
+ "id": "r8_bst_f100_lat_r75",
+ "note": "boosted escape from rest: forward 100 % + full right + roll 75 % (180 deg/s), 14 s",
+ "expect": {
+  "true_blackout_at": "?",
+  "plateau_mps": "?"
+ },
+ "steps": [
+  {
+   "t": 14.0,
+   "strafe_long": 1.0,
+   "strafe_lat": -1.0,
+   "roll": 0.75,
+   "boost": true
+  }
+ ],
+ "pre_s": 1.0,
+ "post_s": 1.5,
+ "fps_target": 60,
+ "fps_actual": 44.0,
+ "monitor": {
+  "left": 0,
+  "top": 0,
+  "width": 3840,
+  "height": 2160,
+  "is_primary": true,
+  "name": "Generic PnP Monitor",
+  "unique_id": "\\\\?\\DISPLAY#AUS32F4#5&10c0ae1&1&UID4352#{e6f07b5f-ee97-4a90-b076-33f57bf4eaa7}"
+ },
+ "roi": {
+  "speed": [
+   0.3944,
+   0.5467,
+   0.0194,
+   0.0211
+  ],
+  "g": [
+   0.6637,
+   0.4667,
+   0.0225,
+   0.0222
+  ],
+  "ab": [
+   0.5981,
+   0.5456,
+   0.0231,
+   0.0244
+  ],
+  "view": [
+   0.65,
+   0.09,
+   0.3,
+   0.27
+  ],
+  "cam": [
+   0.25,
+   0.2,
+   0.5,
+   0.5
+  ]
+ },
+ "recorded": "2026-10-08 16:21:17",
+ "start_speed": 0.0,
+ "gloc_at": null,
+ "grey_at": null,
+ "hud_black_at": null,
+ "hud_lum_base": 255.0,
+ "gloc_policy": "hold",
+ "ease_events": [],
+ "reversals": [],
+ "lat_mirrored": true,
+ "probe_every": 1.0,
+ "probe_cfg": {
+  "probe_views": 3.0,
+  "probe_cut_thr": 0.5,
+  "probe_cut_window_s": 0.8,
+  "probe_ignore_n": 2.0,
+  "probe_dark_abs": 60.0,
+  "probe_dark_frac": 0.5,
+  "probe_dark_hold_s": 0.5,
+  "probe_cockpit_thr": 0.55,
+  "probe_hud_settle_s": 1.2,
+  "probe_gap_s": 1.0,
+  "probe_cockpit_dwell_s": 2.0,
+  "probe_check_gap_s": 0.7,
+  "probe_blind_max": 24.0
+ },
+ "cam_base_mean": 17.551816940307617,
+ "probe": {
+  "presses": 11,
+  "cuts": 11,
+  "ignored": 0,
+  "blind": 0,
+  "black_checks": 7,
+  "black_checks_worked": 7,
+  "black_checks_dead": 0,
+  "true_blackout_at": null,
+  "true_blackout_doubt": false,
+  "resyncs": [
+   {
+    "t": 7.235,
+    "counted": 0,
+    "seen": "external"
+   },
+   {
+    "t": 9.479,
+    "counted": 2,
+    "seen": "cockpit"
+   }
+  ],
+  "conscious_dark_at": 2.178158800001256,
+  "key_lost_at": null,
+  "key_back_at": null,
+  "stray_cuts": [
+   2.658,
+   3.685,
+   4.691,
+   5.702,
+   7.745,
+   8.581,
+   8.665,
+   9.802,
+   11.856,
+   13.805
+  ],
+  "final_view_idx": 2,
+  "base_mean": 17.551816940307617,
+  "dark_thr": 8.775908470153809
+ },
+ "probe_log": [
+  {
+   "t": 2.178158800001256,
+   "kind": "check",
+   "level": 0.709,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 2.363,
+   "idx_after": 1
+  },
+  {
+   "t": 3.3728937999985646,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 3.554,
+   "idx_after": 0
+  },
+  {
+   "t": 4.201154199996381,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 4.4,
+   "idx_after": 2
+  },
+  {
+   "t": 5.413274100006674,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 5.61,
+   "idx_after": 1
+  },
+  {
+   "t": 6.214910900001996,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 6.427,
+   "idx_after": 0
+  },
+  {
+   "t": 8.31696739999461,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 8.517,
+   "idx_after": 0
+  },
+  {
+   "t": 10.294473300004029,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 10.485,
+   "idx_after": 2
+  },
+  {
+   "t": 11.498441300005652,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 11.68,
+   "idx_after": 0
+  },
+  {
+   "t": 12.333021900005406,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 12.545,
+   "idx_after": 2
+  },
+  {
+   "t": 13.55047740000009,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 13.761,
+   "idx_after": 0
+  },
+  {
+   "t": 14.267153299995698,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "cut",
+   "cut_t": 14.462,
+   "idx_after": 2
+  }
+ ],
+ "full_every_s": 0.5,
+ "cam_restore_presses": 1,
+ "cam_recover_s": 0.5,
+ "recovery_s": 1.6
+}

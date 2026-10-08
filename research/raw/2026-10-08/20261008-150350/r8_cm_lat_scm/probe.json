@@ -1,0 +1,181 @@
+{
+ "presses": 14,
+ "cuts": 7,
+ "ignored": 1,
+ "blind": 6,
+ "black_checks": 7,
+ "black_checks_worked": 0,
+ "black_checks_dead": 1,
+ "true_blackout_at": 13.6881,
+ "true_blackout_doubt": true,
+ "resyncs": [
+  {
+   "t": 2.649,
+   "counted": 0,
+   "seen": "external"
+  },
+  {
+   "t": 2.75,
+   "counted": 1,
+   "seen": "cockpit"
+  },
+  {
+   "t": 6.217,
+   "counted": 0,
+   "seen": "external"
+  },
+  {
+   "t": 6.424,
+   "counted": 1,
+   "seen": "cockpit"
+  },
+  {
+   "t": 14.489,
+   "counted": 1,
+   "seen": "cockpit"
+  },
+  {
+   "t": 17.831,
+   "counted": 2,
+   "seen": "cockpit"
+  }
+ ],
+ "conscious_dark_at": null,
+ "key_lost_at": null,
+ "key_back_at": null,
+ "stray_cuts": [
+  3.679,
+  7.228,
+  8.246
+ ],
+ "log": [
+  {
+   "t": 3.0417,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 3.232,
+   "idx_after": 1
+  },
+  {
+   "t": 4.2614,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 4.444,
+   "idx_after": 0
+  },
+  {
+   "t": 6.4827,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 6.727,
+   "idx_after": 1
+  },
+  {
+   "t": 7.7606,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 7.944,
+   "idx_after": 0
+  },
+  {
+   "t": 8.7685,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "blind",
+   "cut_t": null,
+   "idx_after": 1
+  },
+  {
+   "t": 9.5886,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "blind",
+   "cut_t": null,
+   "idx_after": 1
+  },
+  {
+   "t": 10.3999,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "blind",
+   "cut_t": null,
+   "idx_after": 1
+  },
+  {
+   "t": 11.2187,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "blind",
+   "cut_t": null,
+   "idx_after": 1
+  },
+  {
+   "t": 12.0282,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "blind",
+   "cut_t": null,
+   "idx_after": 1
+  },
+  {
+   "t": 12.8766,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "blind",
+   "cut_t": null,
+   "idx_after": 1
+  },
+  {
+   "t": 13.6881,
+   "kind": "check",
+   "level": null,
+   "dark": true,
+   "outcome": "ignored",
+   "cut_t": null,
+   "idx_after": 1
+  },
+  {
+   "t": 15.5223,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 15.728,
+   "idx_after": 1
+  },
+  {
+   "t": 16.7485,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 16.984,
+   "idx_after": 2
+  },
+  {
+   "t": 18.0054,
+   "kind": "cycle",
+   "level": null,
+   "dark": false,
+   "outcome": "cut",
+   "cut_t": 18.18,
+   "idx_after": 1
+  }
+ ],
+ "base_mean": 5.7767534255981445,
+ "dark_thr": 2.8883767127990723
+}

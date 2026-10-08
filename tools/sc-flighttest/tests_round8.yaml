@@ -1,169 +1,357 @@
-# Round 8 (Gladius, DECOUPLED, Arena Commander only): where in the speed bubble, and with which roll, does a corkscrew
-# black you out? Corkscrew = a strafe axis + roll, with some forward held. Forward fraction f picks the point on the
-# egg the ship settles at (full strafe + forward fraction f settles at: f 0 -> 394 m/s boosted, f 0.25 -> 441, f 0.5 -> 455,
-# f 1 -> 501; fixture round 3), so f is "how far toward the nose" and decides how much side push is left (about 12.9 G
-# at the sides, 5.4 G near the nose boosted; ~9.9 G in SCM at any f).
-#   python run.py camcheck                                (once: does the camera key work?)
-#   python run.py run --tests tests_round8.yaml           (30 tests, about 25 minutes)   or:  python run.py campaign --rounds 8
+# Round 8 (Gladius, DECOUPLED, Arena Commander only): what corkscrews do to the pilot, and which one is worth flying.
+#   python run.py camcheck                                (once: does the camera key work, and do the three views look different?)
+#   python run.py run --tests tests_round8.yaml           (about 55 tests, about 60 minutes)   or:  python run.py campaign --rounds 8
 #
-# The camera-key probe (idea: you can still switch to the external camera while greying out, until you are fully
-# blacked out, and then the key stops working): the vJoy `view` button (bound to Star Citizen's camera cycle) is
-# pressed every 0.6 s while the inputs are held. analyze reports, besides the HUD-based grey_at (HUD 80 %) and gloc_at
-# (HUD 50 %, inputs released there):
-#   probe_states / probe_toggled   each press: toggled, no_change or dark (screen black, can't tell)
-#   probe_last_toggle_s            the last press that visibly switched the view
-#   probe_control_lost_s           the first press after control was working that did nothing, or happened in the dark
-#   dark_press_worked              one more press, made in the dark 0.5 s after the let-go: did the camera change?
-# `python run.py camstrip <session> <test>` writes a picture of the frames around each press, to check by eye.
-# The ship is flown to the blackout and then released; the camera is put back to the cockpit view before the next test.
+# WHY. The simulator needs (1) what a blackout / grey-out / RED-out looks and feels like over time, so the pilot view can
+# show it; (2) which corkscrews black you out, and when; (3) the corkscrew that maximises deflection for a pilot who is
+# escaping with everything: boost, forward, strafe AND roll, all started BEFORE the speedwall, as in a real fight.
+# Teaching levels: 101 / 201 corkscrews fly one direction (no counter-strafing). Reversing the corkscrew to stay conscious
+# is an ADVANCED countermeasure, tested only in section F (policy "reverse"), never in the others ("hold").
+#
+# WHAT IS RECORDED in every test (analyze writes summary.csv and a vision.csv per test):
+#   * the vision gradient, continuously: how dark the centre of the screen is (0 clear .. 1 black), how dark the edge is
+#     versus the centre (tunnel vision), the red share of the picture (red-out), the HUD digits' fade, with your inputs;
+#   * the camera-key probe: the vJoy `view` button (bound to Star Citizen's camera cycle: cockpit -> external A ->
+#     external B) is pressed every ~1 s. The camera still switching means you are not truly blacked out. The moment the
+#     screen goes dark, a BLACK CHECK is pressed at once and every 0.7 s while it lasts: camera switched = still
+#     conscious; nothing = a TRUE blackout. analyze reports true_blackout_at, conscious_dark_at, key_lost_at, ...
+#   * a "hold" test never lets go of the controls: the inputs run to the end whatever the screen looks like.
+# The HUD digits (speed, G) exist only in the cockpit view, so flight numbers come from the cockpit windows of each test.
+# `python run.py camstrip <session> <test>` draws the frames around each press, to check by eye.
+#
+# Sections: A the corkscrew map (30, from rest, forward + strafe + roll started together), B escape corkscrews with
+# boost from rest and from a running start, C red-out (down strafe), D held strafes, E onset by axis, F countermeasures.
 tests:
   - id: r8_scm_f0_up_r25
     note: "SCM, forward 0 % + full up strafe + roll 25 % (50 deg/s), 14 s"
-    probe: 0.6
+    probe: 1.0
+    gloc: hold
     steps: [{t: 14, strafe_vert: 1.0, roll: 0.25}]
     expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
   - id: r8_scm_f0_up_r100
     note: "SCM, forward 0 % + full up strafe + roll 100 % (200 deg/s), 14 s"
-    probe: 0.6
+    probe: 1.0
+    gloc: hold
     steps: [{t: 14, strafe_vert: 1.0, roll: 1.0}]
     expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
   - id: r8_scm_f0_lat_r25
     note: "SCM, forward 0 % + full right strafe + roll 25 % (50 deg/s), 14 s"
-    probe: 0.6
+    probe: 1.0
+    gloc: hold
     steps: [{t: 14, strafe_lat: 1.0, roll: 0.25}]
     expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
   - id: r8_scm_f0_lat_r100
     note: "SCM, forward 0 % + full right strafe + roll 100 % (200 deg/s), 14 s"
-    probe: 0.6
+    probe: 1.0
+    gloc: hold
     steps: [{t: 14, strafe_lat: 1.0, roll: 1.0}]
     expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
   - id: r8_scm_f50_up_r25
     note: "SCM, forward 50 % + full up strafe + roll 25 % (50 deg/s), 14 s"
-    probe: 0.6
+    probe: 1.0
+    gloc: hold
     steps: [{t: 14, strafe_long: 0.5, strafe_vert: 1.0, roll: 0.25}]
     expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
   - id: r8_scm_f50_up_r100
     note: "SCM, forward 50 % + full up strafe + roll 100 % (200 deg/s), 14 s"
-    probe: 0.6
+    probe: 1.0
+    gloc: hold
     steps: [{t: 14, strafe_long: 0.5, strafe_vert: 1.0, roll: 1.0}]
     expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
   - id: r8_scm_f50_lat_r25
     note: "SCM, forward 50 % + full right strafe + roll 25 % (50 deg/s), 14 s"
-    probe: 0.6
+    probe: 1.0
+    gloc: hold
     steps: [{t: 14, strafe_long: 0.5, strafe_lat: 1.0, roll: 0.25}]
     expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
   - id: r8_scm_f50_lat_r100
     note: "SCM, forward 50 % + full right strafe + roll 100 % (200 deg/s), 14 s"
-    probe: 0.6
+    probe: 1.0
+    gloc: hold
     steps: [{t: 14, strafe_long: 0.5, strafe_lat: 1.0, roll: 1.0}]
     expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
   - id: r8_scm_f100_up_r25
     note: "SCM, forward 100 % + full up strafe + roll 25 % (50 deg/s), 14 s"
-    probe: 0.6
+    probe: 1.0
+    gloc: hold
     steps: [{t: 14, strafe_long: 1.0, strafe_vert: 1.0, roll: 0.25}]
     expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
   - id: r8_scm_f100_up_r100
     note: "SCM, forward 100 % + full up strafe + roll 100 % (200 deg/s), 14 s"
-    probe: 0.6
+    probe: 1.0
+    gloc: hold
     steps: [{t: 14, strafe_long: 1.0, strafe_vert: 1.0, roll: 1.0}]
     expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
   - id: r8_scm_f100_lat_r25
     note: "SCM, forward 100 % + full right strafe + roll 25 % (50 deg/s), 14 s"
-    probe: 0.6
+    probe: 1.0
+    gloc: hold
     steps: [{t: 14, strafe_long: 1.0, strafe_lat: 1.0, roll: 0.25}]
     expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
   - id: r8_scm_f100_lat_r100
     note: "SCM, forward 100 % + full right strafe + roll 100 % (200 deg/s), 14 s"
-    probe: 0.6
+    probe: 1.0
+    gloc: hold
     steps: [{t: 14, strafe_long: 1.0, strafe_lat: 1.0, roll: 1.0}]
     expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
   - id: r8_bst_f0_up_r25
     note: "boosted, at the sides (394 m/s): forward 0 % + full up strafe + roll 25 % (60 deg/s), 14 s"
-    probe: 0.6
+    probe: 1.0
+    gloc: hold
     steps: [{t: 14, strafe_vert: 1.0, roll: 0.25, boost: true}]
     expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
   - id: r8_bst_f0_up_r100
     note: "boosted, at the sides (394 m/s): forward 0 % + full up strafe + roll 100 % (240 deg/s), 14 s"
-    probe: 0.6
+    probe: 1.0
+    gloc: hold
     steps: [{t: 14, strafe_vert: 1.0, roll: 1.0, boost: true}]
     expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
   - id: r8_bst_f0_lat_r25
     note: "boosted, at the sides (394 m/s): forward 0 % + full right strafe + roll 25 % (60 deg/s), 14 s"
-    probe: 0.6
+    probe: 1.0
+    gloc: hold
     steps: [{t: 14, strafe_lat: 1.0, roll: 0.25, boost: true}]
     expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
   - id: r8_bst_f0_lat_r100
     note: "boosted, at the sides (394 m/s): forward 0 % + full right strafe + roll 100 % (240 deg/s), 14 s"
-    probe: 0.6
+    probe: 1.0
+    gloc: hold
     steps: [{t: 14, strafe_lat: 1.0, roll: 1.0, boost: true}]
     expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
   - id: r8_bst_f25_up_r25
     note: "boosted, off-axis (~441 m/s): forward 25 % + full up strafe + roll 25 % (60 deg/s), 14 s"
-    probe: 0.6
+    probe: 1.0
+    gloc: hold
     steps: [{t: 14, strafe_long: 0.25, strafe_vert: 1.0, roll: 0.25, boost: true}]
     expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
   - id: r8_bst_f25_up_r100
     note: "boosted, off-axis (~441 m/s): forward 25 % + full up strafe + roll 100 % (240 deg/s), 14 s"
-    probe: 0.6
+    probe: 1.0
+    gloc: hold
     steps: [{t: 14, strafe_long: 0.25, strafe_vert: 1.0, roll: 1.0, boost: true}]
     expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
   - id: r8_bst_f25_lat_r25
     note: "boosted, off-axis (~441 m/s): forward 25 % + full right strafe + roll 25 % (60 deg/s), 14 s"
-    probe: 0.6
+    probe: 1.0
+    gloc: hold
     steps: [{t: 14, strafe_long: 0.25, strafe_lat: 1.0, roll: 0.25, boost: true}]
     expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
   - id: r8_bst_f25_lat_r100
     note: "boosted, off-axis (~441 m/s): forward 25 % + full right strafe + roll 100 % (240 deg/s), 14 s"
-    probe: 0.6
+    probe: 1.0
+    gloc: hold
     steps: [{t: 14, strafe_long: 0.25, strafe_lat: 1.0, roll: 1.0, boost: true}]
     expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
   - id: r8_bst_f50_up_r25
     note: "boosted, mid-way (~455 m/s): forward 50 % + full up strafe + roll 25 % (60 deg/s), 14 s"
-    probe: 0.6
+    probe: 1.0
+    gloc: hold
     steps: [{t: 14, strafe_long: 0.5, strafe_vert: 1.0, roll: 0.25, boost: true}]
     expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
   - id: r8_bst_f50_up_r100
     note: "boosted, mid-way (~455 m/s): forward 50 % + full up strafe + roll 100 % (240 deg/s), 14 s"
-    probe: 0.6
+    probe: 1.0
+    gloc: hold
     steps: [{t: 14, strafe_long: 0.5, strafe_vert: 1.0, roll: 1.0, boost: true}]
     expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
   - id: r8_bst_f50_lat_r25
     note: "boosted, mid-way (~455 m/s): forward 50 % + full right strafe + roll 25 % (60 deg/s), 14 s"
-    probe: 0.6
+    probe: 1.0
+    gloc: hold
     steps: [{t: 14, strafe_long: 0.5, strafe_lat: 1.0, roll: 0.25, boost: true}]
     expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
   - id: r8_bst_f50_lat_r100
     note: "boosted, mid-way (~455 m/s): forward 50 % + full right strafe + roll 100 % (240 deg/s), 14 s"
-    probe: 0.6
+    probe: 1.0
+    gloc: hold
     steps: [{t: 14, strafe_long: 0.5, strafe_lat: 1.0, roll: 1.0, boost: true}]
     expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
   - id: r8_bst_f100_up_r25
     note: "boosted, toward the nose (~501 m/s): forward 100 % + full up strafe + roll 25 % (60 deg/s), 14 s"
-    probe: 0.6
+    probe: 1.0
+    gloc: hold
     steps: [{t: 14, strafe_long: 1.0, strafe_vert: 1.0, roll: 0.25, boost: true}]
     expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
   - id: r8_bst_f100_up_r50
     note: "boosted, toward the nose (~501 m/s): forward 100 % + full up strafe + roll 50 % (120 deg/s), 14 s"
-    probe: 0.6
+    probe: 1.0
+    gloc: hold
     steps: [{t: 14, strafe_long: 1.0, strafe_vert: 1.0, roll: 0.5, boost: true}]
     expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
   - id: r8_bst_f100_up_r100
     note: "boosted, toward the nose (~501 m/s): forward 100 % + full up strafe + roll 100 % (240 deg/s), 14 s"
-    probe: 0.6
+    probe: 1.0
+    gloc: hold
     steps: [{t: 14, strafe_long: 1.0, strafe_vert: 1.0, roll: 1.0, boost: true}]
     expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
   - id: r8_bst_f100_lat_r25
     note: "boosted, toward the nose (~501 m/s): forward 100 % + full right strafe + roll 25 % (60 deg/s), 14 s"
-    probe: 0.6
+    probe: 1.0
+    gloc: hold
     steps: [{t: 14, strafe_long: 1.0, strafe_lat: 1.0, roll: 0.25, boost: true}]
     expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
   - id: r8_bst_f100_lat_r50
     note: "boosted, toward the nose (~501 m/s): forward 100 % + full right strafe + roll 50 % (120 deg/s), 14 s"
-    probe: 0.6
+    probe: 1.0
+    gloc: hold
     steps: [{t: 14, strafe_long: 1.0, strafe_lat: 1.0, roll: 0.5, boost: true}]
     expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
   - id: r8_bst_f100_lat_r100
     note: "boosted, toward the nose (~501 m/s): forward 100 % + full right strafe + roll 100 % (240 deg/s), 14 s"
-    probe: 0.6
+    probe: 1.0
+    gloc: hold
     steps: [{t: 14, strafe_long: 1.0, strafe_lat: 1.0, roll: 1.0, boost: true}]
     expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
+
+  # --- B. Escapes: boosted forward + strafe + roll started together, from rest (before the speedwall) and from a running
+  #        start (1.6 s of boost first, ~300 m/s). Fills in the 75 % roll rate and the down strafe (red-out) of section A.
+  - id: r8_bst_f100_up_r75
+    note: "boosted escape from rest: forward 100 % + full up + roll 75 % (180 deg/s), 14 s"
+    probe: 1.0
+    gloc: hold
+    steps: [{t: 14, strafe_long: 1.0, strafe_vert: 1.0, roll: 0.75, boost: true}]
+    expect: {true_blackout_at: "?", plateau_mps: "?"}
+  - id: r8_bst_f100_lat_r75
+    note: "boosted escape from rest: forward 100 % + full right + roll 75 % (180 deg/s), 14 s"
+    probe: 1.0
+    gloc: hold
+    steps: [{t: 14, strafe_long: 1.0, strafe_lat: 1.0, roll: 0.75, boost: true}]
+    expect: {true_blackout_at: "?", plateau_mps: "?"}
+  - id: r8_bst_f100_down_r25
+    note: "boosted escape from rest: forward 100 % + full DOWN + roll 25 % (60 deg/s), 14 s (red-out?)"
+    probe: 1.0
+    gloc: hold
+    steps: [{t: 14, strafe_long: 1.0, strafe_vert: -1.0, roll: 0.25, boost: true}]
+    expect: {red_at: "?", true_blackout_at: "?"}
+  - id: r8_bst_f100_down_r50
+    note: "boosted escape from rest: forward 100 % + full DOWN + roll 50 % (120 deg/s), 14 s (red-out?)"
+    probe: 1.0
+    gloc: hold
+    steps: [{t: 14, strafe_long: 1.0, strafe_vert: -1.0, roll: 0.5, boost: true}]
+    expect: {red_at: "?", true_blackout_at: "?"}
+  - id: r8_bst_f100_down_r100
+    note: "boosted escape from rest: forward 100 % + full DOWN + roll 100 % (240 deg/s), 14 s (red-out?)"
+    probe: 1.0
+    gloc: hold
+    steps: [{t: 14, strafe_long: 1.0, strafe_vert: -1.0, roll: 1.0, boost: true}]
+    expect: {red_at: "?", true_blackout_at: "?"}
+  - id: r8_late_bst_lat_r50
+    note: "running start: boosted forward 1.6 s (~300 m/s), then forward + full right + roll 50 %, 12 s"
+    probe: 1.0
+    gloc: hold
+    steps: [{t: 1.6, strafe_long: 1.0, boost: true}, {t: 12, strafe_long: 1.0, strafe_lat: 1.0, roll: 0.5, boost: true}]
+    expect: {true_blackout_at: "?"}
+  - id: r8_late_bst_up_r50
+    note: "running start: boosted forward 1.6 s (~300 m/s), then forward + full up + roll 50 %, 12 s"
+    probe: 1.0
+    gloc: hold
+    steps: [{t: 1.6, strafe_long: 1.0, boost: true}, {t: 12, strafe_long: 1.0, strafe_vert: 1.0, roll: 0.5, boost: true}]
+    expect: {true_blackout_at: "?"}
+  - id: r8_late_bst_down_r50
+    note: "running start: boosted forward 1.6 s (~300 m/s), then forward + full DOWN + roll 50 %, 12 s (red-out?)"
+    probe: 1.0
+    gloc: hold
+    steps: [{t: 1.6, strafe_long: 1.0, boost: true}, {t: 12, strafe_long: 1.0, strafe_vert: -1.0, roll: 0.5, boost: true}]
+    expect: {red_at: "?", true_blackout_at: "?"}
+
+  # --- C. Red-out in SCM: full down strafe (blood rushes to the head) with roll, forward 0 and 100 %.
+  - id: r8_scm_f0_down_r25
+    note: "SCM, forward 0 % + full DOWN strafe + roll 25 % (50 deg/s), 14 s"
+    probe: 1.0
+    gloc: hold
+    steps: [{t: 14, strafe_vert: -1.0, roll: 0.25}]
+    expect: {red_at: "?", true_blackout_at: "?"}
+  - id: r8_scm_f0_down_r50
+    note: "SCM, forward 0 % + full DOWN strafe + roll 50 % (100 deg/s), 14 s"
+    probe: 1.0
+    gloc: hold
+    steps: [{t: 14, strafe_vert: -1.0, roll: 0.5}]
+    expect: {red_at: "?", true_blackout_at: "?"}
+  - id: r8_scm_f0_down_r100
+    note: "SCM, forward 0 % + full DOWN strafe + roll 100 % (200 deg/s), 14 s"
+    probe: 1.0
+    gloc: hold
+    steps: [{t: 14, strafe_vert: -1.0, roll: 1.0}]
+    expect: {red_at: "?", true_blackout_at: "?"}
+  - id: r8_scm_f100_down_r100
+    note: "SCM, forward 100 % + full DOWN strafe + roll 100 % (200 deg/s), 14 s"
+    probe: 1.0
+    gloc: hold
+    steps: [{t: 14, strafe_long: 1.0, strafe_vert: -1.0, roll: 1.0}]
+    expect: {red_at: "?", true_blackout_at: "?"}
+
+  # --- D. Held strafes with no roll: a full down strafe pulls G for as long as the ship accelerates (SCM ~4.6 s at 4.97 G,
+  #        boosted ~6 s at 6.6 G). Does a plain held strafe red you out?
+  - id: r8_hold_down_scm
+    note: "SCM full DOWN strafe held 9 s (accelerates ~4.6 s, then constant speed)"
+    probe: 1.0
+    gloc: hold
+    steps: [{t: 9, strafe_vert: -1.0}]
+    expect: {red_at: "?"}
+  - id: r8_hold_down_boost
+    note: "boosted full DOWN strafe held 10 s (accelerates ~6 s at 6.6 G)"
+    probe: 1.0
+    gloc: hold
+    steps: [{t: 10, strafe_vert: -1.0, boost: true}]
+    expect: {red_at: "?"}
+
+  # --- E. Onset by axis with the camera probe (round 7 A used the HUD alone and let go at the blackout). Matched ~10 G:
+  #        lateral 9.95, up 9.9; down is weaker (4.97), so compare it with up at 50 %.
+  - id: r8_onset_lat_scm
+    note: "SCM forward + full right + full roll 15 s, held through any blackout"
+    probe: 1.0
+    gloc: hold
+    steps: [{t: 15, strafe_long: 1.0, strafe_lat: 1.0, roll: 1.0}]
+    expect: {grey_at: "~3.6 (round 7)", true_blackout_at: "?"}
+  - id: r8_onset_up_scm
+    note: "SCM forward + full up + full roll 15 s, held through any blackout"
+    probe: 1.0
+    gloc: hold
+    steps: [{t: 15, strafe_long: 1.0, strafe_vert: 1.0, roll: 1.0}]
+    expect: {grey_at: "~6.6 (round 7)", true_blackout_at: "?"}
+  - id: r8_onset_up50_scm
+    note: "SCM forward + 50 % up + full roll 15 s (~5 G, matches full down)"
+    probe: 1.0
+    gloc: hold
+    steps: [{t: 15, strafe_long: 1.0, strafe_vert: 0.5, roll: 1.0}]
+    expect: {true_blackout_at: "?"}
+  - id: r8_onset_down_scm
+    note: "SCM forward + full DOWN + full roll 15 s (~5 G)"
+    probe: 1.0
+    gloc: hold
+    steps: [{t: 15, strafe_long: 1.0, strafe_vert: -1.0, roll: 1.0}]
+    expect: {grey_at: "~5.6 (round 7)", red_at: "?", true_blackout_at: "?"}
+
+  # --- F. Countermeasures (ADVANCED, 201+): when the screen is practically black, the harness waits 0.8 s, then reverses
+  #        the strafe and roll direction (a pilot counter-strafing), holds that until vision is back, resumes, repeats.
+  #        Logged in meta "reversals" with the darkness level at each flip; analyze reports how long vision took to return.
+  - id: r8_cm_lat_scm
+    note: "countermeasure: SCM forward + full right + full roll, reverse the corkscrew when practically black, 18 s"
+    probe: 1.0
+    gloc: reverse
+    steps: [{t: 18, strafe_long: 1.0, strafe_lat: 1.0, roll: 1.0}]
+    expect: {reversals: "?", vision_back_s: "?"}
+  - id: r8_cm_up_scm
+    note: "countermeasure: SCM forward + full up + full roll, reverse when practically black, 18 s"
+    probe: 1.0
+    gloc: reverse
+    steps: [{t: 18, strafe_long: 1.0, strafe_vert: 1.0, roll: 1.0}]
+    expect: {reversals: "?", vision_back_s: "?"}
+  - id: r8_cm_down_scm
+    note: "countermeasure against RED-out: SCM forward + full DOWN + full roll, reverse when practically black, 18 s"
+    probe: 1.0
+    gloc: reverse
+    steps: [{t: 18, strafe_long: 1.0, strafe_vert: -1.0, roll: 1.0}]
+    expect: {reversals: "?", vision_back_s: "?"}
+  - id: r8_cm_lat_boost
+    note: "countermeasure: boosted escape forward + full right + full roll, reverse when practically black, 14 s"
+    probe: 1.0
+    gloc: reverse
+    steps: [{t: 14, strafe_long: 1.0, strafe_lat: 1.0, roll: 1.0, boost: true}]
+    expect: {reversals: "?", vision_back_s: "?"}
+  - id: r8_cm_down_boost
+    note: "countermeasure against RED-out: boosted escape forward + full DOWN + full roll, reverse when practically black, 14 s"
+    probe: 1.0
+    gloc: reverse
+    steps: [{t: 14, strafe_long: 1.0, strafe_vert: -1.0, roll: 1.0, boost: true}]
+    expect: {reversals: "?", vision_back_s: "?"}

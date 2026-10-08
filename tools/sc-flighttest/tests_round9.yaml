@@ -1,0 +1,65 @@
+# Round 9 (Gladius, DECOUPLED, Arena Commander only): the VISION GRADIENT, uninterrupted.
+#   python run.py run --tests tests_round9.yaml           (11 tests, about 12 minutes)   or:  python run.py campaign --rounds 9
+#
+# Round 8 presses the camera key during every test, which is the arbiter of a TRUE blackout but leaves the cockpit view (the
+# only one with a baseline and HUD digits) up for only part of the time. These tests fly the same stimuli with NO camera presses
+# and the cockpit view up the whole time, so vision.csv is a continuous record of the gray-out -> black-out / RED-out process:
+# how dark the centre, the middle ring and the edge of the screen get, how red the picture turns, how fast the HUD digits fade,
+# against the pilot's inputs. That curve is what the simulator's pilot view will draw. All "hold": the inputs run to the end,
+# never reversed, never let go. Compare each with its twin in round 8 for the camera-key verdict.
+tests:
+  - id: r9_vis_scm_f100_lat_r100
+    note: "vision gradient: SCM forward 100 % + full right + roll 100 %, 16 s, cockpit view throughout"
+    gloc: hold
+    steps: [{t: 16, strafe_long: 1.0, strafe_lat: 1.0, roll: 1.0}]
+    expect: {dark_t50: "?", edge_dark_t50: "?"}
+  - id: r9_vis_scm_f100_up_r100
+    note: "vision gradient: SCM forward 100 % + full up + roll 100 %, 16 s"
+    gloc: hold
+    steps: [{t: 16, strafe_long: 1.0, strafe_vert: 1.0, roll: 1.0}]
+    expect: {dark_t50: "?", edge_dark_t50: "?"}
+  - id: r9_vis_scm_f100_down_r100
+    note: "vision gradient (RED-out): SCM forward 100 % + full DOWN + roll 100 %, 16 s"
+    gloc: hold
+    steps: [{t: 16, strafe_long: 1.0, strafe_vert: -1.0, roll: 1.0}]
+    expect: {red_at: "?", dark_t50: "?"}
+  - id: r9_vis_scm_f0_lat_r50
+    note: "vision gradient: SCM forward 0 % + full right + roll 50 %, 16 s"
+    gloc: hold
+    steps: [{t: 16, strafe_lat: 1.0, roll: 0.5}]
+    expect: {dark_t50: "?", edge_dark_t50: "?"}
+  - id: r9_vis_scm_f0_up_r50
+    note: "vision gradient: SCM forward 0 % + full up + roll 50 %, 16 s"
+    gloc: hold
+    steps: [{t: 16, strafe_vert: 1.0, roll: 0.5}]
+    expect: {dark_t50: "?", edge_dark_t50: "?"}
+  - id: r9_vis_scm_f0_down_r50
+    note: "vision gradient (RED-out): SCM forward 0 % + full DOWN + roll 50 %, 16 s"
+    gloc: hold
+    steps: [{t: 16, strafe_vert: -1.0, roll: 0.5}]
+    expect: {red_at: "?", dark_t50: "?"}
+  - id: r9_vis_bst_f100_lat_r50
+    note: "vision gradient: boosted escape from rest, forward 100 % + full right + roll 50 %, 14 s"
+    gloc: hold
+    steps: [{t: 14, strafe_long: 1.0, strafe_lat: 1.0, roll: 0.5, boost: true}]
+    expect: {dark_t50: "?", edge_dark_t50: "?"}
+  - id: r9_vis_bst_f100_up_r50
+    note: "vision gradient: boosted escape from rest, forward 100 % + full up + roll 50 %, 14 s"
+    gloc: hold
+    steps: [{t: 14, strafe_long: 1.0, strafe_vert: 1.0, roll: 0.5, boost: true}]
+    expect: {dark_t50: "?", edge_dark_t50: "?"}
+  - id: r9_vis_bst_f100_down_r50
+    note: "vision gradient (RED-out): boosted escape from rest, forward 100 % + full DOWN + roll 50 %, 14 s"
+    gloc: hold
+    steps: [{t: 14, strafe_long: 1.0, strafe_vert: -1.0, roll: 0.5, boost: true}]
+    expect: {red_at: "?", dark_t50: "?"}
+  - id: r9_vis_hold_down_scm
+    note: "vision gradient (RED-out): SCM full DOWN strafe held 10 s, no roll"
+    gloc: hold
+    steps: [{t: 10, strafe_vert: -1.0}]
+    expect: {red_at: "?"}
+  - id: r9_vis_hold_down_boost
+    note: "vision gradient (RED-out): boosted full DOWN strafe held 12 s, no roll"
+    gloc: hold
+    steps: [{t: 12, strafe_vert: -1.0, boost: true}]
+    expect: {red_at: "?"}
