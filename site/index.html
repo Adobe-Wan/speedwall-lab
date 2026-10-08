@@ -187,7 +187,9 @@ label.file { display: inline-block; border: 1px dashed var(--line); border-radiu
 .fly-note { position: fixed; left: 50%; top: 8px; transform: translateX(-50%); z-index: 20; margin: 0; background: rgba(7,11,17,.85); border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; font-size: .8rem; }
 body.flying .app { max-width: none; }
 body.flying .view { height: calc(100vh - 330px); min-height: 300px; }
-#ahud { z-index: 1; }
+/* the TVI (in #hud) is drawn above the Advanced HUD, so it is never hidden behind a bar or a readout */
+#ahud { z-index: 0; }
+#hud { z-index: 1; }
 footer { color: var(--muted); font-size: .74rem; line-height: 1.5; border-top: 1px solid var(--line); padding-top: 10px; }
 footer p { margin: 0 0 4px; max-width: 75ch; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }

@@ -15,7 +15,8 @@
 //   speed (signed: < 0 when flying backwards), speedCap, throttle (−1..1), g, gPeak,
 //   tank, redZone, boostActive, boostLocked, unlimited, mode ('SCM' | 'BOOST'),
 //   roll, pitch, yaw (°/s),
-//   hfovDeg (default 90), keepOutDeg (default 22): the side groups are laid out outside
+//   hfovDeg (default 90), keepOutDeg (default 22): the bars and the G readout have a FIXED layout (the bars the same
+//     distance either side of the crosshair, 0.11 of the view width); only the maneuver label avoids
 //     the cone keepOutDeg around the nose, where the corkscrew lessons park the TVI,
 //   anchorRollDps (number | null), guideDeg: "HOLD TVI @13°: 27 °/s" under the G readout,
 //   maneuver (string): small caps label at the top centre, hidden when empty.
@@ -305,54 +306,24 @@ export function createHud(svg) {
       `M${q(cx - b)} ${q(cy)}H${q(cx - a)}M${q(cx + a)} ${q(cy)}H${q(cx + b)}` +
       `M${q(cx)} ${q(cy + a)}V${q(cy + bs)}`);
 
-    // keep-out band: pixel radius of keepOutDeg in a view with horizontal FOV hfov
+    // keep-out band: pixel radius of keepOutDeg in a view with horizontal FOV hfov. Only the maneuver label avoids it now.
     const f = (w / 2) / Math.tan((hfov / 2) * RAD);
     const rK = f * Math.tan(keep * RAD);
     Lo.rK = rK; Lo.xhR = r + gap + len;
-    const side = Math.max(64, 20 * u);
-    const step = Math.max(3, Math.round(S / 120));
 
-    // Try progressively tighter layouts until all three blocks clear the band.
+    // Fixed layout, like the game's Advanced HUD: the throttle bar and the AB bar sit the same distance either side of
+    // the crosshair, both centred on its row, with the G readout beside the AB bar. The distance is 0.11 of the view
+    // width (the AB readout sits about 0.11 screen-widths from the centre in game; docs/PLAN.md "FOV matching"), but never
+    // so close that a bar touches the crosshair ticks. Nothing moves to dodge the TVI: the TVI is drawn above the HUD.
     const H0 = Math.max(84, 23 * u);
-    // [bar height, anchor hint on 1-3 lines, also clear the page's TVI label, G attached to the AB bar]
-    const Hs = Math.max(44, 0.55 * H0);
-    const tiers = [
-      [H0, 1, true, true], [H0, 2, true, true], [H0, 3, true, true], [H0, 1, false, true], [H0, 2, false, true], [H0, 3, false, true],
-      [H0, 3, true, false], [H0, 3, false, false],
-      [0.75 * H0, 2, false, true], [0.75 * H0, 2, false, false], [Hs, 2, false, true], [Hs, 2, false, false],
-    ];
-    let res = null;
-    for (const [H, lines, lbl, attached] of tiers) {
-      res = tryLayout(geom(H, lines), { w, h, cx, cy, r1: rK + TVI_PAD, r2: lbl ? rK : 0, step, relaxed: false, side, attached });
-      if (res) break;
-    }
-    if (!res) {
-      // Too tight (narrow view, small FOV): low and at the edges, never over the crosshair.
-      const g = geom(Hs, 2);
-      res = tryLayout(g, { w, h, cx, cy, r1: Lo.xhR + 6, r2: 0, step, relaxed: true, side }) ||
-        { g, l: [cx - side, cy], r: [cx + side, cy], gp: [cx + side + 20, cy], relaxed: true };
-    }
-    Lo.clear = !res.relaxed; // false: the view is too tight to keep the band clear
-    apply(res);
-    layoutManeuver();
-  }
-
-  function tryLayout(g, E) {
+    const g = geom(H0, 3);
+    const D = Math.max(0.11 * w, Lo.xhR + 24);
+    const l = [cx - D, cy], rr = [cx + D, cy];
+    const gp = [rr[0] + bw / 2 + g.zt + Math.max(10, 2 * u), rr[1] + 0.05 * g.H + 0.35 * fsL];
     const obs = [];
-    E.obs = obs;
-    const push = (rects, [tx, ty]) => { for (const r of rects) obs.push([r[0] + tx, r[1] + ty, r[2] + tx, r[3] + ty]); };
-    const yPref = E.cy;   // both bars centred on the crosshair, as in the game
-    const l = place({ rects: g.Lr, pref: [E.cx - E.side, yPref], side: -1, txMax: E.cx - Lo.bw }, E);
-    if (!l) return null;
-    push(g.Lr, l);
-    const r = place({ rects: g.Rr, pref: [E.cx + E.side, yPref], side: 1, txMin: E.cx + Lo.bw }, E);
-    if (!r) return null;
-    push(g.Rr, r);
-    const gp = place({ rects: g.Gr, pref: [r[0] + Lo.bw / 2 + g.zt + Math.max(10, 2 * Lo.u), r[1] + 0.05 * g.H + 0.35 * Lo.fsL],
-      side: 1, maxSlide: E.attached && !E.relaxed ? 1 : 0 }, E);
-    if (!gp) return null;
-    push(g.Gr, gp);
-    return { g, l, r, gp, relaxed: E.relaxed, obs: obs.slice() };
+    for (const [rects, [tx, ty]] of [[g.Lr, l], [g.Rr, rr], [g.Gr, gp]]) for (const rc of rects) obs.push([rc[0] + tx, rc[1] + ty, rc[2] + tx, rc[3] + ty]);
+    apply({ g, l, r: rr, gp, obs });
+    layoutManeuver();
   }
 
   function apply({ g, l, r, gp, obs }) {
