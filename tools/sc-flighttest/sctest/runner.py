@@ -388,6 +388,26 @@ def save(outdir: Path, test, ts, cmds, frames, cfg, grab, lum=None, extra=None, 
             f.write(f"{t:.4f}," + ",".join(str(c[k]) for k in keys) + "\n")
 
 
+def forward_check(cfg, vj, grab, guard, log):
+    """Before a run: push the throttle +0.3 for 1 s from rest and check the ship goes FORWARD. Forward is rated 13.7 G
+    and backward 4.24 G, so +0.3 for 1 s reaches ~40 m/s forward but only ~12 m/s if the axis is inverted in game."""
+    fc = cfg.get("forward_check", {"value": 0.3, "seconds": 1.0, "min_mps": 25.0})
+    if not fc or "speed" not in grab.boxes or "strafe_long" not in vj.axis_map:
+        return
+    brake_to_stop(cfg, vj, grab, guard, log)
+    vj.set(axes={"strafe_long": float(fc.get("value", 0.3))})
+    try:
+        _sleep_guarded(guard, float(fc.get("seconds", 1.0)))
+    finally:
+        vj.set(axes={"strafe_long": 0.0})
+    v = read_speed(grab)
+    log(f"Forward check: throttle +{fc.get('value', 0.3)} for {fc.get('seconds', 1.0)} s -> {v} m/s")
+    brake_to_stop(cfg, vj, grab, guard, log)
+    if v is None or v < float(fc.get("min_mps", 25.0)):
+        raise Abort(f"forward check failed ({v} m/s): the throttle axis looks INVERTED (or unbound) in Star Citizen. "
+                    "Fix it in Keybindings (vJoy Y, Throttle - Forward / Back, invert off) and run again")
+
+
 def run_tests(tests, cfg, session_dir: Path, dry_run=False, log=print):
     session_dir.mkdir(parents=True, exist_ok=True)
     _console = log
@@ -416,6 +436,8 @@ def run_tests(tests, cfg, session_dir: Path, dry_run=False, log=print):
     time.sleep(5)
     start_max = cfg.get("start_max_mps", 3.0)
     try:
+        if not dry_run and any(t.uses_forward for t in tests):
+            forward_check(cfg, vj, grab, guard, log)
         lateral_runs = 0
         skips_in_a_row = 0
         for i, test in enumerate(tests, 1):

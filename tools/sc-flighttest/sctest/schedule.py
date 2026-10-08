@@ -48,6 +48,10 @@ class Test:
         return any(s.buttons.get("boost") for s in self.steps)
 
     @property
+    def uses_forward(self) -> bool:
+        return any(s.axes.get("strafe_long") for s in self.steps)
+
+    @property
     def uses_lateral(self) -> bool:
         return any(s.axes.get("strafe_lat") for s in self.steps)
 
