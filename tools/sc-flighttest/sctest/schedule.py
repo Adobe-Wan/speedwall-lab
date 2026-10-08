@@ -33,6 +33,17 @@ class Test:
         return any(s.buttons.get("boost") for s in self.steps)
 
     @property
+    def uses_lateral(self) -> bool:
+        return any(s.axes.get("strafe_lat") for s in self.steps)
+
+    def mirrored(self) -> "Test":
+        """Same test with left/right strafe swapped. The ship is left/right symmetric, so results are the same; flying
+        every second lateral test mirrored cancels the sideways drift that a pitch flip does not."""
+        steps = [Step(s.t, {k: (-v if k == "strafe_lat" else v) for k, v in s.axes.items()}, dict(s.buttons)) for s in self.steps]
+        return Test(self.id, self.note, steps, self.expect, self.pre_s, self.post_s,
+                    self.gloc, self.ease_axes, self.ease_step, self.ease_min)
+
+    @property
     def duration(self) -> float:
         return self.pre_s + sum(s.t for s in self.steps) + self.post_s
 

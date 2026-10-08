@@ -17,7 +17,24 @@ Repeatable Star Citizen flight tests. A virtual joystick (vJoy) holds **exact** 
 2. Double-click **`setup.bat`** in this folder. It creates a private environment (`.venv`) and installs everything.
 3. From then on, open a terminal in this folder and run commands as `.venv\Scripts\python run.py ...`. Or run `.venv\Scripts\activate` once per terminal, then plain `python run.py ...`.
 
-### Bind vJoy in Star Citizen
+### Star Citizen profile (fastest: load a file instead of binding by hand)
+`star-citizen\speedwall-vjoy-js4.xml` binds the vJoy device, which the game sees as **joystick 4** (`js4`), to the eight actions the tests use, and nothing else:
+
+| vJoy | Star Citizen action |
+|---|---|
+| X / Y / Z | Strafe Left-Right / Forward-Backward / Up-Down |
+| Rx / Ry / Rz | Pitch / Yaw / Roll |
+| button 1 / button 2 | Afterburner / Spacebrake |
+
+1. Back up `...\StarCitizen\LIVE\user\client\0\Profiles\default\actionmaps.xml`.
+2. Copy the XML into `...\StarCitizen\LIVE\user\client\0\controls\mappings\` (create the folder if it isn't there).
+3. In game: **Options → Keybindings → Advanced Controls Customization**, then the profile list at the bottom, select `speedwall-vjoy-js4`, **Load**.
+4. Select the **vJoy** device and set **deadzone 0, curve linear, saturation 100 %** on every axis. The file can't set these.
+5. In free flight, decoupled, SCM, ship stopped: `python run.py dircheck`. It pushes each axis in turn and tells you what the ship must do. Invert in game any axis that went the wrong way; never change `config.yaml`.
+
+CIG doesn't document this file format; the profile is written from community knowledge and the app's importer reads it back correctly, but I couldn't try it in the game. If Star Citizen ignores it, or your vJoy isn't joystick 4 (the number is in the `js4_` names and `instance="4"`; find-and-replace it), use the manual steps below.
+
+### Bind vJoy in Star Citizen by hand
 In Star Citizen: **Options → Keybindings → Advanced Controls Customization**, under *Flight – Movement*. For each row below:
 1. Double-click the action in Star Citizen.
 2. Alt-Tab to the terminal and run the command.
@@ -62,11 +79,14 @@ Then run `python run.py fpscheck`. "one grab per frame" should read **30 fps or 
 3. In a terminal: `python run.py list --tests tests_round3.yaml` to see the tests, then `python run.py run --tests tests_round3.yaml` (29 tests, about 25 minutes) or a few by id.
 4. Click back into Star Citizen within 5 seconds. Hands off.
 
+**All the outstanding rounds at once:** `run_campaign.bat` (or `python run.py campaign`). It flies rounds 6, 7, 5 and 4 as one list, processes and analyzes them, and zips the results. `--rounds 6 7` picks some. See `docs/flight-model-tests.md` for the order and what each round settles.
+
 Each test:
 1. Spacebrakes until the speed reads 0–1 m/s three times in a row.
-2. Waits for a full boost tank (boosted tests only).
-3. Refuses to start if the ship is still moving.
-4. Holds its inputs, then records a short coast.
+2. Flips the ship 180° with a full **pitch** (2.8 s at the Gladius's 68 °/s), so consecutive tests fly in opposite directions and stay inside the arena. Forward and up/down reverse; left/right does not, so every second lateral test is flown with `strafe_lat` negated (the ship is left/right symmetric; `lat_mirrored` in `meta.json` says which). Set `turnaround_axis: yaw` or `mirror_lateral: false` in `config.yaml` to change this.
+3. Waits for a full boost tank (boosted tests only).
+4. Refuses to start if the ship is still moving.
+5. Holds its inputs, then records a short coast.
 
 Results go to `results\<date-time>\<test id>\`.
 
@@ -80,6 +100,8 @@ After a let-go, the run waits for your vision to come back, plus 8 s, before the
 
 A held strafe only pulls G until it reaches the wall (about 2.3 s in SCM), so it can't black you out. Sustained G comes from corkscrews (strafe + roll). Round 3 found lateral + roll greys out in 2–3 s and up + roll in 4–7 s; round 7 measures it.
 
+**What the harness can and can't know.** It sees only the HUD digits' brightness. It marks two moments in every test: the **grey-out** (HUD below 80 %, `grey_at`) and the **blackout** (below 50 %, `gloc_at`). The gap between them (`grey_to_black_s`) is how long you keep useful control while greying out. After a let-go, `recovery_s` is how long vision took to come back. Star Citizen's actual G-LOC rule isn't published and isn't assumed anywhere: the onset times, the `ease` levels and the recovery times are the data from which the simulator's model gets built.
+
 ### How rotation is measured (no sky camera)
 In decoupled mode, a strafe thrust is fixed to the ship. Rotating the ship spins that thrust vector, so the velocity traces a circle and the HUD speed rises and falls once per full rotation. The period gives the rotation rate, and the size of the swing gives the thrust. A fit on round 2's roll + up test gave **239.9 °/s** and **12.9 G**, against a spec of 240 °/s and 12.9 G, with 0.25 m/s error. The `rg_*` tests use a gentle 25% strafe, so the G-load stays around 2–3 G.
 
@@ -89,7 +111,8 @@ python run.py process <session-folder-name>
 python run.py analyze <session-folder-name>
 ```
 `analyze` writes `summary.csv`. For each test, next to the model's prediction:
-- `start_speed`, `gloc_at`;
+- `start_speed`, `gloc_at`, and for G-LOC: `grey_at`, `grey_to_black_s`, `recovery_s`, `ease_events`, `sustained_scale`;
+- for boost-release tests (a boosted step followed by a boost-free one): `rel_start_mps`, `rel_speed_at_*s`, `rel_t_to_226` (and 400/300/260/240/230), `rel_decel_G_first1s`, `rel_decel_G_300_to_235`, `rel_end_above_scm_mps`;
 - plateau speed and `plateau_drift_mps_per_s` (non-zero means it was still settling);
 - time to 100/200/300/400/480 m/s;
 - fitted acceleration in G;

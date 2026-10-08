@@ -38,9 +38,12 @@ brake_until_mps: 1.0  # spacebrake until OCR speed is below this (falls back to 
 brake_max_s: 45
 refill_until_pct: 99  # after a test, idle until the AB (boost) readout is at least this
 refill_max_s: 60      # ...or this long, whichever comes first
-start_max_mps: 3.0
-turnaround: true      # yaw ~180 deg between tests so the run doesn't drift into the map boundary
-turnaround_s: 3.6     # seconds of full yaw for ~180 deg (Gladius SCM yaw ~52 deg/s)    # a test never starts above this speed (brakes again, else skips the test)
+start_max_mps: 3.0  # a test never starts above this speed (brakes again, else skips the test)
+turnaround: true      # flip the ship 180 deg between tests so the run doesn't drift out of the arena
+turnaround_axis: pitch  # pitch (reverses forward + up/down) or yaw (reverses forward + left/right)
+turnaround_s: 2.8     # seconds of full deflection for 180 deg: pitch 68 deg/s -> 2.65 s (yaw 52.1 deg/s -> 3.6 s)
+mirror_lateral: true  # a pitch flip leaves left/right alone, so fly every second lateral test with strafe_lat negated
+                      # (the ship is left/right symmetric; the sideways drift then cancels). false = never mirror.
 
 # G-LOC guard: if the HUD digits fade below this fraction of their pre-test brightness for
 # gloc_hold_s, all inputs are released and the test ends early; then the run waits for the HUD.

@@ -47,16 +47,18 @@ def brake_to_stop(cfg, vj, grab, guard, log):
 
 
 def turn_around(cfg, vj, guard, log):
-    """Yaw roughly 180 degrees at rest, so consecutive tests fly in opposite directions.
-    A yaw flips both forward and left/right in world space, so the run stays near its start point."""
-    secs = cfg.get("turnaround_s", 3.6)          # Gladius SCM yaw ~52 deg/s -> ~3.5 s for 180 deg
-    vj.set(axes={"yaw": 1.0})
+    """Flip the ship 180 degrees at rest, so consecutive tests fly in opposite directions and the run stays inside
+    the arena. A pitch flip reverses forward and up/down in world space (left/right is unchanged: see
+    mirror_lateral); a yaw flip reverses forward and left/right. SCM rates: pitch 68 deg/s, yaw 52.1 deg/s."""
+    axis = cfg.get("turnaround_axis", "pitch")
+    secs = cfg.get("turnaround_s", 2.8 if axis == "pitch" else 3.6)   # 180 / 68 = 2.65 s;  180 / 52.1 = 3.45 s
+    vj.set(axes={axis: 1.0})
     try:
         _sleep_guarded(guard, secs)
     finally:
         vj.center()
     _sleep_guarded(guard, 1.0)                    # let the rotation stop
-    log(f"  turned around ({secs:.1f} s of full yaw)")
+    log(f"  flipped ({secs:.1f} s of full {axis})")
 
 
 def wait_hud_recovered(cfg, grab, guard, log, baseline):
@@ -71,8 +73,10 @@ def wait_hud_recovered(cfg, grab, guard, log, baseline):
         if good >= 5:
             break
         _sleep_guarded(guard, 0.2)
-    log(f"  HUD back after {time.perf_counter()-t0:.1f} s; resting {cfg.get('gloc_rest_s', 8)} s")
+    back = time.perf_counter() - t0
+    log(f"  HUD back after {back:.1f} s; resting {cfg.get('gloc_rest_s', 8)} s")
     _sleep_guarded(guard, cfg.get("gloc_rest_s", 8))
+    return back
 
 
 def wait_boost_full(cfg, vj, grab, guard, log):
@@ -101,7 +105,9 @@ def record(test, cfg, vj, grab, guard):
     ease_step instead, at most once per gloc_ease_wait_s, and the test flies on: a pilot reduces the input
     rather than letting go. The scale never comes back up within a test. Below ease_min, or a full blackout
     anyway, falls back to the release above.
-    Returns (t, cmds, frames, lum, gloc_at, baseline, ease_events)."""
+    grey_at is the first time the HUD stayed below gloc_ease_frac for gloc_hold_s (the grey-out), whatever the
+    policy; gloc_at - grey_at is how long the pilot kept control while greyed out.
+    Returns (t, cmds, frames, lum, gloc_at, baseline, ease_events, grey_at)."""
     period = 1.0 / cfg["target_fps"]
     frames = {k: [] for k in grab.boxes}
     ts, cmds, lum = [], [], []
@@ -110,7 +116,7 @@ def record(test, cfg, vj, grab, guard):
     dim_frac, hold_s = cfg.get("gloc_dim_frac", 0.5), cfg.get("gloc_hold_s", 0.25)
     ease = test.gloc == "ease"
     ease_frac, ease_wait = cfg.get("gloc_ease_frac", 0.8), cfg.get("gloc_ease_wait_s", 1.5)
-    scale, grey_since, last_ease, ease_events = 1.0, None, -1e9, []
+    scale, grey_since, last_ease, ease_events, grey_at = 1.0, None, -1e9, [], None
     t0 = time.perf_counter()
     nxt = t0
     while True:
@@ -138,16 +144,18 @@ def record(test, cfg, vj, grab, guard):
         if now < test.pre_s:
             base = float(np.median(lum))                       # HUD brightness before any input
         elif base and base > 40 and gloc_at is None:
-            if ease and l < ease_frac * base:                  # greying out: ease off, don't let go
+            if l < ease_frac * base:                           # greying out
                 grey_since = now if grey_since is None else grey_since
-                if now - grey_since >= hold_s and now - last_ease >= ease_wait:
+                if grey_at is None and now - grey_since >= hold_s:
+                    grey_at = round(grey_since - test.pre_s, 2)
+                if ease and now - grey_since >= hold_s and now - last_ease >= ease_wait:   # ease off, don't let go
                     scale = round(scale - test.ease_step, 3)
                     last_ease = now
                     ease_events.append([round(now - test.pre_s, 2), max(scale, 0.0)])
                     if scale < test.ease_min:                  # eased as far as allowed: release
                         dim_since = dim_since if dim_since is not None else grey_since
                         l = 0.0
-            elif ease:
+            else:
                 grey_since = None
             if l < dim_frac * base:
                 dim_since = now if dim_since is None else dim_since
@@ -166,7 +174,7 @@ def record(test, cfg, vj, grab, guard):
         else:
             nxt = time.perf_counter()
     vj.center()
-    return np.array(ts), cmds, frames, np.array(lum), gloc_at, base, ease_events
+    return np.array(ts), cmds, frames, np.array(lum), gloc_at, base, ease_events, grey_at
 
 
 def save(outdir: Path, test, ts, cmds, frames, cfg, grab, lum=None, extra=None):
@@ -200,10 +208,17 @@ def run_tests(tests, cfg, session_dir: Path, dry_run=False, log=print):
     time.sleep(5)
     start_max = cfg.get("start_max_mps", 3.0)
     try:
+        lateral_runs = 0
         for i, test in enumerate(tests, 1):
-            log(f"[{i}/{len(tests)}] {test.id}: {test.note}")
+            mirrored = False
+            if cfg.get("mirror_lateral", True) and test.uses_lateral:
+                mirrored = lateral_runs % 2 == 1               # every second lateral test flies the other way
+                lateral_runs += 1
+                if mirrored:
+                    test = test.mirrored()
+            log(f"[{i}/{len(tests)}] {test.id}{' (strafe mirrored)' if mirrored else ''}: {test.note}")
             brake_to_stop(cfg, vj, grab, guard, log)
-            if i > 1 and cfg.get("turnaround", True) and "yaw" in vj.axis_map:
+            if i > 1 and cfg.get("turnaround", True) and cfg.get("turnaround_axis", "pitch") in vj.axis_map:
                 turn_around(cfg, vj, guard, log)
             if test.uses_boost:
                 wait_boost_full(cfg, vj, grab, guard, log)
@@ -215,19 +230,24 @@ def run_tests(tests, cfg, session_dir: Path, dry_run=False, log=print):
                 if v0 is not None and v0 > start_max:
                     log(f"  SKIPPED {test.id}: still {v0} m/s")
                     continue
-            ts, cmds, frames, lum, gloc_at, base, ease_events = record(test, cfg, vj, grab, guard)
+            ts, cmds, frames, lum, gloc_at, base, ease_events, grey_at = record(test, cfg, vj, grab, guard)
             save(session_dir / test.id, test, ts, cmds, frames, cfg, grab, lum,
-                 {"start_speed": v0, "gloc_at": gloc_at, "hud_lum_base": base, "gloc_policy": test.gloc,
-                  "ease_events": ease_events})
+                 {"start_speed": v0, "gloc_at": gloc_at, "grey_at": grey_at, "hud_lum_base": base,
+                  "gloc_policy": test.gloc, "ease_events": ease_events, "lat_mirrored": mirrored})
             fps = len(ts) / max(ts[-1], 1e-6)
             log(f"  recorded {len(ts)} frames ({fps:.0f} fps)")
             if fps < 30:
                 log("  WARNING: below 30 fps. Run `python run.py fpscheck` and see README 'Troubleshooting'.")
             for t_e, s_e in ease_events:
                 log(f"  grey-out at {t_e} s: eased {', '.join(test.ease_axes)} to {s_e:.0%}")
+            if grey_at is not None:
+                log(f"  grey-out began {grey_at} s into the inputs" + (f", blackout at {gloc_at} s" if gloc_at is not None else ""))
             if gloc_at is not None:
                 log(f"  G-LOC: HUD faded {gloc_at} s into the inputs; inputs released, test ended early.")
-                wait_hud_recovered(cfg, grab, guard, log, base)
+                back = wait_hud_recovered(cfg, grab, guard, log, base)
+                mp = session_dir / test.id / "meta.json"          # how long vision took to come back after the let-go
+                meta = json.loads(mp.read_text()); meta["recovery_s"] = round(back, 1)
+                mp.write_text(json.dumps(meta, indent=1))
     except Abort as e:
         log(f"ABORTED: {e}. All inputs released.")
     finally:

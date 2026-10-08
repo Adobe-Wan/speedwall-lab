@@ -33,3 +33,36 @@ def hold(cfg: dict, control: str, value: float, seconds: float):
         time.sleep(seconds)
     finally:
         vj.close()
+
+
+# control, deflection, seconds, what the ship should do for a POSITIVE deflection (config.yaml: + = ...)
+DIRCHECK = [
+    ("strafe_long", 0.5, 1.2, "move FORWARD"), ("strafe_lat", 0.5, 1.2, "move to the RIGHT"),
+    ("strafe_vert", 0.5, 1.2, "move UP"), ("pitch", 0.3, 1.5, "pitch the nose UP"),
+    ("yaw", 0.3, 1.5, "yaw the nose to the RIGHT"), ("roll", 0.3, 1.5, "roll RIGHT (clockwise from behind)"),
+]
+
+
+def dircheck(cfg: dict):
+    """Push every axis the way the tests do, one at a time, and say what the ship must do. In Arena Commander,
+    decoupled, SCM, ship stopped. A strafe is followed by the spacebrake. Ctrl+C releases everything."""
+    vj = VJoy(cfg["vjoy_device"], cfg["axes"], cfg["buttons"])
+    try:
+        print("Direction check. Free flight, decoupled, SCM, ship stopped, window focused. Starting in 5 s; Ctrl+C stops.")
+        time.sleep(5)
+        for name, v, secs, what in DIRCHECK:
+            if name not in cfg["axes"]:
+                continue
+            print(f"  {name} +{v}: the ship should {what}")
+            vj.set(axes={name: v}); time.sleep(secs); vj.center()
+            if name.startswith("strafe"):
+                vj.set(buttons={"brake": True}); time.sleep(4.0); vj.set(buttons={"brake": False})
+            time.sleep(2.0)
+        print("  boost: the AB bar should drain for 2 s")
+        vj.set(buttons={"boost": True}); time.sleep(2.0); vj.set(buttons={"boost": False}); time.sleep(1.0)
+        print("  brake: you are stopped, so the speed stays 0; press it while moving to see it bite")
+        vj.set(buttons={"brake": True}); time.sleep(1.0)
+        print("Any that went the wrong way: invert that axis in Star Citizen (Keybindings > Advanced Controls Customization > "
+              "the vJoy device > Invert). Don't change config.yaml: the tests assume + = forward, right, up, nose up, yaw right, roll right.")
+    finally:
+        vj.close()

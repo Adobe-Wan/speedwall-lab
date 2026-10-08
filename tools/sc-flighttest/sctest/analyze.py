@@ -88,11 +88,64 @@ def dominant_period_dps(t, y):
     return math.degrees(ws[int(np.argmax(p))])
 
 
+SCM_CAP = 225.0
+HUD_LATENCY_S = 0.3   # fixture: the HUD shows an input's effect about 0.3 s after it
+
+
+def release_trace(cols, meta, t_on):
+    """How fast speed falls once boost is let go (tests whose boosted steps are followed by a boost-free one).
+
+    The release is the end of the last boosted step. Times are seconds after the release as commanded; the HUD
+    lags by about HUD_LATENCY_S, so the first 0.3 s are flat. rel_t_to_N is the first time the speed stays at or
+    below N m/s for three samples; None means it never got there inside the recording, which is itself the answer
+    to "does speed stay above the SCM cap"."""
+    steps = meta.get("steps") or []
+    last = max((i for i, s in enumerate(steps) if s.get("boost")), default=None)
+    sp = cols.get("speed")
+    if last is None or last == len(steps) - 1 or sp is None:
+        return {}
+    t = cols["t"]
+    t_rel = t_on + sum(s["t"] for s in steps[: last + 1])
+    ok = ~np.isnan(sp)
+    pre = ok & (t >= t_rel - 0.5) & (t <= t_rel)
+    post = ok & (t >= t_rel)
+    if pre.sum() < 3 or post.sum() < 10:
+        return {}
+    tt, ss = t[post] - t_rel, sp[post]
+    out = {"rel_start_mps": round(float(np.median(sp[pre])), 1)}
+    for sec in (0.5, 1, 2, 3, 5, 8, 12, 20):
+        m = np.abs(tt - sec) <= 0.1
+        if m.any():
+            out[f"rel_speed_at_{sec:g}s"] = round(float(np.median(ss[m])), 1)
+    for thr in (400, 300, 260, 240, 230, 226):
+        below = ss <= thr
+        hit = [i for i in range(len(ss) - 2) if below[i] and below[i + 1] and below[i + 2]]
+        out[f"rel_t_to_{thr}"] = round(float(tt[hit[0]]), 2) if hit else None
+    m = (tt >= HUD_LATENCY_S) & (tt <= HUD_LATENCY_S + 1.0)
+    if m.sum() > 5:
+        out["rel_decel_G_first1s"] = round(float(-np.polyfit(tt[m], ss[m], 1)[0] / G0), 2)
+    m = (ss <= 300) & (ss >= SCM_CAP + 10)          # the tail: just above the SCM cap, where a quadratic bleed would fade away
+    if m.sum() > 8:
+        out["rel_decel_G_300_to_235"] = round(float(-np.polyfit(tt[m], ss[m], 1)[0] / G0), 2)
+    out["rel_end_mps"] = round(float(np.median(ss[tt >= tt.max() - 2.0])), 1)
+    out["rel_end_above_scm_mps"] = round(out["rel_end_mps"] - SCM_CAP, 1)
+    out["rel_recorded_s"] = round(float(tt.max()), 1)
+    return out
+
+
 def summarize(d: Path) -> dict:
     cols, meta = load(d)
     t, t_on, t_off = active_window(cols, meta)
     out = {"test": meta["id"], "fps": meta.get("fps_actual"),
            "start_speed": meta.get("start_speed"), "gloc_at": meta.get("gloc_at")}
+    if meta.get("grey_at") is not None:
+        out["grey_at"] = meta["grey_at"]                        # HUD dimmed to 80 %: the grey-out
+        if meta.get("gloc_at") is not None:
+            out["grey_to_black_s"] = round(meta["gloc_at"] - meta["grey_at"], 2)   # control kept while greyed out
+    if meta.get("recovery_s") is not None:
+        out["recovery_s"] = meta["recovery_s"]                  # seconds for the HUD to come back after the let-go
+    if meta.get("lat_mirrored"):
+        out["lat_mirrored"] = True
     if meta.get("ease_events"):
         out["ease_events"] = meta["ease_events"]                # [s after inputs start, input scale]
         if meta.get("gloc_at") is None:
@@ -175,6 +228,7 @@ def summarize(d: Path) -> dict:
                 hi = (gg > 1.0) & (tt >= 0.2)
                 out[f"s{k}_g_over1_s"] = round(float(hi.sum() * np.nanmedian(np.diff(t))), 2)
             t0 = t1
+    out.update(release_trace(cols, meta, t_on))
     for k, v in (meta.get("expect") or {}).items():
         out[f"expect_{k}"] = v
     return out

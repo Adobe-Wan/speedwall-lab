@@ -3,6 +3,7 @@
 
   python run.py bind <control>            help SC's binding screen detect one vJoy axis/button
   python run.py hold <control> <value> <s>   hold one input (direction check)
+  python run.py dircheck                  push every axis in turn and say what the ship should do
   python run.py calibrate [--monitor N]   drag boxes over the HUD readouts
   python run.py ocrcheck                  print live HUD readings (verify calibration)
   python run.py fpscheck                  measure capture speed (needs >= 30 fps)
@@ -10,6 +11,8 @@
   python run.py run [ids...] [--tests FILE] [--dry-run]  run tests (all if none given) -> results/<session>/
   python run.py process <session>         OCR + roll-track recorded frames -> series.csv
   python run.py analyze <session>         per-test summary -> summary.csv
+  python run.py campaign [--rounds 6 7 5 4]   every outstanding round in ONE session, then process + analyze + pack
+  python run.py pack <session>            zip the results (no frames) to send back: results/<session>-data.zip
 """
 from __future__ import annotations
 import argparse, sys, time
@@ -18,6 +21,9 @@ import yaml
 
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
+
+# Outstanding rounds, in the order worth flying them (docs/flight-model-tests.md).
+CAMPAIGN = {"6": "tests_round6.yaml", "7": "tests_round7.yaml", "5": "tests_round5.yaml", "4": "tests_round4.yaml"}
 
 
 def cfg():
@@ -29,11 +35,54 @@ def tests(c, path="tests.yaml"):
     return parse(yaml.safe_load((ROOT / path).read_text()), c["axes"])
 
 
+def campaign(c, args):
+    """All the chosen rounds as one list (so the flip between tests carries across rounds), then process,
+    analyze and pack. One command, one results folder."""
+    from sctest.runner import run_tests
+    from sctest.process import process_dir
+    from sctest.analyze import summarize_session
+    ts = []
+    for r in args.rounds:
+        ts += tests(c, CAMPAIGN[r])
+    ids = [t.id for t in ts]
+    if len(ids) != len(set(ids)):
+        sys.exit("duplicate test ids across rounds")
+    flying = sum(t.duration for t in ts)
+    between = len(ts) * 35                                       # braking from speed, the flip, the boost refill: a rough allowance
+    print(f"Rounds {', '.join(args.rounds)}: {len(ts)} tests, about {(flying + between) / 60:.0f} minutes (more if you grey out: "
+          f"each let-go waits for your vision to come back).")
+    print("Before you continue: Arena Commander free flight (never the PU, never PvP), Gladius, DECOUPLED, SCM, open space,")
+    print("G-safe OFF, nothing ahead of you, you at the keyboard. F12 releases everything and stops.")
+    if not (args.yes or args.dry_run):
+        input("Press Enter when ready... ")
+    session = ROOT / "results" / time.strftime("%Y%m%d-%H%M%S")
+    run_tests(ts, c, session, dry_run=args.dry_run)
+    if args.dry_run:
+        return
+    for d in sorted(x for x in session.iterdir() if (x / "frames.npz").exists()):
+        process_dir(d, 1)
+    out = summarize_session(session)
+    print(f"Summary: {out}")
+    print(f"Packed:  {pack(session, False)}\nSend that zip back (or commit it under research/raw/).")
+
+
+def pack(session: Path, with_frames: bool) -> Path:
+    import zipfile
+    zp = session.parent / f"{session.name}-data.zip"
+    with zipfile.ZipFile(zp, "w", zipfile.ZIP_DEFLATED) as z:
+        for f in sorted(session.rglob("*")):
+            if f.is_file() and (with_frames or f.name != "frames.npz"):
+                z.write(f, f"{session.name}/{f.relative_to(session)}")
+        z.write(ROOT / "config.yaml", f"{session.name}/config.yaml")     # the settings this ran with
+    return zp
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
     b = sub.add_parser("bind"); b.add_argument("control"); b.add_argument("--negative", action="store_true")
     h = sub.add_parser("hold"); h.add_argument("control"); h.add_argument("value", type=float); h.add_argument("seconds", type=float)
+    sub.add_parser("dircheck")
     ca = sub.add_parser("calibrate"); ca.add_argument("--monitor", type=int)
     sub.add_parser("ocrcheck")
     sub.add_parser("fpscheck")
@@ -42,6 +91,11 @@ def main():
     r.add_argument("--tests", default="tests.yaml", help="test file, e.g. tests_round2.yaml")
     p = sub.add_parser("process"); p.add_argument("session"); p.add_argument("--stride", type=int, default=1)
     a = sub.add_parser("analyze"); a.add_argument("session")
+    cp = sub.add_parser("campaign")
+    cp.add_argument("--rounds", nargs="+", default=list(CAMPAIGN), choices=list(CAMPAIGN), help="default: 6 7 5 4")
+    cp.add_argument("--yes", action="store_true", help="don't wait for Enter before starting")
+    cp.add_argument("--dry-run", action="store_true")
+    pk = sub.add_parser("pack"); pk.add_argument("session"); pk.add_argument("--with-frames", action="store_true")
     args = ap.parse_args()
     c = cfg()
 
@@ -51,6 +105,9 @@ def main():
     elif args.cmd == "hold":
         from sctest.bind import hold
         hold(c, args.control, args.value, args.seconds)
+    elif args.cmd == "dircheck":
+        from sctest.bind import dircheck
+        dircheck(c)
     elif args.cmd == "calibrate":
         from sctest.calibrate import calibrate
         calibrate(ROOT / "config.yaml", args.monitor)
@@ -81,6 +138,10 @@ def main():
         for d in sorted(x for x in s.iterdir() if (x / "frames.npz").exists()):
             process_dir(d, args.stride)
         print(f"Next: python run.py analyze {args.session}")
+    elif args.cmd == "campaign":
+        campaign(c, args)
+    elif args.cmd == "pack":
+        print(f"Wrote {pack(ROOT / 'results' / args.session, args.with_frames)}")
     elif args.cmd == "analyze":
         from sctest.analyze import summarize_session
         out = summarize_session(ROOT / "results" / args.session)

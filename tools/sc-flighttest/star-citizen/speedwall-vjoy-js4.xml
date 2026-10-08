@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Star Citizen control profile for the sc-flighttest harness: binds the vJoy virtual joystick, which the game
+  sees as joystick instance 4 ("js4"), to the flight actions the tests drive. Nothing else is bound.
+
+  vJoy axis (config.yaml)   test control   Star Citizen action
+  X                         strafe_lat     v_strafe_lateral       Strafe Left / Right
+  Y                         strafe_long    v_strafe_longitudinal  Strafe Forward / Backward
+  Z                         strafe_vert    v_strafe_vertical      Strafe Up / Down
+  Rx                        pitch          v_pitch                Pitch
+  Ry                        yaw            v_yaw                  Yaw
+  Rz                        roll           v_roll                 Roll
+  button 1                  boost          v_afterburner          Afterburner
+  button 2                  brake          v_space_brake          Spacebrake
+
+  Written from community knowledge of the format; CIG does not document it. See ../README.md, "Star Citizen
+  profile", for how to load it, the direction check, and what to do if the game ignores it.
+-->
+<ActionMaps version="1" optionsVersion="2" rebindVersion="2" profileName="speedwall-vjoy-js4">
+ <CustomisationUIHeader label="speedwall-vjoy-js4" legacyBind="0">
+  <devices>
+   <joystick instance="4"/>
+  </devices>
+  <categories>
+   <category label="@ui_CCSpaceFlight"/>
+  </categories>
+ </CustomisationUIHeader>
+ <options type="joystick" instance="4" Product="vJoy Device {BEAD1234-0000-0000-0000-504944564944}"/>
+ <actionmap name="spaceship_movement">
+  <action name="v_strafe_lateral"><rebind input="js4_x"/></action>
+  <action name="v_strafe_longitudinal"><rebind input="js4_y"/></action>
+  <action name="v_strafe_vertical"><rebind input="js4_z"/></action>
+  <action name="v_pitch"><rebind input="js4_rotx"/></action>
+  <action name="v_yaw"><rebind input="js4_roty"/></action>
+  <action name="v_roll"><rebind input="js4_rotz"/></action>
+  <action name="v_afterburner"><rebind input="js4_button1"/></action>
+  <action name="v_space_brake"><rebind input="js4_button2"/></action>
+ </actionmap>
+</ActionMaps>

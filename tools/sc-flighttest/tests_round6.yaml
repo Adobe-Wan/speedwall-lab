@@ -1,19 +1,38 @@
-# Round 6 (Gladius, DECOUPLED, SCM mode): the full boost-release tail, from the nose back to the 225 SCM cap.
-#   python run.py run --tests tests_round6.yaml        (3 tests, about 2 minutes)
+# Round 6 (Gladius, DECOUPLED, SCM mode): how fast speed falls when boost is let go above the SCM cap (225 m/s).
+#   python run.py run --tests tests_round6.yaml        (6 tests, about 5 minutes)   or:  python run.py campaign --rounds 6
 #
-# Why: the fixture's boostRelease trace stops at 393 m/s, 1.4 s after release. The fitted quadratic
-# (k·(v − 225)², 18.8 G → 6.9 G) fades to nothing near the cap, so the model now assumes a floor at the SCM retro
-# rating (4.24 G) and reaches 225 about 5 s after release. These tests replace that assumption with the real tail.
+# Why: the fixture's boostRelease trace stops at 393 m/s, 1.4 s after release. A pilot reported that in the
+# simulator speed stayed above SCM after letting go. The old fit (k*(v-225)^2, 18.8 G -> 6.9 G) fades to nothing near
+# the cap (246 m/s still, 20 s later); the model now assumes a floor at the SCM retro rating (4.24 G, ~5 s to 225
+# from the nose). These tests replace that assumption with the real tail, from several release speeds.
+#
+# analyze reports for each (seconds after the release as commanded; the HUD lags ~0.3 s):
+#   rel_start_mps, rel_speed_at_{0.5,1,2,3,5,8,12,20}s, rel_t_to_{400,300,260,240,230,226},
+#   rel_decel_G_first1s, rel_decel_G_300_to_235 (the tail), rel_end_mps, rel_end_above_scm_mps.
+# rel_t_to_226 = None means the ship was still above the SCM cap when the recording ended.
+# The windows are long on purpose: 25 s from the nose covers the old fit's slow tail.
 tests:
   - id: r6_release_all
-    note: pin at boosted nose 8 s, release everything, record speed and G for 12 s
-    steps: [{t: 8, strafe_long: 1.0, boost: true}, {t: 12}]
-    expect: {time_to_226_s: "model ~5", g_meter_tail: "model >= 4.2 until 225"}
+    note: pin at boosted nose 8 s, release boost AND every input, record the fall for 25 s
+    steps: [{t: 8, strafe_long: 1.0, boost: true}, {t: 25}]
+    expect: {model_t_to_226_s: 5.3, old_fit_t_to_226_s: ">20"}
   - id: r6_release_fwd_held
-    note: same, but keep full forward held after letting go of boost (does forward thrust slow the bleed?)
-    steps: [{t: 8, strafe_long: 1.0, boost: true}, {t: 12, strafe_long: 1.0}]
-    expect: {time_to_226_s: "model ~5"}
-  - id: r6_release_from_mid
-    note: boosted forward to ~350 (2.5 s from rest), release everything; checks the tail on its own
-    steps: [{t: 2.5, strafe_long: 1.0, boost: true}, {t: 8}]
-    expect: {time_to_226_s: "model ~3"}
+    note: same, but keep full forward held after letting go of boost (does forward thrust slow the fall or hold you above SCM?)
+    steps: [{t: 8, strafe_long: 1.0, boost: true}, {t: 25, strafe_long: 1.0}]
+    expect: {model_t_to_226_s: 5.3}
+  - id: r6_release_fwd_lat
+    note: same, but forward + full strafe held after letting go of boost (a dodge right after boost ends)
+    steps: [{t: 8, strafe_long: 1.0, boost: true}, {t: 15, strafe_long: 1.0, strafe_lat: 1.0}]
+    expect: {model_t_to_226_s: "~5"}
+  - id: r6_release_450
+    note: boosted forward 2.6 s (~450 m/s), release everything, record 15 s (the model reaches 450 at 2.6 s; the start speed is measured)
+    steps: [{t: 2.6, strafe_long: 1.0, boost: true}, {t: 15}]
+    expect: {model_t_to_226_s: 4.5}
+  - id: r6_release_350
+    note: boosted forward 1.9 s (~350 m/s), release everything, record 15 s
+    steps: [{t: 1.9, strafe_long: 1.0, boost: true}, {t: 15}]
+    expect: {model_t_to_226_s: 2.9}
+  - id: r6_release_280
+    note: boosted forward 1.6 s (~280 m/s), release everything, record 12 s; the last stretch above the cap
+    steps: [{t: 1.6, strafe_long: 1.0, boost: true}, {t: 12}]
+    expect: {model_t_to_226_s: 1.4}

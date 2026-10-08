@@ -1,5 +1,5 @@
 # Round 7 (Gladius, DECOUPLED, Arena Commander only): G-LOC and the corkscrews you'd actually fly.
-#   python run.py run --tests tests_round7.yaml        (14 tests, about 25 minutes with refills)
+#   python run.py run --tests tests_round7.yaml        (14 tests, about 15 minutes)   or:  python run.py campaign --rounds 7
 #
 # Why: the fixture has only a qualitative G-LOC note ("lateral + roll greys out in 2-3 s; up + roll 4-7 s at
 # 10-13 G"). A held strafe can't test G-LOC: it pulls G only until it hits the wall (~2.3 s in SCM), then 0 G.
@@ -9,6 +9,8 @@
 #               (what a pilot does), instead of letting go. The level that stops the grey-out is the
 #               sustainable one (meta.json "ease_events"; analyze reports "sustained_scale").
 # gloc: release (default) = let go on blackout. Used only where the onset time itself is the measurement.
+# Every test, whatever its policy, records grey_at (HUD below 80 %) and gloc_at (below 50 %); analyze reports both,
+# grey_to_black_s (how long you keep control while greying out) and recovery_s (vision back after a let-go).
 tests:
   # --- A. Onset: how long a fixed G holds before grey-out, by axis. SCM, forward + one strafe + full roll.
   #        Matched ~10 G: lateral 9.95, up 9.9; down is weaker (4.97), so compare it to up at 50 %.
