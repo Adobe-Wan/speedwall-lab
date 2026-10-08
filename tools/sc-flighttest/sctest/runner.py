@@ -272,6 +272,15 @@ def press_view(vj, guard, cfg):
     vj.set(buttons={"view": True}); _sleep_guarded(guard, cfg.get("probe_pulse_s", 0.12)); vj.set(buttons={"view": False})
 
 
+def _hud_readable(crops) -> bool:
+    """Cockpit view test that ignores the scenery: the speed, G and boost digits all parse."""
+    try:
+        return all(ocr.read_number(crops[k], kind) is not None
+                   for k, kind in (("speed", "int"), ("g", "g"), ("ab", "pct")) if k in crops)
+    except Exception:
+        return False
+
+
 def probe_recover(cfg, vj, grab, guard, log, rec):
     """After a probe test: wait until the screen is visible again, then press the camera key until the cockpit view
     is back (the next test reads the HUD there). Returns fields for meta.json. Raises Abort if the camera can't be
@@ -284,24 +293,29 @@ def probe_recover(cfg, vj, grab, guard, log, rec):
     t0 = time.perf_counter()
     tries, last_press = 0, -1e9
     ok_frames = 0
+    max_tries = int(cfg.get("probe_restore_tries", 8))
     while time.perf_counter() - t0 < cfg.get("gloc_recover_max_s", 40):
         guard.check()
-        cur = grab.grab()["cam"]
-        bright = cam_mean(cur) >= 0.7 * vp.base_mean
+        crops = grab.grab()
+        cur = crops["cam"]
         settled = time.perf_counter() - last_press > 1.6
-        if bright and settled:
-            if cam_dist(cur, vp.base) < thr:
-                ok_frames += 1
-                if ok_frames >= 5:
-                    break
-            else:
-                ok_frames = 0
-                if tries >= 5:
-                    raise Abort("could not get the camera back to the cockpit view (is the vJoy view button bound to the camera "
-                                "key? run `python run.py camcheck`). Fix it by hand and re-run the remaining tests")
-                press_view(vj, guard, cfg); last_press = time.perf_counter(); tries += 1
+        # The cockpit view is recognised by its HUD readouts (speed, G and boost all readable), which does not depend on
+        # the scenery. Comparing the picture with the pre-test cockpit frame fails when a planet or moon has moved in
+        # the view, which is what aborted the first campaign.
+        hud_ok = _hud_readable(crops)
+        bright = cam_mean(cur) >= 0.5 * vp.base_mean or cam_mean(cur) >= 30
+        same_picture = bright and cam_dist(cur, vp.base) < thr
+        if hud_ok or same_picture:
+            ok_frames += 1
+            if ok_frames >= 3:
+                break
         else:
             ok_frames = 0
+            if settled and bright:
+                if tries >= max_tries:
+                    raise Abort("could not get the camera back to the cockpit view after %d presses (is the vJoy view button bound "
+                                "to the camera key? run `python run.py camcheck`). Fix it by hand and re-run the remaining tests" % tries)
+                press_view(vj, guard, cfg); last_press = time.perf_counter(); tries += 1
         _sleep_guarded(guard, 0.1)
     out.update(cam_restore_presses=tries, cam_recover_s=round(time.perf_counter() - t0, 1))
     if tries:
@@ -332,6 +346,15 @@ def save(outdir: Path, test, ts, cmds, frames, cfg, grab, lum=None, extra=None, 
 
 
 def run_tests(tests, cfg, session_dir: Path, dry_run=False, log=print):
+    session_dir.mkdir(parents=True, exist_ok=True)
+    _console = log
+    def log(msg=""):                                   # every line also goes to run.log, so an abort is never lost
+        _console(msg)
+        try:
+            with open(session_dir / "run.log", "a", encoding="utf-8") as fh:
+                fh.write(f"{time.strftime('%H:%M:%S')} {msg}\n")
+        except OSError:
+            pass
     guard = Guard(cfg["window_title_contains"], cfg["abort_key"], enabled=not dry_run)
     vj = VJoy(cfg["vjoy_device"], cfg["axes"], cfg["buttons"], dry_run=dry_run)
     probing = any(t.probe > 0 for t in tests)
