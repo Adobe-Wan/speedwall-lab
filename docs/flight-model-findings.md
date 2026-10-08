@@ -193,3 +193,41 @@ suggests near-instant), coupled mode, G-safe on, other ships, ship-to-ship scena
 4. **Scenario prototypes**: "flip to a target behind", "target above", "boosted turn without bleeding speed",
    "corkscrew escape, stay out of the grey". Each scores time-to-nose-on and peak darkness, against the model's
    optimum above.
+
+## 7. Round 10 first results: the boosted egg's shape (session `20261008-172622`)
+
+Raw data: `research/raw/2026-10-08/20261008-172622/` (37 tests; the forward check passed: +0.3 throttle → 38 m/s).
+An earlier attempt (`20261008-171610`) flew with the throttle axis inverted and is not used.
+
+**The limaçon holds at the sides and toward the tail, measured by turning at speed:**
+
+| Test | What happened | Limaçon |
+|---|---|---|
+| `r10_turn90_boost`: at 510, boosted pitch ~90°, boost held | bled 510 → **394** in ~4 s (excess shrinks ~e-fold per second) | 394 at 90° |
+| `r10_turn180_boost`: at 510, boosted flip ~180° | 510 → 286 after 6 s, still falling slowly (~4 G of bleed) | 268 at 180° |
+| `r10_turn90_release`: same 90° turn, boost released | 510 → **223** in ~2.5 s | SCM sphere 225 |
+| `r10_turn90_scm`: SCM at 225, pitch 90° | **no loss** (224) | sphere |
+| `r10_turn90_boost_fwd`: 90° turn with full throttle held | dips to 442, then climbs back to 483 as forward thrust drags the velocity onto the new nose | — |
+| `r10_flip_and_burn`: flip at 510, then throttle + boost | 363 → 63 m/s in ~1.5 s (≈20 G: the boosted forward rating), then re-accelerates | — |
+
+Together with round 3 (518 / 514 / 508 at 8.6° / 16.9° / 24.5°, limaçon 518.6 / 514.5 / 508.6) and round 5 (408 at the
+sweep's end heading, limaçon 406), the boosted egg boundary is now measured at the nose, near the nose, the side and the
+tail. Measured up (394) equals measured lateral (394), so the cross-section is round. **Not yet measured: the boosted
+radius straight DOWN** (`r4_boost_down` ran out of time at 76 m/s) and the 120–150° quadrant.
+
+**Sideways room at a given forward speed** (limaçon cross-section, `lateralRoom` in the fixture):
+
+| Forward speed (m/s) | 0 | 200 | 300 | 400 | 450 | 480 | 500 | 510 | 519 |
+|---|---|---|---|---|---|---|---|---|---|
+| Max sideways speed (m/s) | 394 | 403 | 367 | 293 | 232 | 179 | **128** | 91 | 29 |
+
+At 500 m/s forward you have ±128 m/s of sideways room, and only 3–6 G of side push to use it (`boostSide.factor` 0.469
+above 354 m/s forward): the room exists, but it takes ~2–4 s to reach. Both belong in the egg view.
+
+**The bleed is not a single constant.** Fixture `softWallK` 1.3 /s; the 90° turn shows ~1.0 /s, the 180° flip slower
+(~4 G near the tail). Fit it per heading, or as a G-limited bleed.
+
+**Rotation:** yaw 25 % / 50 % and pitch 25 % are linear (13.0 / 26.1 / 17.0 °/s), so the round-5 15 % yaw reading was an
+artefact. Pitch + roll together measured ~212 °/s (independent axes predict 211, capped 200), a first sign that rates
+add; the pitch + yaw tests need a proper fit (the strafe's component along the rotation axis drifts and masks the
+period) before the fast-flip answer is settled.
