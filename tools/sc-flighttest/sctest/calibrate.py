@@ -9,7 +9,8 @@ from . import ocr
 LABELS = {"speed": "SPEED digits only (e.g. 225) - not 'm/s'",
           "g": "G number only (e.g. 0.0) - not the 'G'",
           "ab": "AB boost percent (e.g. 100%)",
-          "view": "(optional, only used if roll_view: true) open sky for camera roll tracking; c to skip"}
+          "view": "(optional, only used if roll_view: true) open sky for camera roll tracking; c to skip",
+          "cam": "(G-LOC camera probe) a box that looks very different in the cockpit and the external camera, e.g. the middle of the screen; c to keep"}
 
 
 def calibrate(cfg_path: Path, monitor: int | None):

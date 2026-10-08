@@ -10,8 +10,9 @@ One-time setup is in `tools/sc-flighttest/README.md` (vJoy with 6 axes and 8 but
 |---|---|---|
 | 1 | Load `star-citizen\speedwall-vjoy-js4.xml` in game | Binds vJoy (joystick 4) to the 8 actions the tests use. Then set deadzone 0 / linear / saturation 100 % on the vJoy device. |
 | 2 | `.venv\Scripts\python run.py dircheck` | Pushes each axis in turn; the ship must go forward, right, up, nose up, yaw right, roll right. Invert in game what's wrong. |
+| 2b | `.venv\Scripts\python run.py camcheck` | Round 8 only: presses vJoy button 3 (bound to the camera key) twice and checks that the middle of the screen changes. Prints the `cam_state_thr` to put in `config.yaml`. |
 | 3 | `.venv\Scripts\python run.py ocrcheck` | Live HUD readings. If any is `None`: `python run.py calibrate`. Then `python run.py fpscheck` (30 fps or more). |
-| 4 | **`run_campaign.bat`** | Rounds 6, 7, 5, 4 as one run: the ship flips 180° by pitch between tests, then processes, analyzes and zips. About 40 minutes. `--rounds 6` flies just the release tests. |
+| 4 | **`run_campaign.bat`** | Rounds 6, 7, 8, 5, 4 as one run: the ship flips 180° by pitch between tests, then processes, analyzes and zips. About 70 minutes. `--rounds 6` flies just the release tests; `--rounds 8` just the corkscrew map. |
 | 5 | Send back `results\<session>-data.zip` | Contains `summary.csv`, every test's `series.csv`, `meta.json`, `commands.csv` and the `config.yaml` used (no raw frames). |
 
 Free flight, decoupled, **SCM**, open space, nothing ahead, **G-safe off**. F12 releases every input and stops. Never in the persistent universe or PvP.
@@ -25,6 +26,7 @@ Run order is 6 → 7 → 5 → 4. Round 6 fixes a reported bug, round 7 changes 
 | Round / file | What it settles | Now in the model | Tests |
 |---|---|---|---|
 | **6** `tests_round6.yaml` | **Speed after boost is let go, above the SCM cap:** the whole fall from 519 m/s down to 225 m/s, from the nose (all inputs released; forward held; forward + strafe held) and from ~450, ~350 and ~280 m/s | Assumed: the bleed never drops below the SCM retro rating (4.24 G), so ~5 s to 225 from the nose. The fitted quadratic alone left the ship above SCM 20 s later, which pilots noticed. | 6 |
+| **8** `tests_round8.yaml` | **The corkscrew map:** 30 corkscrews (a strafe axis + roll, with forward held) at different points of the SCM sphere and the boost egg, at slow and fast roll, up and sideways. With the camera-key probe, each reports when it greyed you out, when you blacked out, and when the camera key stopped working | Only the qualitative round 3 note | 30 |
 | **7** A `tests_round7.yaml` | **G-LOC onset by axis:** seconds to grey-out and to blackout at ~10 G lateral vs up, and ~5 G up vs down | One qualitative note: lateral + roll greys out in 2–3 s, up + roll in 4–7 s | 4 |
 | **7** B | **Managing G-LOC:** the strafe or roll level you can hold for 20 s, easing instead of letting go | Not modeled | 3 |
 | **7** C | **Boosted escape corkscrew:** speed kept and side G at roll 25/50/75 %, up vs lateral | Only roll 100 % is measured (514 m/s, 5.4 G) | 4 |
@@ -42,6 +44,9 @@ For every release test, `analyze` writes (seconds after the release as commanded
 - `rel_decel_G_300_to_235` is the number that matters most. A quadratic bleed fades toward 0 there; the model now assumes at least 4.24 G.
 
 ## How G-LOC is handled
+
+- **The camera-key probe (round 8).** While greying out you can still switch to the external camera, until you are fully blacked out; then the key stops working. The harness presses vJoy button 3 (bound to the camera cycle) every 0.6 s during a corkscrew and watches the middle of the screen, so every test reports `probe_last_toggle_s` and `probe_control_lost_s` next to the HUD's `grey_at` and `gloc_at`. After the blackout it also presses once or twice in the dark and checks, once vision is back, whether the camera moved (`dark_press_worked`), because a black screen can't show it. Run `camcheck` once first, and `camstrip` on the first test to check the detection by eye.
+- **What round 8 maps.** The forward fraction picks the point on the egg the corkscrew settles at (boosted: 0 → the sides, 394 m/s; 0.25 → 441; 0.5 → 455; 1 → near the nose, 501), so the 30 tests show how roll rate, strafe axis and position in the bubble combine. That is the limit of your corkscrews: the longest each one can be held before control is lost.
 
 - **CIG's rule isn't known here.** It isn't published, and nothing in the simulator assumes one. Round 3 shows it isn't a simple "G over a limit": lateral + roll greyed out faster than up + roll at similar G. So the tests measure what you see instead of assuming a formula.
 - **The harness sees the HUD digits' brightness**, nothing else. In every test it marks the **grey-out** (HUD below 80 %: `grey_at`) and the **blackout** (below 50 %: `gloc_at`). The gap is how long you keep useful control while greying (`grey_to_black_s`). After a let-go, `recovery_s` is how long vision took to come back.

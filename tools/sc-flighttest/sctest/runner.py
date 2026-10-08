@@ -6,7 +6,7 @@ import numpy as np
 
 from .safety import Guard, Abort
 from .vjoy_out import VJoy
-from .capture import Grabber, brightness
+from .capture import Grabber, brightness, cam_dist, cam_mean
 from . import ocr
 
 
@@ -107,7 +107,15 @@ def record(test, cfg, vj, grab, guard):
     anyway, falls back to the release above.
     grey_at is the first time the HUD stayed below gloc_ease_frac for gloc_hold_s (the grey-out), whatever the
     policy; gloc_at - grey_at is how long the pilot kept control while greyed out.
-    Returns (t, cmds, frames, lum, gloc_at, baseline, ease_events, grey_at)."""
+
+    Camera-key probe (test.probe > 0): the vJoy "view" button is pressed for probe_pulse_s every test.probe seconds
+    while the inputs are held. The last centre-of-screen frame that was not black is kept. After a blackout, once
+    inputs are released, the button is pressed once or twice more in the dark (so that the number of presses since that
+    last visible frame is odd) and run_tests checks afterwards, with vision back, whether the camera differs from that
+    last visible frame: it does only if an odd number of those presses took effect.
+    Returns (t, cmds, frames, lum, gloc_at, baseline, ease_events, grey_at, probe) where probe is
+    {"presses": [s after inputs start], "dark_press_at": s or None, "dark_presses": n, "since_bright": n,
+     "cam_at_dark": last visible frame or None, "cam_base": frame or None}."""
     period = 1.0 / cfg["target_fps"]
     frames = {k: [] for k in grab.boxes}
     ts, cmds, lum = [], [], []
@@ -117,6 +125,11 @@ def record(test, cfg, vj, grab, guard):
     ease = test.gloc == "ease"
     ease_frac, ease_wait = cfg.get("gloc_ease_frac", 0.8), cfg.get("gloc_ease_wait_s", 1.5)
     scale, grey_since, last_ease, ease_events, grey_at = 1.0, None, -1e9, [], None
+    pulse, dark_delay = cfg.get("probe_pulse_s", 0.12), cfg.get("probe_dark_delay_s", 0.5)
+    t_inputs_end = test.pre_s + sum(s.t for s in test.steps)
+    press_until, next_press, presses, dark_press_at, cam_base = -1.0, test.pre_s + test.probe, [], None, None
+    dark_mean = cfg.get("probe_dark_mean", 14.0)
+    cam_bright, t_bright, dark_plan, dark_done, since_bright = None, 0.0, None, 0, 0
     t0 = time.perf_counter()
     nxt = t0
     while True:
@@ -129,7 +142,20 @@ def record(test, cfg, vj, grab, guard):
             axes = {k: (v * scale if k in test.ease_axes else v) for k, v in axes.items()}
         if gloc_at is not None:
             axes, buttons = {}, {}
-        cmd = ({k: axes.get(k, 0.0) for k in vj.axis_map}, {"boost": buttons.get("boost", False), "brake": False})
+        if test.probe > 0:
+            if gloc_at is None and next_press <= t < t_inputs_end:           # a press every test.probe seconds
+                press_until = t + pulse; next_press += test.probe; presses.append(round(t - test.pre_s, 2))
+            elif gloc_at is not None:
+                if dark_plan is None:                                              # how many presses since the screen went black?
+                    since_bright = sum(1 for p in presses if p + test.pre_s >= t_bright - 0.05)
+                    dark_plan = [gloc_at + dark_delay + 0.4 * i for i in range(1 if since_bright % 2 == 0 else 2)]
+                if dark_done < len(dark_plan) and t - test.pre_s >= dark_plan[dark_done]:
+                    press_until = t + pulse; dark_done += 1                       # a press in the dark
+                    dark_press_at = dark_press_at if dark_press_at is not None else round(t - test.pre_s, 2)
+        pad = {"boost": buttons.get("boost", False), "brake": False}
+        if "view" in vj.button_map:
+            pad["view"] = t < press_until
+        cmd = ({k: axes.get(k, 0.0) for k in vj.axis_map}, pad)
         if cmd != last_cmd:
             vj.set(*cmd)
             last_cmd = cmd
@@ -137,12 +163,16 @@ def record(test, cfg, vj, grab, guard):
         now = time.perf_counter() - t0
         l = max(brightness(g[k]) for k in ("speed", "g") if k in g) if ("speed" in g or "g" in g) else 255.0
         ts.append(now)
-        cmds.append({**cmd[0], "boost": int(cmd[1]["boost"])})
+        cmds.append({**cmd[0], "boost": int(cmd[1]["boost"]), "view": int(cmd[1].get("view", False))})
         lum.append(l)
         for k, v in g.items():
             frames[k].append(v)
+        if "cam" in g and cam_mean(g["cam"]) >= dark_mean:
+            cam_bright, t_bright = g["cam"], now                      # the last frame with anything to see
         if now < test.pre_s:
             base = float(np.median(lum))                       # HUD brightness before any input
+            if frames.get("cam"):
+                cam_base = np.median(np.stack(frames["cam"]), axis=0)
         elif base and base > 40 and gloc_at is None:
             if l < ease_frac * base:                           # greying out
                 grey_since = now if grey_since is None else grey_since
@@ -165,8 +195,9 @@ def record(test, cfg, vj, grab, guard):
                     last_cmd = None
             else:
                 dim_since = None
-        if gloc_at is not None and now - test.pre_s - gloc_at > 1.0:
-            break                                              # keep 1 s after release, then stop
+        keep = dark_delay + 0.4 * len(dark_plan or [0]) + 1.0 if test.probe > 0 else 1.0   # after a blackout: 1 s, or until the dark presses are done
+        if gloc_at is not None and now - test.pre_s - gloc_at > keep:
+            break
         nxt += period
         d = nxt - time.perf_counter()
         if d > 0:
@@ -174,7 +205,44 @@ def record(test, cfg, vj, grab, guard):
         else:
             nxt = time.perf_counter()
     vj.center()
-    return np.array(ts), cmds, frames, np.array(lum), gloc_at, base, ease_events, grey_at
+    return (np.array(ts), cmds, frames, np.array(lum), gloc_at, base, ease_events, grey_at,
+            {"presses": presses, "dark_press_at": dark_press_at, "dark_presses": dark_done, "since_bright": since_bright,
+             "cam_at_dark": None if cam_bright is None else cam_bright.copy(), "cam_base": cam_base})
+
+
+def press_view(vj, guard, cfg):
+    vj.set(buttons={"view": True}); _sleep_guarded(guard, cfg.get("probe_pulse_s", 0.12)); vj.set(buttons={"view": False})
+
+
+def probe_aftermath(test, cfg, vj, grab, guard, log, probe, blacked_out):
+    """After a probe test, once vision is back: did the press made in the dark take effect (the camera now differs from
+    the view just before it), and put the camera back to the cockpit view so the next test reads the HUD again.
+    Returns fields for meta.json. Raises Abort if the camera can't be restored."""
+    thr = cfg.get("cam_state_thr", 0.3)
+    _sleep_guarded(guard, 1.0 if blacked_out else cfg.get("probe_settle_s", 3.0))
+    out = {"probe_presses": len(probe["presses"]), "dark_press_at": probe["dark_press_at"],
+           "dark_presses": probe["dark_presses"], "presses_since_black": probe["since_bright"]}
+    cur = grab.grab().get("cam")
+    if cur is None:
+        return out
+    if probe["dark_presses"] and probe["cam_at_dark"] is not None:
+        d = cam_dist(cur, probe["cam_at_dark"])
+        out.update(dark_press_worked=bool(d > thr), dark_press_dist=round(d, 3))
+        log(f"  presses made after the screen went black ({probe['since_bright'] + probe['dark_presses']} in all, odd on purpose) "
+            f"{'DID' if d > thr else 'did not'} change the camera (distance {d:.2f}, threshold {thr})")
+    if probe["cam_base"] is None:
+        return out
+    d0 = cam_dist(cur, probe["cam_base"]); tries = 0
+    while d0 > thr and tries < 4:                              # not in the starting view: press until it is
+        press_view(vj, guard, cfg); _sleep_guarded(guard, 1.2)
+        cur = grab.grab()["cam"]; d0 = cam_dist(cur, probe["cam_base"]); tries += 1
+    out.update(cam_restore_presses=tries, cam_final_dist=round(d0, 3))
+    if tries:
+        log(f"  camera back to the cockpit view after {tries} press(es)")
+    if d0 > thr:
+        raise Abort("could not get the camera back to the cockpit view (is the vJoy view button bound to the camera key? "
+                    "run `python run.py camcheck`). Fix it by hand and re-run the remaining tests")
+    return out
 
 
 def save(outdir: Path, test, ts, cmds, frames, cfg, grab, lum=None, extra=None):
@@ -200,8 +268,15 @@ def save(outdir: Path, test, ts, cmds, frames, cfg, grab, lum=None, extra=None):
 def run_tests(tests, cfg, session_dir: Path, dry_run=False, log=print):
     guard = Guard(cfg["window_title_contains"], cfg["abort_key"], enabled=not dry_run)
     vj = VJoy(cfg["vjoy_device"], cfg["axes"], cfg["buttons"], dry_run=dry_run)
-    grab = Grabber(cfg["monitor"], cfg["roi"], cfg.get("view_downscale", 480), cfg.get("view_max_px", 450_000),
-                   use_view=cfg.get("roll_view", False))
+    probing = any(t.probe > 0 for t in tests)
+    if probing and "view" not in cfg["buttons"]:
+        raise SystemExit("Probe tests press a vJoy 'view' button: add `view: 3` under `buttons:` in config.yaml, bind button 3 "
+                         "to Star Citizen's camera cycle (F4), then run `python run.py camcheck`.")
+    if probing:
+        cfg["roi"].setdefault("cam", [0.25, 0.20, 0.50, 0.50])
+    rois = {k: v for k, v in cfg["roi"].items() if k != "cam" or probing}   # the centre-of-screen frames only when probed
+    grab = Grabber(cfg["monitor"], rois, cfg.get("view_downscale", 480), cfg.get("view_max_px", 450_000),
+                   use_view=cfg.get("roll_view", False), cam_w=cfg.get("cam_downscale", 96))
     log(f"Capture: {'one region per frame' if grab.single else 'separate regions (slower)'}; "
         f"{', '.join(grab.boxes)}")
     log(f"Focus the Star Citizen window. Starting in 5 s. Press {cfg['abort_key']} at any time to abort.")
@@ -230,10 +305,11 @@ def run_tests(tests, cfg, session_dir: Path, dry_run=False, log=print):
                 if v0 is not None and v0 > start_max:
                     log(f"  SKIPPED {test.id}: still {v0} m/s")
                     continue
-            ts, cmds, frames, lum, gloc_at, base, ease_events, grey_at = record(test, cfg, vj, grab, guard)
+            ts, cmds, frames, lum, gloc_at, base, ease_events, grey_at, probe = record(test, cfg, vj, grab, guard)
             save(session_dir / test.id, test, ts, cmds, frames, cfg, grab, lum,
                  {"start_speed": v0, "gloc_at": gloc_at, "grey_at": grey_at, "hud_lum_base": base,
-                  "gloc_policy": test.gloc, "ease_events": ease_events, "lat_mirrored": mirrored})
+                  "gloc_policy": test.gloc, "ease_events": ease_events, "lat_mirrored": mirrored,
+                  "probe_every": test.probe, "probe_press_times": probe["presses"]})
             fps = len(ts) / max(ts[-1], 1e-6)
             log(f"  recorded {len(ts)} frames ({fps:.0f} fps)")
             if fps < 30:
@@ -242,11 +318,15 @@ def run_tests(tests, cfg, session_dir: Path, dry_run=False, log=print):
                 log(f"  grey-out at {t_e} s: eased {', '.join(test.ease_axes)} to {s_e:.0%}")
             if grey_at is not None:
                 log(f"  grey-out began {grey_at} s into the inputs" + (f", blackout at {gloc_at} s" if gloc_at is not None else ""))
+            extra = {}
             if gloc_at is not None:
                 log(f"  G-LOC: HUD faded {gloc_at} s into the inputs; inputs released, test ended early.")
-                back = wait_hud_recovered(cfg, grab, guard, log, base)
-                mp = session_dir / test.id / "meta.json"          # how long vision took to come back after the let-go
-                meta = json.loads(mp.read_text()); meta["recovery_s"] = round(back, 1)
+                extra["recovery_s"] = round(wait_hud_recovered(cfg, grab, guard, log, base), 1)   # vision back after the let-go
+            if test.probe > 0 and "cam" in grab.boxes:
+                extra.update(probe_aftermath(test, cfg, vj, grab, guard, log, probe, gloc_at is not None))
+            if extra:
+                mp = session_dir / test.id / "meta.json"
+                meta = json.loads(mp.read_text()); meta.update(extra)
                 mp.write_text(json.dumps(meta, indent=1))
     except Abort as e:
         log(f"ABORTED: {e}. All inputs released.")

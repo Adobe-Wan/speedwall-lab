@@ -2,7 +2,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 
-BUTTONS = ("boost", "brake")
+BUTTONS = ("boost", "brake", "view")
 
 
 @dataclass
@@ -27,6 +27,10 @@ class Test:
     ease_axes: tuple = ("strafe_lat", "strafe_long", "strafe_vert", "roll")
     ease_step: float = 0.15
     ease_min: float = 0.25
+    # Camera-key probe: press the vJoy "view" button (bound to Star Citizen's camera cycle, F4 by default) every
+    # `probe` seconds while the inputs are held. A pilot who is greying out can still switch to the external camera
+    # until fully blacked out; the probe records when the presses stop taking effect. 0 = off.
+    probe: float = 0.0
 
     @property
     def uses_boost(self) -> bool:
@@ -41,7 +45,7 @@ class Test:
         every second lateral test mirrored cancels the sideways drift that a pitch flip does not."""
         steps = [Step(s.t, {k: (-v if k == "strafe_lat" else v) for k, v in s.axes.items()}, dict(s.buttons)) for s in self.steps]
         return Test(self.id, self.note, steps, self.expect, self.pre_s, self.post_s,
-                    self.gloc, self.ease_axes, self.ease_step, self.ease_min)
+                    self.gloc, self.ease_axes, self.ease_step, self.ease_min, self.probe)
 
     @property
     def duration(self) -> float:
@@ -80,7 +84,8 @@ def parse(doc: dict, known_axes) -> list[Test]:
             raise ValueError(f"test {d['id']}: unknown ease_axes {sorted(unknown)}")
         tests.append(Test(d["id"], d.get("note", ""), steps, d.get("expect", {}),
                           float(d.get("pre_s", 1.0)), float(d.get("post_s", 1.5)),
-                          gloc, ease_axes, float(d.get("ease_step", 0.15)), float(d.get("ease_min", 0.25))))
+                          gloc, ease_axes, float(d.get("ease_step", 0.15)), float(d.get("ease_min", 0.25)),
+                          float(d.get("probe", 0.0))))
     ids = [t.id for t in tests]
     if len(ids) != len(set(ids)):
         raise ValueError("duplicate test ids")

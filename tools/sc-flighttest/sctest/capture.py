@@ -38,7 +38,7 @@ def union_box(boxes):
 
 class Grabber:
     def __init__(self, monitor_index: int, rois: dict, view_downscale: int = 480, view_max_px: int = 450_000,
-                 use_view: bool = False):
+                 use_view: bool = False, cam_w: int = 96):
         import mss
         self.sct = mss.mss()
         if monitor_index >= len(self.sct.monitors):
@@ -49,10 +49,16 @@ class Grabber:
         if "view" in self.boxes:
             self.boxes["view"] = shrink_box(self.boxes["view"], view_max_px)
         self.view_w = view_downscale
+        self.cam_w = cam_w
         self.union = union_box(list(self.boxes.values())) if self.boxes else None
         self.single = bool(self.union) and self.union["width"] * self.union["height"] <= UNION_MAX_PX
 
     def _post(self, k, img):
+        if k == "cam":                                    # centre of the screen, small and grey: the camera-key probe
+            import cv2
+            g = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            h = max(4, int(round(g.shape[0] * self.cam_w / g.shape[1])))
+            return cv2.resize(g, (self.cam_w, h), interpolation=cv2.INTER_AREA)
         if k == "view":
             import cv2
             g = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -81,3 +87,16 @@ def brightness(img) -> float:
     """Brightness of the brightest pixels in a crop (98th percentile, 0-255): the HUD digits.
     They fade to black when the pilot greys out / blacks out from G-LOC."""
     return float(np.percentile(np.asarray(img).max(axis=-1) if np.ndim(img) == 3 else img, 98))
+
+
+def cam_mean(img) -> float:
+    """Average brightness (0-255) of a probe frame: near 0 means the screen is black."""
+    return float(np.mean(img))
+
+
+def cam_dist(a, b) -> float:
+    """How different two probe frames look, ignoring overall brightness: mean absolute difference of the two
+    frames after each is divided by its own mean. About 0.05 for the same view a moment apart; a switch between
+    the cockpit and the external camera is several times that. Meaningless when either frame is nearly black."""
+    a = np.asarray(a, dtype=np.float32); b = np.asarray(b, dtype=np.float32)
+    return float(np.mean(np.abs(a / max(a.mean(), 8.0) - b / max(b.mean(), 8.0))))

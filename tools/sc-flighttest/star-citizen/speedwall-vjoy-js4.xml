@@ -12,6 +12,7 @@
   Rz                        roll           v_roll                 Roll
   button 1                  boost          v_afterburner          Afterburner
   button 2                  brake          v_space_brake          Spacebrake
+  button 3                  view           v_view_cycle_fwd       Cycle camera (G-LOC probe, round 8)
 
   Written from community knowledge of the format; CIG does not document it. See ../README.md, "Star Citizen
   profile", for how to load it, the direction check, and what to do if the game ignores it.
@@ -35,5 +36,8 @@
   <action name="v_roll"><rebind input="js4_rotz"/></action>
   <action name="v_afterburner"><rebind input="js4_button1"/></action>
   <action name="v_space_brake"><rebind input="js4_button2"/></action>
+ </actionmap>
+ <actionmap name="spaceship_view">
+  <action name="v_view_cycle_fwd"><rebind input="js4_button3"/></action>
  </actionmap>
 </ActionMaps>

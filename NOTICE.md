@@ -15,5 +15,8 @@ They appear in `research/gladius-v1-fixture.json` (marked `spviewer`), in `site/
 ## Cockpit HUD
 `site/js/hud.mjs` is an original drawing. Its layout follows the in-game Advanced HUD (crosshair, throttle bar, AB bar, G meter); no game art, fonts or shapes are used.
 
+## Ship model
+The Gladius in the 3D view (`gladiusGeometry` in `site/index.html`) and the top-down outline in the slice views are original low-poly drawings, built from the ship's 20 × 17 × 5.5 m size in the fixture and a general idea of its shape. They are an approximation, not a copy of any game model.
+
 ## Trademarks
-Star Citizen®, Squadron 42®, Roberts Space Industries® and Cloud Imperium® are registered trademarks of Cloud Imperium Rights LLC. This is an unofficial fan project, not affiliated with the Cloud Imperium group of companies. No game assets (art, models, logos, fonts or HUD graphics) are used.
+Star Citizen®, Squadron 42®, Roberts Space Industries®, Cloud Imperium® and the Aegis Dynamics Gladius name are registered trademarks of Cloud Imperium Rights LLC. This is an unofficial fan project, not affiliated with the Cloud Imperium group of companies. No game assets (art, models, logos, fonts or HUD graphics) are used.

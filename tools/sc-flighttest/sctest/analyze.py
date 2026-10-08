@@ -133,6 +133,59 @@ def release_trace(cols, meta, t_on):
     return out
 
 
+PROBE_RATIO = 2.5     # a press "toggled" when the view changed this many times more than it does between presses...
+PROBE_MIN = 0.15      # ...and by at least this much (camera-probe distance, see capture.cam_dist)
+PROBE_DARK = 14.0     # a probe frame darker than this (0-255) is black: nothing can be seen either way
+
+
+def probe_report(cols, meta, t_on):
+    """Camera-key probe: for each press, did the view change? A pilot who is greying out can still switch camera until
+    fully blacked out, so the last press that took effect marks when control was lost.
+
+    Each press is classified from the centre-of-screen frames: 'toggled' (the view changed clearly more than it changes
+    between presses), 'no_change', or 'dark' (the screen was black, so it can't be told). The press made in the dark after
+    the blackout is judged afterwards, by comparing the camera once vision is back (meta: dark_press_worked)."""
+    if "view" not in cols or "cam_chg" not in cols:
+        return {}
+    t, chg, mean = cols["t"], cols["cam_chg"], cols["cam_mean"]
+    view = cols["view"]
+    press_t = t[np.where((view[1:] > 0.5) & (view[:-1] <= 0.5))[0] + 1]
+    press_t = press_t[press_t >= t_on]
+    if not len(press_t):
+        return {}
+    quiet = (t >= t_on) & ~np.isnan(chg)
+    for tp in press_t:
+        quiet &= (t < tp) | (t > tp + 0.7)
+    noise = max(float(np.median(chg[quiet])) if quiet.sum() > 10 else 0.0, 0.03)
+    states = []
+    for tp in press_t:
+        w = (t >= tp + 0.15) & (t <= tp + 0.6) & ~np.isnan(chg)
+        if not w.any():
+            continue
+        score, bright = float(np.max(chg[w])), float(np.mean(mean[w]))
+        if bright < PROBE_DARK:
+            s = "dark"
+        else:
+            s = "toggled" if score >= PROBE_MIN and score / noise >= PROBE_RATIO else "no_change"
+        states.append((round(float(tp - t_on), 2), s))
+    out = {"probe_presses": len(states), "probe_toggled": sum(s == "toggled" for _, s in states),
+           "probe_noise": round(noise, 3), "probe_states": " ".join(f"{t:g}:{s}" for t, s in states)}
+    toggled = [t for t, s in states if s == "toggled"]
+    if toggled:
+        out["probe_last_toggle_s"] = toggled[-1]
+        lost = [t for t, s in states if t > toggled[0] and s in ("no_change", "dark")]
+        if lost:
+            out["probe_control_lost_s"] = lost[0]     # first press after control was working that did nothing (or couldn't be seen)
+    dark = [t for t, s in states if s == "dark"]
+    if dark:
+        out["probe_first_dark_s"] = dark[0]
+    for k in ("dark_press_at", "dark_presses", "presses_since_black", "dark_press_worked", "dark_press_dist", "cam_final_dist",
+              "cam_restore_presses"):
+        if meta.get(k) is not None:
+            out[k if k.startswith(("dark", "presses")) else f"probe_{k}"] = meta[k]
+    return out
+
+
 def summarize(d: Path) -> dict:
     cols, meta = load(d)
     t, t_on, t_off = active_window(cols, meta)
@@ -229,6 +282,7 @@ def summarize(d: Path) -> dict:
                 out[f"s{k}_g_over1_s"] = round(float(hi.sum() * np.nanmedian(np.diff(t))), 2)
             t0 = t1
     out.update(release_trace(cols, meta, t_on))
+    out.update(probe_report(cols, meta, t_on))
     for k, v in (meta.get("expect") or {}).items():
         out[f"expect_{k}"] = v
     return out

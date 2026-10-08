@@ -25,12 +25,14 @@ Repeatable Star Citizen flight tests. A virtual joystick (vJoy) holds **exact** 
 | X / Y / Z | Strafe Left-Right / Forward-Backward / Up-Down |
 | Rx / Ry / Rz | Pitch / Yaw / Roll |
 | button 1 / button 2 | Afterburner / Spacebrake |
+| button 3 | Cycle camera view (F4's action), used only by the round 8 G-LOC probe |
 
 1. Back up `...\StarCitizen\LIVE\user\client\0\Profiles\default\actionmaps.xml`.
 2. Copy the XML into `...\StarCitizen\LIVE\user\client\0\controls\mappings\` (create the folder if it isn't there).
 3. In game: **Options → Keybindings → Advanced Controls Customization**, then the profile list at the bottom, select `speedwall-vjoy-js4`, **Load**.
 4. Select the **vJoy** device and set **deadzone 0, curve linear, saturation 100 %** on every axis. The file can't set these.
-5. In free flight, decoupled, SCM, ship stopped: `python run.py dircheck`. It pushes each axis in turn and tells you what the ship must do. Invert in game any axis that went the wrong way; never change `config.yaml`.
+5. For round 8 only: `python run.py camcheck` (cockpit view, ship stopped). It presses vJoy button 3 twice, compares the middle of the screen before and after, and says whether the camera key works and which `cam_state_thr` to set. If the middle of your screen looks the same in both views, drag a better `cam` box with `python run.py calibrate`.
+6. In free flight, decoupled, SCM, ship stopped: `python run.py dircheck`. It pushes each axis in turn and tells you what the ship must do. Invert in game any axis that went the wrong way; never change `config.yaml`.
 
 CIG doesn't document this file format; the profile is written from community knowledge and the app's importer reads it back correctly, but I couldn't try it in the game. If Star Citizen ignores it, or your vJoy isn't joystick 4 (the number is in the `js4_` names and `instance="4"`; find-and-replace it), use the manual steps below.
 
@@ -99,6 +101,8 @@ Results go to `results\<date-time>\<test id>\`.
 After a let-go, the run waits for your vision to come back, plus 8 s, before the next test.
 
 A held strafe only pulls G until it reaches the wall (about 2.3 s in SCM), so it can't black you out. Sustained G comes from corkscrews (strafe + roll). Round 3 found lateral + roll greys out in 2–3 s and up + roll in 4–7 s; round 7 measures it.
+
+**Camera-key probe (round 8).** A pilot who is greying out can still switch to the external camera until fully blacked out; after that the key stops working. Tests with `probe: 0.6` press vJoy button 3 (Star Citizen's camera cycle) every 0.6 s while the inputs are held, and the harness records the middle of the screen, small and grey. From those frames `analyze` classifies every press as `toggled` (the view changed clearly more than it changes between presses), `no_change`, or `dark` (screen black, can't tell), and reports `probe_last_toggle_s` and `probe_control_lost_s`. Because a black screen can't show whether a key worked, there is a second check: after the blackout the harness presses once or twice more in the dark (so that the number of presses since the screen went black is odd), waits for vision to return, and compares the camera with the last frame that was visible. `dark_press_worked: true` means the key still worked in the dark; `false` means it didn't, which is what you describe. It then presses until the cockpit view is back, so the next test can read the HUD. `python run.py camstrip <session> <test>` draws the frames around every press so you can check the detection by eye the first time. This assumes the key toggles between two views (`camcheck` warns if it doesn't). If your `config.yaml` was calibrated before this, add `view: 3` under `buttons:` and the `cam`, `cam_*`, `probe_*` lines from the default one.
 
 **What the harness can and can't know.** It sees only the HUD digits' brightness. It marks two moments in every test: the **grey-out** (HUD below 80 %, `grey_at`) and the **blackout** (below 50 %, `gloc_at`). The gap between them (`grey_to_black_s`) is how long you keep useful control while greying out. After a let-go, `recovery_s` is how long vision took to come back. Star Citizen's actual G-LOC rule isn't published and isn't assumed anywhere: the onset times, the `ease` levels and the recovery times are the data from which the simulator's model gets built.
 

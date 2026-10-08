@@ -4,6 +4,7 @@ import csv, json
 from pathlib import Path
 import numpy as np
 from . import ocr
+from .capture import cam_dist, cam_mean
 
 MAX_ACCEL = 40 * 9.81  # m/s^2, generous sanity bound for OCR glitch rejection
 
@@ -26,6 +27,12 @@ def process_dir(d: Path, stride: int = 1, log=print) -> Path:
             cols[key] = ocr.clean_series(t[idx], np.array(vals, float), rate)
     if "hud_lum" in z:
         cols["hud_lum"] = z["hud_lum"][idx]
+    if "cam" in z:                                        # camera-key probe: brightness, and change versus 0.5 s earlier
+        fps = n / max(float(t[-1] - t[0]), 1e-6)
+        lag = max(1, int(round(0.5 * fps)))
+        cam = z["cam"]
+        cols["cam_mean"] = np.array([cam_mean(cam[i]) for i in idx])
+        cols["cam_chg"] = np.array([cam_dist(cam[i], cam[max(0, i - lag)]) if i >= lag else np.nan for i in idx])
     if "view" in z:
         from .roll import roll_track
         seg, rel, inl = roll_track([z["view"][i] for i in idx])

@@ -1,0 +1,169 @@
+# Round 8 (Gladius, DECOUPLED, Arena Commander only): where in the speed bubble, and with which roll, does a corkscrew
+# black you out? Corkscrew = a strafe axis + roll, with some forward held. Forward fraction f picks the point on the
+# egg the ship settles at (full strafe + forward fraction f settles at: f 0 -> 394 m/s boosted, f 0.25 -> 441, f 0.5 -> 455,
+# f 1 -> 501; fixture round 3), so f is "how far toward the nose" and decides how much side push is left (about 12.9 G
+# at the sides, 5.4 G near the nose boosted; ~9.9 G in SCM at any f).
+#   python run.py camcheck                                (once: does the camera key work?)
+#   python run.py run --tests tests_round8.yaml           (30 tests, about 25 minutes)   or:  python run.py campaign --rounds 8
+#
+# The camera-key probe (idea: you can still switch to the external camera while greying out, until you are fully
+# blacked out, and then the key stops working): the vJoy `view` button (bound to Star Citizen's camera cycle) is
+# pressed every 0.6 s while the inputs are held. analyze reports, besides the HUD-based grey_at (HUD 80 %) and gloc_at
+# (HUD 50 %, inputs released there):
+#   probe_states / probe_toggled   each press: toggled, no_change or dark (screen black, can't tell)
+#   probe_last_toggle_s            the last press that visibly switched the view
+#   probe_control_lost_s           the first press after control was working that did nothing, or happened in the dark
+#   dark_press_worked              one more press, made in the dark 0.5 s after the let-go: did the camera change?
+# `python run.py camstrip <session> <test>` writes a picture of the frames around each press, to check by eye.
+# The ship is flown to the blackout and then released; the camera is put back to the cockpit view before the next test.
+tests:
+  - id: r8_scm_f0_up_r25
+    note: "SCM, forward 0 % + full up strafe + roll 25 % (50 deg/s), 14 s"
+    probe: 0.6
+    steps: [{t: 14, strafe_vert: 1.0, roll: 0.25}]
+    expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
+  - id: r8_scm_f0_up_r100
+    note: "SCM, forward 0 % + full up strafe + roll 100 % (200 deg/s), 14 s"
+    probe: 0.6
+    steps: [{t: 14, strafe_vert: 1.0, roll: 1.0}]
+    expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
+  - id: r8_scm_f0_lat_r25
+    note: "SCM, forward 0 % + full right strafe + roll 25 % (50 deg/s), 14 s"
+    probe: 0.6
+    steps: [{t: 14, strafe_lat: 1.0, roll: 0.25}]
+    expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
+  - id: r8_scm_f0_lat_r100
+    note: "SCM, forward 0 % + full right strafe + roll 100 % (200 deg/s), 14 s"
+    probe: 0.6
+    steps: [{t: 14, strafe_lat: 1.0, roll: 1.0}]
+    expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
+  - id: r8_scm_f50_up_r25
+    note: "SCM, forward 50 % + full up strafe + roll 25 % (50 deg/s), 14 s"
+    probe: 0.6
+    steps: [{t: 14, strafe_long: 0.5, strafe_vert: 1.0, roll: 0.25}]
+    expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
+  - id: r8_scm_f50_up_r100
+    note: "SCM, forward 50 % + full up strafe + roll 100 % (200 deg/s), 14 s"
+    probe: 0.6
+    steps: [{t: 14, strafe_long: 0.5, strafe_vert: 1.0, roll: 1.0}]
+    expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
+  - id: r8_scm_f50_lat_r25
+    note: "SCM, forward 50 % + full right strafe + roll 25 % (50 deg/s), 14 s"
+    probe: 0.6
+    steps: [{t: 14, strafe_long: 0.5, strafe_lat: 1.0, roll: 0.25}]
+    expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
+  - id: r8_scm_f50_lat_r100
+    note: "SCM, forward 50 % + full right strafe + roll 100 % (200 deg/s), 14 s"
+    probe: 0.6
+    steps: [{t: 14, strafe_long: 0.5, strafe_lat: 1.0, roll: 1.0}]
+    expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
+  - id: r8_scm_f100_up_r25
+    note: "SCM, forward 100 % + full up strafe + roll 25 % (50 deg/s), 14 s"
+    probe: 0.6
+    steps: [{t: 14, strafe_long: 1.0, strafe_vert: 1.0, roll: 0.25}]
+    expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
+  - id: r8_scm_f100_up_r100
+    note: "SCM, forward 100 % + full up strafe + roll 100 % (200 deg/s), 14 s"
+    probe: 0.6
+    steps: [{t: 14, strafe_long: 1.0, strafe_vert: 1.0, roll: 1.0}]
+    expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
+  - id: r8_scm_f100_lat_r25
+    note: "SCM, forward 100 % + full right strafe + roll 25 % (50 deg/s), 14 s"
+    probe: 0.6
+    steps: [{t: 14, strafe_long: 1.0, strafe_lat: 1.0, roll: 0.25}]
+    expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
+  - id: r8_scm_f100_lat_r100
+    note: "SCM, forward 100 % + full right strafe + roll 100 % (200 deg/s), 14 s"
+    probe: 0.6
+    steps: [{t: 14, strafe_long: 1.0, strafe_lat: 1.0, roll: 1.0}]
+    expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
+  - id: r8_bst_f0_up_r25
+    note: "boosted, at the sides (394 m/s): forward 0 % + full up strafe + roll 25 % (60 deg/s), 14 s"
+    probe: 0.6
+    steps: [{t: 14, strafe_vert: 1.0, roll: 0.25, boost: true}]
+    expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
+  - id: r8_bst_f0_up_r100
+    note: "boosted, at the sides (394 m/s): forward 0 % + full up strafe + roll 100 % (240 deg/s), 14 s"
+    probe: 0.6
+    steps: [{t: 14, strafe_vert: 1.0, roll: 1.0, boost: true}]
+    expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
+  - id: r8_bst_f0_lat_r25
+    note: "boosted, at the sides (394 m/s): forward 0 % + full right strafe + roll 25 % (60 deg/s), 14 s"
+    probe: 0.6
+    steps: [{t: 14, strafe_lat: 1.0, roll: 0.25, boost: true}]
+    expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
+  - id: r8_bst_f0_lat_r100
+    note: "boosted, at the sides (394 m/s): forward 0 % + full right strafe + roll 100 % (240 deg/s), 14 s"
+    probe: 0.6
+    steps: [{t: 14, strafe_lat: 1.0, roll: 1.0, boost: true}]
+    expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
+  - id: r8_bst_f25_up_r25
+    note: "boosted, off-axis (~441 m/s): forward 25 % + full up strafe + roll 25 % (60 deg/s), 14 s"
+    probe: 0.6
+    steps: [{t: 14, strafe_long: 0.25, strafe_vert: 1.0, roll: 0.25, boost: true}]
+    expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
+  - id: r8_bst_f25_up_r100
+    note: "boosted, off-axis (~441 m/s): forward 25 % + full up strafe + roll 100 % (240 deg/s), 14 s"
+    probe: 0.6
+    steps: [{t: 14, strafe_long: 0.25, strafe_vert: 1.0, roll: 1.0, boost: true}]
+    expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
+  - id: r8_bst_f25_lat_r25
+    note: "boosted, off-axis (~441 m/s): forward 25 % + full right strafe + roll 25 % (60 deg/s), 14 s"
+    probe: 0.6
+    steps: [{t: 14, strafe_long: 0.25, strafe_lat: 1.0, roll: 0.25, boost: true}]
+    expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
+  - id: r8_bst_f25_lat_r100
+    note: "boosted, off-axis (~441 m/s): forward 25 % + full right strafe + roll 100 % (240 deg/s), 14 s"
+    probe: 0.6
+    steps: [{t: 14, strafe_long: 0.25, strafe_lat: 1.0, roll: 1.0, boost: true}]
+    expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
+  - id: r8_bst_f50_up_r25
+    note: "boosted, mid-way (~455 m/s): forward 50 % + full up strafe + roll 25 % (60 deg/s), 14 s"
+    probe: 0.6
+    steps: [{t: 14, strafe_long: 0.5, strafe_vert: 1.0, roll: 0.25, boost: true}]
+    expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
+  - id: r8_bst_f50_up_r100
+    note: "boosted, mid-way (~455 m/s): forward 50 % + full up strafe + roll 100 % (240 deg/s), 14 s"
+    probe: 0.6
+    steps: [{t: 14, strafe_long: 0.5, strafe_vert: 1.0, roll: 1.0, boost: true}]
+    expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
+  - id: r8_bst_f50_lat_r25
+    note: "boosted, mid-way (~455 m/s): forward 50 % + full right strafe + roll 25 % (60 deg/s), 14 s"
+    probe: 0.6
+    steps: [{t: 14, strafe_long: 0.5, strafe_lat: 1.0, roll: 0.25, boost: true}]
+    expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
+  - id: r8_bst_f50_lat_r100
+    note: "boosted, mid-way (~455 m/s): forward 50 % + full right strafe + roll 100 % (240 deg/s), 14 s"
+    probe: 0.6
+    steps: [{t: 14, strafe_long: 0.5, strafe_lat: 1.0, roll: 1.0, boost: true}]
+    expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
+  - id: r8_bst_f100_up_r25
+    note: "boosted, toward the nose (~501 m/s): forward 100 % + full up strafe + roll 25 % (60 deg/s), 14 s"
+    probe: 0.6
+    steps: [{t: 14, strafe_long: 1.0, strafe_vert: 1.0, roll: 0.25, boost: true}]
+    expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
+  - id: r8_bst_f100_up_r50
+    note: "boosted, toward the nose (~501 m/s): forward 100 % + full up strafe + roll 50 % (120 deg/s), 14 s"
+    probe: 0.6
+    steps: [{t: 14, strafe_long: 1.0, strafe_vert: 1.0, roll: 0.5, boost: true}]
+    expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
+  - id: r8_bst_f100_up_r100
+    note: "boosted, toward the nose (~501 m/s): forward 100 % + full up strafe + roll 100 % (240 deg/s), 14 s"
+    probe: 0.6
+    steps: [{t: 14, strafe_long: 1.0, strafe_vert: 1.0, roll: 1.0, boost: true}]
+    expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
+  - id: r8_bst_f100_lat_r25
+    note: "boosted, toward the nose (~501 m/s): forward 100 % + full right strafe + roll 25 % (60 deg/s), 14 s"
+    probe: 0.6
+    steps: [{t: 14, strafe_long: 1.0, strafe_lat: 1.0, roll: 0.25, boost: true}]
+    expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
+  - id: r8_bst_f100_lat_r50
+    note: "boosted, toward the nose (~501 m/s): forward 100 % + full right strafe + roll 50 % (120 deg/s), 14 s"
+    probe: 0.6
+    steps: [{t: 14, strafe_long: 1.0, strafe_lat: 1.0, roll: 0.5, boost: true}]
+    expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}
+  - id: r8_bst_f100_lat_r100
+    note: "boosted, toward the nose (~501 m/s): forward 100 % + full right strafe + roll 100 % (240 deg/s), 14 s"
+    probe: 0.6
+    steps: [{t: 14, strafe_long: 1.0, strafe_lat: 1.0, roll: 1.0, boost: true}]
+    expect: {grey_at: "?", gloc_at: "?", probe_control_lost_s: "?"}

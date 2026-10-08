@@ -252,7 +252,7 @@ footer p { margin: 0 0 4px; max-width: 75ch; }
   <header>
     <h1>Speedwall Lab</h1>
     <span class="sub">Gladius · decoupled · how your speed limits your maneuvers</span>
-    <span class="chip proto" title="Physics reproduces the measured settle speeds; some wall behavior is still being fitted.">Alpha · v0.6</span>
+    <span class="chip proto" title="Physics reproduces the measured settle speeds; some wall behavior is still being fitted.">Alpha · v0.7</span>
     <button id="ctl-open" class="hdr">Controls</button>
     <button id="fly" class="hdr" aria-pressed="false" title="Full screen, with every key going to the simulator (hold Esc to leave)">Fly full screen</button>
     <a class="btn fb" href="https://github.com/Adobe-Wan/speedwall-lab/issues/new?template=alpha-feedback.yml" target="_blank" rel="noopener">Send feedback</a>
@@ -274,7 +274,7 @@ footer p { margin: 0 0 4px; max-width: 75ch; }
         <span class="seg" role="group" aria-label="Camera">
           <button id="cam-34" aria-pressed="true" title="Three-quarter view from behind and above">Overview</button>
           <button id="cam-side" aria-pressed="false" title="Side profile: the egg's real shape">Side</button>
-          <button id="t-follow" aria-pressed="false" title="Ride behind the ship, looking up the nose">Close-up</button>
+          <button id="t-follow" aria-pressed="false" title="Chase cam: rides behind the ship and keeps your dodge room and the wall in frame. Starts by itself with each lesson.">Chase</button>
         </span>
         <button id="t-meas" aria-pressed="true" title="Top speeds measured in game, placed on the egg">In-game tests</button>
       </div>
@@ -451,7 +451,7 @@ let script = null;
 // pad and boost lock the maneuver set are cleared too (otherwise they keep flying the ship).
 function endManeuver(resetOnScreen) {
   if (!script && !maneuver) return;
-  script = null; maneuver = null; dodge = null; markPreset(null); ctl.rollHold = 0;
+  script = null; maneuver = null; dodge = null; markPreset(null); ctl.rollHold = 0; egg.chase(false);
   if (!run || !run.shown) { $('runbar').hidden = true; setNote(''); } else $('run-msg').textContent = 'You have the controls.';
   run = null;
   if (resetOnScreen) { setThr(0); ctl.padL = ctl.padU = 0; ctl.padSticky = false; drawKnob(); setLock(false); }
@@ -611,7 +611,7 @@ $('unlimited').addEventListener('change', e => { ctl.unlimited = e.target.checke
 function reset(pinned) {
   if (pinned === 'rest') pinned = false; if (pinned === 'nose') pinned = true;
   if (typeof pinned === 'object' && pinned) { const { vx, boost } = pinned; reset(false); S = { ...mkState(vx, boost), x: S.x }; setLock(boost); return; }
-  script = null; maneuver = null; dodge = null; run = null; markPreset(null); ctl.rollHold = 0; qAtt = [0, 0, 0, 1]; controls.mouse.center();
+  script = null; maneuver = null; dodge = null; run = null; markPreset(null); ctl.rollHold = 0; qAtt = [0, 0, 0, 1]; controls.mouse.center(); egg.chase(false);
   const vx = pinned === 'scm' ? 225 : pinned ? 520 : 0;
   S = { ...mkState(vx, pinned === true), x: S.x };
   trail.length = 0; setThr(pinned ? 100 : 0); setLock(pinned === true); ctl.padL = ctl.padU = 0; ctl.padSticky = false; drawKnob();
@@ -658,6 +658,7 @@ document.querySelectorAll('[data-preset]').forEach(b => b.onclick = () => {
   run = { t: 0, min: Infinity, peakG: 0, tvi: 0, shown: false };
   $('run-name').textContent = p.title; $('run-result').textContent = ''; $('run-msg').hidden = false; $('runbar').hidden = false;
   setNote(p.watch);
+  egg.chase(true);   // ride behind the ship with its limits in frame
   // the maneuver buttons sit below the views on phones: bring the views back into sight to watch it
   const v = document.querySelector('.views'), r = v.getBoundingClientRect();
   if (r.top < 0 || r.bottom > innerHeight + 40) v.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
@@ -756,21 +757,51 @@ function shell(gl, geometry, color, alpha, rim, order) {
   }
   return meshes;
 }
-function dartGeometry(gl) {
-  const L = 20, W = 17, H = 5.5, xw = L / 2 - 0.6 * L;
-  const N = [L/2,0,0], T = [-L/2,0,0], Wl = [xw, W/2, 0], Wr = [xw, -W/2, 0], Up = [xw, 0, H/2], Dn = [xw, 0, -H/2];
-  const faces = [[N,Wl,Up],[N,Up,Wr],[N,Wr,Dn],[N,Dn,Wl],[T,Up,Wl],[T,Wr,Up],[T,Dn,Wr],[T,Wl,Dn]];
-  const pos = [], nor = [];
-  for (const f of faces) {
-    const [a, b, c] = f.map(p => R3(...p));
-    const u = b.map((x, i) => x - a[i]), v = c.map((x, i) => x - a[i]);
-    let n = [u[1]*v[2]-u[2]*v[1], u[2]*v[0]-u[0]*v[2], u[0]*v[1]-u[1]*v[0]]; const l = Math.hypot(...n); n = n.map(x => x / l);
-    pos.push(...a, ...b, ...c); nor.push(...n, ...n, ...n);
+/* A low-poly Gladius, drawn here for this project from its 20 x 17 x 5.5 m size (fixture) and a general idea of the
+   ship: a tapered fuselage with a canopy, swept wings and two tail fins. It is an approximation, not CIG's model. Built
+   in render coordinates (x nose, y up, z right) as convex pieces; each piece's faces come from its convex hull. */
+const SHIP_PLAN = [[0, 10], [0.7, 6.5], [1.5, 2.6], [1.7, 2.0], [8.5, -4.0], [8.5, -8.8], [2.0, -9.0], [1.5, -9.4]]; // right half, top-down: [z, x]
+function gladiusGeometry(gl) {
+  const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+  const cross = (u, v) => [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+  const dot = (u, v) => u[0] * v[0] + u[1] * v[1] + u[2] * v[2];
+  const pos = [], nor = [], col = [];
+  // every supporting triangle of a convex point set, wound so its normal points outward
+  function piece(pts, color) {
+    const n = pts.length;
+    for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) for (let k = j + 1; k < n; k++) {
+      let nm = cross(sub(pts[j], pts[i]), sub(pts[k], pts[i])); const l = Math.hypot(...nm); if (l < 1e-6) continue;
+      let front = 0, back = 0;
+      for (let m = 0; m < n; m++) if (m !== i && m !== j && m !== k) { const d = dot(nm, sub(pts[m], pts[i])) / l; if (d > 1e-4) front++; else if (d < -1e-4) back++; }
+      if (front && back) continue;                          // not a face of the hull
+      if (!front && !back) continue;                        // everything coplanar
+      let [a, b, c] = [pts[i], pts[j], pts[k]];
+      if (front) { [b, c] = [c, b]; nm = nm.map(x => -x); }
+      pos.push(...a, ...b, ...c); nor.push(...nm.map(x => x / l), ...nm.map(x => x / l), ...nm.map(x => x / l)); col.push(...color, ...color, ...color);
+    }
   }
-  return new Geometry(gl, { position: { size: 3, data: new Float32Array(pos) }, normal: { size: 3, data: new Float32Array(nor) } });
+  const HULL = [0.78, 0.82, 0.90], WING = [0.66, 0.72, 0.84], CANOPY = [0.30, 0.62, 0.86], ENGINE = [0.42, 0.46, 0.54];
+  // fuselage: rings [x, half-width, top, bottom] from the nose tip back
+  const ring = (x, w, t, b) => [[x, t, 0], [x, 0.6 * t, 0.75 * w], [x, -0.2 * b, w], [x, -b, 0.7 * w], [x, -b, -0.7 * w], [x, -0.2 * b, -w], [x, 0.6 * t, -0.75 * w]];
+  piece([[10, -0.15, 0], ...ring(6.5, 0.7, 0.55, 0.45), ...ring(2, 1.5, 1.0, 0.9), ...ring(-4, 1.9, 1.1, 1.0), ...ring(-9.4, 1.5, 0.9, 0.8)], HULL);
+  piece([[5.6, 0.6, 0], [0.8, 1.0, 0.85], [0.8, 1.0, -0.85], [2.6, 1.9, 0], [-0.6, 1.2, 0]], CANOPY);
+  for (const sd of [1, -1]) {
+    // wing: swept back, slightly drooped, thicker at the root
+    const w = (x, z, y, th) => [[x, y + th, sd * z], [x, y - th, sd * z]];
+    piece([...w(2.0, 1.2, 0, 0.28), ...w(-4.0, 8.5, -0.5, 0.1), ...w(-8.8, 8.5, -0.5, 0.1), ...w(-9.0, 1.2, 0, 0.26)], WING);
+    // tail fin, canted outward
+    const f = (x, y, z) => [[x, y, sd * (z - 0.12)], [x, y, sd * (z + 0.12)]];
+    piece([...f(-5.2, 0.9, 1.2), ...f(-9.4, 0.9, 1.4), ...f(-9.8, 2.7, 2.4), ...f(-7.2, 2.6, 2.2)], WING);
+    // engine pod
+    piece([[-8.0, 0.7, sd * 0.5], [-8.0, 0.7, sd * 1.7], [-8.0, -0.7, sd * 0.5], [-8.0, -0.7, sd * 1.7],
+           [-10.0, 0.5, sd * 0.6], [-10.0, 0.5, sd * 1.6], [-10.0, -0.5, sd * 0.6], [-10.0, -0.5, sd * 1.6]], ENGINE);
+  }
+  return new Geometry(gl, { position: { size: 3, data: new Float32Array(pos) }, normal: { size: 3, data: new Float32Array(nor) }, color: { size: 3, data: new Float32Array(col) } });
 }
-const FS_LAMBERT = `precision mediump float; uniform vec3 uColor; varying vec3 vN; varying vec3 vV;
-void main(){ float d = 0.35 + 0.65*abs(dot(normalize(vN), normalize(vec3(0.4,0.8,0.5)))); gl_FragColor = vec4(uColor*d, 1.0); }`;
+const VS_SHIP = `attribute vec3 position; attribute vec3 normal; attribute vec3 color; uniform mat4 modelViewMatrix, projectionMatrix; uniform mat3 normalMatrix;
+varying vec3 vN; varying vec3 vC; void main(){ vN = normalize(normalMatrix*normal); vC = color; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }`;
+const FS_SHIP = `precision mediump float; varying vec3 vN; varying vec3 vC;
+void main(){ float d = 0.35 + 0.65*abs(dot(normalize(vN), normalize(vec3(0.4,0.8,0.5)))); gl_FragColor = vec4(vC*d, 1.0); }`;
 
 const hasWebGL = (() => { try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch { return false; } })();
 function makeRenderer(canvas) {
@@ -780,7 +811,7 @@ function makeRenderer(canvas) {
 }
 
 /* ───────────────────────── egg view ───────────────────────── */
-const stubView = { resize() {}, draw() {}, hud() {} };
+const stubView = { resize() {}, draw() {}, chase() {}, hud() {} };
 const egg = !hasWebGL ? stubView : (() => {
   const canvas = $('c-egg'), renderer = makeRenderer(canvas), gl = renderer.gl;
   const camera = new Camera(gl, { fov: 38, near: 5, far: 8000 });
@@ -823,9 +854,9 @@ const egg = !hasWebGL ? stubView : (() => {
   const UNIT = []; for (let j = 0; j <= 96; j++) { const a = 2 * Math.PI * j / 96; UNIT.push([Math.sin(a), Math.cos(a)]); } void circ;
 
   const glyphT = new Transform(); glyphT.setParent(scene);
-  const glyph = new Mesh(gl, { geometry: dartGeometry(gl), program: new Program(gl, { vertex: VS_SHELL, fragment: FS_LAMBERT, uniforms: { uColor: { value: COL.glyph } } }) });
+  const glyph = new Mesh(gl, { geometry: gladiusGeometry(gl), program: new Program(gl, { vertex: VS_SHIP, fragment: FS_SHIP }) });
   // The ship rides on the velocity point: in velocity space, where the ship sits IS how fast it is going.
-  glyph.setParent(glyphT);   // true size: the dart is the Gladius's 20 m
+  glyph.setParent(glyphT);   // true size: 20 m long
   // Everything that moves (velocity arrow, trail, settle ray, thrust and dead-thrust arrows, the dodge ring and its
   // reach lines) is one coloured line mesh: one draw call.
   const dyn = colorLines(gl, 1024); dyn.renderOrder = 40; dyn.setParent(scene);
@@ -859,27 +890,39 @@ const egg = !hasWebGL ? stubView : (() => {
   function place(el, p) { v3.set(...p); camera.project(v3); const w = canvas.parentElement.clientWidth, h = canvas.parentElement.clientHeight;
     const on = v3.z < 1 && v3.z > -1; el.hidden = !on; if (on) { el.style.left = `${(v3.x + 1) / 2 * w}px`; el.style.top = `${(1 - v3.y) / 2 * h}px`; } }
 
-  // Follow: the orbit target rides with the ship, so you can zoom in on it squeezed into the egg's nose.
-  let follow = false; const HOME_T = [130, 0, 0];
-  const setCam = m => { camMode = m; follow = m === 'follow';
+  // Chase cam: the orbit target rides on the middle of the dodge-room ring (centred on the nose axis at your forward
+  // speed), and the distance is chosen so the whole ring and the wall ahead stay in frame, so the ship is always
+  // seen against its limits: tight at the nose, wide mid-egg. You can still orbit it with the mouse.
+  let follow = false, chaseD = 600, autoChase = false, prevMode = '34'; const HOME_T = [130, 0, 0];
+  const setCam = (m, auto = false) => { camMode = m; follow = m === 'follow'; autoChase = follow && auto;
     for (const [id, k] of [['cam-34', '34'], ['cam-side', 'side'], ['t-follow', 'follow']]) $(id).setAttribute('aria-pressed', m === k);
     if (!follow) { touched = false; orbit.target.set(...HOME_T); home(); orbit.forcePosition(); return; }
-    // Look up the nose from behind the ship: the sideways-room ring faces you, with the ship inside it.
-    const p = R3(...S.v); orbit.target.set(...p); camera.position.set(p[0] - 430, p[1] + 110, p[2] + 70); orbit.forcePosition(); touched = true; };
+    // start behind, a little above and to the side, looking up the nose
+    const p = R3(S.v[0], 0, 0); chaseD = Math.hypot(camera.position.x - p[0], camera.position.y - p[1], camera.position.z - p[2]);
+    orbit.target.set(...p); camera.position.set(p[0] - 0.93 * chaseD, p[1] + 0.27 * chaseD, p[2] + 0.17 * chaseD); orbit.forcePosition(); touched = true; };
   $('cam-34').onclick = () => setCam('34'); $('cam-side').onclick = () => setCam('side');
   $('t-follow').onclick = () => setCam(follow ? '34' : 'follow');
-
+  // A lesson starts the chase cam and hands the camera back afterwards, unless the pilot picked a view meanwhile.
+  const chase = on => { if (on) { if (!follow) { prevMode = camMode; setCam('follow', true); } } else if (autoChase) setCam(prevMode); };
+  const half = Math.tan(camera.fov * Math.PI / 360);
 
   let lastKey = '', frameW = 0;
   function resize() { const w = canvas.parentElement.clientWidth, h = canvas.parentElement.clientHeight; if (!w || !h) return; renderer.setSize(w, h); aspect = w / h; camera.perspective({ aspect }); if (!touched) { home(); orbit.forcePosition(); } frameW = w * 10000 + h; lastKey = ''; }
   function draw(st, d) {
     const [vx, vy, vz] = st.v, room = d.room;
-    { // ease the orbit target toward the ship (follow) or home; moving the target carries the camera along
-      const want = follow ? R3(vx, vy, vz) : HOME_T, t = orbit.target, k = follow ? 0.25 : 0.08;
+    { // ease the orbit target toward the ring's centre (chase) or home; moving the target carries the camera along
+      const want = follow ? R3(vx, 0, 0) : HOME_T, t = orbit.target, k = follow ? 0.25 : 0.08;
       const dx = (want[0] - t.x) * k, dy = (want[1] - t.y) * k, dz = (want[2] - t.z) * k;
       if (Math.abs(dx) + Math.abs(dy) + Math.abs(dz) > 1e-3) { t.set(t.x + dx, t.y + dy, t.z + dz); camera.position.set(camera.position.x + dx, camera.position.y + dy, camera.position.z + dz); }
     }
     orbit.update();
+    if (follow) { // zoom so the dodge-room ring, the ship in it and the wall ahead fit, with a margin
+      const reach = Math.max(room, Math.hypot(vy, vz) + 25, 0.5 * Math.max(0, d.r - d.speed), 45);
+      const want = Math.min(3000, Math.max(150, 1.4 * reach / Math.min(half, half * aspect)));
+      chaseD += (want - chaseD) * 0.12;
+      const t = orbit.target, p = camera.position, dx = p.x - t.x, dy = p.y - t.y, dz = p.z - t.z, l = Math.hypot(dx, dy, dz) || 1;
+      if (Math.abs(chaseD - l) > 0.5) { camera.position.set(t.x + dx / l * chaseD, t.y + dy / l * chaseD, t.z + dz / l * chaseD); orbit.forcePosition(); }
+    }
     // Render on demand (PLAN.md §9): skip the frame when nothing visible changed.
     const cp = camera.position, key = [vx, vy, vz, cp.x, cp.y, cp.z, room, d.pinned, trail.length, st.a[0], st.a[1], st.a[2], showMeas, follow, frameW]
       .map(x => (typeof x === 'number' ? x.toFixed(2) : x)).join();
@@ -924,7 +967,7 @@ const egg = !hasWebGL ? stubView : (() => {
     else labels.settle.hidden = true;
     place(tviIcon, pv); tviIcon.hidden = tviIcon.hidden || d.speed < 3;
   }
-  return { resize, draw };
+  return { resize, draw, chase };
 })();
 
 /* ───────────────────────── pilot view: dust + crosshair + TVI ───────────────────────── */
@@ -1033,7 +1076,12 @@ function drawSlice(canvas, st, d, big) {
   // origin = rest
   c.strokeStyle = 'rgba(135,150,171,.8)'; c.lineWidth = 1.2; c.beginPath(); c.moveTo(ox - 5, oy); c.lineTo(ox + 5, oy); c.moveTo(ox, oy - 5); c.lineTo(ox, oy + 5); c.stroke();
   // the ship rides on the velocity point (nose up the page = +forward; no rotation in V1)
-  c.save(); c.translate(...P(lat, fwd)); c.fillStyle = '#c7d1e5'; const g = big ? 1.6 : 1; c.beginPath(); c.moveTo(0, -10 * g); c.lineTo(8.5 * g, 2 * g); c.lineTo(0, 10 * g); c.lineTo(-8.5 * g, 2 * g); c.closePath(); c.fill(); c.restore();
+  // the ship, from above, nose up: the same outline as the 3D model (1 px per metre, so 20 px long)
+  c.save(); c.translate(...P(lat, fwd)); const g = big ? 1.6 : 1;
+  c.beginPath(); SHIP_PLAN.forEach(([z, x], i) => i ? c.lineTo(z * g, -x * g) : c.moveTo(z * g, -x * g));
+  for (let i = SHIP_PLAN.length - 1; i >= 0; i--) c.lineTo(-SHIP_PLAN[i][0] * g, -SHIP_PLAN[i][1] * g);
+  c.closePath(); c.fillStyle = '#c7d1e5'; c.fill(); c.strokeStyle = 'rgba(7,11,17,.9)'; c.lineWidth = 1; c.stroke();
+  c.fillStyle = '#4aa3d8'; c.beginPath(); c.ellipse(0, -3.4 * g, 0.85 * g, 2.5 * g, 0, 0, 2 * Math.PI); c.fill(); c.restore();
   if (big) { c.font = '600 12px ui-monospace, Menlo, monospace'; c.fillStyle = '#f2a33a'; c.textAlign = 'center';
     c.fillText('nose 520', ...P(0, 532)); c.fillText('tail 268', ...P(0, -284)); c.textAlign = 'left'; c.fillText('394', ...P(398, 6)); c.fillStyle = '#5aa9e6'; c.fillText('SCM 225', ...P(150, 190));
     c.fillStyle = d.pinned ? '#ff6a55' : '#e7edf5'; c.fillText(`room ${Math.round(room)}`, ...P(room + 8, fwd - 4)); }

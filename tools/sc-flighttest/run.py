@@ -4,6 +4,8 @@
   python run.py bind <control>            help SC's binding screen detect one vJoy axis/button
   python run.py hold <control> <value> <s>   hold one input (direction check)
   python run.py dircheck                  push every axis in turn and say what the ship should do
+  python run.py camcheck                  does the vJoy view button switch the camera? (G-LOC probe setup)
+  python run.py camstrip <session> <test> contact sheet of the probe frames, to check the detection by eye
   python run.py calibrate [--monitor N]   drag boxes over the HUD readouts
   python run.py ocrcheck                  print live HUD readings (verify calibration)
   python run.py fpscheck                  measure capture speed (needs >= 30 fps)
@@ -23,7 +25,8 @@ ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 
 # Outstanding rounds, in the order worth flying them (docs/flight-model-tests.md).
-CAMPAIGN = {"6": "tests_round6.yaml", "7": "tests_round7.yaml", "5": "tests_round5.yaml", "4": "tests_round4.yaml"}
+CAMPAIGN = {"6": "tests_round6.yaml", "7": "tests_round7.yaml", "8": "tests_round8.yaml",
+            "5": "tests_round5.yaml", "4": "tests_round4.yaml"}
 
 
 def cfg():
@@ -83,6 +86,8 @@ def main():
     b = sub.add_parser("bind"); b.add_argument("control"); b.add_argument("--negative", action="store_true")
     h = sub.add_parser("hold"); h.add_argument("control"); h.add_argument("value", type=float); h.add_argument("seconds", type=float)
     sub.add_parser("dircheck")
+    sub.add_parser("camcheck")
+    cs = sub.add_parser("camstrip"); cs.add_argument("session"); cs.add_argument("test")
     ca = sub.add_parser("calibrate"); ca.add_argument("--monitor", type=int)
     sub.add_parser("ocrcheck")
     sub.add_parser("fpscheck")
@@ -92,7 +97,7 @@ def main():
     p = sub.add_parser("process"); p.add_argument("session"); p.add_argument("--stride", type=int, default=1)
     a = sub.add_parser("analyze"); a.add_argument("session")
     cp = sub.add_parser("campaign")
-    cp.add_argument("--rounds", nargs="+", default=list(CAMPAIGN), choices=list(CAMPAIGN), help="default: 6 7 5 4")
+    cp.add_argument("--rounds", nargs="+", default=list(CAMPAIGN), choices=list(CAMPAIGN), help="default: 6 7 8 5 4")
     cp.add_argument("--yes", action="store_true", help="don't wait for Enter before starting")
     cp.add_argument("--dry-run", action="store_true")
     pk = sub.add_parser("pack"); pk.add_argument("session"); pk.add_argument("--with-frames", action="store_true")
@@ -105,6 +110,12 @@ def main():
     elif args.cmd == "hold":
         from sctest.bind import hold
         hold(c, args.control, args.value, args.seconds)
+    elif args.cmd == "camcheck":
+        from sctest.camcheck import camcheck
+        camcheck(c)
+    elif args.cmd == "camstrip":
+        from sctest.camcheck import camstrip
+        camstrip(ROOT / "results" / args.session, args.test)
     elif args.cmd == "dircheck":
         from sctest.bind import dircheck
         dircheck(c)

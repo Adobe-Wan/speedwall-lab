@@ -13,6 +13,7 @@ axes:
 buttons:
   boost: 1           # -> SC "Afterburner" (hold)
   brake: 2           # -> SC "Spacebrake" (hold)
+  view: 3            # -> SC "Cycle camera view" (default key F4), pressed by the G-LOC camera-key probe
 
 # Safety
 window_title_contains: "Star Citizen"   # inputs are only sent while this window is focused
@@ -29,6 +30,7 @@ roi:
   g:     [0.656, 0.470, 0.030, 0.022]   # G number ("0.0"), not the "G" label
   ab:    [0.594, 0.547, 0.031, 0.024]   # boost tank percent ("100%")
   view:  [0.650, 0.090, 0.300, 0.270]   # optional sky patch, only used when roll_view: true
+  cam:   [0.250, 0.200, 0.500, 0.500]   # middle of the screen: looks very different in the cockpit and in the external camera (G-LOC probe)
 roll_view: false      # camera roll tracking is no longer needed: rotation rates come from the speed readout
 view_downscale: 480
 view_max_px: 450000
@@ -53,5 +55,14 @@ gloc_hold_s: 0.25
 # releasing them; at most one ease step per gloc_ease_wait_s so the pilot has time to recover.
 gloc_ease_frac: 0.8
 gloc_ease_wait_s: 1.5
+
+# Camera-key probe (tests with `probe: <seconds>`): the vJoy `view` button is pressed this often while inputs are held,
+# and once more in the dark after a blackout. `python run.py camcheck` tells you whether it works and what to set here.
+probe_pulse_s: 0.12        # how long each press is held
+probe_dark_delay_s: 0.5    # the first press in the dark comes this long after the let-go
+probe_dark_mean: 14        # a centre-of-screen frame darker than this (0-255) counts as black
+probe_settle_s: 3.0        # wait this long before checking the camera when you did not black out
+cam_downscale: 96          # width in pixels of the saved probe frames
+cam_state_thr: 0.3         # frames further apart than this are different camera views (camcheck suggests a value)
 gloc_recover_max_s: 40
 gloc_rest_s: 8
