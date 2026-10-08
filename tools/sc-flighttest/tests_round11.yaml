@@ -1,5 +1,5 @@
 # Round 11 (Gladius, DECOUPLED, Arena Commander free flight only, G-safe OFF): close the boosted egg, settle the fast flip.
-#   python run.py campaign --rounds 11        (8 tests, about 8 minutes)
+#   python run.py campaign --rounds 11        (8 tests, about 9 minutes)
 #
 # Egg: boost to the nose wall, turn the nose a known angle with boost held, then hold boost and let the IFCS bleed the speed
 # to the egg's radius at that heading (round 10 showed this works: 90 deg -> 394). Pitch UP puts the velocity below the
@@ -7,11 +7,12 @@
 # Rotation: pitch + yaw rotate the ship about an axis at right angles to the nose, so a light FORWARD thrust spins fully
 # with the ship and nothing drifts (round 10's up-strafe method drifted along the axis and masked the period).
 tests:
-  - id: r11_boost_down_long
-    note: "boosted full DOWN strafe from rest, 10 s: the boosted radius straight down (limacon 394)"
+  - id: r11_redout_stairs
+    note: "boosted full DOWN strafe from rest, held 18 s through red-out. Round 9 showed thrust stops while you are out
+      (speed frozen at 229 for ~4.5 s), then resumes: expect a staircase. The down RADIUS comes from r10_turn90_boost (394)."
     gloc: hold
-    steps: [{t: 10, strafe_vert: -1.0, boost: true}]
-    expect: {plateau_mps: 394}
+    steps: [{t: 18, strafe_vert: -1.0, boost: true}]
+    expect: {plateau_mps: "staircase toward 394"}
   - id: r11_turn90_pitchdown
     note: "boost to the nose wall 4 s, pitch DOWN 1.1 s (~90 deg, velocity ends on the UP side), boost only 5 s (limacon 394)"
     gloc: hold

@@ -231,3 +231,17 @@ above 354 m/s forward): the room exists, but it takes ~2–4 s to reach. Both be
 artefact. Pitch + roll together measured ~212 °/s (independent axes predict 211, capped 200), a first sign that rates
 add; the pitch + yaw tests need a proper fit (the strafe's component along the rotation axis drifts and masks the
 period) before the fast-flip answer is settled.
+
+## 8. Blackout cuts your thrust (and a correction)
+
+- **`r4_boost_down` was cut short by the harness, not the game.** Round 4 predates the "hold" policy, so it let go of
+  the controls when the HUD went dark (red-out at 2.8 s). Its 6.6 G acceleration stands; its "plateau 76" does not.
+  The r7 onset tests also let go at HUD blackout, by design; their onset times stand.
+- **While you are fully blacked/redded out, the ship stops responding.** `r9_vis_hold_down_boost` held boosted full down
+  for 12 s: speed climbed to 229 m/s by 4.7 s, the screen went fully dark, and the speed read **229 again at 9.6 s** when
+  vision returned. Then it accelerated again (373 by 13.2 s). So during a true blackout the thrust inputs do nothing; the
+  G load disappears, the pilot recovers in ~4–5 s, and the inputs work again. A held high-G manoeuvre therefore becomes a
+  staircase. This is the mechanism the trainer must teach: pushing past the blackout does not buy more speed, it buys
+  seconds of drifting with no control. `r11_redout_stairs` measures the staircase directly.
+- The boosted radius straight **down** is 394, from `r10_turn90_boost` (pitch up 90° puts the velocity below the ship,
+  with no G load).
