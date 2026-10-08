@@ -245,3 +245,39 @@ period) before the fast-flip answer is settled.
   seconds of drifting with no control. `r11_redout_stairs` measures the staircase directly.
 - The boosted radius straight **down** is 394, from `r10_turn90_boost` (pitch up 90° puts the velocity below the ship,
   with no G load).
+
+## 9. Round 11 (session `20261008-180210`): the boosted egg is closed, and diagonal rotation is slower
+
+**The boosted egg is the limaçon r(θ) = 394 + 126 cos θ all the way round, and it is round in cross-section.** Each test:
+boost to the nose wall (510), turn a known angle with boost held, let the IFCS bleed to the radius at that heading.
+
+| Heading of the velocity relative to the nose | Measured settle | Limaçon |
+|---|---|---|
+| 90°, below the ship (`r10_turn90_boost`, pitch up) | 394 | 394 |
+| 90°, above the ship (`r11_turn90_pitchdown`) | 394 | 394 |
+| 120° (`r11_turn120_boost`) | **331** | 331 |
+| ~135–138°, to the side and back (`r11_turn135_yaw_boost`, yaw) | **301** | 305 at 135°, 300 at 138° |
+| 150° (`r11_turn150_boost`) | **285** | 285 |
+| 180° (nose wall pinned backward, round 1) | 267–268 | 268 |
+
+With round 3 (8.6° / 16.9° / 24.5°) and the lateral 394, the shape is confirmed at every heading tested, above, below and
+to the side. The fixture's `lateralRoom` table can be drawn as measured.
+
+**Combining pitch and yaw is SLOWER than pitch alone.** Forward-thrust rotation gauge (`r11_rot_*`, fits within 0.3 m/s):
+
+| Input | Measured | Each axis independent | Capped at the best axis | Stick vector scaled to length 1 |
+|---|---|---|---|---|
+| Pitch 100 % (calibration) | 68.2 °/s | 68 | 68 | 68 |
+| Pitch + yaw 100 % | **62.6 °/s** | 85.7 | 68 | 60.6 |
+| Pitch + yaw 100 %, boosted | **74.8 °/s** | 102.9 | 81.6 | 72.8 |
+
+The game appears to scale a diagonal stick back to unit length (it is within ~3 % of that model). So the fastest 180° is
+**pure pitch** (2.65 s SCM, 2.21 s boosted), not a diagonal pull; section 4's "1.74 s if rates add" does not happen.
+For a diagonal target, pulling diagonally still avoids a roll and is about as fast as roll-then-pitch. The round-10
+pitch + roll figure (212 °/s) came from the drifting up-strafe gauge and should be re-measured with this method before use.
+
+**Blackout cuts thrust AND boost.** `r11_boost_down_long` (boosted full down, held): 250 m/s at 5.0 s, then the screen went
+black; at 9.5 s, when vision returned, the speed read **224**: during the blackout the IFCS bled the ship back to the SCM
+sphere, as if boost and thrust had been released. It then accelerated again (310 at 11.0 s). Round 9's 229 → 229 is the
+same effect starting from just above SCM. A held high-G boosted manoeuvre therefore loses its boost speed at every
+blackout.
