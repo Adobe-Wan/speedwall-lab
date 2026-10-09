@@ -7,7 +7,7 @@
 // level, compared with the measured `hud_level` from vision.csv. Tests where the harness let go of the controls at a blackout are
 // left out (the readings after the cut say nothing about the pilot); tests that never blacked out are kept whatever their policy.
 //
-//   pnpm build && node tools/fit-gloc.mjs [--fit] [--report]
+//   pnpm build && node tools/fit-gloc.mjs [--onset] [--fit] [--report] [--latch] [--trace <test ...>]
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { step, restState, DT, angularVelocity, turnVelocity, boostActive } from "../packages/core/dist/index.js";
 import { profileFromFixture } from "../packages/data-gladius/dist/index.js";
@@ -48,15 +48,17 @@ console.error(`${data.length} tests: ${data.map((d) => d.id).join(" ")}`);
 const ONSET = process.argv.includes("--onset");   // score only up to the first blackout (the latch that follows is not modelled)
 const hudOf = (D, q) => (D <= 0.4 ? 1 : D < 1 ? 1 - (0.2 * (D - 0.4)) / 0.6 : D < q.gone ? 0.8 - (0.3 * (D - 1)) / (q.gone - 1) : Math.max(0, 0.5 - (0.5 * (D - q.gone)) / 0.5));
 function predict(test, q) {
-  let D = 0, last = null, vf = null; const out = [];
+  let D = 0, last = null, vf = null, blk = false; const out = [];
   for (const { t, v: v0 } of test.g) {
     const a = q.tau > 0 && last !== null ? Math.min(1, (t - last) / q.tau) : 1; vf = vf === null || a >= 1 ? v0 : vf.map((x, i) => x + (v0[i] - x) * a); const v = vf;
     if (last !== null) {
-      const dt = t - last, T = q.T, r = Math.max(Math.abs(v[0]) / (v[0] >= 0 ? T.fwd : T.back), Math.abs(v[1]) / T.lat, Math.abs(v[2]) / (v[2] >= 0 ? T.up : T.down));
+      const dt = t - last, T = q.T, r = blk ? 0 : Math.max(Math.abs(v[0]) / (v[0] >= 0 ? T.fwd : T.back), Math.abs(v[1]) / T.lat, Math.abs(v[2]) / (v[2] >= 0 ? T.up : T.down));
       const rise = r > 1 ? (r - 1) ** q.p : 0, fall = r <= 1 ? (q.exp ? q.rec * D : q.rec * (1 - r * q.near)) : 0;
       D = Math.min(q.gone + 0.5, Math.max(0, D + rise * dt - fall * dt));
+      // --latch: a full blackout cuts the thrust (measured), so the load is gone until vision returns at the clear level
+      if (q.clear != null) blk = blk ? D > q.clear : D >= q.gone + 0.5;
     }
-    last = t; out.push({ t, D });
+    last = t; out.push({ t, D, h: blk ? 0 : hudOf(D, q) });
   }
   return out;
 }
@@ -64,7 +66,7 @@ function cost(q, rep = false) {
   let c = 0, n = 0;
   for (const d of data) {
     const pr = predict(d, q); let k = 0, e2 = 0, m = 0, worst = 0;
-    for (const { t, h } of d.hud) { while (k + 1 < pr.length && pr[k + 1].t <= t) k++; if (t < -0.5) continue; if (ONSET && d.black !== undefined && t > d.black) continue; const e = hudOf(pr[k].D, q) - h; e2 += e * e; m++; worst = Math.max(worst, Math.abs(e)); }
+    for (const { t, h } of d.hud) { while (k + 1 < pr.length && pr[k + 1].t <= t) k++; if (t < -0.5) continue; if (ONSET && d.black !== undefined && t > d.black) continue; const e = pr[k].h - h; e2 += e * e; m++; worst = Math.max(worst, Math.abs(e)); }
     c += e2; n += m; if (rep) console.log(`  ${d.id.padEnd(26)} rms ${Math.sqrt(e2 / m).toFixed(2)}  worst ${worst.toFixed(2)}`);
   }
   return Math.sqrt(c / n);
@@ -83,8 +85,9 @@ function nm(fn, x0, iters = 1500) {
   }
   pts.sort((a, b) => a.y - b.y); return pts[0];
 }
-const cur = [8.1, 6.6, 3.85, 13.5, 8, 1, 0.33, 1.8, 0, 0];
-console.log(`current model (T up ${cur[0]}, lat ${cur[1]}, down ${cur[2]}, fwd ${cur[3]}, back ${cur[4]}, exponent 1, linear recovery 0.33/s): HUD rms error ${cost(mk(cur, false), process.argv.includes("--report")).toFixed(3)}`);
+const cur = [8.1, 6.6, 3.85, 13.5, 8, 1, 0.35, 1.8, 0, 0];
+const CLEAR = 0.35;   // pilot.clearDose: the app's blackout latch (whole-trace scores only; --onset stops at the first blackout)
+console.log(`current model (T up ${cur[0]}, lat ${cur[1]}, down ${cur[2]}, fwd ${cur[3]}, back ${cur[4]}, exponent 1, linear recovery ${cur[6]}/s, blackout latch to ${CLEAR}): HUD rms error ${cost({ ...mk(cur, false), clear: CLEAR }, process.argv.includes("--report")).toFixed(3)}`);
 if (process.argv.includes("--fit")) {
   for (const exp of [false, true]) {
     let best = { y: 1e9 };
@@ -98,6 +101,15 @@ if (process.argv.includes("--trace")) {
   for (const id of process.argv.slice(process.argv.indexOf("--trace") + 1)) {
     const d = data.find((x) => x.id === id); if (!d) continue; const pr = predict(d, q);
     console.log(`\n${id}: t | G(vec mag) | dose | predicted HUD | measured HUD`);
-    let k = 0; for (const { t, h } of d.hud.filter((_, i) => i % 3 === 0)) { while (k + 1 < pr.length && pr[k + 1].t <= t) k++; const gv = d.g[k].v; console.log(`${t.toFixed(1).padStart(5)} | ${Math.hypot(...gv).toFixed(1).padStart(5)} (${gv.map((x) => x.toFixed(0)).join(",")}) | ${pr[k].D.toFixed(2)} | ${hudOf(pr[k].D, q).toFixed(2)} | ${h.toFixed(2)}`); }
+    let k = 0; for (const { t, h } of d.hud.filter((_, i) => i % 3 === 0)) { while (k + 1 < pr.length && pr[k + 1].t <= t) k++; const gv = d.g[k].v; console.log(`${t.toFixed(1).padStart(5)} | ${Math.hypot(...gv).toFixed(1).padStart(5)} (${gv.map((x) => x.toFixed(0)).join(",")}) | ${pr[k].D.toFixed(2)} | ${pr[k].h.toFixed(2)} | ${h.toFixed(2)}`); }
+  }
+}
+if (process.argv.includes("--latch")) {
+  // Score whole traces (recovery included) with the blackout latch the app runs: thrust cut at blackDose, back at clearDose.
+  console.log("\nwith the blackout latch (whole traces): HUD rms error by clear level and drain rate");
+  const recs = [0.25, 0.3, 0.33, 0.35, 0.37, 0.4];
+  console.log(`clear \\ drain  ${recs.map((r) => r.toFixed(2).padStart(6)).join("")}`);
+  for (const clear of [1, 0.6, 0.5, 0.45, 0.4, 0.35, 0.3, 0.2, 0]) {
+    console.log(`${clear.toFixed(2).padStart(13)}  ${recs.map((rec) => { const x = [...cur]; x[6] = rec; return cost({ ...mk(x, false), clear }).toFixed(3).padStart(6); }).join("")}`);
   }
 }
