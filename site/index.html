@@ -954,7 +954,10 @@ const egg = !hasWebGL ? stubView : (() => {
   // speed), and the distance is chosen so the whole ring and the wall ahead stay in frame, so the ship is always
   // seen against its limits: tight at the nose, wide mid-egg. You can still orbit it with the mouse.
   let follow = false, chaseD = 600, autoChase = false, prevMode = '34'; const HOME_T = [130, 0, 0];
-  let qView = [0, 0, 0, 1], worldFrame = true;    // the attitude the egg is drawn with (identity in the ship-fixed view)
+  // The egg follows where the nose points (pitch and yaw) but NOT the roll: qView is the swing, the shortest turn that takes the
+  // nose axis to where the nose points; qTw is the roll about the nose that is left over. Ship-frame vectors (the velocity point,
+  // thrust, the reach lines, the ship itself) are rotated by qTw, so rolling spins them around the steady egg: a corkscrew.
+  let qView = [0, 0, 0, 1], qTw = [0, 0, 0, 1], worldFrame = true;    // identity in the ship-fixed view
   $('t-frame').onclick = e => { worldFrame = !worldFrame; e.currentTarget.setAttribute('aria-pressed', worldFrame); lastKey = ''; };
   const setCam = (m, auto = false) => { camMode = m; follow = m === 'follow'; autoChase = follow && auto;
     for (const [id, k] of [['cam-34', '34'], ['cam-side', 'side'], ['t-follow', 'follow']]) $(id).setAttribute('aria-pressed', m === k);
@@ -974,8 +977,13 @@ const egg = !hasWebGL ? stubView : (() => {
     const [vx, vy, vz] = st.v, room = d.room;
     // attitude as a render-frame quaternion (page frame x nose, y left, z up -> render x, z, -y)
     const qReal = [att[0], att[2], -att[1], att[3]];
-    qView = worldFrame ? qReal : [0, 0, 0, 1];
+    const nose = qrotv(qReal, [1, 0, 0]);
+    let swing = [0, 1, 0, 0];   // nose straight back: any half turn will do
+    if (nose[0] > -0.999999) { const l = Math.hypot(nose[2], nose[1], 1 + nose[0]); swing = [0, -nose[2] / l, nose[1] / l, (1 + nose[0]) / l]; }
+    const twist = qMul([-swing[0], -swing[1], -swing[2], swing[3]], qReal);
+    qView = worldFrame ? swing : [0, 0, 0, 1]; qTw = worldFrame ? twist : [0, 0, 0, 1];
     shipT.quaternion.set(...qView);
+    const T = pt => qrotv(qTw, pt);   // a ship-frame render vector, in the egg's frame
     const rot = pt => qrotv(qView, pt);
     { // ease the orbit target toward the ring's centre (chase) or the egg's centre; moving the target carries the camera along
       // (the camera keeps its orientation in space: it follows where the ship is, not which way it points)
@@ -993,15 +1001,16 @@ const egg = !hasWebGL ? stubView : (() => {
     }
     // Render on demand (PLAN.md §9): skip the frame when nothing visible changed.
     const gp = R3(...st.x), gox = -((gp[0] * GRID_SLIDE) % GRID), goz = -((gp[2] * GRID_SLIDE) % GRID);
-    const cp = camera.position, key = [gox, goz, vx, vy, vz, cp.x, cp.y, cp.z, room, d.pinned, trail.length, st.a[0], st.a[1], st.a[2], follow, frameW, ...qView]
+    const cp = camera.position, key = [gox, goz, vx, vy, vz, cp.x, cp.y, cp.z, room, d.pinned, trail.length, st.a[0], st.a[1], st.a[2], follow, frameW, ...qView, ...qTw]
       .map(x => (typeof x === 'number' ? x.toFixed(2) : x)).join();
     if (key === lastKey) return;
     lastKey = key;
     gridT.quaternion.set(...(worldFrame ? [0, 0, 0, 1] : [-qReal[0], -qReal[1], -qReal[2], qReal[3]]));
     gridMesh.program.uniforms.uOff.value = [gox, goz];
     discT.position.set(vx, 0, 0); discT.scale.set(1, Math.max(room, 0.001), Math.max(room, 0.001));
-    const pv = R3(vx, vy, vz);
+    const pv = T(R3(vx, vy, vz));
     glyphT.position.set(...pv);
+    glyphT.quaternion.set(...qTw);   // the ship rolls with the roll
     // The ship is drawn at its true 20 m, but never smaller than ~42 px on screen: from the overview camera the egg is
     // 1000 m across, so the true-size ship would be a dot. The scale only grows as the camera pulls back.
     const wv = rot(pv), camD = Math.hypot(cp.x - wv[0], cp.y - wv[1], cp.z - wv[2]);
@@ -1013,7 +1022,7 @@ const egg = !hasWebGL ? stubView : (() => {
     dyn.seg([0, 0, 0], pv, COL.tvi, 1);                                       // velocity arrow
     if (sp3 > 3) dyn.seg(pv, tviP, COL.tvi, 0.5);                              // ship -> TVI
     { // 3 s trail: kept in world space, so turn it back into the ship's current frame (shipT turns it forward again)
-      const inv = [-qReal[0], -qReal[1], -qReal[2], qReal[3]]; let prev = null;
+      const inv = [-qView[0], -qView[1], -qView[2], qView[3]]; let prev = null;
       for (const w of trail) { const pt = qrotv(inv, w); if (prev) dyn.seg(prev, pt, COL.tvi, 0.45); prev = pt; } }
     const ringCol = d.pinned ? COL.warn : COL.white;                         // the dodge ring at your forward speed
     for (let j = 1; j < UNIT.length; j++) dyn.seg(R3(vx, UNIT[j-1][1] * room, UNIT[j-1][0] * room), R3(vx, UNIT[j][1] * room, UNIT[j][0] * room), ringCol, 0.85);
@@ -1022,17 +1031,17 @@ const egg = !hasWebGL ? stubView : (() => {
     const ends = {};
     const yMax = Math.sqrt(Math.max(0, room * room - vz * vz)), zMax = Math.sqrt(Math.max(0, room * room - vy * vy));
     for (const [k, y, z] of [['L', yMax, vz], ['R', -yMax, vz], ['U', vy, zMax], ['D', vy, -zMax]]) {
-      const e = R3(vx, y, z); ends[k] = e;
+      const e = T(R3(vx, y, z)); ends[k] = e;
       if (room <= 0.5) continue;
       dyn.seg(pv, e, ringCol, 0.9);                                          // reach line to the wall
-      const tick = k === 'L' || k === 'R' ? [0, 9, 0] : [0, 0, 9];
+      const tick = T(k === 'L' || k === 'R' ? [0, 9, 0] : [0, 0, 9]);
       dyn.seg([e[0] - 9, e[1] - tick[1], e[2] - tick[2]], [e[0] + 9, e[1] + tick[1], e[2] + tick[2]], ringCol, 0.9);
     }
     if (d.settle) { const n = 18, sp = d.settle.p; for (let i = 0; i < n; i++) { const a = i / n, b = (i + 0.55) / n;   // dashed settle ray
-      dyn.seg(R3(sp[0]*a, sp[1]*a, sp[2]*a), R3(sp[0]*b, sp[1]*b, sp[2]*b), COL.tvi, 0.5); } }
+      dyn.seg(T(R3(sp[0]*a, sp[1]*a, sp[2]*a)), T(R3(sp[0]*b, sp[1]*b, sp[2]*b)), COL.tvi, 0.5); } }
     const ga = st.a, gl_ = len(ga);
-    if (gl_ > 0.5) { const k = 9 / g0; dyn.seg(pv, R3(vx + ga[0]*k, vy + ga[1]*k, vz + ga[2]*k), COL.boost, 1); }          // thrust
-    if (d.pinned && d.req && len(d.req) > 0.5) { const k = 9 / g0, q = d.req; dyn.seg(pv, R3(vx + q[0]*k, vy + q[1]*k, vz + q[2]*k), COL.grey, 0.8); } // dead thrust
+    if (gl_ > 0.5) { const k = 9 / g0; dyn.seg(pv, T(R3(vx + ga[0]*k, vy + ga[1]*k, vz + ga[2]*k)), COL.boost, 1); }          // thrust
+    if (d.pinned && d.req && len(d.req) > 0.5) { const k = 9 / g0, q = d.req; dyn.seg(pv, T(R3(vx + q[0]*k, vy + q[1]*k, vz + q[2]*k)), COL.grey, 0.8); } // dead thrust
     dyn.end();
     renderer.render({ scene, camera, sort: true });
     place(labels.nose, rot(R3(520, 0, -70))); place(labels.tail, rot(R3(-300, 0, 0))); place(labels.side, rot(R3(0, 0, 420)));
@@ -1044,7 +1053,7 @@ const egg = !hasWebGL ? stubView : (() => {
       place(labels.reachR, rot(ends.R)); labels.reachR.textContent = `${Math.round(rightRoom)} ▸`; }
     else labels.reachL.hidden = labels.reachR.hidden = true;
     const sv = d.settle, far = sv && Math.hypot(sv.p[0] - vx, sv.p[1] - vy, sv.p[2] - vz) > 25;
-    if (far) { place(labels.settle, rot(R3(sv.p[0] - 40, sv.p[1], sv.p[2] - 40))); labels.settle.textContent = `ends ~${Math.round(sv.speed)} · ${Math.round(sv.side)} sideways`; }
+    if (far) { place(labels.settle, rot(T(R3(sv.p[0] - 40, sv.p[1], sv.p[2] - 40)))); labels.settle.textContent = `ends ~${Math.round(sv.speed)} · ${Math.round(sv.side)} sideways`; }
     else labels.settle.hidden = true;
     place(tviIcon, rot(tviP)); tviIcon.hidden = tviIcon.hidden || d.speed < 3;
   }
