@@ -45,8 +45,7 @@ describe("G-LOC model: constant side load, time until the HUD is gone", () => {
 
 describe("G-LOC model: boosted launch from rest with a strafe (the side part of the capped thrust), grey-out within 0.6 s", () => {
   it.each(rows.filter((r) => r.test.startsWith("r9_vis_bst_")).map((r): [string, (typeof rows)[number]] => [r.test, r]))("%s", (_n, r) => {
-    const st = r.steps[0]!, inp = { fwd: 1, lat: 0, up: 0, boost: true, ...(r.dir === "lat" ? { lat: 1 } : r.dir === "up" ? { up: 1 } : { up: -1 }) };
-    void st;
+    const inp = { fwd: 1, lat: r.dir === "lat" ? 1 : 0, up: r.dir === "up" ? 1 : r.dir === "down" ? -1 : 0, boost: true };
     let s = restState(), ps = restPilot(), grey: number | null = null;
     for (let i = 0; i < 8 / DT && grey === null; i++) {
       s = step(s, inp, profile, DT);
