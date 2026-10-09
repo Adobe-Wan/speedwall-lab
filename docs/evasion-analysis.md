@@ -248,4 +248,13 @@ What changes:
    (app model, chaser 550 m behind at 520 m/s, 10 s: wall 547 m, far TVI with a 27 deg/s roll 360 m, forward released 50 m).
 4. Sections 2-4 above remain correct for 1 km but describe a range that does not happen in a fight.
 
+**What post-3.23 community advice says (dated sources: `/mnt/project-files/research/post-3.23-evasion-sources.md`, project
+files, not in the repo).** It agrees on the range (Spectrum, 2024-09: fights moved from 200-400 m to 500-700 m with Master Modes) and on
+the small-dodge physics (Spectrum, 2026-06: `½at²` over the flight time). It adds three things the model does not settle:
+- **Don't hold a steady corkscrew.** Spectrum replies (2025-04, 2026-04) say to change direction often and roll both ways; the model
+  only scores a steady roll, so "full rate" is the best *steady* roll, not a proven best tactic. A random-reversal case is missing.
+- **Roll may not do what the model assumes.** Johnathan Winters, "Roll Isn't Doing What You Think It Is" (2025-11-29): not yet
+  watched (no transcript). Treat point 1 above as provisional until it is.
+- **Velocity inheritance** (`v_proj + closing`) rests on one unsourced Spectrum reply (2026-05). Still a test item (`proj_inherit`).
+
 The app (`site/index.html`) now computes the chaser's miss at 550 m (or the live range in the Flee lessons) instead of a fixed 1 s.
