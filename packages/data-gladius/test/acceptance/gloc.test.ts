@@ -3,7 +3,7 @@
 // Acceptance for the G-LOC MODEL against fixture glocTrials. It is a model, not CIG's rule: it only has to reproduce when
 // the measured pilots greyed out and when they did not. Misses are listed in docs/physics-fit.md.
 import { describe, expect, it } from "vitest";
-import { DT, restPilot, restState, step, stepPilot, type Vec3 } from "@speedwall-lab/core";
+import { DT, restPilot, restState, step, stepPilot, vision, type Vec3 } from "@speedwall-lab/core";
 import { fixture, profile } from "../fixture.js";
 
 const pilot = profile.pilot!;
@@ -55,5 +55,40 @@ describe("G-LOC model: boosted launch from rest with a strafe (the side part of 
     }
     expect(grey, "model grey-out").not.toBeNull();
     expect(Math.abs((grey as number) - (r.greyAt_s as number))).toBeLessThanOrEqual(0.6);
+  });
+});
+
+// Recovery: a blackout cuts the thrust, so the load is gone until vision returns. Replays each test's steps as a constant
+// gPeak in its direction while a strafe is held (0 between steps), and checks how long the HUD stays dark and when a load
+// still held greys it again.
+const recovery = fixture.glocRecovery.rows;
+function replayRecovery(r: (typeof recovery)[number]) {
+  const unit: Vec3 = r.dir === "up" ? [0, 0, 1] : r.dir === "down" ? [0, 0, -1] : [0, 1, 0];
+  let s = restPilot(), t = 0, out: number | null = null, back: number | null = null, again: number | null = null;
+  for (const st of r.steps) {
+    const on = !!(st.strafe_lat || st.strafe_vert || st.strafe_long);
+    for (let i = 0; i < st.t / DT; i++) {
+      s = stepPilot(s, s.blackout || !on ? [0, 0, 0] : (unit.map((x) => x * r.gPeak) as Vec3), pilot, DT);
+      t += DT;
+      const hud = vision(s, pilot).hud;
+      if (out === null && hud < 0.1) out = t;
+      else if (out !== null && back === null && hud >= 0.5) back = t;
+      else if (back !== null && again === null && on && hud < 0.8) again = t;
+    }
+  }
+  return { out, back, again };
+}
+
+describe("G-LOC model: recovery from a blackout with the load held (fixture glocRecovery)", () => {
+  it.each(recovery.map((r): [string, (typeof recovery)[number]] => [`${r.test} (${r.dir} ${r.gPeak} G)`, r]))("%s: dark for the measured time", (_n, r) => {
+    const m = replayRecovery(r);
+    expect(m.out, "model: HUD out").not.toBeNull();
+    expect(m.back, "model: vision back").not.toBeNull();
+    expect(Math.abs((m.back as number) - (m.out as number) - (r.visionBackAt_s - r.hudOutAt_s))).toBeLessThanOrEqual(1.5);
+  });
+  it.each(recovery.filter((r) => r.greyAgainAt_s !== null).map((r): [string, (typeof recovery)[number]] => [`${r.test} (${r.dir} ${r.gPeak} G)`, r]))("%s: comes back clear and greys again later, not at once", (_n, r) => {
+    const m = replayRecovery(r), measured = (r.greyAgainAt_s as number) - r.visionBackAt_s;
+    expect(m.again, "model: grey again").not.toBeNull();
+    expect(Math.abs((m.again as number) - (m.back as number) - measured)).toBeLessThanOrEqual(Math.max(1.5, 0.4 * measured));
   });
 });

@@ -12,8 +12,8 @@ export const FITTED_PILOT: PilotParams = {
   greyDose: 1,
   goneDose: 1.8,
   blackDose: 2.3,
-  clearDose: 1,
-  recoverPerS: 0.33,
+  clearDose: 0.35,
+  recoverPerS: 0.35,
 };
 
 const rows = "fixture glocTrials (r9_vis_*, r10_g_*, r10_geq_*, r10_rec_*)";
@@ -27,6 +27,6 @@ export const PILOT_PROVENANCE: Record<string, ProvenanceEntry> = {
   "pilot.greyDose": { kind: "fitted", source: "HUD digits at 80 % (grey_at)" },
   "pilot.goneDose": { kind: "fitted", source: "HUD below 50 % (hud_black_at); up is the outlier (predicted ~2 s late)" },
   "pilot.blackDose": { kind: "fitted", source: "fully black ~4.4 s at 10 G lateral (r10_rec_*)" },
-  "pilot.clearDose": { kind: "assumed", source: "thrust returns when vision does (boosted-down staircase, r11_boost_down_long)" },
-  "pilot.recoverPerS": { kind: "fitted", source: "vision back ~4 s after the load stops; NOT SETTLED: lateral tests held the stick, and vision returned 4 s after the stick was released, while boosted down returned 4-4.5 s after the blackout began with the stick held" },
+  "pilot.clearDose": { kind: "fitted", source: "fixture glocRecovery: with the stick held through a blackout, vision returns 4.6-6.7 s after the HUD goes dark (mean 5.9) and the pilot mostly comes back clear (HUD back above 80 % in 9 of 12; 50-80 % after the SCM down red-outs), greying again 1.0-4.1 s later. Was 1 (assumed), which returned vision ~4 s after the blackout already at grey, so a held 10 G lateral load blacked out again ~2.5 s later" },
+  "pilot.recoverPerS": { kind: "fitted", source: "drains the stress from blackDose to clearDose in ~5.6 s (fixture glocRecovery; was 0.33, which the grey-out onsets do not distinguish from 0.35). The blackout cuts the thrust, so the recovery clock starts at the blackout, not at the stick release: r10_rec_lat_15/30/60 released at 7 s and restarted at 8.5/10/13 s, and all came back at 11.3 s" },
 };

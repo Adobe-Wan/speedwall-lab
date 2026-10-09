@@ -65,6 +65,18 @@ const glocRow = z.object({
   redPeak: num.nullable(),
 });
 
+const glocRecoveryRow = z.object({
+  test: z.string(),
+  session: z.string(),
+  dir: z.enum(["up", "lat", "down"]),
+  boosted: z.boolean(),
+  steps: z.array(traceStepAll).min(1),
+  gPeak: num,
+  hudOutAt_s: num,
+  visionBackAt_s: num,
+  greyAgainAt_s: num.nullable(),
+});
+
 export const fixtureSchema = z.object({
   ship: z.literal("Gladius"),
   patch: z.string(),
@@ -140,6 +152,7 @@ export const fixtureSchema = z.object({
       .min(1),
   }),
   glocTrials: z.object({ _note: z.string(), rows: z.array(glocRow).min(1) }),
+  glocRecovery: z.object({ _note: z.string(), rows: z.array(glocRecoveryRow).min(1) }),
   gloc: z.string(),
   invalid: z.record(z.string(), z.string()),
   forwardAxis: z.string(),
@@ -150,3 +163,4 @@ export type FixturePlateau = Fixture["plateaus"][number];
 export type FixtureWallTrace = z.infer<typeof wallTrace>;
 export type FixtureSpeedTrace = z.infer<typeof speedTrace>;
 export type FixtureGlocRow = z.infer<typeof glocRow>;
+export type FixtureGlocRecoveryRow = z.infer<typeof glocRecoveryRow>;

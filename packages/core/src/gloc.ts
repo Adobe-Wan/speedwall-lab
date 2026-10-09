@@ -10,7 +10,7 @@ import type { PilotParams, Vec3 } from "./types.js";
 export interface PilotState {
   /** Accumulated stress: 0 = fine, greyDose = HUD digits at 80 %, goneDose = HUD below 50 %, blackDose = fully out. */
   dose: number;
-  /** Fully blacked out: thrust and boost are cut until vision returns (dose back down to clearDose). */
+  /** Fully blacked out: thrust and boost are cut until vision returns (dose drained back down to clearDose). */
   blackout: boolean;
   /** 0..1: how much of the recent load was "eyeballs up" (down strafe), which tints the screen red. */
   redShare: number;
@@ -60,5 +60,6 @@ export function vision(s: PilotState, p: PilotParams): Vision {
   const edge = lerp(D, 0.5, 0, p.goneDose, 0.85), centre = lerp(D, 0.9, 0, p.blackDose, 1);
   const red = Math.min(0.9, s.redShare * lerp(D, 0.3, 0, p.goneDose, 0.9));
   const state = s.blackout ? "blackout" : D >= p.goneDose ? "gone" : D >= p.greyDose ? "grey" : "ok";
-  return { hud, edge: Math.max(edge, s.blackout ? 1 : 0), centre: s.blackout ? 1 : centre, red, state };
+  // While blacked out the HUD stays dark (measured: it reads 0 until vision returns), even as the stress drains under it.
+  return { hud: s.blackout ? 0 : hud, edge: Math.max(edge, s.blackout ? 1 : 0), centre: s.blackout ? 1 : centre, red, state };
 }

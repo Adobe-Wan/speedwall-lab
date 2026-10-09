@@ -24,15 +24,27 @@ describe("pilot G-LOC model", () => {
     expect(v.edge).toBeGreaterThan(v.centre);
     expect(v.hud).toBeLessThan(1);
   });
-  it("vision returns about 4 s after the blackout begins, because the thrusters are cut (model)", () => {
-    // Boosted down held through a red-out came back 4-4.5 s after the blackout began (r11_boost_down_long). The lateral
-    // rec tests returned 4 s after the stick was RELEASED, ~2.5 s later than this: not settled.
+  it("vision returns about 5.5 s after the blackout begins, because the thrusters are cut, and comes back clear", () => {
+    // Measured (fixture glocRecovery): 4.6-6.7 s from the HUD going dark to vision back, the same whether the stick was
+    // held or released (the blackout had already cut the thrust), and the HUD comes back clear, not grey.
     let s = restPilot(), t = 0, since = 0;
     while (!s.blackout && t < 20) { s = stepPilot(s, [0, 10, 0], pilot, DT); t += DT; }
     expect(s.blackout).toBe(true);
+    expect(vision(s, pilot).hud).toBe(0);
     while (s.blackout && since < 20) { s = stepPilot(s, [0, 0, 0], pilot, DT); since += DT; }
-    expect(since).toBeGreaterThan(3);
-    expect(since).toBeLessThan(5);
+    expect(since).toBeGreaterThan(4.6);
+    expect(since).toBeLessThan(6.7);
+    expect(vision(s, pilot)).toMatchObject({ state: "ok", hud: 1 });
+  });
+  it("a load still held after vision returns greys you again later, not at once (r10_g_up_100, r9_vis_scm_f0_lat_r50)", () => {
+    let s = restPilot(), back = -1, again = -1, t = 0;
+    for (let i = 0; i < 20 / DT && again < 0; i++) {
+      const was = s.blackout;
+      s = stepPilot(s, s.blackout ? [0, 0, 0] : [0, 10, 0], pilot, DT); t += DT;
+      if (was && !s.blackout) back = t;
+      if (back > 0 && vision(s, pilot).state !== "ok") again = t;
+    }
+    expect(again - back).toBeGreaterThan(1);   // measured 1.5 s at 10 G lateral; the old clear level greyed at once
   });
   it("a long boosted down hold makes a staircase: out, back, out again (r11_redout_stairs)", () => {
     let s = restPilot(), out = 0, back = 0, was = false;

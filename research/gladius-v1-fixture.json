@@ -1254,7 +1254,7 @@
   },
   "note": "V1 excludes rotation; kept for V2."
  },
- "gloc": "Per-direction tolerance, not one G limit (see glocTrials). SCM strafe + full roll from rest, no grey within 20 s at: up 2.5/5/6.5/7.5 G, lateral 2.5/5 G, down 2.5/3.7 G. Greys out at: up 10 G (4.4 s), lateral 7.5 G (7.4 s) and 10 G (1.7-2.1 s), down 5 G (3.4-3.6 s, red-out). Boost itself is not the cause (equal-G boosted and SCM pairs agree within 0.25 s). A boosted launch from rest (~21 G forward) greys out in ~2 s. While fully blacked out the ship stops responding and boost drops (speed bleeds to the SCM cap); the HUD returned ~4 s after the load stopped (lateral) or 4-4.5 s after the blackout began with the stick held (boosted down); unsettled which applies.",
+ "gloc": "Per-direction tolerance, not one G limit (see glocTrials). SCM strafe + full roll from rest, no grey within 20 s at: up 2.5/5/6.5/7.5 G, lateral 2.5/5 G, down 2.5/3.7 G. Greys out at: up 10 G (4.4 s), lateral 7.5 G (7.4 s) and 10 G (1.7-2.1 s), down 5 G (3.4-3.6 s, red-out). Boost itself is not the cause (equal-G boosted and SCM pairs agree within 0.25 s). A boosted launch from rest (~21 G forward) greys out in ~2 s. While fully blacked out the ship stops responding and boost drops (speed bleeds to the SCM cap); vision returns 4.6-6.7 s after the HUD goes dark whether or not the stick is released (the blackout has already cut the thrust), mostly back to a clear HUD, and a load still held greys it again 1-4 s later (see glocRecovery).",
  "boostRelease": {
   "note": "All inputs and boost released while moving ~514 m/s near the boosted nose wall; IFCS decelerates toward the SCM cap. [t after release, speed, G meter] Inputs were released at t=0; the HUD shows the response ~0.3 s later (game/HUD latency). (Round 1 trace, 1.4 s only; superseded for the tail by releaseTraces, session 20261008-133222.)",
   "samples": [
@@ -3375,7 +3375,7 @@
   ]
  },
  "glocTrials": {
-  "_note": "Time from the input start to the HUD digits at 80 % (greyAt), below 50 % (hudGoneAt) and the screen half dark (dark50At); null = not reached within the test. gPeak is the HUD G meter peak (steady side G for the strafe + full-roll tests; rows with forwardLaunch greyed out during the ~19-21 G boosted run-up from rest, so their gPeak is the earlier forward peak). Not a CIG rule: a per-direction tolerance with onset time falling as G rises, ~4 s recovery. Forward (eyeballs-in) tolerance is not mapped.",
+  "_note": "Time from the input start to the HUD digits at 80 % (greyAt), below 50 % (hudGoneAt) and the screen half dark (dark50At); null = not reached within the test. gPeak is the HUD G meter peak (steady side G for the strafe + full-roll tests; rows with forwardLaunch greyed out during the ~19-21 G boosted run-up from rest, so their gPeak is the earlier forward peak). Not a CIG rule: a per-direction tolerance with onset time falling as G rises; recovery in glocRecovery. Forward (eyeballs-in) tolerance is not mapped.",
   "rows": [
    {
     "test": "r10_g_down_050",
@@ -3942,6 +3942,223 @@
     "hudGoneAt_s": 8.37,
     "dark50At_s": 8.6,
     "redPeak": 0.15
+   }
+  ]
+ },
+ "glocRecovery": {
+  "_note": "Recovery from a full blackout, from the same vision.csv files as glocTrials (2 Hz, so +/-0.5 s). Seconds from the input start: hudOutAt = HUD digits below 10 %; visionBackAt = HUD back above 50 %; greyAgainAt = HUD below 80 % again with the load still applied (null = the HUD never came back above 80 %, or the test ended). Every row held its stick through the blackout except r10_rec_lat_*, which released at 7 s and reapplied at 8.5 / 10 / 13 s: they came back at the same moment, because the blackout had already cut the thrust. Out to back: 4.6-6.7 s, mean 5.9.",
+  "rows": [
+   {
+    "test": "r10_g_up_100",
+    "session": "20261008-172622",
+    "dir": "up",
+    "boosted": false,
+    "steps": [
+     {
+      "t": 20.0,
+      "strafe_vert": 1.0,
+      "roll": 1.0
+     }
+    ],
+    "gPeak": 10.0,
+    "hudOutAt_s": 7.18,
+    "visionBackAt_s": 11.78,
+    "greyAgainAt_s": 15.88
+   },
+   {
+    "test": "r9_vis_scm_f0_up_r50",
+    "session": "20261008-150350",
+    "dir": "up",
+    "boosted": false,
+    "steps": [
+     {
+      "t": 16.0,
+      "strafe_vert": 1.0,
+      "roll": 0.5
+     }
+    ],
+    "gPeak": 10.0,
+    "hudOutAt_s": 7.13,
+    "visionBackAt_s": 12.74,
+    "greyAgainAt_s": null
+   },
+   {
+    "test": "r9_vis_scm_f0_lat_r50",
+    "session": "20261008-150350",
+    "dir": "lat",
+    "boosted": false,
+    "steps": [
+     {
+      "t": 16.0,
+      "strafe_lat": -1.0,
+      "roll": 0.5
+     }
+    ],
+    "gPeak": 10.0,
+    "hudOutAt_s": 4.64,
+    "visionBackAt_s": 11.27,
+    "greyAgainAt_s": 12.8
+   },
+   {
+    "test": "r10_rec_lat_15",
+    "session": "20261008-172622",
+    "dir": "lat",
+    "boosted": false,
+    "steps": [
+     {
+      "t": 7.0,
+      "strafe_lat": -1.0,
+      "roll": 1.0
+     },
+     {
+      "t": 1.5
+     },
+     {
+      "t": 10.0,
+      "strafe_lat": -1.0,
+      "roll": 1.0
+     }
+    ],
+    "gPeak": 10.0,
+    "hudOutAt_s": 4.65,
+    "visionBackAt_s": 11.25,
+    "greyAgainAt_s": 12.78
+   },
+   {
+    "test": "r10_rec_lat_30",
+    "session": "20261008-172622",
+    "dir": "lat",
+    "boosted": false,
+    "steps": [
+     {
+      "t": 7.0,
+      "strafe_lat": 1.0,
+      "roll": 1.0
+     },
+     {
+      "t": 3.0
+     },
+     {
+      "t": 10.0,
+      "strafe_lat": 1.0,
+      "roll": 1.0
+     }
+    ],
+    "gPeak": 10.0,
+    "hudOutAt_s": 4.63,
+    "visionBackAt_s": 11.28,
+    "greyAgainAt_s": 12.82
+   },
+   {
+    "test": "r10_rec_lat_60",
+    "session": "20261008-172622",
+    "dir": "lat",
+    "boosted": false,
+    "steps": [
+     {
+      "t": 7.0,
+      "strafe_lat": -1.0,
+      "roll": 1.0
+     },
+     {
+      "t": 6.0
+     },
+     {
+      "t": 10.0,
+      "strafe_lat": -1.0,
+      "roll": 1.0
+     }
+    ],
+    "gPeak": 10.0,
+    "hudOutAt_s": 4.67,
+    "visionBackAt_s": 11.34,
+    "greyAgainAt_s": 15.41
+   },
+   {
+    "test": "r10_g_down_100",
+    "session": "20261008-172622",
+    "dir": "down",
+    "boosted": false,
+    "steps": [
+     {
+      "t": 20.0,
+      "strafe_vert": -1.0,
+      "roll": 1.0
+     }
+    ],
+    "gPeak": 5.0,
+    "hudOutAt_s": 8.74,
+    "visionBackAt_s": 15.38,
+    "greyAgainAt_s": null
+   },
+   {
+    "test": "r10_geq_down_scm_100",
+    "session": "20261008-172622",
+    "dir": "down",
+    "boosted": false,
+    "steps": [
+     {
+      "t": 20.0,
+      "strafe_vert": -1.0,
+      "roll": 0.8
+     }
+    ],
+    "gPeak": 5.0,
+    "hudOutAt_s": 7.73,
+    "visionBackAt_s": 13.86,
+    "greyAgainAt_s": 14.87
+   },
+   {
+    "test": "r10_geq_down_bst_075",
+    "session": "20261008-172622",
+    "dir": "down",
+    "boosted": true,
+    "steps": [
+     {
+      "t": 20.0,
+      "strafe_vert": -0.75,
+      "roll": 0.8,
+      "boost": true
+     }
+    ],
+    "gPeak": 5.0,
+    "hudOutAt_s": 8.22,
+    "visionBackAt_s": 14.38,
+    "greyAgainAt_s": null
+   },
+   {
+    "test": "r9_vis_scm_f0_down_r50",
+    "session": "20261008-150350",
+    "dir": "down",
+    "boosted": false,
+    "steps": [
+     {
+      "t": 16.0,
+      "strafe_vert": -1.0,
+      "roll": 0.5
+     }
+    ],
+    "gPeak": 5.0,
+    "hudOutAt_s": 6.67,
+    "visionBackAt_s": 12.77,
+    "greyAgainAt_s": null
+   },
+   {
+    "test": "r9_vis_hold_down_boost",
+    "session": "20261008-150350",
+    "dir": "down",
+    "boosted": true,
+    "steps": [
+     {
+      "t": 12.0,
+      "strafe_vert": -1.0,
+      "boost": true
+     }
+    ],
+    "gPeak": 6.7,
+    "hudOutAt_s": 4.14,
+    "visionBackAt_s": 8.74,
+    "greyAgainAt_s": 10.26
    }
   ]
  },
