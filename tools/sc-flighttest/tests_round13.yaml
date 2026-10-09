@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: 2026 AdobeWan
 # SPDX-License-Identifier: CC-BY-4.0
+# DEFERRED 2026-10-09 (no second pilot available); kept for later.
 # Round 13 (Gladius, DECOUPLED, Arena Commander FREE FLIGHT only, both pilots present): MEASURE THE SHOOTER. TWO PILOTS.
 #   python run.py run --tests tests_round13.yaml
 #

@@ -345,7 +345,7 @@ are unchanged: Decoupled, G-Safe OFF, 4K, FOV 100, Arena Commander free flight, 
 | chase_equal | P0 | 2P | Both Gladii boosted at the nose, shooter 550 m behind, both full forward. Target flies 12 s of: (a) up + full roll (wall); (b) up + roll 27 deg/s (far TVI); (c) forward released, up + full roll; (d) straight line as the baseline. Shooter fires at the pip throughout. Log range each second (HUD) and hit markers. 3 runs each | The coaches' rules against a same-top-speed chaser: does the range hold on the wall and close in (b) and (c), and do the hit rates follow (model: the corkscrew alone shifts shots only 2-5 m at this range) |
 | chase_delta | P1 | 2P | As (a), but the shooter starts at 700 m and closes with a positive delta (target at 450 m/s forward, shooter on the wall), firing from 600 m in | How much a positive delta raises the hit rate at the same range |
 
-## 11. Update, 2026-10-09: measure the shooter (round 13, two pilots)
+## 11. Update, 2026-10-09: measure the shooter (round 13, two pilots; deferred, no second pilot available)
 
 The tests above measure the ship. What decides whether a dodge works at 550 m is mostly the shooter's delay, which the alpha assumed
 (0.25 s) and modelled as perfect tracking. `docs/aim-model.md` adds a human tracking model and a two-pilot test that measures it:
