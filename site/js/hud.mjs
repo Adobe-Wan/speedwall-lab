@@ -38,6 +38,7 @@ const MONO = 'ui-monospace, SFMono-Regular, Menlo, Consolas, "DejaVu Sans Mono",
 const CW = 0.62;         // monospace glyph advance in em, with a little slack
 const HALO = 2;          // reach of the text halo stroke
 const EDGE = 8;          // keep everything this far inside the view
+const TOOLBAR = 44;      // the page puts its view tool buttons in this band at the top edge
 const GAP = 4;           // minimum gap between HUD blocks
 const TVI_PAD = 20;      // clearance beyond the keep-out radius (the TVI glyph's wings reach ±22 px)
 const TVI_LBL = [14, 66, 10, 26]; // the page's "TVI 13°" label box relative to the TVI centre (x0, x1, y0, y1)
@@ -418,7 +419,8 @@ export function createHud(svg) {
     else { set(M, 'textLength', null); set(M, 'lengthAdjust', null); }
     const rects = [[-tw / 2 - HALO, -0.95 * fs, tw / 2 + HALO, 0.3 * fs + HALO]];
     const E = { w, h, cx, cy, r1: rK + TVI_PAD, r2: rK, step: 3, relaxed: false, obs: Lo.obs || [] };
-    const pref = [cx, EDGE + 0.95 * fs];
+    // below the page's view tool buttons (~40 px row at the top edge), so the label never sits under them
+    const pref = [cx, Math.max(EDGE, TOOLBAR) + 0.95 * fs];
     let p = place({ rects, pref }, E);
     if (!p) { E.r2 = 0; p = place({ rects, pref }, E); }
     if (!p) { E.r1 = Lo.xhR + 6; E.relaxed = true; p = place({ rects, pref }, E); }
