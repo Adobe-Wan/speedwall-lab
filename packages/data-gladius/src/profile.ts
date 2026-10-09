@@ -3,9 +3,7 @@
 import type { FlightProfile, ProvenanceEntry } from "@speedwall-lab/core";
 import type { Fixture } from "./fixture-schema.js";
 import { FITTED_WALL } from "./fitted.js";
-
-/** Author-described, not yet measured: see provenance "boost.redZonePct". */
-const RED_ZONE_PCT = 25;
+import { FITTED_PILOT, PILOT_PROVENANCE } from "./pilot.js";
 
 const MEASURED = "Measured in-game by AdobeWan (sc-flighttest / hand tests)";
 
@@ -26,10 +24,10 @@ export function profileFromFixture(f: Fixture): FlightProfile {
   for (const axis of ["fwd", "back", "lat", "up", "down"] as const) {
     set(`scm.G.${axis}`, "measured", scm.G_provenance);
     const text = boost.G_provenance[axis] ?? "";
-    // Values taken from spviewer.eu are third-party data (NOTICE.md).
+    // A value still taken from spviewer.eu would be third-party data (NOTICE.md); round 4 replaced both.
     set(
       `boost.G.${axis}`,
-      /spviewer/i.test(text) ? "thirdParty" : "measured",
+      !/^measured/.test(text) && /spviewer/i.test(text) ? "thirdParty" : "measured",
       text || "provenance not stated in fixture",
     );
   }
@@ -39,14 +37,14 @@ export function profileFromFixture(f: Fixture): FlightProfile {
   set("boost.rotationDps", "measured", boost.rotation_provenance);
   const unstated = "fixture gives the value but not how it was obtained (confirm in P1)";
   set("boost.softWallK", "assumed", unstated);
-  set("boost.tankDrainPctPerS", "assumed", unstated);
-  set("boost.tankRegenPctPerS", "assumed", unstated);
-  set("boost.redZonePct", "assumed", "author's description of the in-game AB meter (2026-10-07): boost is disabled in the bottom 25 % after the tank empties; not in the fixture");
+  for (const k of ["tankDrainPctPerS", "tankRegenPctPerS", "redZonePct"]) set(`boost.${k}`, "measured", boost.tank_provenance);
+  set("rotationRule", "measured", boost.rotationCombination_provenance);
   set("thrustRule.fullStrafeForwardCurve.settledSpeed", "measured", "round 3 full-strafe sweep");
   set("thrustRule.fullStrafeForwardCurve.effectiveForwardG", "fitted", "derived from the settled speeds (limaçon inverse), per fixture note");
   const fit = "fitted to the fixture's wall and release traces by tools/fit-gladius.mjs";
   for (const k of ["slewGps", "boostSide", "letOffBleed", "retroEaseK", "releaseK"]) set(`wall.${k}`, "fitted", fit);
-  set("wall.releaseFloorG", "assumed", "after boost release the IFCS brakes at least at the measured SCM retro rating (scm.G.back) until back at the SCM cap; the fixture's boostRelease trace ends at 393 m/s (1.4 s), so the tail is not measured (round 6)");
+  set("wall.releaseFloorG", "measured", boost.releaseFloor_provenance);
+  Object.assign(provenance, PILOT_PROVENANCE);
   set("lateralRoomTable", "fitted", "fixture lateralRoom.boost (limaçon cross-section, tabulated)");
   set("dimensionsM", "assumed", "author-specified 20 x 17 x 5.5 m (fixture dimensions_note)");
 
@@ -69,7 +67,7 @@ export function profileFromFixture(f: Fixture): FlightProfile {
       softWallK: boost.softWallK_per_s,
       tankDrainPctPerS: boost.tankDrain_pct_per_s,
       tankRegenPctPerS: boost.tankRegen_pct_per_s,
-      redZonePct: RED_ZONE_PCT,
+      redZonePct: boost.redZonePct,
     },
     thrustRule: {
       name: "c2",
@@ -79,7 +77,9 @@ export function profileFromFixture(f: Fixture): FlightProfile {
       },
     },
     lateralRoomTable: f.lateralRoom.boost.map(([a, b]) => [a, b]),
-    wall: { ...structuredClone(FITTED_WALL), releaseFloorG: scm.G.back },
+    rotationRule: boost.rotationCombination,
+    pilot: structuredClone(FITTED_PILOT),
+    wall: { ...structuredClone(FITTED_WALL), releaseFloorG: boost.releaseFloorG },
     provenance,
   };
 }

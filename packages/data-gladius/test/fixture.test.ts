@@ -47,13 +47,21 @@ describe("FlightProfile from fixture", () => {
     expect(profile.boost.G.fwd).toBe(21.2);
   });
 
-  it("labels the spviewer values as thirdParty, and only those", () => {
-    // NOTICE.md: these two must be replaced by round-4 measurements before the repo goes public.
-    const third = Object.entries(profile.provenance)
-      .filter(([, e]) => e.kind === "thirdParty")
-      .map(([k]) => k)
-      .sort();
-    expect(third).toEqual(["boost.G.back", "boost.G.down"]);
+  it("has no third-party values left: round 4 replaced the two spviewer ones", () => {
+    const third = Object.entries(profile.provenance).filter(([, e]) => e.kind === "thirdParty");
+    expect(third).toEqual([]);
+    expect(profile.boost.G.back).toBe(5.96);
+    expect(profile.boost.G.down).toBe(6.8);
+  });
+
+  it("labels the 2026-10-08 constants measured, with their test ids", () => {
+    for (const k of ["boost.redZonePct", "boost.tankDrainPctPerS", "boost.tankRegenPctPerS", "wall.releaseFloorG", "rotationRule"]) {
+      expect(profile.provenance[k]?.kind).toBe("measured");
+    }
+    expect(profile.provenance["boost.redZonePct"]?.source).toContain("r7_tank_cycle");
+    expect(profile.provenance["wall.releaseFloorG"]?.source).toContain("r6_release_all");
+    expect(profile.boost).toMatchObject({ tankDrainPctPerS: 5, tankRegenPctPerS: 3.75, redZonePct: 25 });
+    expect(profile.wall.releaseFloorG).toBe(4.26);
   });
 
   it("gives every numeric group a provenance label", () => {

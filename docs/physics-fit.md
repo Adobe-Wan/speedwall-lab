@@ -50,3 +50,22 @@ The boosted egg stays a limaçon, r(θ) = 394 + 126·cosθ: nose 520, sides 394,
   - side push: 3–6 G instead of 12.9 (fitted above).
 
 **Open question (round 5).** In `dd_wall_fwdlat_boost` (pinned at the nose, then forward + strafe), the speed held 517–518 for 6 s. On the limaçon, that means the TVI stalled about 12–14° off the nose. The G meter's steady ~3 G says the velocity kept swinging: the fitted model reaches ~24° and 510 m/s by 7 s, inside the ±10 m/s tolerance but on the low side. `tools/sc-flighttest/tests_round5.yaml` settles it. It measures the egg's radius by heading (a slow yaw sweep with the speed bleeding to r(δ)) and repeats the nose slide for 13 s.
+
+## Update 2026-10-09: rounds 4-11 merged
+
+Source: `docs/HANDOFF-REPLY.md`, `docs/flight-model-findings.md`, `research/gladius-measurements-2026-10-08.json` (merged into the fixture with test IDs; raw data in `research/raw/2026-10-08/`).
+
+**Now measured (were assumed):** `releaseFloorG` 4.26 G, boost red zone 25 %, tank drain 5.0 %/s and regen 3.75 %/s, boosted back 5.96 G and down 6.8 G (the spviewer values are gone), boosted up 12.99 G, SCM up 10.02 G, rotation rule (a diagonal stick is scaled to unit length).
+
+**Changed in the model:**
+- Release floor = the SCM thruster rating along the way the IFCS has to push (4.26 G nose-on, ~10 G after a 90 degree turn; `r10_turn90_release` is matched without being fitted). A held lateral stick scales it by `releaseSideFactor` 0.63 (fitted to `r6_release_fwd_lat` only).
+- Past the egg (after a turn) the IFCS pulls back at `overspeedK` 1.15 /s, falling to half of that toward the tail (`overspeedTail` 0.5). Fitted to the five turn-to-egg traces (rms 5 m/s). The soft wall K 1.3 /s still applies below the egg.
+- Rotation: `packages/core/src/rotation.ts`; the page uses it.
+- HUD lag after a boost drop: 0.4 s in the replays (fitted; the game's ramp-down is 0.3 s).
+
+**Acceptance now: 610 of 656 physics checks pass (46 miss; before this update 189 of 222, 33 miss).** The 33 old misses are unchanged (the wall traces above). The 13 new misses:
+- `r10_turn90_boost_fwd` (turn with throttle held), 8 samples: the model dips to ~463, the game to 441, and recovers ~25 m/s too high.
+- `r6_release_fwd_lat` 3 samples, `r10_flip_and_burn` 1 sample, `r9_vis_bst_f100_up_r50` (G-LOC model grey-out time) 1 sample.
+- Not modelled: the boost ramp-up (0.6 s per the wiki API) makes the model reach ~410 m/s at 2.3 s where the game shows ~390; replays set the speed at the release, so only launch samples are affected and none is asserted.
+
+**G-LOC (a MODEL).** Per-direction tolerance and a stress dose: stress rises at (G / tolerance - 1) per second above the tolerance, HUD grey at 1, gone at 1.8, blackout at 2.3, drains at 0.33/s. Up 8.1 G, lateral 6.6 G, down 3.85 G are fitted to `glocTrials`; forward 13.5 G and backward 8 G are each fitted to a single scenario (flip and burn; boost release). Not settled: how long recovery takes after a held lateral load (the model says ~4 s from the start of the blackout, because thrust is cut; the lateral tests show 4 s after the stick is released), the forward and backward tolerances, and the HUD-gone time for up (predicted ~2 s late). The page runs it in free flight only (off during lessons) and flags it "model".

@@ -6,6 +6,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { step, derive, restState, DT } from "../packages/core/dist/index.js";
 import { profileFromFixture } from "../packages/data-gladius/dist/index.js";
+import { releaseRows, turnRows, launchRows } from "../packages/data-gladius/dist/replay.js";
 
 const fixture = JSON.parse(readFileSync(new URL("../research/gladius-v1-fixture.json", import.meta.url), "utf8"));
 const base = profileFromFixture(fixture);
@@ -48,6 +49,19 @@ function score(p, report = false) {
     const e = Math.abs(speed(s) - pl.plateau_mps) / Math.max(0.01 * pl.plateau_mps, 3);
     cost += e * e; if (e > 1) { fails++; if (report) console.log(`plateau ${pl.id}: measured ${pl.plateau_mps}, model ${speed(s).toFixed(0)} ✗`); }
   }
+  // 2026-10-08 traces (research/raw/2026-10-08): the six release traces (±10 m/s) and the five turn-to-egg traces (±15 m/s)
+  // are fitted; the rest are validation only (tolerances as in the acceptance tests) and are only reported.
+  for (const [group, rows, tol, fitted] of [
+    ["releaseTraces", releaseRows, 10, true], ["turnTraces", turnRows, 15, true], ["turnTraces", turnRows, 15, false], ["throttleTraces", launchRows, 10, false]]) {
+    const FIT = new Set(["turn90_boosted_pitch_up", "turn90_boosted_pitch_down", "turn120_boosted", "turn135_boosted_yaw", "turn150_boosted"]);
+    for (const [id, tr] of Object.entries(fixture[group])) {
+      if (id === "_note" || (group === "turnTraces" && FIT.has(id) !== fitted)) continue;
+      const r = rows(p, tr).filter((_, i) => i % 2 === 0);
+      let bad = 0; for (const x of r) { const e = Math.abs(x.model - x.measured) / tol; if (fitted) cost += e * e * 0.5; if (e > 1) bad++; }
+      if (bad) fails += fitted ? bad : 0;
+      if (report) console.log(`\n${group}/${tr.test}${fitted ? "" : " (validation)"}: ${bad}/${r.length} samples outside ±${tol} m/s`);
+    }
+  }
   const rel = release(p);
   if (report) console.log("\nboostRelease (±15, model at t − 0.3 s)\n    t | v meas model");
   for (const r of rel) { const e = Math.abs(r.mv - r.v) / 15; cost += e * e; if (e > 1) fails++; if (report) console.log(`${r.t.toFixed(3).padStart(5)} | ${r.v} ${r.mv.toFixed(0)}${e > 1 ? " ✗" : ""}`); }
@@ -57,7 +71,7 @@ function score(p, report = false) {
 // parameter vector <-> wall params
 const KEYS = [["slewGps", 5, 80], ["boostSide.factor", 0.05, 1], ["boostSide.fromFwd", 0, 500], ["boostSide.toFwd", 0, 520],
   ["letOffBleed.G", 0, 10], ["letOffBleed.side", 0.05, 1], ["letOffBleed.fromFwd", 0, 519], ["letOffBleed.toFwd", 0, 520],
-  ["retroEaseK", 0.1, 5], ["releaseK", 0.0005, 0.01]];
+  ["retroEaseK", 0.1, 5], ["releaseK", 0.0005, 0.01], ["overspeedK", 0.3, 3], ["overspeedTail", 0, 1], ["releaseSideFactor", 0.2, 1]];
 const get = (o, k) => k.split(".").reduce((a, b) => a[b], o);
 const set = (o, k, v) => { const ks = k.split("."); const last = ks.pop(); ks.reduce((a, b) => a[b], o)[last] = v; };
 function withX(x) { const p = structuredClone(base); KEYS.forEach(([k, lo, hi], i) => set(p.wall, k, Math.min(hi, Math.max(lo, x[i])))); 
@@ -96,6 +110,9 @@ if (args.has("--write")) {
   letOffBleed: { G: ${r(W.letOffBleed.G, 2)}, side: ${r(W.letOffBleed.side, 3)}, fromFwd: ${r(W.letOffBleed.fromFwd)}, toFwd: ${r(W.letOffBleed.toFwd)} },
   retroEaseK: ${r(W.retroEaseK, 3)},
   releaseK: ${r(W.releaseK, 6)},
+  overspeedK: ${r(W.overspeedK, 2)},
+  overspeedTail: ${r(W.overspeedTail, 2)},
+  releaseSideFactor: ${r(W.releaseSideFactor, 2)},
 };
 `);
   writeFileSync(new URL("../packages/data-gladius/src/fitted.ts", import.meta.url), src);

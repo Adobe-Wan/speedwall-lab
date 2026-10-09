@@ -72,6 +72,12 @@ function bankLimit(a: Vec3, n: Vec3, limit: number, G: AxisG): Vec3 {
   return r;
 }
 
+/** The most acceleration (G) the thruster banks can give along unit direction `d`: each bank at its own rating. */
+export function bankRating(G: AxisG, d: Vec3): number {
+  const lim = (x: number, pos: number, neg: number) => (Math.abs(x) < 1e-9 ? Infinity : (x > 0 ? pos : neg) / Math.abs(x));
+  return Math.min(lim(d[0], G.fwd, G.back), lim(d[1], G.lat, G.lat), lim(d[2], G.up, G.down));
+}
+
 /** Advance the simulation by one fixed step. Pure: returns a new state. */
 export function step(s: State, u: Input, p: FlightProfile, dt: number = DT): State {
   const boosted = boostActive(s, u), W = p.wall;
@@ -102,7 +108,11 @@ export function step(s: State, u: Input, p: FlightProfile, dt: number = DT): Sta
     const r = eggRadiusAlong(p, boosted, v);
     // PLAN.md §4.4, in order. (1) Trim the outward request: to 0 at the SCM sphere (you may reach it this
     // step, not pass it), to K·(r − |v|) at the boosted soft wall, to 0 while bleeding down after boost.
-    const limit = releasing ? 0 : boosted ? p.boost.softWallK * (r - sp) : Math.max(0, r - sp) / dt;
+    // Past the egg (after a turn, say) the pull back onto it uses its own gain, weaker toward the tail (measured, rounds 10-11).
+    const over = boosted && sp > r, kOver = W.overspeedK * (1 - (1 - W.overspeedTail) * Math.max(0, -n[0]));
+    const limit = releasing ? 0 : boosted ? (over ? kOver : p.boost.softWallK) * (r - sp) : Math.max(0, r - sp) / dt;
+    // The C2 cap limits what the pilot asks for, not the IFCS pulling the speed back onto the egg.
+    if (over) cap = Math.max(cap, -limit);
     let along = a[0] * n[0] + a[1] * n[1] + a[2] * n[2];
     const atWall = along > limit;
     if (atWall) { a = [a[0] - (along - limit) * n[0], a[1] - (along - limit) * n[1], a[2] - (along - limit) * n[2]]; along = limit; }
@@ -135,8 +145,13 @@ export function step(s: State, u: Input, p: FlightProfile, dt: number = DT): Sta
     if (atWall || releasing) a = bankLimit(a, n, Math.min(limit, a[0] * n[0] + a[1] * n[1] + a[2] * n[2]), boosted ? p.boost.G : p.scm.G);
     if (releasing) {
       // Boost released (or tank empty) above the SCM cap: IFCS bleeds the excess (fitted), never weaker than
-      // the floor (assumed), and stops at the cap instead of overshooting below it.
-      const dec = Math.min(Math.max(W.releaseK * (sp - scm) ** 2, (W.releaseFloorG ?? 0) * G0), (sp - scm) / dt);
+      // the floor (measured, 4.26 G), and stops at the cap instead of overshooting below it.
+      // The floor is the SCM thruster rating along the way the IFCS has to push: 4.26 G (the retros) with the nose on the
+      // velocity, ~10 G after a 90° turn (the up thrusters: r10_turn90_release). A held side thrust shares the thrusters:
+      // a full lateral stick lowers the floor (r6_release_fwd_lat: 2.2 G below 300 m/s instead of 4.26).
+      const side = Math.min(1, Math.hypot(cmd[1], cmd[2]) / (p.scm.G.lat * G0));
+      const floor = (W.releaseFloorG ?? 0) * (bankRating(p.scm.G, [-n[0], -n[1], -n[2]]) / p.scm.G.back) * G0 * (1 - (1 - (W.releaseSideFactor ?? 1)) * side);
+      const dec = Math.min(Math.max(W.releaseK * (sp - scm) ** 2, floor), (sp - scm) / dt);
       a = [a[0] - dec * n[0], a[1] - dec * n[1], a[2] - dec * n[2]];
     }
   } else {

@@ -45,17 +45,28 @@ export const flightProfileSchema = z
           .strict(),
       })
       .strict(),
+    rotationRule: z.enum(["unitLength", "independent"]),
     lateralRoomTable: z.array(pair).min(2).optional(),
     wall: z
       .object({
         slewGps: num.positive(),
         boostSide: z.object({ factor: num.min(0).max(1), fromFwd: num, toFwd: num }).strict(),
         letOffBleed: z.object({ G: num.nonnegative(), side: num.min(0).max(1), fromFwd: num, toFwd: num }).strict(),
+        overspeedK: num.nonnegative(),
+        overspeedTail: num.min(0).max(1),
         retroEaseK: num.nonnegative(),
         releaseK: num.nonnegative(),
         releaseFloorG: num.nonnegative().optional(),
+        releaseSideFactor: num.min(0).max(1).optional(),
       })
       .strict(),
+    pilot: z
+      .object({
+        tolG: z.object({ up: num.positive(), lat: num.positive(), down: num.positive(), fwd: num.positive(), back: num.positive() }).strict(),
+        kappa: num.positive(), greyDose: num.positive(), goneDose: num.positive(), blackDose: num.positive(), clearDose: num.positive(), recoverPerS: num.positive(),
+      })
+      .strict()
+      .optional(),
     provenance: z.record(z.string(), provenanceEntrySchema),
   })
   .strict()

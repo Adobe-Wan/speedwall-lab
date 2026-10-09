@@ -6,11 +6,7 @@
 - **Stay On Target** (https://github.com/Adobe-Wan/stay-on-target), MIT, Copyright (c) 2026 Stay On Target contributors. The controller matching and "move it to map it" capture in `site/js/controls.mjs` are adapted from it.
 
 ## Third-party data (not covered by this repository's licenses)
-Two Gladius values come from **SC Ships Performances Viewer (spviewer.eu) by Olakeen** and are used with the author's permission:
-- boosted reverse acceleration 5.9 G;
-- boosted down acceleration 6.6 G.
-
-They appear in `research/gladius-v1-fixture.json` (marked `spviewer`), in `site/index.html`, and in `docs/RESEARCH.md`. `docs/RESEARCH.md` also quotes other spviewer figures in its research notes. These values may not be reused under MIT or CC BY. They'll be replaced by the author's own measurements (`tools/sc-flighttest/tests_round4.yaml`).
+Two Gladius values (boosted back 5.9 G and down 6.6 G) were first taken from **SC Ships Performances Viewer (spviewer.eu) by Olakeen**, used with the author's permission. Round 4 (2026-10-08) replaced both with the author's own measurements (5.96 G and 6.8 G), so no spviewer value remains in `research/gladius-v1-fixture.json` or `site/`. `docs/RESEARCH.md` still quotes spviewer figures in its research notes; those may not be reused under MIT or CC BY.
 
 ## Cockpit HUD
 `site/js/hud.mjs` is an original drawing. Its layout follows the in-game Advanced HUD (crosshair, throttle bar, AB bar, G meter); no game art, fonts or shapes are used.

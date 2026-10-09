@@ -15,6 +15,10 @@
     "./fixture-schema": {
       "types": "./dist/fixture-schema.d.ts",
       "default": "./dist/fixture-schema.js"
+    },
+    "./replay": {
+      "types": "./dist/replay.d.ts",
+      "default": "./dist/replay.js"
     }
   },
   "files": [

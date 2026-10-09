@@ -7,8 +7,11 @@ import type { WallParams } from "@speedwall-lab/core";
 
 export const FITTED_WALL: WallParams = {
   slewGps: 46.2,
-  boostSide: { factor: 0.469, fromFwd: 354, toFwd: 354 },
+  boostSide: { factor: 0.47, fromFwd: 358, toFwd: 358 },
   letOffBleed: { G: 5.15, side: 0.625, fromFwd: 0, toFwd: 520 },
   retroEaseK: 1.023,
-  releaseK: 0.002275,
+  releaseK: 0.002266,
+  overspeedK: 1.15,
+  overspeedTail: 0.5,
+  releaseSideFactor: 0.63,
 };

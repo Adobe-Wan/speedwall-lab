@@ -29,10 +29,10 @@ Every visual has a one-line plain-language caption. The tone is a coaching white
 | | V1 (this plan) | V1.1 | Later (see RESEARCH.md) |
 |---|---|---|---|
 | Ship | Gladius | Gladius | Fleet (61 ships), ship picker |
-| Translation | fwd/back, lat, up/down, boost + tank | same | same |
-| Rotation | none: attitude fixed, so dust and TVI agree | pitch/yaw/roll at measured rates; dust swirls; TVI anchoring gauge | corkscrew and duel labs |
+| Translation | fwd/back, lat, up/down, boost + tank (drain 5.0 %/s, regen 3.75 %/s, re-engage at 25 %: measured) | same | same |
+| Rotation | V1: pitch/yaw/roll at measured, linear rates; a diagonal stick is scaled to unit length (§4.8); dust swirls; TVI anchoring gauge | same | corkscrew and duel labs |
 | Views | Egg, Pilot, Slice | same | compare overlay, attacker's view |
-| Input | keyboard, touch, gamepad, presets | same | HOTAS mapping wizard, record/replay |
+| Input | keyboard, touch, gamepad, presets; controls wizard and SC actionmaps import | same | record/replay |
 | Mode | decoupled (validated) | same | coupled (unverified) |
 
 ---
@@ -123,8 +123,10 @@ The full derivations and test evidence are in RESEARCH.md §0.4 and the round 1�
    2. Apply the cap.
    3. Cancel any remaining outward part with real thrust, limited per bank. In SCM this gives a 9.9 G dodge for ~1.3 s, then ~4.2 G while the retros bleed forward speed.
 5. **Boosted-wall side thrust.** Fit one or two constants to the fixture's boost wall traces (strafe only ≈ 6–7.5 G; forward + strafe ≈ 3 G).
-6. **Boost release or empty tank.** Decelerate to the SCM sphere, fitted to `boostRelease`.
+6. **Boost release or empty tank.** The IFCS bleeds the ship to the SCM sphere. Measured from the nose (519): about 11.9 G over the first second (12.5 G peak), then **4.26 G** from 300 to 235 m/s; 225 after 5.2 s. Released at 440 (peaked 457): 4.8 s; released at 338 (peaked 367): 3.7 s. With a strafe held: 7.6 s (only 2.2 G below 300). The **spacebrake above SCM is no faster than releasing** (5.2 s, same curve). Acceptance: the release traces in the measurements file (fixture `releaseTraces`), within ±10 m/s.
 7. **Position.** `x += v·dt`, used only by the pilot view's dust.
+8. **Rotation (P6).** Linear per axis. If `|(pitch, yaw, roll)| > 1`, divide the stick vector by its length, then multiply each axis by its rate. A full pitch + yaw stick turns the nose at 62.6 °/s (boosted 74.8), slower than pitch alone, so the fastest 180° is pure pitch. Roll combined with pitch is unverified. The speed lost in a boosted turn needs no extra rule: the ship-frame velocity is checked against the egg every step (§4.4).
+9. **Turning bleed.** Above the egg the IFCS pulls the speed back toward it; the measured rate is not one constant (see `docs/physics-fit.md`).
 
 **Acceptance (CI):**
 - Every fixture plateau within 1% (or ±3 m/s).
@@ -139,14 +141,15 @@ The full derivations and test evidence are in RESEARCH.md §0.4 and the round 1�
 
 ## 5. Egg view (velocity space)
 
-- **Camera.** Orbit camera, defaulting to a 3/4 view from behind and above; reset-view button. Nose = +X; 1 unit = 1 m/s.
+- **Camera.** Orbit camera, defaulting to a 3/4 view from behind and above (or the chase camera below); reset-view button. Nose = +X; 1 unit = 1 m/s.
 - **Boost egg.**
   - A revolved limaçon mesh (64 × 32 segments) at ~15–20% opacity, with a fresnel rim so the silhouette reads.
   - Latitude rings every 100 m/s of forward speed.
   - HTML labels at the nose (520), sides (394) and tail (268).
   - Draw back faces first, then front faces; no sorting library needed.
-- **SCM sphere** (225): faint, toggleable.
-- **Ship glyph** at the origin: a dimensioned dart, 20 × 17 × 5.5 m. Readable size by default; a toggle shows true scale (1 m = 1 m/s).
+- **SCM sphere** (225): always shown.
+- **Ship:** a low-poly Gladius at true size (20 × 17 × 5.5 m) on the velocity point. Frame option: the egg turns with the ship (default) or stays in the ship frame.
+- **Chase camera** (default at lesson start): follows the ring centre and zooms to keep the sideways room and the wall in frame; world-fixed orientation.
 - **Velocity point.** An arrow from the origin plus a 3 s trail. The point carries the **TVI symbol**, the same marker used in the pilot view, and glows when pinned.
 - **Sideways-room disc (the key visual).** The egg's cross-section at your current forward speed, drawn as a ring through the velocity point, with its radius in m/s:
 
@@ -204,6 +207,7 @@ The full derivations and test evidence are in RESEARCH.md §0.4 and the round 1�
   - the **TVI offset angle δ** (nose to velocity);
   - an optional **guide ring** at the trainer's offset (default 13°, adjustable);
   - in V1.1, the roll rate that would anchor the TVI at that offset (`ω = a_side / (v·sinδ)`; see RESEARCH.md "TVI-anchored corkscrew").
+- **HUD layout.** The advanced HUD is a fixed layout measured from an in-game screenshot at 100° FOV (1456 × 819): speed bar 140 px left and AB bar 159 px right of the crosshair (the game's HUD is not symmetric), both centred about 16 px above its row, the G value ending 272 px right. Positions scale with view width and tan(hFOV/2). The 0.11-screen-width figure below is superseded for the bars; the in-game FOV setting's horizontal-vs-vertical meaning is still unverified (the layout treats 100 as horizontal).
 - **FOV matching.** An FOV control plus a "match my screen" helper. The player enters their in-game FOV, or matches a HUD element's on-screen distance. The author measured the AB readout at about 0.11 screen-widths from centre, roughly 12–17°. With that set, TVI offsets on our screen match the pilot's game screen. Whether the in-game FOV setting is horizontal or vertical is unverified, so the helper calibrates from a screenshot.
 - **Link to the egg view.** The TVI angle equals the angle of the velocity point off the egg's +X axis. The same symbol appears in both views, and the settle ghost shows where the TVI will drift for the held input.
 
@@ -216,10 +220,9 @@ The full derivations and test evidence are in RESEARCH.md §0.4 and the round 1�
 
 ## 7. Layout, input and scenes
 
-**Layout (mobile-first):**
-- **Phone portrait:** view tabs (Slice · Egg · Pilot), readout strip, and a touch pad at the bottom (throttle slider, strafe pad, boost button).
-- **Tablet:** two panes.
-- **Desktop:** Egg | Pilot side by side, with the slice inset in the egg view.
+**Layout (desktop-first):**
+- **Desktop:** Egg | Pilot side by side, with the slice inset in the egg view; narrow desktop windows keep the controls.
+- **Touch phones** play the lessons only (no controls); the explanation sits under the view.
 
 **Input:**
 - **Keyboard:**
@@ -228,12 +231,14 @@ The full derivations and test evidence are in RESEARCH.md §0.4 and the round 1�
   - P pause, `.` step, R reset to rest, N reset pinned at the nose.
 - **Gamepad:** Gamepad API, analog, with invert toggles.
 - **Touch** as above.
-- **Presets** (scripted, then hand back control):
-  - strafe from rest;
-  - full forward then strafe;
-  - forward + strafe from rest;
-  - 25% / 50% forward + strafe;
-  - release forward to make room.
+- **Lessons** (scripted from a standstill, then hand back control; lesson figures cite the fixture, and any figure without a test ID is marked *model*):
+  1. strafe from a stop;
+  2. dodge at top speed;
+  3. dodge from mid-egg;
+  4. ease off to make room;
+  5. escape corkscrew (boosted, forward + up, roll ~120 °/s; shows the measured launch grey-out, not a blackout);
+  6. corkscrew and still shoot back (roll ~27 °/s: *model*);
+  7. over-spinning.
 - **Timescale:** 0.25×–1×.
 
 **Four guided scenes** (30–60 s each, then "now try it"):
@@ -253,6 +258,7 @@ The full derivations and test evidence are in RESEARCH.md §0.4 and the round 1�
 - Colour-blind-safe palette, with no colour-only meaning.
 - `prefers-reduced-motion`: Slice view by default, dust off.
 - A text alternative for every view: a live region with speed, sideways room and TVI angle.
+- Screen-reader pass deferred (qa-2026-10-07 item 7).
 
 ---
 
@@ -327,6 +333,7 @@ There's no public spviewer repository or license, and the framework is unknown. 
   - **Exit:** CI green except physics tests.
 - **P1 — Core physics** (§4).
   - **Exit:** all acceptance tests pass; fitted constants reported.
+- **P2–P5 are re-planned as porting the prototype page (`site/index.html`) into `render` and `element`; P6 rotation is already in the prototype.**
 - **P2 — Slice view + readouts + keyboard/touch.**
   - The first shippable, no-WebGL experience.
   - Responsive at 375 / 768 / 1440 px.
@@ -344,7 +351,7 @@ There's no public spviewer repository or license, and the framework is unknown. 
   | SCM | 68 °/s | 52 °/s | 200 °/s |
   | Boost | 81.6 °/s | 62.7 °/s | 240 °/s |
 
-  Adds dust swirl, the TVI orbiting while rolling, and the TVI anchoring gauge.
+  A diagonal stick is scaled to unit length (§4.8). Adds dust swirl, the TVI orbiting while rolling, and the TVI anchoring gauge.
 - **P7 — spviewer hand-off kit.** Demo link, the three integration levels, the data adapter, and answers to §8's questions.
 
 **Tests:**

@@ -92,6 +92,10 @@ export interface FlightProfile {
   };
   /** Boosted lateral room table, [forward m/s, sideways room m/s] (fixture lateralRoom.boost). */
   lateralRoomTable?: [number, number][];
+  /** How a stick vector longer than 1 is scaled: "unitLength" divides it by its length (measured, round 11). */
+  rotationRule: "unitLength" | "independent";
+  /** Pilot G-LOC model (a model, not a measured rule; see PilotParams). */
+  pilot?: PilotParams;
   /** Wall and transient behaviour, fitted to the measured traces (PLAN.md §4, items 4–6). */
   wall: WallParams;
   /** Key: dotted field path, e.g. "boost.G.back". Fields not listed are unlabelled. */
@@ -108,15 +112,39 @@ export interface WallParams {
    * forward speed `fromFwd` to `toFwd`.
    */
   letOffBleed: { G: number; side: number; fromFwd: number; toFwd: number };
+  /**
+   * Boosted and past the egg (after a turn): the IFCS pulls the speed back at (speed − radius)·k, with
+   * k = overspeedK · (1 − (1 − overspeedTail) · max(0, −cos(velocity off nose))), 1/s. Fitted to the round 10-11 turn traces.
+   */
+  overspeedK: number;
+  overspeedTail: number;
   /** Retros easing off as forward speed runs out in a dodge: retro ≤ k · forward speed, 1/s. */
   retroEaseK: number;
   /** Boost released above the SCM cap: deceleration = k·(speed − SCM cap)², in 1/m. */
   releaseK: number;
   /**
-   * Boost released: the bleed never falls below this many G until the speed is back at the SCM cap. Without it
-   * the quadratic tail would leave you above SCM for 20+ s. Omitted = 0 (pure quadratic).
+   * Boost released: the bleed never falls below this many G until the speed is back at the SCM cap (measured 4.26 G,
+   * round 6). Without it the quadratic tail would leave you above SCM for 20+ s. Omitted = 0 (pure quadratic).
    */
   releaseFloorG?: number;
+  /** Multiplier on that floor at a full side stick (1 = unchanged). Fitted to one trace, r6_release_fwd_lat. */
+  releaseSideFactor?: number;
+}
+
+/** G-LOC model parameters (MODEL: see gloc.ts). */
+export interface PilotParams {
+  /** G tolerated per direction (ship frame: up = +z thrust, down = −z, lat = ±y, fwd = +x, back = −x) before stress builds. */
+  tolG: { up: number; lat: number; down: number; fwd: number; back: number };
+  /** Stress per second at twice the tolerance. */
+  kappa: number;
+  /** Stress at which the HUD digits are at 80 %, below 50 %, and the pilot is fully out. */
+  greyDose: number;
+  goneDose: number;
+  blackDose: number;
+  /** Blackout ends (thrust returns) when the stress has fallen to this. */
+  clearDose: number;
+  /** Stress lost per second while the load is below tolerance. */
+  recoverPerS: number;
 }
 
 export interface Readouts {

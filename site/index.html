@@ -142,10 +142,15 @@ label.tog { display: inline-flex; gap: 6px; align-items: center; color: var(--mu
 .keytable span:nth-child(odd) { text-align: right; white-space: nowrap; }
 details.more summary { cursor: pointer; color: var(--muted); font-size: .8rem; }
 @media (pointer: coarse) { .vtools button, .seg button { min-height: 44px; padding: 8px 10px; } button { min-height: 44px; } label.tog input { width: 22px; height: 22px; } }
-.legend { display: flex; flex-wrap: wrap; gap: 2px 16px; font: .76rem var(--font-ui); color: var(--muted); margin-top: -4px; }
+.gloc { position: absolute; inset: 0; pointer-events: none; --c: 0; --e: 0; --r: 0; --r0: 100%;
+  background: radial-gradient(ellipse closest-side at 50% 50%, rgba(0,0,0,var(--c)) 0%, rgba(0,0,0,var(--c)) var(--r0), rgba(0,0,0,var(--e)) 100%),
+              radial-gradient(ellipse closest-side at 50% 50%, rgba(170,15,15,0) 25%, rgba(190,20,20,var(--r)) 100%); }
+.gloc[hidden] { display: none; }
+#r-gloc.warn { color: var(--warn, #ff6a55); }
+.legend { display: flex; flex-wrap: wrap; gap: 2px 16px; font: .76rem var(--font-ui); color: var(--muted); margin-bottom: -4px; }
 .legend span::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: -1px; }
 .legend .lg-egg::before { background: var(--boost); } .legend .lg-scm::before { background: var(--scm); }
-.legend .lg-ring::before { border: 1.5px solid var(--fg); background: none; } .legend .lg-dot::before { width: 5px; height: 5px; background: #ffeecc; }
+.legend .lg-ring::before { border: 1.5px solid var(--fg); background: none; }
 .legend .lg-tvi::before { border: 1.5px solid var(--tvi); background: none; }
 .set { display: grid; grid-template-columns: auto 1fr auto; gap: 4px 8px; align-items: center; font-size: .78rem; color: var(--muted); }
 .set input[type=range] { accent-color: var(--tvi); min-width: 0; width: 100%; }
@@ -242,6 +247,8 @@ footer p { margin: 0 0 4px; max-width: 75ch; }
 @media (pointer: coarse) and (max-width: 979px), (pointer: coarse) and (orientation: landscape) and (max-height: 540px) {
   .deck, .vtools, .caption, #ctl-open, #fly, .run-msg { display: none !important; }
   .app { padding-bottom: 12px; }
+  /* on a phone the lessons come first, the statistics after them */
+  .maneuvers { order: 1; } .legend, .readouts { order: 2; } .app > footer { order: 3; }
   .lesson-note { display: block; }
 }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
@@ -278,7 +285,6 @@ footer p { margin: 0 0 4px; max-width: 75ch; }
           <button id="cam-side" aria-pressed="false" title="Side profile: the egg's real shape">Side</button>
           <button id="t-follow" aria-pressed="false" title="Chase cam: rides behind the ship and keeps your dodge room and the wall in frame. Starts by itself with each lesson.">Chase</button>
         </span>
-        <button id="t-meas" aria-pressed="true" title="Top speeds measured in game, placed on the egg">In-game tests</button>
         <button id="t-frame" aria-pressed="true" title="On: the egg and the ship turn with the ship, and your velocity stays put in space (pitch the nose up and the 520 end goes up with it). Off: the view stays attached to the ship, so the velocity moves instead.">Egg turns with ship</button>
       </div>
       <canvas class="inset" id="c-inset" aria-hidden="true"></canvas>
@@ -286,12 +292,14 @@ footer p { margin: 0 0 4px; max-width: 75ch; }
     </section>
     <section class="view" id="v-pilot" data-hidden="false" aria-label="Pilot view: space dust, crosshair and TVI">
       <canvas id="c-pilot"></canvas>
+      <div class="gloc" id="gloc" aria-hidden="true" hidden></div>
       <svg class="overlay" id="hud" aria-hidden="true"></svg>
       <svg class="overlay" id="ahud" aria-hidden="true"></svg>
       <div class="vtitle">Cockpit view</div>
       <div class="vtools">
         <button id="t-dust" aria-pressed="true">Dust</button>
         <button id="t-ring" aria-pressed="true">Guide ring</button>
+        <button id="t-gloc" aria-pressed="true" title="A MODEL, not a measured rule: how much G you can take depends on the direction (up most, down least), and the screen greys, darkens from the edge (red for down) and blacks out, then the thrusters and boost cut until you recover (~4 s). Fitted to the author's tests; forward and backward tolerance are not mapped. Off while a lesson runs.">G-LOC (model)</button>
       </div>
       <div class="caption" id="cap-pilot"></div>
     </section>
@@ -311,6 +319,20 @@ footer p { margin: 0 0 4px; max-width: 75ch; }
     <button id="run-stop" class="small">Stop</button>
   </div>
   </div>
+  <div class="legend" aria-hidden="true"><span class="lg-egg">Amber egg: top speed with boost</span><span class="lg-scm">Blue ball: top speed without boost (225)</span><span class="lg-ring">White ring: dodge room left</span><span class="lg-tvi">TVI (circle with wings): where you're really going</span></div>
+  <div class="readouts" aria-hidden="true">
+    <div class="ro"><b>Speed</b><span id="r-speed">0</span><small>m/s</small></div>
+    <div class="ro"><b>Forward</b><span id="r-fwd">0</span><small>m/s</small></div>
+    <div class="ro"><b>Sideways</b><span id="r-side">0</span><small>m/s</small></div>
+    <div class="ro key" title="How much more sideways speed you can add at your current forward speed, left and right"><b>Dodge room</b><span id="r-room">394</span><small>m/s</small>
+      <div class="roombar" aria-hidden="true"><i id="rb-fill"></i><b id="rb-ship"></b></div><small class="rb-lr" id="rb-lr">◂ 394 · 394 ▸</small></div>
+    <div class="ro" title="Your current push. 1 G = Earth gravity"><b>Thrust</b><span id="r-g">0.0</span><small>G</small></div>
+    <div class="ro"><b>Roll</b><span id="r-roll">0</span><small>°/s</small></div>
+    <div class="ro" title="Angle between where your nose points and where you are actually going (the TVI)"><b>Drift angle</b><span id="r-tvi">–</span><small>°</small></div>
+    <div class="ro" title="MODEL, not a measured rule: stress from the G you are pulling in each direction. Greys the HUD, then the screen, then blacks out and cuts thrust and boost."><b>G-LOC (model)</b><span id="r-gloc">clear</span><div class="tank"><i id="r-glocbar"></i></div></div>
+    <div class="ro"><b>Boost tank</b><span id="r-tank">100</span><small>%</small><div class="tank"><i id="r-tankbar"></i></div></div>
+    <div class="ro"><b>Flight mode</b><span class="chip" id="r-mode">SCM</span> <span class="chip" id="r-pin" hidden>At limit</span></div>
+  </div>
   <section class="maneuvers" id="lessons" aria-labelledby="lessons-h">
         <h2 id="lessons-h">Lessons: pick a maneuver, watch the ship in the egg</h2>
         <p class="lesson-note" id="lesson-note" role="status">Pick a lesson to watch the ship move inside the egg.</p>
@@ -327,20 +349,13 @@ footer p { margin: 0 0 4px; max-width: 75ch; }
           <button data-preset="ck-shoot">Corkscrew and still shoot back<small>Boost, forward + up, slow roll ~27 °/s: the TVI holds still</small></button>
           <button data-preset="ck-spin">Over-spinning (don't)<small>Full-rate roll: the spiral is far smaller than the ship</small></button>
         </div>
+        <h3>Speed you lose · turning and braking</h3>
+        <div class="mgrid">
+          <button data-preset="turn-cost">Turning while boosted costs speed<small>Pitch up 90° at the nose: 520 drops to 394, the egg's side. In SCM it costs nothing</small></button>
+          <button data-preset="flip-burn">Flip and burn<small>Flip with a full pitch, then full throttle: ~300 m/s gone in 1.5 s</small></button>
+          <button data-preset="let-go">Let go of boost<small>Back to 225 m/s in about 5 s; the spacebrake is no faster</small></button>
+        </div>
       </section>
-  <div class="legend" aria-hidden="true"><span class="lg-egg">Amber egg: top speed with boost</span><span class="lg-scm">Blue ball: top speed without boost (225)</span><span class="lg-ring">White ring: dodge room left</span><span class="lg-dot">Dots: speeds measured in game</span><span class="lg-tvi">TVI (circle with wings): where you're really going</span></div>
-  <div class="readouts" aria-hidden="true">
-    <div class="ro"><b>Speed</b><span id="r-speed">0</span><small>m/s</small></div>
-    <div class="ro"><b>Forward</b><span id="r-fwd">0</span><small>m/s</small></div>
-    <div class="ro"><b>Sideways</b><span id="r-side">0</span><small>m/s</small></div>
-    <div class="ro key" title="How much more sideways speed you can add at your current forward speed, left and right"><b>Dodge room</b><span id="r-room">394</span><small>m/s</small>
-      <div class="roombar" aria-hidden="true"><i id="rb-fill"></i><b id="rb-ship"></b></div><small class="rb-lr" id="rb-lr">◂ 394 · 394 ▸</small></div>
-    <div class="ro" title="Your current push. 1 G = Earth gravity"><b>Thrust</b><span id="r-g">0.0</span><small>G</small></div>
-    <div class="ro"><b>Roll</b><span id="r-roll">0</span><small>°/s</small></div>
-    <div class="ro" title="Angle between where your nose points and where you are actually going (the TVI)"><b>Drift angle</b><span id="r-tvi">–</span><small>°</small></div>
-    <div class="ro"><b>Boost tank</b><span id="r-tank">100</span><small>%</small><div class="tank"><i id="r-tankbar"></i></div></div>
-    <div class="ro"><b>Flight mode</b><span class="chip" id="r-mode">SCM</span> <span class="chip" id="r-pin" hidden>At limit</span></div>
-  </div>
   <p class="sr" aria-live="polite" id="live"></p>
 
   <div class="deck">
@@ -371,7 +386,7 @@ footer p { margin: 0 0 4px; max-width: 75ch; }
         <button id="reset">Stop <kbd class="hint sc">R</kbd></button>
         <button id="pin">Start at top speed <kbd class="hint sc">N</kbd></button>
         <button id="pause" aria-pressed="false">Pause <kbd class="hint sc">P</kbd></button>
-        <label class="tog" title="The boost tank never drains (training aid; the game's tank drains 4.8 %/s and refills 4 %/s)"><input type="checkbox" id="unlimited"> Unlimited boost</label>
+        <label class="tog" id="unlimited-tog" title="The boost tank never drains (training aid)"><input type="checkbox" id="unlimited"> Unlimited boost</label>
       </div>
       <div class="set">
         <span>Roll rate</span><input type="range" id="rollrate" min="5" max="100" value="100" aria-label="Roll rate, percent of full stick"><output id="rollrate-v"></output>
@@ -393,7 +408,7 @@ footer p { margin: 0 0 4px; max-width: 75ch; }
   <p class="fly-note" id="fly-note" hidden></p>
 
   <footer>
-    <p><strong>How to read it.</strong> Your ship sits at your current velocity: the farther from the centre cross (stopped), the faster you're moving, in that direction. <strong>Amber egg:</strong> top speed in each direction while boosting (520 forward, 394 sideways, 268 back). <strong>Blue ball:</strong> top speed without boost (SCM, 225 every way). <strong>White ring:</strong> how much more sideways speed you can add at your forward speed; it turns red at the limit. <strong>Dots:</strong> speeds measured in game. <strong>TVI</strong> (the circle with wings in the cockpit): where you're really going. <strong>Decoupled:</strong> the ship keeps drifting when you let go; thrusters only push.</p>
+    <p><strong>How to read it.</strong> Your ship sits at your current velocity: the farther from the centre cross (stopped), the faster you're moving, in that direction. <strong>Amber egg:</strong> top speed in each direction while boosting (520 forward, 394 sideways, 268 back). <strong>Blue ball:</strong> top speed without boost (SCM, 225 every way). <strong>White ring:</strong> how much more sideways speed you can add at your forward speed; it turns red at the limit. <strong>TVI</strong> (the circle with wings in the cockpit): where you're really going. <strong>Decoupled:</strong> the ship keeps drifting when you let go; thrusters only push.</p>
     <p>Physics: the tested core model (<code>packages/core</code>), fitted to the author's in-game measurements. All 30 measured settle speeds match within 1%; the wall and boost-release traces mostly match, and the misses are listed in <code>docs/physics-fit.md</code>. Decoupled mode only. Roll is a preview: each corkscrew lists its in-game result to compare.</p>
     <p>Measurements: AdobeWan, in-game tests (Oct 2026). Original directional-G research: <a href="https://www.spviewer.eu/" style="color:var(--muted)">SC Ships Performances Viewer</a> by Olakeen, used with permission.</p>
     <p>This is an unofficial Star Citizen fan project, not affiliated with the Cloud Imperium group of companies. Star Citizen® is a registered trademark of Cloud Imperium Rights LLC. No game assets are used.</p>
@@ -404,7 +419,7 @@ footer p { margin: 0 0 4px; max-width: 75ch; }
 import { Renderer, Camera, Transform, Program, Mesh, Geometry, Orbit, Vec3 } from './vendor/ogl.mjs';
 import { createControls, keyName } from './js/controls.mjs';
 import { createHud } from './js/hud.mjs';
-import { step as coreStep, derive as coreDerive, restState, capped, boostActive, eggRadiusAlong, lateralRoom as coreRoom, gladius, G0 } from './vendor/speedwall-core.mjs';
+import { step as coreStep, derive as coreDerive, restState, capped, boostActive, eggRadiusAlong, lateralRoom as coreRoom, gladius, G0, angularVelocity, stickScaled, restPilot, stepPilot, vision } from './vendor/speedwall-core.mjs';
 
 /* ───────────────────────── physics: the tested core (packages/core), bundled with the Gladius profile ─────────────────────────
    site/vendor/speedwall-core.mjs is generated by `pnpm build:alpha`. The core's ship frame is y = right; this page's
@@ -421,16 +436,6 @@ function step(s, u, boostHeld, dt) {
   const inp = coreInput(u, boostHeld), c = coreStep(s.c, inp, gladius, dt);
   return { c, v: toA(c.vWorld), x: s.x, tank: c.tank, a: toA(c.aWorld), boost: boostActive(s.c, inp), roll: s.roll };
 }
-// Measured boosted settle speeds (research/gladius-v1-fixture.json, plateaus): i = inputs, v = m/s.
-const FIXTURE_PLATEAUS = [
-  { i: { fwd: -1 }, v: 267 }, { i: { lat: 1 }, v: 394 }, { i: { up: -1 }, v: 391 }, { i: { fwd: 1 }, v: 519 },
-  { i: { fwd: 1, up: 1 }, v: 501 }, { i: { fwd: 1, up: -1 }, v: 514 }, { i: { up: 1, lat: -1 }, v: 394 },
-  { i: { fwd: 0.5, up: 1 }, v: 455 }, { i: { fwd: 0.25, up: 1 }, v: 441 }, { i: { fwd: 0.5, up: 0.5 }, v: 501 },
-  { i: { fwd: 0.5, lat: -1 }, v: 455 }, { i: { fwd: 0.1, lat: -1 }, v: 414 }, { i: { fwd: 0.25, lat: -1 }, v: 441 },
-  { i: { fwd: 0.4, lat: -1 }, v: 455 }, { i: { fwd: 0.6, lat: -1 }, v: 455 }, { i: { fwd: 0.75, lat: -1 }, v: 480 },
-  { i: { fwd: 0.9, lat: -1 }, v: 498 }, { i: { fwd: 1, lat: -0.25 }, v: 518 }, { i: { fwd: 1, lat: -0.5 }, v: 514 },
-  { i: { fwd: 1, lat: -0.75 }, v: 508 }, { i: { fwd: 0.25, lat: -0.25 }, v: 501 }, { i: { fwd: 0.75, lat: -0.75 }, v: 501 },
-].map(p => ({ ...p, b: true }));
 /* ───────────────────────── input ───────────────────────── */
 const $ = id => document.getElementById(id);
 const ctl = { thr: 0, padL: 0, padU: 0, padSticky: false, boostLock: false, boostBtn: false, keys: new Set(), paused: false, rollBtn: 0, rollHold: 0, rollFrac: 1, unlimited: false };
@@ -449,6 +454,13 @@ const qRot = (q, v) => { const [x, y, z, w] = q, [vx, vy, vz] = v; // v' = q v q
 const qAxisAngle = (w, dt) => { const a = Math.hypot(...w) * dt; if (a < 1e-12) return [0, 0, 0, 1]; const s = Math.sin(a / 2) / (a / dt);
   return [w[0] * s, w[1] * s, w[2] * s, Math.cos(a / 2)]; };
 let S = mkState(0, false);
+// G-LOC (a MODEL, not a measured rule): the pilot's stress, and its effect on the screen and on the thrusters.
+let PS = restPilot();
+const gloc = { on: true };   // switched by #t-gloc; remembered in prefs
+// The model runs in free flight. A lesson shows the speed limits, so it runs without blackouts (the lesson texts say what the
+// measured pilots felt); taking the controls ends the lesson and the model takes over.
+const glocLive = () => gloc.on && !script;
+const NO_THRUST = { f: 0, l: 0, u: 0 };
 let script = null;
 // Ending a maneuver. resetOnScreen: the pilot took over with keys or a controller, so the on-screen throttle,
 // pad and boost lock the maneuver set are cleared too (otherwise they keep flying the ship).
@@ -542,6 +554,7 @@ setRollFrac(1);
 // Page preferences (per browser).
 const prefs = (() => { try { return { shortcuts: true, ...JSON.parse(localStorage.getItem('speedwall.prefs.v1') || '{}') }; } catch { return { shortcuts: true }; } })();
 const savePrefs = () => { try { localStorage.setItem('speedwall.prefs.v1', JSON.stringify(prefs)); } catch { /* private mode */ } };
+gloc.on = prefs.gloc !== false; $('t-gloc').setAttribute('aria-pressed', gloc.on);
 $('shortcuts').checked = prefs.shortcuts; document.body.classList.toggle('no-shortcuts', !prefs.shortcuts);
 $('shortcuts').addEventListener('change', e => { prefs.shortcuts = e.target.checked; document.body.classList.toggle('no-shortcuts', !prefs.shortcuts); savePrefs(); });
 // Key hints on the buttons follow your bindings (empty when the action has no key).
@@ -608,10 +621,13 @@ $('c-pilot').addEventListener('mousedown', e => { if (e.button === 1) { e.preven
 document.addEventListener('pointerlockchange', () => { controls.mouse.setLocked(document.pointerLockElement === $('c-pilot')); });
 document.addEventListener('mousemove', e => { if (document.pointerLockElement === $('c-pilot')) controls.mouse.move(e.movementX, e.movementY); });
 
+$('t-gloc').onclick = e => { gloc.on = !gloc.on; e.currentTarget.setAttribute('aria-pressed', gloc.on); PS = restPilot(); glocKey = ''; prefs.gloc = gloc.on; savePrefs(); };
+$('unlimited-tog').title = `The boost tank never drains (training aid; measured in game: it drains ${gladius.boost.tankDrainPctPerS} %/s and refills ${gladius.boost.tankRegenPctPerS} %/s)`;
 $('unlimited').addEventListener('change', e => { ctl.unlimited = e.target.checked; });
 
 // pinned: false/'rest' (stopped), true/'nose' (boosted nose, 520), 'scm' (SCM wall, 225) or { vx, boost }
 function reset(pinned) {
+  PS = restPilot();
   if (pinned === 'rest') pinned = false; if (pinned === 'nose') pinned = true;
   if (typeof pinned === 'object' && pinned) { const { vx, boost } = pinned; reset(false); S = { ...mkState(vx, boost), x: S.x }; setLock(boost); return; }
   script = null; maneuver = null; dodge = null; run = null; markPreset(null); ctl.rollHold = 0; qAtt = [0, 0, 0, 1]; controls.mouse.center(); egg.chase(false);
@@ -642,10 +658,19 @@ const PRESETS = {
                   steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [1.65, { f: 0, l: 1, u: 0, boost: true }]] },
   letoff:       { title: 'Ease off to make room', result: { at: 5, sim: () => `lowest ${Math.round(run.min)} m/s`, game: 'lowest ~435 m/s' }, start: 'rest', go: 6, watch: 'Forward released, strafe held: in game the speed falls from 519 to ~435 m/s (fixture; this model dips to ~425). The ship drops back into the egg and the dodge ring opens.',
                   steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [6, { f: 0, l: 1, u: 0, boost: true }]] },
-  'ck-escape':  { title: 'Escape corkscrew', result: { at: 8, sim: () => `${Math.round(len(S.v))} m/s, spiral radius ~${Math.round(spiralR())} m`, game: '514 m/s at full roll; other rates: round 7' }, start: 'rest', go: 6, watch: 'Boosted, forward + up, roll ~120 °/s (50 %): you keep ~515 m/s, opening the range on anyone not boosting, while the side push draws a spiral wide enough to spoil their lead. Slower roll = wider, steadier spiral; faster = tighter. Starting to grey out? Ease the strafe or the roll rate a little. Don\'t let go: the spiral stops and the speed bleeds. Up strafe, not sideways: sideways + roll greyed pilots out in 2–3 s (fixture).',
+  'ck-escape':  { title: 'Escape corkscrew', result: { at: 8, sim: () => `${Math.round(len(S.v))} m/s, spiral radius ~${Math.round(spiralR())} m`, game: '513 m/s, ~5.9 G side at roll 50 % (r9_vis_bst_f100_up_r50)' }, start: 'rest', go: 6, watch: 'Boosted, forward + up, roll ~120 °/s (50 %): you keep ~513 m/s, opening the range on anyone not boosting, while the side push draws a spiral wide enough to spoil their lead. The boosted launch from a stop pulls ~21 G forward and greys the screen out at about 2 s (measured); it clears as you reach the nose, and then the spiral holds with no further grey. Slower roll = wider, steadier spiral; faster = tighter. Don\'t let go: the spiral stops and the speed bleeds. Up strafe, not sideways: up is the direction you can take most G in (sideways greyed pilots out in ~2 s at 10 G, up in ~4 s, down red-outs at 5 G). A corkscrew started at speed, not from a stop, is not measured.',
                   steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [6, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: 0.5 }]] },
-  'ck-shoot':   { title: 'Corkscrew and shoot back', result: { at: 6, sim: () => `TVI ${Math.round(run.tvi)}° off the nose`, game: 'rule of thumb ~13°' }, start: 'rest', go: 6, watch: 'Boosted, forward + up, roll ~27 °/s: the TVI holds steady ~15° off the nose (this model; the research rule of thumb says ~13°), so your target doesn\'t spin and you can shoot back. ~27 m miss vs 16 m at full roll (research). Corkscrews measured at the nose ran 514–518 m/s (fixture).',
+  'ck-shoot':   { title: 'Corkscrew and shoot back', result: { at: 6, sim: () => `TVI ${Math.round(run.tvi)}° off the nose`, game: 'not measured at this roll rate (model: rule of thumb ~13°)' }, start: 'rest', go: 6, watch: 'Boosted, forward + up, roll ~27 °/s: the TVI holds steady ~15° off the nose (this model; the research rule of thumb says ~13°), so your target doesn\'t spin and you can shoot back. ~27 m miss vs 16 m at full roll (research). Corkscrews measured at the nose ran 514–518 m/s (fixture).',
                   steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [6, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: 27 / 240 }]] },
+  'turn-cost':  { title: 'Turning while boosted costs speed', result: { at: 5, sim: () => `${Math.round(len(S.v))} m/s`, game: '394 m/s (r10_turn90_boost); in SCM a turn costs nothing (r10_turn90_scm)' }, start: 'rest', go: 6,
+                  watch: 'Boost to the nose, then pitch up 90° (1.1 s) with boost held and forward released. Your velocity stays where it was while the nose swings, so you are suddenly sideways to your own egg and the IFCS pulls you back to its edge: 520 → 394 m/s in about 4 s (measured). The egg turns with the nose; the 520 end only ever points where the ship does. In SCM the egg is a ball, so a turn costs nothing.',
+                  steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [6, { f: 0, l: 0, u: 0, boost: true, p: 1 }], [7.1, { f: 0, l: 0, u: 0, boost: true, p: 0 }]] },
+  'flip-burn':  { title: 'Flip and burn', result: { at: 5, sim: () => `lowest ${Math.round(run.min)} m/s`, game: 'down to ~17 m/s, then speeding up the other way (r10_flip_and_burn)' }, start: 'rest', go: 4,
+                  watch: 'Boost to the nose, flip with a full pitch (2.2 s boosted; the fastest 180° is pure pitch, a diagonal stick is scaled back and is slower), then full throttle with boost. The forward thrusters (about 20 G) take ~300 m/s off in 1.5 s, through zero, and you start back the other way.',
+                  steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [4, { f: 0, l: 0, u: 0, boost: true, p: 1 }], [6.2, { f: 1, l: 0, u: 0, boost: true, p: 0 }]] },
+  'let-go':     { title: 'Let go of boost', result: { at: 7, sim: () => (run.rel == null ? 'still above 225 m/s' : `back to 225 m/s in ${run.rel.toFixed(1)} s`), game: '5.2 s from the nose; the spacebrake is no faster (r6_release_all, r7_spacebrake_nose)' }, start: 'rest', go: 6,
+                  watch: 'Boost to the nose, then let go of everything. The IFCS bleeds you back to the SCM ball: ~12 G at first, then a steady 4.26 G (the retros) from 300 m/s, 225 m/s after 5.2 s (measured). Hitting the spacebrake instead is no faster. Hold a strafe while you slow and it takes ~7.6 s.',
+                  steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [6, { f: 0, l: 0, u: 0, boost: false }]] },
   'ck-spin':    { title: 'Over-spinning', result: { at: 6, sim: () => `${Math.round(len(S.v))} m/s, ${gSmooth.toFixed(1)} G`, game: '514 m/s, 5.4 G' }, start: 'rest', go: 6, watch: 'Full-rate roll (240 °/s): the side push spins so fast the spiral radius is only ~3 m (research), far smaller than the 20 m ship. It throws away ~40 % of the miss (research). In game: 514 m/s, 5.4 G side (fixture); this model: ~520 m/s, ~6 G.',
                   steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [6, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: 1 }]] },
 };
@@ -659,7 +684,7 @@ function markPreset(key) { document.querySelectorAll('[data-preset]').forEach(b 
 document.querySelectorAll('[data-preset]').forEach(b => b.onclick = () => {
   const key = b.dataset.preset, p = PRESETS[key]; reset(p.start); script = { t: 0, go: p.go || 0, steps: p.steps, i: -1 }; maneuver = key; markPreset(key);
   dodge = p.dodge ? { t: 0, dist: 0 } : null;
-  run = { t: 0, min: Infinity, peakG: 0, tvi: 0, shown: false };
+  run = { t: 0, min: Infinity, peakG: 0, tvi: 0, rel: null, shown: false };
   $('run-name').textContent = p.title; $('run-result').textContent = ''; $('run-msg').hidden = false; $('runbar').hidden = false;
   setNote(p.watch);
   egg.chase(true);   // ride behind the ship with its limits in frame
@@ -895,21 +920,22 @@ const egg = !hasWebGL ? stubView : (() => {
   // reach lines) is one coloured line mesh: one draw call.
   const dyn = colorLines(gl, 1024); dyn.renderOrder = 40; dyn.setParent(shipT);
 
-  // Measured settle speeds, drawn on the egg. Each sits at its measured speed along the direction the model
-  // says it settles (the thrust direction), so a dot on the shell means the egg shape agrees with the game.
-  const measured = (() => {
-    const pts = [];
-    for (const p of FIXTURE_PLATEAUS) {
-      const u = { f: p.i.fwd || 0, l: p.i.lat || 0, u: p.i.up || 0 }, q = request(u, p.b), n = len(q); if (!n) continue;
-      pts.push(R3(...q.map(c => c / n * p.v)));
-    }
-    const geo = new Geometry(gl, { position: { size: 3, data: new Float32Array(pts.flat()) } });
-    const prog = new Program(gl, { vertex: `attribute vec3 position; uniform mat4 modelViewMatrix, projectionMatrix; void main(){ gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); gl_PointSize = 7.0; }`,
-      fragment: `precision mediump float; void main(){ vec2 c = gl_PointCoord - 0.5; float d = length(c); if (d > 0.5) discard; gl_FragColor = d > 0.32 ? vec4(0.03,0.04,0.07,1.0) : vec4(1.0,0.93,0.8,1.0); }`, depthTest: false, transparent: true });
-    const m = new Mesh(gl, { geometry: geo, program: prog, mode: gl.POINTS, frustumCulled: false }); m.renderOrder = 50; m.setParent(shipT); return m;
+  // Position grid, kept faint: world-fixed lines on the horizontal plane through the egg's centre. The egg is velocity
+  // space, so the ship holds still in it at a steady speed; the grid slides past with your position (at 0.4 x scale,
+  // not to scale) so you can see the ship is moving. It fades out with distance from the middle.
+  const GRID = 100, GRID_R = 1000, GRID_SLIDE = 0.4;
+  const gridT = new Transform(); gridT.setParent(scene);   // world-fixed: shipT turns with the ship, this does not (ship-frame view: it counter-turns)
+  const gridMesh = (() => {
+    const pts = [], n = Math.ceil(GRID_R / GRID) + 1, step = 50, ext = (n + 1) * GRID;
+    for (let k = -n; k <= n; k++) for (let a = -ext; a < ext; a += step) { pts.push(a, 0, k * GRID, a + step, 0, k * GRID); pts.push(k * GRID, 0, a, k * GRID, 0, a + step); }
+    const geometry = new Geometry(gl, { position: { size: 3, data: new Float32Array(pts) } });
+    const program = new Program(gl, {
+      vertex: `attribute vec3 position; uniform mat4 modelViewMatrix, projectionMatrix; uniform vec2 uOff; uniform float uR; varying float vA;
+        void main(){ vec3 p = position; p.x += uOff.x; p.z += uOff.y; float r = length(p.xz) / uR; vA = clamp(1.0 - r * r, 0.0, 1.0); gl_Position = projectionMatrix*modelViewMatrix*vec4(p,1.0); }`,
+      fragment: `precision mediump float; uniform vec3 uColor; uniform float uAlpha; varying float vA; void main(){ gl_FragColor = vec4(uColor, uAlpha * vA); }`,
+      uniforms: { uOff: { value: [0, 0] }, uR: { value: GRID_R }, uColor: { value: COL.scm }, uAlpha: { value: 0.16 } }, transparent: true, depthWrite: false });
+    const m = new Mesh(gl, { geometry, program, mode: gl.LINES, frustumCulled: false }); m.renderOrder = 5; m.setParent(gridT); return m;
   })();
-  let showMeas = true;
-  $('t-meas').onclick = e => { showMeas = !showMeas; e.target.setAttribute('aria-pressed', showMeas); measured.visible = showMeas; };
 
   // HTML labels
   const ov = $('o-egg'), labels = {};
@@ -966,15 +992,26 @@ const egg = !hasWebGL ? stubView : (() => {
       if (Math.abs(chaseD - l) > 0.5) { camera.position.set(t.x + dx / l * chaseD, t.y + dy / l * chaseD, t.z + dz / l * chaseD); orbit.forcePosition(); }
     }
     // Render on demand (PLAN.md §9): skip the frame when nothing visible changed.
-    const cp = camera.position, key = [vx, vy, vz, cp.x, cp.y, cp.z, room, d.pinned, trail.length, st.a[0], st.a[1], st.a[2], showMeas, follow, frameW, ...qView]
+    const gp = R3(...st.x), gox = -((gp[0] * GRID_SLIDE) % GRID), goz = -((gp[2] * GRID_SLIDE) % GRID);
+    const cp = camera.position, key = [gox, goz, vx, vy, vz, cp.x, cp.y, cp.z, room, d.pinned, trail.length, st.a[0], st.a[1], st.a[2], follow, frameW, ...qView]
       .map(x => (typeof x === 'number' ? x.toFixed(2) : x)).join();
     if (key === lastKey) return;
     lastKey = key;
+    gridT.quaternion.set(...(worldFrame ? [0, 0, 0, 1] : [-qReal[0], -qReal[1], -qReal[2], qReal[3]]));
+    gridMesh.program.uniforms.uOff.value = [gox, goz];
     discT.position.set(vx, 0, 0); discT.scale.set(1, Math.max(room, 0.001), Math.max(room, 0.001));
     const pv = R3(vx, vy, vz);
     glyphT.position.set(...pv);
+    // The ship is drawn at its true 20 m, but never smaller than ~42 px on screen: from the overview camera the egg is
+    // 1000 m across, so the true-size ship would be a dot. The scale only grows as the camera pulls back.
+    const wv = rot(pv), camD = Math.hypot(cp.x - wv[0], cp.y - wv[1], cp.z - wv[2]);
+    const gs = Math.max(1, 4.2 * camD * half / Math.max(200, canvas.parentElement.clientHeight));
+    glyphT.scale.set(gs, gs, gs);
+    // The TVI is where you are GOING: ahead of the ship along its velocity, as in the cockpit, not on top of it.
+    const sp3 = Math.hypot(vx, vy, vz), tviD = 24 + 11 * gs, tviP = sp3 > 1e-6 ? [pv[0] + pv[0] / sp3 * tviD, pv[1] + pv[1] / sp3 * tviD, pv[2] + pv[2] / sp3 * tviD] : pv;
     dyn.begin();
     dyn.seg([0, 0, 0], pv, COL.tvi, 1);                                       // velocity arrow
+    if (sp3 > 3) dyn.seg(pv, tviP, COL.tvi, 0.5);                              // ship -> TVI
     { // 3 s trail: kept in world space, so turn it back into the ship's current frame (shipT turns it forward again)
       const inv = [-qReal[0], -qReal[1], -qReal[2], qReal[3]]; let prev = null;
       for (const w of trail) { const pt = qrotv(inv, w); if (prev) dyn.seg(prev, pt, COL.tvi, 0.45); prev = pt; } }
@@ -1009,7 +1046,7 @@ const egg = !hasWebGL ? stubView : (() => {
     const sv = d.settle, far = sv && Math.hypot(sv.p[0] - vx, sv.p[1] - vy, sv.p[2] - vz) > 25;
     if (far) { place(labels.settle, rot(R3(sv.p[0] - 40, sv.p[1], sv.p[2] - 40))); labels.settle.textContent = `ends ~${Math.round(sv.speed)} · ${Math.round(sv.side)} sideways`; }
     else labels.settle.hidden = true;
-    place(tviIcon, rot(pv)); tviIcon.hidden = tviIcon.hidden || d.speed < 3;
+    place(tviIcon, rot(tviP)); tviIcon.hidden = tviIcon.hidden || d.speed < 3;
   }
   return { resize, draw, chase };
 })();
@@ -1166,6 +1203,19 @@ function anchorRoll(d) {
   const deg = Math.min(30, Math.max(2, +$('ring').value));
   return a / (d.speed * Math.sin(deg * Math.PI / 180)) * 180 / Math.PI;
 }
+// Screen effects of the G-LOC model: HUD digits first, then a vignette from the edge, then everything; red for a down load.
+const glocEl = $('gloc'); let glocKey = '';
+function glocView(v) {
+  const k = v ? [v.hud, v.edge, v.centre, v.red, v.state].map(x => typeof x === 'number' ? x.toFixed(2) : x).join() : 'off';
+  if (k === glocKey) return; glocKey = k;
+  glocEl.hidden = !v;
+  const hudOp = v ? String(v.hud) : '';
+  $('hud').style.opacity = hudOp; $('ahud').style.opacity = hudOp;
+  if (v) { glocEl.style.setProperty('--c', v.centre.toFixed(2)); glocEl.style.setProperty('--e', v.edge.toFixed(2)); glocEl.style.setProperty('--r', v.red.toFixed(2)); glocEl.style.setProperty('--r0', `${Math.round(100 - 65 * v.edge)}%`); }
+  const word = !v ? 'off' : { ok: 'clear', grey: 'grey-out', gone: 'HUD gone', blackout: 'BLACKED OUT' }[v.state];
+  $('r-gloc').textContent = word; $('r-gloc').className = v && v.state !== 'ok' ? 'warn' : '';
+  $('r-glocbar').style.width = v ? `${Math.min(100, PS.dose / gladius.pilot.blackDose * 100)}%` : '0%';
+}
 function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min(0.25, (now - last) / 1000); last = now;
@@ -1176,20 +1226,25 @@ function frame(now) {
     runScript(dt); acc += dt;
     const live = currentInput();
     while (acc >= DT) {
-      const x0 = S.x; S = step(S, live.u, live.boost, DT); acc -= DT;
+      // G-LOC (model): while blacked out the thrusters and boost are cut (measured: the speed bleeds back to SCM)
+      const cut = glocLive() && PS.blackout;
+      const x0 = S.x; S = step(S, cut ? NO_THRUST : live.u, cut ? false : live.boost, DT); acc -= DT;
       // Rotation: the ship (and its egg) turns at ω (ship frame: +x roll right, −y pitch up, −z yaw right); a
       // world-fixed velocity therefore turns by −ω·dt in the ship frame. Roll keeps the forward speed; pitch and
       // yaw swing the nose off the velocity, so a boosted ship's speed limit drops to the egg's radius there.
-      const R = S.boost ? ROT_DPS.boost : ROT_DPS.scm, k = Math.PI / 180;
-      const om = [live.roll * R.roll * k, -live.pitch * R.pitch * k, -live.yaw * R.yaw * k];
+      // The core scales a stick vector longer than 1 back to unit length (measured: full pitch + yaw turns the nose
+      // slower than pitch alone) and applies the boosted rates.
+      const R = S.boost ? ROT_DPS.boost : ROT_DPS.scm, stick = { roll: live.roll, pitch: live.pitch, yaw: live.yaw };
+      const om = angularVelocity(stick, gladius, S.boost), sc = stickScaled(stick, gladius);
       if (om[0] || om[1] || om[2]) {
         const dq = qAxisAngle(om, DT);
         S.v = qRot([-dq[0], -dq[1], -dq[2], dq[3]], S.v); S.c = { ...S.c, vWorld: toA(S.v) };
         qAtt = qNorm(qMul(qAtt, dq));
       }
+      if (glocLive()) PS = stepPilot(PS, cut ? [0, 0, 0] : [S.a[0] / g0, -S.a[1] / g0, S.a[2] / g0], gladius.pilot, DT);
       const vw = qRot(qAtt, S.v);   // position in the world frame (for the dust)
       S.x = [x0[0] + vw[0] * DT, x0[1] + vw[1] * DT, x0[2] + vw[2] * DT];
-      S.roll = live.roll * R.roll; S.pitch = live.pitch * R.pitch; S.yaw = live.yaw * R.yaw;
+      S.roll = sc[0] * R.roll; S.pitch = sc[1] * R.pitch; S.yaw = sc[2] * R.yaw;
       if (dodge && dodge.t < 2 && (!script || script.t >= script.go)) { dodge.t += DT; dodge.dist += Math.hypot(S.v[1], S.v[2]) * DT; }
     }
     // a ~3 s trail: one point per 1/60 s of sim time, whatever the frame rate
@@ -1200,11 +1255,12 @@ function frame(now) {
     const P = PRESETS[maneuver], R = P.result, go = script.go, on = script.t >= go;
     const stage = on ? '' : ' · building speed'; if (run.stage !== stage) { run.stage = stage; $('run-name').textContent = P.title + stage; }
     run.t = script.t - go;                                    // seconds into the maneuver itself (negative while building speed)
-    if (on) { run.min = Math.min(run.min, d.speed); run.peakG = Math.max(run.peakG, d.g); run.tvi = d.tviDeg; }
+    if (on) { run.min = Math.min(run.min, d.speed); run.peakG = Math.max(run.peakG, d.g); run.tvi = d.tviDeg; if (run.rel == null && d.speed <= gladius.scm.speedCap + 1) run.rel = run.t; }
     $('run-prog').style.width = `${Math.max(0, Math.min(100, script.t / (go + R.at) * 100))}%`;
     if (!run.shown && run.t >= R.at) { run.shown = true; $('run-msg').hidden = true;
       $('run-result').textContent = `Simulator: ${R.sim()} · In game: ${R.game}`; }
   }
+  glocView(glocLive() ? vision(PS, gladius.pilot) : null);
   gSmooth += (d.g - gSmooth) * 0.15;
   gPeak = Math.max(gSmooth, gPeak - dt * 1.5);   // peak hold, falling 1.5 G/s
   bBtn.classList.toggle('active', d.boost); bBtn.setAttribute('aria-pressed', d.boost);

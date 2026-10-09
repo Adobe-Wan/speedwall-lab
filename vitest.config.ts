@@ -9,6 +9,7 @@ const alias = {
   "@speedwall-lab/core/schema": src("./packages/core/src/schema.ts"),
   "@speedwall-lab/core": src("./packages/core/src/index.ts"),
   "@speedwall-lab/data-gladius/fixture-schema": src("./packages/data-gladius/src/fixture-schema.ts"),
+  "@speedwall-lab/data-gladius/replay": src("./packages/data-gladius/src/replay.ts"),
   "@speedwall-lab/data-gladius": src("./packages/data-gladius/src/index.ts"),
 };
 
