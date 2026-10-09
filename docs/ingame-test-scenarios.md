@@ -333,3 +333,14 @@ Not in the 2 hours (second session, two pilots, about 60 min): `proj_speed`, `pr
 | `tk_*`, `d04` | Boost-cost figures in `flip-burn` and the roll lessons; remove "angular boost cost 0 / not measured" |
 | `rot_*` | The instant-onset assumption in `rotation.ts` (only if net lag exceeds about 0.2 s) |
 | `d01`, `d02`, `d03` | Fixture merge for `r7_dodge_mid_boost`; what the pilot view draws (HUD fade versus screen darkness); the recovery curve |
+
+## 10. Update, 2026-10-09: test at gun range (500-600 m)
+
+The pilot set the engagement range: 500-600 m with Panther repeaters, never 1 km. Every two-pilot test above that says 1000 m is
+flown at **550 m** instead (`lead_hits`: 550 m and 400 m; `proj_speed`: 300 / 550 / 800 m; `proj_chase`: 550 m). Standing conditions
+are unchanged: Decoupled, G-Safe OFF, 4K, FOV 100, Arena Commander free flight, pilot present, never PU or PvP.
+
+| ID | P | Auto | Procedure | What it settles |
+|---|---|---|---|---|
+| chase_equal | P0 | 2P | Both Gladii boosted at the nose, shooter 550 m behind, both full forward. Target flies 12 s of: (a) up + full roll (wall); (b) up + roll 27 deg/s (far TVI); (c) forward released, up + full roll; (d) straight line as the baseline. Shooter fires at the pip throughout. Log range each second (HUD) and hit markers. 3 runs each | The coaches' rules against a same-top-speed chaser: does the range hold on the wall and close in (b) and (c), and do the hit rates follow (model: the corkscrew alone shifts shots only 2-5 m at this range) |
+| chase_delta | P1 | 2P | As (a), but the shooter starts at 700 m and closes with a positive delta (target at 450 m/s forward, shooter on the wall), firing from 600 m in | How much a positive delta raises the hit rate at the same range |

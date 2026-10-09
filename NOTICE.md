@@ -8,6 +8,8 @@
 ## Third-party data (not covered by this repository's licenses)
 Two Gladius values (boosted back 5.9 G and down 6.6 G) were first taken from **SC Ships Performances Viewer (spviewer.eu) by Olakeen**, used with the author's permission. Round 4 (2026-10-08) replaced both with the author's own measurements (5.96 G and 6.8 G), so no spviewer value remains in `research/gladius-v1-fixture.json` or `site/`. `docs/RESEARCH.md` still quotes spviewer figures in its research notes; those may not be reused under MIT or CC BY.
 
+The chaser readout in `site/index.html` assumes a projectile speed of **1500 m/s**, a round figure chosen because the **Star Citizen Wiki** (starcitizen.tools, CC BY-SA) lists 1480 m/s for the CF-337 Panther in 4.10.1. The wiki value itself is not copied into the fixture or the app; the 1500 is an `assumed` input until it is measured in game (`proj_speed`, `docs/ingame-test-scenarios.md`).
+
 ## Cockpit HUD
 `site/js/hud.mjs` is an original drawing. Its layout follows the in-game Advanced HUD (crosshair, throttle bar, AB bar, G meter); no game art, fonts or shapes are used.
 

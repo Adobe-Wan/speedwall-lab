@@ -221,3 +221,31 @@ Measured anchors: `r10_flip_and_burn` took 363 m/s to about 63 in 1.5 s (about 2
    `gloc: hold`. The missing partial-forward data.
 4. **Side push by forward speed**: strafe-only dodges from 200-500 m/s, forward held and released (the 358 m/s step is a fit to one wall trace).
 5. **TVI capture** during a corkscrew at the nose, and the other items in `docs/coach-review-2026-10-09.md` section 4.
+
+## 8. Correction, 2026-10-09: gun range is 500-600 m, not 1 km
+
+The pilot (a Gladius flyer) corrected the setup above: 1 km is never an effective range. With the Gladius's CF-337 Panther
+repeaters you fight at **500-600 m**, and a chaser with a **positive closing delta** has the advantage (shorter flight time; ESP
+and the pip work in its favour; a fleeing pilot can hardly watch the chaser's delta and trajectory). Projectile speed is assumed
+1500 m/s (the Star Citizen Wiki lists 1480 for the Panther, 4.10.1; not measured, and whether shots inherit the shooter's speed is
+not known). Flight time `tau = range / (projectile speed + closing speed)`.
+
+Closed form, same `f` and `g` as section 1 (**Mod**; misses in metres, A / B):
+
+| range | closing | tau | 6 G, roll 27 °/s | 6 G, 150 °/s | 6 G, 240 °/s | 8.1 G, 240 °/s |
+|---|---|---|---|---|---|---|
+| 500 m | 0 | 0.33 s | 3.3 / 0.2 | 3.2 / 0.9 | 3.1 / 1.5 | 4.2 / 2.0 |
+| 550 m | 0 | 0.37 s | 4.0 / 0.2 | 3.9 / 1.2 | 3.7 / 1.9 | 5.0 / 2.6 |
+| 600 m | 0 | 0.40 s | 4.7 / 0.3 | 4.6 / 1.6 | 4.4 / 2.5 | 5.9 / 3.4 |
+| 550 m | 85 m/s | 0.35 s | 3.5 / 0.2 | 3.5 / 1.1 | 3.3 / 1.7 | 4.5 / 2.2 |
+
+What changes:
+1. **The best roll is full rate.** The maximin roll is about `160 / tau` deg/s, about 430 deg/s at 0.37 s: above the 240 maximum.
+   Against model A the roll barely matters at this range; against model B slow is worst.
+2. **No corkscrew beats a good shooter at gun range.** 6-8 G for 0.35 s moves the ship 2-5 m, inside an 8 m hit radius and under half
+   the Gladius's 17 m width (from behind it shows 17 m wide by 5.5 m tall). The corkscrew only punishes sloppy aim there.
+3. **So range is the defence.** Staying on the boosted wall denies the chaser closing speed; a far TVI or less forward gives it away
+   (app model, chaser 550 m behind at 520 m/s, 10 s: wall 547 m, far TVI with a 27 deg/s roll 360 m, forward released 50 m).
+4. Sections 2-4 above remain correct for 1 km but describe a range that does not happen in a fight.
+
+The app (`site/index.html`) now computes the chaser's miss at 550 m (or the live range in the Flee lessons) instead of a fixed 1 s.

@@ -329,7 +329,7 @@ footer p { margin: 0 0 4px; max-width: 75ch; }
     <div class="ro" title="Your current push. 1 G = Earth gravity"><b>Thrust</b><span id="r-g">0.0</span><small>G</small></div>
     <div class="ro"><b>Roll</b><span id="r-roll">0</span><small>°/s</small></div>
     <div class="ro" title="Angle between where your nose points and where you are actually going (the TVI)"><b>Drift angle</b><span id="r-tvi">–</span><small>°</small></div>
-    <div class="ro" title="MODEL: how far a shot fired 1 s ago misses you now, from a chaser behind who leads with your velocity (first number) or with your velocity and acceleration (second). 1 s flight time and an 8 m hit radius are assumptions; red = it would hit. Whether the game's lead uses acceleration is not settled."><b>Chaser's miss (model)</b><span id="r-miss">–</span><small>m · 1 s shot</small></div>
+    <div class="ro" title="MODEL: how far a shot misses you, from a Gladius behind you at gun range (550 m, or the live range in the Flee lessons) holding 520 m/s. First number: it leads with your velocity; second: with your velocity and acceleration. Flight time = range / (projectile speed + closing speed). Range, projectile speed and the 8 m hit radius are assumptions; red = it would hit. Whether the game's lead uses acceleration is not settled."><b>Chaser's miss (model)</b><span id="r-miss">–</span><small id="r-miss-at">m · 550 m</small></div>
     <div class="ro" title="MODEL, not a measured rule: stress from the G you are pulling in each direction. Greys the HUD, then the screen, then blacks out and cuts thrust and boost."><b>G-LOC (model)</b><span id="r-gloc">clear</span><div class="tank"><i id="r-glocbar"></i></div></div>
     <div class="ro"><b>Boost tank</b><span id="r-tank">100</span><small>%</small><div class="tank"><i id="r-tankbar"></i></div></div>
     <div class="ro"><b>Flight mode</b><span class="chip" id="r-mode">SCM</span> <span class="chip" id="r-pin" hidden>At limit</span></div>
@@ -346,9 +346,14 @@ footer p { margin: 0 0 4px; max-width: 75ch; }
         </div>
         <h3>Corkscrews · roll while strafing so the shooter's lead is wrong</h3>
         <div class="mgrid">
-          <button data-preset="ck-escape">Escape corkscrew (chaser behind)<small>Boost, forward + up, roll ~150 °/s: the readout shows how far a chaser's shots miss</small></button>
+          <button data-preset="ck-escape">Escape corkscrew (chaser behind)<small>Boost, forward + up, full roll: at gun range the chaser's shots still land close</small></button>
           <button data-preset="ck-shoot">Corkscrew and still shoot back<small>For a target AHEAD: slow roll ~27 °/s keeps the TVI still (not the way to flee)</small></button>
-          <button data-preset="ck-spin">Over-spinning (don't)<small>Full-rate roll: the spiral is far smaller than the ship</small></button>
+        </div>
+        <h3>Fleeing a chaser as fast as you · it starts 550 m behind at 520 m/s</h3>
+        <div class="mgrid">
+          <button data-preset="flee-wall">Stay on the wall<small>Full forward + up, full roll: the chaser can't close</small></button>
+          <button data-preset="flee-tvi">TVI far out, slow roll<small>Roll ~27 °/s: you slow down off the nose and the chaser closes</small></button>
+          <button data-preset="flee-ease">Ease off forward<small>More side push, but every m/s you give up is closing speed for the chaser</small></button>
         </div>
         <h3>Speed you lose · turning and braking</h3>
         <div class="mgrid">
@@ -659,9 +664,9 @@ const PRESETS = {
                   steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [1.65, { f: 0, l: 1, u: 0, boost: true }]] },
   letoff:       { title: 'Ease off to make room', result: { at: 5, sim: () => `lowest ${Math.round(run.min)} m/s`, game: 'lowest ~435 m/s' }, start: 'rest', go: 6, watch: 'Forward released, strafe held: in game the speed falls from 519 to ~435 m/s (fixture; this model dips to ~425). The ship drops back into the egg and the dodge ring opens. (The model under-pushes sideways in this case; it is one of the listed misses in physics-fit.md.)',
                   steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [6, { f: 0, l: 1, u: 0, boost: true }]] },
-  'ck-escape':  { title: 'Escape corkscrew (chaser behind)', result: { at: 10, sim: () => `${Math.round(len(S.v))} m/s${missTxt()}`, game: '513 m/s, ~5.9 G side at roll 50 % (r9_vis_bst_f100_up_r50)' }, start: 'rest', go: 0, watch: 'A chaser behind you shoots at where your velocity (and, for a better shooter, your acceleration) says you will be. Boosted, forward + up, roll ~150 °/s from the first second: you keep ~513 m/s (measured, r9_vis_bst_f100_up_r50: 5.9 G side load, one run) and, on the model, both kinds of shooter miss by 20 m or more at a 1 s flight time (the readout under the view). Roll rate is a trade: slower rolls (down to ~27 °/s) miss a velocity-only shooter by more but a shooter who leads your acceleration hits you; faster rolls do the opposite; ~150 °/s is the best of both (model). The boosted launch pulls ~21 G and greys the screen at about 2 s (measured), clearing near the nose. Up is the direction you can take most G in (sideways greyed pilots out in ~2 s at 10 G, up in ~4 s, down red-outs at 5 G). Don\'t let go: the spiral stops. Not measured: whether the game\'s shooter leads your acceleration, and a corkscrew started at speed.',
-                  steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: 0.65 }]] },
-  'ck-shoot':   { title: 'Corkscrew and shoot back (target ahead)', result: { at: 10, sim: () => `TVI ${Math.round(run.tvi)}° off the nose${missTxt()}`, game: 'not measured at this roll rate (model: rule of thumb ~13°)' }, start: 'rest', go: 0, watch: 'For a target AHEAD of you, not for fleeing. Boosted, forward + up, roll ~27 °/s from a standstill: the TVI swings out and takes ~10 s to settle ~10-15° off the nose (model; the research rule of thumb says ~13°), so your target doesn\'t spin and you can shoot back. On the model, a chaser behind you who leads only your velocity misses by ~27 m at a 1 s flight time, but one who also leads your acceleration hits you (the readout under the view shows both). Roll 27 °/s is not measured. Corkscrews measured at the nose ran 514–518 m/s (fixture).',
+  'ck-escape':  { title: 'Escape corkscrew (chaser behind)', result: { at: 10, sim: () => `${Math.round(len(S.v))} m/s${missTxt()}`, game: '513 m/s, ~6 G side load (r9_vis_bst_f100_up_r50, r8_bst_f100_up_r100)' }, start: 'rest', go: 0, watch: 'A chaser behind you shoots at where your velocity (and, for a better shooter, your acceleration) says you will be. At gun range (500-600 m) a shot takes only about 0.35 s to reach you (assumed ~1500 m/s projectiles), and in 0.35 s even 6-8 G moves you just 3-5 m: on the model no corkscrew gets you clear of a good shooter there (the readout under the view, red = a hit on an 8 m radius). Roll at full rate: it is the best of a bad lot against both kinds of shooter, and a slow roll is the worst against one who leads your acceleration (model). Boosted, forward + up: you keep ~513 m/s (measured). The boosted launch pulls ~21 G and greys the screen at about 2 s (measured). Up is the direction you can take most G in (sideways greyed pilots out in ~2 s at 10 G, up in ~4 s, down red-outs at 5 G). The real defence is not letting the chaser into gun range: see the Flee lessons. Not measured: the game\'s lead rule, projectile speed, and whether shots inherit the shooter\'s speed.',
+                  steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: 1 }]] },
+  'ck-shoot':   { title: 'Corkscrew and shoot back (target ahead)', result: { at: 10, sim: () => `TVI ${Math.round(run.tvi)}° off the nose${missTxt()}`, game: 'not measured at this roll rate (model: rule of thumb ~13°)' }, start: 'rest', go: 0, watch: 'For a target AHEAD of you, not for fleeing. Boosted, forward + up, roll ~27 °/s from a standstill: the TVI swings out and takes ~10 s to settle ~10-15° off the nose (model; the research rule of thumb says ~13°), so your target doesn\'t spin and you can shoot back. Don\'t use it to flee: on the model a chaser behind you at gun range hits you either way, and one who leads your acceleration hits you almost dead centre (the readout under the view shows both). Roll 27 °/s is not measured. Corkscrews measured at the nose ran 514–518 m/s (fixture).',
                   steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: 27 / 240 }]] },
   'turn-cost':  { title: 'Turning while boosted costs speed', result: { at: 5, sim: () => `${Math.round(len(S.v))} m/s`, game: '394 m/s (r10_turn90_boost); in SCM a turn costs nothing (r10_turn90_scm)' }, start: 'rest', go: 6,
                   watch: 'Boost to the nose, then pitch up 90° (1.1 s) with boost held and forward released. Your velocity stays where it was while the nose swings, so you are suddenly sideways to your own egg and the IFCS pulls you back to its edge: 520 → 394 m/s in about 4 s (measured). The egg turns with the nose; the 520 end only ever points where the ship does. In SCM the egg is a ball, so a turn costs nothing. (With the throttle held through the turn the speed dips to ~441 and climbs back to ~483 as the forward thrust drags the velocity onto the new nose; measured once, r10_turn90_boost_fwd, and the model misses it.)',
@@ -672,8 +677,12 @@ const PRESETS = {
   'let-go':     { title: 'Let go of boost', result: { at: 7, sim: () => (run.rel == null ? 'still above 225 m/s' : `back to 225 m/s in ${run.rel.toFixed(1)} s`), game: '5.2 s from the nose (r6_release_all)' }, start: 'rest', go: 6,
                   watch: 'Boost to the nose, then let go of everything. The IFCS bleeds you back to the SCM ball: ~12 G at first, then a steady 4.26 G (the retros) from 300 m/s, 225 m/s after 5.2 s (measured). What the spacebrake does here has not been measured. Hold a strafe while you slow and it takes ~7.6 s.',
                   steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [6, { f: 0, l: 0, u: 0, boost: false }]] },
-  'ck-spin':    { title: 'Over-spinning', result: { at: 9, sim: () => `${Math.round(len(S.v))} m/s, ${gSmooth.toFixed(1)} G${missTxt()}`, game: '513 m/s, 5.96 G (r8_bst_f100_up_r100)' }, start: 'rest', go: 0, watch: 'Full-rate roll (240 °/s) from the first second. The thrust turns so fast that the spiral is tiny and the speed is ~520 m/s with ~6 G of side push (measured: 513 m/s, 5.96 G, r8_bst_f100_up_r100). Whether that is a mistake depends on the shooter: against a velocity-only lead it throws away ~40 % of the miss at a 1 s flight time (model; at 0.5 s it barely matters), against one who also leads your acceleration it is the best roll rate there is (readout under the view: both numbers). Not measured: which kind of lead the game uses.',
+  'flee-wall':  { title: 'Flee: stay on the wall', chase: true, result: { at: 10, sim: () => `chaser at ${Math.round(chase.range)} m after 10 s${missTxt()}`, game: 'not measured (needs a two-pilot chase test)' }, start: { vx: 520, boost: true }, go: 0, watch: 'You start at the boosted nose with a Gladius 550 m behind holding the same 520 m/s. Forward + up, full roll: your speed along your line stays ~515-520, so the chaser has no closing speed and the range holds (model). That is the whole point: at gun range the corkscrew alone only pushes shots 3-5 m off (readout), so keeping the chaser from closing matters more than the spiral. Strafe up: it is the axis you tolerate most G in.',
                   steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: 1 }]] },
+  'flee-tvi':   { title: 'Flee: TVI far out, slow roll', chase: true, result: { at: 10, sim: () => `chaser at ${Math.round(chase.range)} m after 10 s · TVI ${Math.round(run.tvi)}°${missTxt()}`, game: 'not measured (needs a two-pilot chase test)' }, start: { vx: 520, boost: true }, go: 0, watch: 'The coaching rule "put the TVI farther out and roll slowly". Forward + up, roll ~27 °/s: the velocity swings off the nose and your speed along your line drops, so a chaser as fast as you closes on you (watch the range). On the model the slow roll also lets a shooter who leads your acceleration hit you almost dead centre. It only pays against a slower chaser, or a shooter whose lead ignores your acceleration (not tested).',
+                  steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: 27 / 240 }]] },
+  'flee-ease':  { title: 'Flee: ease off forward', chase: true, result: { at: 10, sim: () => `chaser at ${Math.round(chase.range)} m after 10 s${missTxt()}`, game: 'not measured; in game letting go of forward drops you to ~435 m/s (fixture)' }, start: { vx: 520, boost: true }, go: 0, watch: 'The coaching rule "use less forward thrust". Forward released, up + full roll: you drop back into the fat part of the egg, where the side push is stronger (measured ~8-12 G below 400 m/s, round 8, noisy; G-LOC caps what you can hold at ~8 G up), but every m/s you give up is closing speed for a chaser as fast as you, and the shrinking range shortens their shot (model). Worth it against a slower chaser, or to drag the chaser toward your wingmen.',
+                  steps: [[0, { f: 0, l: 0, u: 1, boost: true, r: 1, rf: 1 }]] },
 };
 // Corkscrew helix radius a/ω² (docs/RESEARCH.md), with a the current G and ω the roll rate the lesson is flying.
 function spiralR() { const w = ctl.rollFrac * gladius.boost.rotationDps.roll * Math.PI / 180; return w > 0.05 ? gSmooth * 9.80665 / (w * w) : 0; }
@@ -685,7 +694,7 @@ function markPreset(key) { document.querySelectorAll('[data-preset]').forEach(b 
 document.querySelectorAll('[data-preset]').forEach(b => b.onclick = () => {
   const key = b.dataset.preset, p = PRESETS[key]; reset(p.start); script = { t: 0, go: p.go || 0, steps: p.steps, i: -1 }; maneuver = key; markPreset(key);
   dodge = p.dodge ? { t: 0, dist: 0 } : null;
-  run = { t: 0, min: Infinity, peakG: 0, tvi: 0, rel: null, shown: false };
+  run = { t: 0, min: Infinity, peakG: 0, tvi: 0, rel: null, shown: false, chase: !!p.chase }; chase.range = CHASE.range;
   $('run-name').textContent = p.title; $('run-result').textContent = ''; $('run-msg').hidden = false; $('runbar').hidden = false;
   setNote(p.watch);
   egg.chase(true);   // ride behind the ship with its limits in frame
@@ -1179,11 +1188,17 @@ function drawSlice(canvas, st, d, big) {
 }
 
 /* ───────────────────────── loop ───────────────────────── */
-// Chaser's miss (MODEL): a shooter behind you fires at where you will be after a flight time of SHOT_TAU, leading with your
-// velocity (A) or with your velocity and acceleration (B). We keep a short history and show how far the shot fired SHOT_TAU
-// ago misses you now. The flight time and the hit radius are assumptions, and whether the game's lead uses acceleration is not settled.
-const SHOT_TAU = 1, HIT_R = 8, hist = []; const missNow = { A: 0, B: 0, ok: false };   // missTxt() below is used by the lessons
-const missTxt = () => (missNow.ok ? ` · chaser misses by ${Math.round(missNow.A)} / ${Math.round(missNow.B)} m (model)` : '');
+// Chaser's miss (MODEL): a Gladius behind you at gun range fires at where you will be after the projectile's flight time,
+// leading with your velocity (A) or with your velocity and acceleration (B). We keep a short history and show how far the shot
+// fired one flight time ago misses you now. Flight time = range / (projectile speed + closing speed): the chaser holds the
+// Gladius top speed, so whatever speed you give up along your line it gets back as closing speed (a positive delta) and
+// the range shrinks with it. Range, projectile speed and hit radius are assumptions (A), and whether the game's lead uses
+// acceleration is not settled.
+const VP_ASSUMED = 1500;   // m/s, ASSUMED: the Star Citizen Wiki lists 1480 for the Gladius's CF-337 Panther (4.10.1); not measured here
+const CHASE = { range: 550, speed: 520, vp: VP_ASSUMED }, HIT_R = 8, hist = [];
+const chase = { range: CHASE.range, tau: CHASE.range / CHASE.vp };   // the live chase: range now and the flight time it gives
+const missNow = { A: 0, B: 0, ok: false };   // missTxt() below is used by the lessons
+const missTxt = () => (missNow.ok ? ` · chaser misses by ${Math.round(missNow.A)} / ${Math.round(missNow.B)} m at ${Math.round(chase.range)} m (model)` : '');
 const trail = []; let acc = 0, last = performance.now(), roT = 0, trailT = 0, liveT = 0;
 const DT = 1 / 240;
 function derive(st, inp) {
@@ -1265,8 +1280,12 @@ function frame(now) {
     // a ~3 s trail: one point per 1/60 s of sim time, whatever the frame rate
     trailT += dt; while (trailT > 1 / 60) { trailT -= 1 / 60; trail.push(R3(...qRot(qAtt, S.v))); if (trail.length > 180) trail.shift();
       hist.push({ t: S.c.t, p: [...S.x], v: qRot(qAtt, S.v), a: qRot(qAtt, S.a) }); if (hist.length > 200) hist.shift(); }
-    { const now = hist[hist.length - 1], i = hist.findIndex(h => h.t >= now.t - SHOT_TAU);
-      missNow.ok = !!now && i > 0 && now.t - hist[i].t > SHOT_TAU * 0.9;
+    { // the chaser: keeps 520 m/s along your starting line; you open or close the range with your own speed along it
+      const away = qRot(qAtt, S.v)[0], closing = CHASE.speed - away;
+      if (run && run.chase) chase.range = Math.max(50, chase.range - closing * dt); else chase.range = CHASE.range;
+      chase.tau = chase.range / (CHASE.vp + Math.max(0, closing)); }
+    { const now = hist[hist.length - 1], i = hist.findIndex(h => h.t >= now.t - chase.tau);
+      missNow.ok = !!now && i > 0 && now.t - hist[i].t > chase.tau * 0.9;
       if (missNow.ok) { const h = hist[i], tau = now.t - h.t, d = (k) => Math.hypot(...[0, 1, 2].map(j => now.p[j] - (h.p[j] + h.v[j] * tau + k * 0.5 * h.a[j] * tau * tau)));
         missNow.A = d(0); missNow.B = d(1); } }
   }
@@ -1299,7 +1318,8 @@ function frame(now) {
       $('rb-fill').style.left = `${50 - yMax / room * 50}%`; $('rb-fill').style.width = `${yMax / room * 100}%`;
       $('rb-ship').style.left = `${Math.min(100, Math.max(0, 50 - S.v[1] / room * 50))}%`;
       $('rb-lr').textContent = `◂ ${Math.round(L)} · ${Math.round(Rr)} ▸`; } $('r-g').textContent = gSmooth.toFixed(1);
-    { const m = $('r-miss'); if (!missNow.ok || d.speed < 20) { m.textContent = '–'; m.className = ''; } else { m.textContent = `${Math.round(missNow.A)} / ${Math.round(missNow.B)}`; m.className = Math.min(missNow.A, missNow.B) < HIT_R ? 'warn' : ''; } } $('r-tvi').textContent = d.speed > 3 ? Math.round(d.tviDeg) : '–';
+    { const m = $('r-miss'); if (!missNow.ok || d.speed < 20) { m.textContent = '–'; m.className = ''; } else { m.textContent = `${Math.round(missNow.A)} / ${Math.round(missNow.B)}`; m.className = Math.min(missNow.A, missNow.B) < HIT_R ? 'warn' : ''; }
+      $('r-miss-at').textContent = `m · ${Math.round(chase.range)} m, ${chase.tau.toFixed(2)} s shot`; } $('r-tvi').textContent = d.speed > 3 ? Math.round(d.tviDeg) : '–';
     $('r-tank').textContent = ctl.unlimited ? '∞' : S.c.boostLocked ? `${Math.round(S.tank)}🔒` : Math.round(S.tank);
     $('r-tankbar').classList.toggle('locked', !!S.c.boostLocked && !ctl.unlimited); $('r-roll').textContent = Math.round(Math.abs(S.roll || 0)); $('r-tankbar').style.width = `${S.tank}%`;
     const mode = $('r-mode'); mode.textContent = d.boost ? 'Boost' : 'SCM'; mode.className = `chip ${d.boost ? 'on-boost' : 'on-scm'}`;
