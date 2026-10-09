@@ -130,4 +130,10 @@ Hit share of each pattern divided by the straight runs, against the calibration 
 | thin-axis confirmed | The Flee lessons tap up and down rather than sideways; a short lesson "dodge where the ship is thin" with the outline drawn behind the ship |
 | thin-axis killed | The hit outline is wrong: replace it with the measured `hit_radius` widths (`docs/ingame-test-scenarios.md` §6.4) |
 
-Until then the alpha keeps the ideal shooter and says so. Nothing in `site/index.html` changes in this PR.
+**Update (2026-10-10, quality pass):** the alpha now shows both shooters side by side, labelled as a model with assumed
+parameters: the "Chaser's miss" readout leads with the human shooter (`τe` 0.25 s, `ωc` 3 rad/s, the middle column above) and
+lists the ideal one under it, and every Flee and corkscrew lesson's result bar reports "on target" for both. The alpha scores
+hits on the same 17 x 5.5 m outline as this note (turned with the ship's roll), not the old 8 m disc, so its numbers match the
+table above to within a few points (taps, forward held: 40 / 65 % human against 69 / 73 % ideal in a headless run). The tracker is
+stepped at 1/60 s in the page (`pushHist` in `site/index.html`), the core's at 1/240 s. Round 13 would replace the assumed
+parameters with measured ones; until then the readout's tooltip and the lesson texts say they are assumed.

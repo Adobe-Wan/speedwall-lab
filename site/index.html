@@ -101,10 +101,21 @@ button.small { padding: 4px 10px; }
 .vtools button { padding: 5px 9px; font-size: .72rem; background: rgba(12,18,28,.72); border-color: var(--line-2); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
 .vtools button:hover { background: rgba(28,40,60,.9); }
 .caption { position: absolute; left: 10px; right: 10px; bottom: 10px; font-size: .9rem; line-height: 1.4; color: var(--fg); background: rgba(7,11,18,.72); border: 1px solid var(--line); border-radius: var(--r-md); padding: 8px 12px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
-.caption:empty { display: none; }
+.caption:empty, .caption[data-empty="true"] { display: none; }
+/* the running lesson, under the live line: Do / See, then a Details toggle for the caveats and sources */
+.cap-lesson { display: grid; gap: 4px; margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--line); font-size: .84rem; line-height: 1.42; }
+.cap-lesson:empty { display: none; }
+.cap-lesson .do, .cap-lesson .see, .lesson-note .do, .lesson-note .see { display: block; }
+.cap-lesson b, .lesson-note b, details.more-d summary { font: 600 .62rem var(--font-data); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-right: 6px; }
+.cap-lesson .see b, .lesson-note .see b { color: var(--tvi); }
+.cap-lesson .see, .lesson-note .see { color: var(--tvi); }
+.cap-dodge { font-weight: 700; color: var(--fg); }
+details.more-d summary { cursor: pointer; list-style: none; display: inline-block; padding: 2px 0; } details.more-d summary::-webkit-details-marker { display: none; }
+details.more-d summary::before { content: "+"; display: inline-block; width: 12px; } details.more-d[open] summary::before { content: "−"; }
+details.more-d summary:hover { color: var(--fg); }
+details.more-d > span { display: block; color: var(--fg-2); font-size: .8rem; line-height: 1.45; margin-top: 2px; }
 /* long lesson notes scroll inside the caption instead of covering the view */
-.caption { box-sizing: border-box; max-height: 40%; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
-.caption .watch { display: block; color: var(--tvi); font-size: .8rem; margin-top: 3px; }
+.caption { box-sizing: border-box; max-height: 46%; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
 #v-egg .caption { left: 170px; }
 .seg { display: inline-flex; border: 1px solid var(--line-2); border-radius: var(--r-sm); background: rgba(12,18,28,.72); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
 .seg button { border: 0; border-radius: 0; background: transparent; backdrop-filter: none; } .seg button + button { border-left: 1px solid var(--line-2); }
@@ -127,7 +138,7 @@ button.small { padding: 4px 10px; }
 .legend .lg-tvi::before { border: 1.5px solid var(--tvi); background: none; }
 
 /* ── readouts ── */
-.readouts { display: grid; grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); gap: 8px; }
+.readouts { display: grid; grid-template-columns: repeat(auto-fit, minmax(108px, 1fr)); gap: 8px; }
 .ro { position: relative; background: linear-gradient(180deg, rgba(24,35,53,.7), rgba(15,22,34,.7)); border: 1px solid var(--line); border-radius: var(--r-md); padding: 9px 11px 10px; min-width: 0; box-shadow: var(--shadow); }
 .ro[title] { cursor: help; }
 .ro b { display: block; font: 600 .6rem var(--font-data); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
@@ -137,6 +148,8 @@ button.small { padding: 4px 10px; }
 .ro.key b { color: var(--tvi); }
 .ro.key > span:not(.chip) { font-size: 1.6rem; }
 .ro small { color: var(--muted); font-size: .7rem; margin-left: 3px; }
+.ro small.ro-sub { display: block; margin: 3px 0 0; font: 500 .72rem/1.35 var(--font-data); font-variant-numeric: tabular-nums; white-space: normal; }
+.ro small.ro-sub .warn { color: var(--warn); }
 .tank { position: relative; height: 5px; background: rgba(140,165,205,.12); border-radius: 3px; margin-top: 7px; overflow: hidden; }
 .tank::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 25%; background: rgba(255,106,85,.3); }
 .tank i { position: relative; display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #d9862a, var(--boost)); border-radius: 3px; }
@@ -155,7 +168,8 @@ button.small { padding: 4px 10px; }
 .lessons-how { margin: 0; color: var(--muted); font-size: .82rem; }
 .maneuvers h3 { margin: 8px 0 0; font: 600 .64rem var(--font-data); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 10px; }
 .maneuvers h3::after { content: ""; flex: 1; height: 1px; background: var(--line); }
-.lesson-note { display: none; margin: 0; font-size: .86rem; line-height: 1.45; color: var(--tvi); }
+.lesson-note { display: none; margin: 0; font-size: .86rem; line-height: 1.45; color: var(--fg); }
+.lesson-note .do, .lesson-note .see { margin-bottom: 4px; }
 .mgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px; }
 .mgrid button { position: relative; text-align: left; font-weight: 600; font-size: .86rem; line-height: 1.3; padding: 11px 12px 12px 14px; min-height: 44px; border-color: var(--line-2); background: linear-gradient(180deg, rgba(28,40,60,.55), rgba(17,25,38,.55)); border-radius: var(--r-md); }
 .mgrid button::before { content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: transparent; transition: background-color .15s var(--ease); }
@@ -169,7 +183,8 @@ button.small { padding: 4px 10px; }
 .runbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; background: linear-gradient(90deg, rgba(126,240,200,.12), rgba(18,30,46,.85) 45%); border: 1px solid rgba(126,240,200,.5); border-radius: var(--r-md); padding: 7px 8px 7px 12px; margin-top: 10px; font-size: .84rem; box-shadow: 0 10px 30px -16px rgba(126,240,200,.4); }
 .run-name { font-weight: 700; color: var(--tvi); } .run-msg { color: var(--muted); }
 .run-prog { flex: 1 1 80px; height: 4px; background: rgba(140,165,205,.14); border-radius: 2px; overflow: hidden; min-width: 60px; } .run-prog i { display: block; height: 100%; width: 0; background: var(--tvi); box-shadow: 0 0 8px var(--tvi); }
-.run-result { font-family: var(--font-data); color: var(--fg); } .run-result:empty { display: none; }
+.run-result { order: 2; flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 4px 18px; font-family: var(--font-data); font-size: .82rem; color: var(--fg); } .run-result:empty { display: none; }
+.run-result b { display: inline-block; font: 600 .62rem var(--font-data); letter-spacing: .1em; text-transform: uppercase; color: var(--tvi); margin-right: 6px; }
 
 /* ── control deck ── */
 .deck { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 20px; align-items: start; background: var(--glass); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 16px; box-shadow: var(--shadow); }
@@ -341,7 +356,7 @@ footer a { color: var(--fg-2) !important; }
     <div class="brand">
       <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32"><ellipse cx="14" cy="16" rx="12" ry="11" fill="none" stroke="#f2a33a" stroke-width="2.6"/><circle cx="14" cy="16" r="5.5" fill="none" stroke="#5aa9e6" stroke-width="1.6" opacity=".8"/><circle cx="22" cy="16" r="3.3" fill="#7ef0c8"/></svg></span>
       <div class="brand-text">
-        <div class="brand-row"><h1>Speedwall Lab</h1><span class="chip proto" title="Physics reproduces the measured settle speeds; some wall behavior is still being fitted.">Alpha · v0.7</span></div>
+        <div class="brand-row"><h1>Speedwall Lab</h1><span class="chip proto" title="Physics reproduces the measured settle speeds; some wall behavior is still being fitted.">Alpha · v0.8</span></div>
         <span class="sub">Gladius · decoupled · how your speed limits your maneuvers</span>
       </div>
     </div>
@@ -414,13 +429,13 @@ footer a { color: var(--fg-2) !important; }
     <div class="ro" title="Your current push. 1 G = Earth gravity"><b>Thrust</b><span id="r-g">0.0</span><small>G</small></div>
     <div class="ro"><b>Roll</b><span id="r-roll">0</span><small>°/s</small></div>
     <div class="ro" title="Angle between where your nose points and where you are actually going (the TVI)"><b>Drift angle</b><span id="r-tvi">–</span><small>°</small></div>
-    <div class="ro" title="MODEL: how far a shot misses you, from a Gladius behind you at gun range (550 m, or the live range in the Flee lessons) holding 520 m/s. First number: it leads with your velocity; second: with your velocity and acceleration. Flight time = range / (projectile speed + closing speed). The shooter aims at what it saw 0.25 s earlier (reaction and aim lag). Range, projectile speed, that delay and the 8 m hit radius are assumptions; red = it would hit. Whether the game's lead uses acceleration is not settled."><b>Chaser's miss (model)</b><span id="r-miss">–</span><small id="r-miss-at">m · 550 m</small></div>
-    <div class="ro" title="MODEL, not a measured rule: stress from the G you are pulling in each direction. Greys the HUD, then the screen, then blacks out and cuts thrust and boost."><b>G-LOC (model)</b><span id="r-gloc">clear</span><div class="tank"><i id="r-glocbar"></i></div></div>
+    <div class="ro" title="MODEL: how far a shot from a Gladius behind you at gun range (550 m, or the live range in the Flee lessons; it holds 520 m/s) misses you, in metres. Big number: a human shooter who has to steer the crosshair after the lead pip and sees you 0.25 s late (assumed). Below it: an ideal shooter that aims exactly at what it saw 0.25 s ago. Each pair: the pip leads with your velocity / with your velocity and acceleration (which one the game uses is not settled). Red = the shot lands on the ship's outline (17 x 5.5 m seen from behind, turned with your roll: a crude rectangle that over-counts hits). Flight time = range / (1500 m/s projectile + closing speed). Range, projectile speed, the delays and the outline are assumptions."><b>Chaser's miss (model)</b><span id="r-miss">–</span><small>m</small><small class="ro-sub"><span>human</span> · <span id="r-miss-ideal">ideal –</span></small><small class="ro-sub" id="r-miss-at">550 m</small></div>
+    <div class="ro" title="MODEL, not a measured rule: stress from the G you are pulling in each direction. Greys the HUD, then the screen, then blacks out and cuts thrust and boost. Paused while a lesson runs, so you see the speed limits; the lesson texts say what the measured pilot felt."><b>G-LOC (model)</b><span id="r-gloc">clear</span><div class="tank"><i id="r-glocbar"></i></div></div>
     <div class="ro"><b>Boost tank</b><span id="r-tank">100</span><small>%</small><div class="tank"><i id="r-tankbar"></i></div></div>
     <div class="ro"><b>Flight mode</b><span class="chip" id="r-mode">SCM</span> <span class="chip" id="r-pin" hidden>At limit</span></div>
   </div>
   <section class="maneuvers" id="lessons" aria-labelledby="lessons-h">
-        <div class="lessons-head"><h2 id="lessons-h">Lessons</h2><p class="lessons-how">Pick a maneuver and watch the ship move inside the egg. Touch any flight control to take over.</p></div>
+        <div class="lessons-head"><h2 id="lessons-h">Lessons</h2><p class="lessons-how">Pick a lesson: the ship flies it while you watch. Touch any flight control to take over.</p></div>
         <p class="lesson-note" id="lesson-note" role="status">Pick a lesson to watch the ship move inside the egg.</p>
         <h3>Room to dodge</h3>
         <div class="mgrid">
@@ -429,7 +444,7 @@ footer a { color: var(--fg-2) !important; }
           <button data-preset="dodge-mid">Dodge from mid-egg (300 m/s)<small>Build up to 300, then strafe: compare the 2 s distance</small></button>
           <button data-preset="letoff">Ease off to make room<small>Build up to the nose, then let go of forward and strafe: speed drops to ~435 (in game), the dodge room opens</small></button>
         </div>
-        <h3>Corkscrews · roll while strafing so the shooter's lead is wrong</h3>
+        <h3>Corkscrews · what rolling does, and doesn't do</h3>
         <div class="mgrid">
           <button data-preset="ck-escape">Escape corkscrew (chaser behind)<small>Boost, forward + up, a gradual roll that reverses: the roll aims the push, it is not the dodge</small></button>
           <button data-preset="ck-shoot">Corkscrew and still shoot back<small>For a target AHEAD: slow roll ~27 °/s keeps the TVI still (not the way to flee)</small></button>
@@ -736,7 +751,8 @@ $('pause').onclick = togglePause;
 // Maneuvers, condensed to what each one teaches. Every one starts from a standstill, so you see the speed build up:
 // the first step is the approach, and `go` is when the maneuver proper starts (result times, the 2 s dodge distance
 // and the lowest speed are all measured from there). Each step: [start time s, inputs]; r/rf = roll direction and
-// fraction of full roll rate; p/y = pitch/yaw stick. watch: what to look at, with the in-game result and its source.
+// fraction of full roll rate; p/y = pitch/yaw stick. do: what the ship flies, one line; see: what to look for, with the key
+// number and its label (measured / model / assumed); more: the caveats, sources and test IDs, behind a Details toggle.
 // dodge: show the sideways distance covered in the first 2 s of the maneuver.
 // Sources: fixture = research/gladius-v1-fixture.json (measured); research = docs/RESEARCH.md duel model
 // (miss distance against a shooter who leads your current velocity, 1 s projectile flight); model = this simulator.
@@ -746,38 +762,79 @@ const TAPS = [[0, 'l', 1, .4], [.9, 'u', 1, .3], [1.9, 'l', -1, .5], [2.8, 'l', 
   [5.6, 'l', 1, .5], [6.5, 'u', 1, .3], [7.5, 'l', -1, .4], [8.3, 'u', 1, .5], [9.4, 'l', 1, .3]];
 const taps = (f) => TAPS.flatMap(([t, k, v, d]) => [[t, { f, l: k === 'l' ? v : 0, u: k === 'u' ? v : 0, boost: true }], [t + d, { f, l: 0, u: 0, boost: true }]]);
 const PRESETS = {
-  rest:         { title: 'Strafe from a stop', result: { at: 6, sim: () => `${Math.round(Math.abs(S.v[1]))} m/s sideways`, game: '394 m/s' }, start: 'rest', go: 0, watch: 'Boost + strafe from a stop: the ship slides straight out to 394 m/s sideways (measured). The egg is a little wider than that, about 410 m/s, with 10-25 % forward added (measured: sw_f10_l100, sw_f25_l100).',
+  rest:         { title: 'Strafe from a stop', result: { at: 6, sim: () => `${Math.round(Math.abs(S.v[1]))} m/s sideways`, game: '394 m/s' }, start: 'rest', go: 0,
+                  do: 'Boost and strafe sideways from a standstill.',
+                  see: 'The ship slides straight out to 394 m/s sideways (measured): the egg\'s width at zero forward speed.',
+                  more: 'The egg is a little wider than that, about 410 m/s, with 10-25 % forward added (measured: sw_f10_l100, sw_f25_l100).',
                   steps: [[0, { f: 0, l: 1, u: 0, boost: true }]] },
-  'dodge-nose': { title: 'Dodge at top speed', result: { at: 2, sim: () => `${Math.round(dodge.dist)} m in 2 s`, game: 'side push 3–6 G' }, start: 'rest', go: 5.5, dodge: true, watch: 'At 520 m/s the egg is a thin tip: side thrust is ~3–6 G (fixture wall traces), so 2 s of strafing moves you only ~90 m (model).',
+  'dodge-nose': { title: 'Dodge at top speed', result: { at: 2, sim: () => `${Math.round(dodge.dist)} m in 2 s`, game: 'side push 3–6 G' }, start: 'rest', go: 5.5, dodge: true,
+                  do: 'Boost to the 520 m/s nose, then strafe sideways.',
+                  see: 'Only ~90 m sideways in 2 s (model): at the tip of the egg the side push is ~3-6 G (measured, fixture wall traces).',
+                  more: 'Compare the mid-egg dodge: about twice the distance. The 2 s are counted from the moment the strafe starts.',
                   steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [5.5, { f: 1, l: 1, u: 0, boost: true }]] },
-  'dodge-mid':  { title: 'Dodge from mid-egg', result: { at: 2, sim: () => `${Math.round(dodge.dist)} m in 2 s`, game: 'one test (r7_dodge_mid_boost): side push ~12 G, 8.4 G after 1.7 s' }, start: 'rest', go: 1.65, dodge: true, watch: 'At 300 m/s forward you\'re in the fat middle of the egg: side push ~12 G falling to ~8.4 G over the next 1.7 s (measured, one test: r7_dodge_mid_boost), and the model gives ~170 m in 2 s, about twice the nose (model).',
+  'dodge-mid':  { title: 'Dodge from mid-egg', result: { at: 2, sim: () => `${Math.round(dodge.dist)} m in 2 s`, game: 'one test (r7_dodge_mid_boost): side push ~12 G, 8.4 G after 1.7 s' }, start: 'rest', go: 1.65, dodge: true,
+                  do: 'Boost to 300 m/s, then let go of forward and strafe.',
+                  see: '~170 m sideways in 2 s (model), about twice the nose: in the fat middle of the egg the side push is ~12 G, falling to ~8.4 G over 1.7 s (measured, one test).',
+                  more: 'The in-game numbers come from one test, r7_dodge_mid_boost; the 2 s distance itself is the model\'s, not measured.',
                   steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [1.65, { f: 0, l: 1, u: 0, boost: true }]] },
-  letoff:       { title: 'Ease off to make room', result: { at: 5, sim: () => `lowest ${Math.round(run.min)} m/s`, game: 'lowest ~435 m/s' }, start: 'rest', go: 6, watch: 'Forward released, strafe held: in game the speed falls from 519 to ~435 m/s (fixture; this model dips to ~425). The ship drops back into the egg and the dodge ring opens. (The model under-pushes sideways in this case; it is one of the listed misses in physics-fit.md.)',
+  letoff:       { title: 'Ease off to make room', result: { at: 5, sim: () => `lowest ${Math.round(run.min)} m/s`, game: 'lowest ~435 m/s' }, start: 'rest', go: 6,
+                  do: 'Boost to the nose, then release forward and hold a strafe.',
+                  see: 'Speed falls from 519 to ~435 m/s in game (fixture) and the dodge ring opens as the ship drops back into the egg.',
+                  more: 'This model dips to ~425 m/s and under-pushes sideways here; it is one of the misses listed in docs/physics-fit.md.',
                   steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [6, { f: 0, l: 1, u: 0, boost: true }]] },
-  'ck-escape':  { title: 'Escape corkscrew (chaser behind)', result: { at: 10, sim: () => `${Math.round(len(S.v))} m/s${missTxt()}`, game: '513 m/s, ~6 G side load (r9_vis_bst_f100_up_r50)' }, start: 'rest', go: 0, watch: 'Apprentice_One\'s escape from a tail (2025-05): boost, forward + up, roll at a gradual rate (~60 °/s here) and reverse the roll now and then (he reverses it as he nears blackout). The roll only turns which way your up-push points; it is not the dodge itself. Johnathan Winters: "roll does nothing for you" (2024-12, 2025-11): the dodge comes from strafe changes the shooter can\'t predict (see the Flee lessons). At gun range (500-600 m) a shot takes ~0.35 s plus the shooter\'s ~0.25 s to react (both assumed), so a 6 G push moves you ~10 m: about one Gladius width (readout; model). You keep ~513 m/s (measured). The boosted launch pulls ~21 G and greys the screen at about 2 s (measured). Up is the axis you tolerate most G in. Not measured: the game\'s lead rule, projectile speed, and whether shots inherit the shooter\'s speed.',
+  'ck-escape':  { title: 'Escape corkscrew (chaser behind)', result: { at: 10, sim: () => `${Math.round(len(S.v))} m/s`, game: '513 m/s, ~6 G side load (r9_vis_bst_f100_up_r50)' }, start: 'rest', go: 0,
+                  do: 'Boost, forward + up, roll at a gradual ~60 °/s and reverse the roll every few seconds (Apprentice_One\'s escape from a tail, 2025-05).',
+                  see: 'The roll only turns which way your up-push points; it is not the dodge. You keep ~513 m/s (measured), the launch pulls ~21 G and greys the screen at about 2 s (measured), and the readout shows how often a shooter behind you still connects (model).',
+                  more: 'He reverses the roll as he nears blackout. Johnathan Winters: "roll does nothing for you" (2024-12, 2025-11): the dodge comes from strafe changes the shooter can\'t predict (see the Flee lessons). At gun range (500-600 m) a shot takes ~0.35 s plus the shooter\'s ~0.25 s to react (both assumed), so a 6 G push moves you ~10 m: about one Gladius width (model). Up is the axis you tolerate most G in. A chaser as fast as you would close on you meanwhile (the Flee lessons show the range). Not measured: the game\'s lead rule, projectile speed, and whether shots inherit the shooter\'s speed.',
                   steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: .25 }], [3.5, { f: 1, l: 0, u: 1, boost: true, r: -1, rf: .25 }], [6, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: .25 }], [8.5, { f: 1, l: 0, u: 1, boost: true, r: -1, rf: .25 }]] },
-  'ck-shoot':   { title: 'Corkscrew and shoot back (target ahead)', result: { at: 10, sim: () => `TVI ${Math.round(run.tvi)}° off the nose${missTxt()}`, game: 'not measured at this roll rate (model: rule of thumb ~13°)' }, start: 'rest', go: 0, watch: 'For a target AHEAD of you, not for fleeing. Boosted, forward + up, roll ~27 °/s from a standstill: the TVI swings out and takes ~10 s to settle ~10-15° off the nose (model; the research rule of thumb says ~13°), so your target doesn\'t spin and you can shoot back. Don\'t use it to flee: on the model a chaser behind you at gun range hits you either way, and one who leads your acceleration hits you almost dead centre (the readout under the view shows both). Roll 27 °/s is not measured. Corkscrews measured at the nose ran 514–518 m/s (fixture).',
+  'ck-shoot':   { title: 'Corkscrew and shoot back (target ahead)', result: { at: 10, sim: () => `TVI ${Math.round(run.tvi)}° off the nose`, game: 'not measured at this roll rate (model: rule of thumb ~13°)' }, start: 'rest', go: 0,
+                  do: 'Boost, forward + up, with a slow roll of ~27 °/s. For a target AHEAD of you, not for fleeing.',
+                  see: 'The TVI swings out and settles ~10-15° off the nose after ~10 s (model; the research rule of thumb says ~13°), so your target doesn\'t spin and you can shoot back.',
+                  more: 'Don\'t use it to flee: on the model a chaser behind you at gun range hits you either way, and one who leads your acceleration hits you almost dead centre (the readout shows both). Roll 27 °/s is not measured. Corkscrews measured at the nose ran 514–518 m/s (fixture).',
                   steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: 27 / 240 }]] },
   'turn-cost':  { title: 'Turning while boosted costs speed', result: { at: 5, sim: () => `${Math.round(len(S.v))} m/s`, game: '394 m/s (r10_turn90_boost); in SCM a turn costs nothing (r10_turn90_scm)' }, start: 'rest', go: 6,
-                  watch: 'Boost to the nose, then pitch up 90° (1.1 s) with boost held and forward released. Your velocity stays where it was while the nose swings, so you are suddenly sideways to your own egg and the IFCS pulls you back to its edge: 520 → 394 m/s in about 4 s (measured). The egg turns with the nose; the 520 end only ever points where the ship does. In SCM the egg is a ball, so a turn costs nothing. (With the throttle held through the turn the speed dips to ~441 and climbs back to ~483 as the forward thrust drags the velocity onto the new nose; measured once, r10_turn90_boost_fwd, and the model misses it.)',
+                  do: 'Boost to the nose, then pitch up 90° (1.1 s) with boost held and forward released.',
+                  see: '520 → 394 m/s in about 4 s (measured). Your velocity stays put while the nose swings, so you are suddenly sideways to your own egg and the IFCS pulls you back to its edge. In SCM the egg is a ball, so the same turn costs nothing (measured).',
+                  more: 'The egg turns with the nose; the 520 end only ever points where the ship does. With the throttle held through the turn the speed dips to ~441 and climbs back to ~483 as the forward thrust drags the velocity onto the new nose (measured once, r10_turn90_boost_fwd; the model misses it).',
                   steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [6, { f: 0, l: 0, u: 0, boost: true, p: 1 }], [7.1, { f: 0, l: 0, u: 0, boost: true, p: 0 }]] },
   'flip-burn':  { title: 'Flip and burn', result: { at: 5, sim: () => `lowest ${Math.round(run.min)} m/s`, game: 'through zero in about 4 s, then speeding up the other way (r10_flip_and_burn)' }, start: 'rest', go: 4,
-                  watch: 'Boost to the nose, flip with a full pitch (2.2 s boosted; the fastest 180° is pure pitch, a diagonal stick is scaled back and is slower), then full throttle with boost. The forward thrusters (about 20 G) take ~300 m/s off in 1.5 s, through zero (measured once, r10_flip_and_burn: about 4 s from 511 m/s). Braking with the retros alone (4-6 G) would take about 8 s and twice the distance (model; the spacebrake itself is not measured, round 12 re-flies it). The flip wins above roughly 160 m/s; below that braking is quicker and keeps your nose on the target (model). Cut the throttle at zero: continuing the 20 G burn greyed the HUD to 25 % within 2 s (r10_flip_and_burn).',
+                  do: 'Boost to the nose, flip with a full pitch (2.2 s), then full throttle with boost.',
+                  see: 'The forward thrusters (about 20 G) take ~300 m/s off in 1.5 s and carry you through zero in about 4 s from 511 m/s (measured once). Braking with the retros alone (4-6 G) would take about 8 s and twice the distance (model).',
+                  more: 'The fastest 180° is pure pitch: a diagonal stick is scaled back and turns slower. The spacebrake itself is not measured (round 12 re-flies it). The flip wins above roughly 160 m/s; below that braking is quicker and keeps your nose on the target (model). Cut the throttle at zero: continuing the 20 G burn greyed the HUD to 25 % within 2 s (r10_flip_and_burn).',
                   steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [4, { f: 0, l: 0, u: 0, boost: true, p: 1 }], [6.2, { f: 1, l: 0, u: 0, boost: true, p: 0 }]] },
   'let-go':     { title: 'Let go of boost', result: { at: 7, sim: () => (run.rel == null ? 'still above 225 m/s' : `back to 225 m/s in ${run.rel.toFixed(1)} s`), game: '5.2 s from the nose (r6_release_all)' }, start: 'rest', go: 6,
-                  watch: 'Boost to the nose, then let go of everything. The IFCS bleeds you back to the SCM ball: ~12 G at first, then a steady 4.26 G (the retros) from 300 m/s, 225 m/s after 5.2 s (measured). What the spacebrake does here has not been measured. Hold a strafe while you slow and it takes ~7.6 s.',
+                  do: 'Boost to the nose, then let go of everything.',
+                  see: 'The IFCS bleeds you back to the SCM ball: 225 m/s after 5.2 s (measured). ~12 G at first, then a steady 4.26 G (the retros) from 300 m/s.',
+                  more: 'What the spacebrake does here has not been measured. Hold a strafe while you slow and it takes ~7.6 s.',
                   steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [6, { f: 0, l: 0, u: 0, boost: false }]] },
-  'flee-wall':  { title: 'Flee: stay on the wall, tap-strafe', chase: true, result: { at: 10, sim: () => `chaser at ${Math.round(chase.range)} m after 10 s${missTxt()}`, game: 'not measured (needs a two-pilot chase test)' }, start: { vx: 520, boost: true }, go: 0, watch: 'You start at the boosted nose with a Gladius 550 m behind holding the same 520 m/s. Full forward, no roll, and short strafe taps (0.25-0.5 s, side and up, never the same rhythm twice): the dodge advice of experienced pilots (Johnathan Winters 2024-12 / 2025-01: "quick side-strafe taps", delayed, not repeated; "on a full extension you just want to tap"). Your speed along your line stays ~515-520, so the chaser can\'t close and the range holds (model). Honest caveat: the model\'s shooters track perfectly once they have seen you (0.25 s late, assumed), and against them short taps at the wall keep you on target most of the time, more than the steady up-push of the escape corkscrew (readout). What taps are meant to beat is a human\'s aim, which the model does not include; the two-pilot test settles it.',
+  'flee-wall':  { title: 'Flee: stay on the wall, tap-strafe', chase: true, result: { at: 10, sim: () => `chaser at ${Math.round(chase.range)} m after 10 s`, game: 'not measured (needs a two-pilot chase test)' }, start: { vx: 520, boost: true }, go: 0,
+                  do: 'Full forward on the wall, no roll, short strafe taps (0.25-0.5 s, side and up, never the same rhythm twice).',
+                  see: 'Your speed along your line stays ~515-520, so a chaser as fast as you can\'t close and the range holds (model). The taps work on the shooter\'s delay: the modelled human shooter connects far less often than the ideal one (readout; model, shooter assumed).',
+                  more: 'The dodge advice of experienced pilots (Johnathan Winters 2024-12 / 2025-01: "quick side-strafe taps", delayed, not repeated; "on a full extension you just want to tap"). The ideal shooter aims exactly at what it saw 0.25 s ago (assumed); the human one steers its crosshair after the lead pip with the same delay and needs ~0.3 s to close a gap (crossover model, docs/aim-model.md; both assumed until a two-pilot test measures them). In game: not measured.',
                   steps: taps(1) },
-  'flee-tvi':   { title: 'Flee: TVI far out, slow roll', chase: true, result: { at: 10, sim: () => `chaser at ${Math.round(chase.range)} m after 10 s · TVI ${Math.round(run.tvi)}°${missTxt()}`, game: 'not measured (needs a two-pilot chase test)' }, start: { vx: 520, boost: true }, go: 0, watch: 'The coaching rule "put the TVI farther out and roll slowly". Forward + up, roll ~27 °/s: the velocity swings off the nose and your speed along your line drops, so a chaser as fast as you closes on you (watch the range). On the model the slow roll also lets a shooter who leads your acceleration hit you almost dead centre. It only pays against a slower chaser, or a shooter whose lead ignores your acceleration (not tested).',
+  'flee-tvi':   { title: 'Flee: TVI far out, slow roll', chase: true, result: { at: 10, sim: () => `chaser at ${Math.round(chase.range)} m after 10 s · TVI ${Math.round(run.tvi)}°`, game: 'not measured (needs a two-pilot chase test)' }, start: { vx: 520, boost: true }, go: 0,
+                  do: 'Forward + up, roll ~27 °/s: the coaching rule "put the TVI farther out and roll slowly".',
+                  see: 'The velocity swings off the nose and your speed along your line drops, so a chaser as fast as you closes (watch the range). On the model a shooter who leads your acceleration hits you almost dead centre.',
+                  more: 'It only pays against a slower chaser, or a shooter whose lead ignores your acceleration (not tested). In game: not measured (needs a two-pilot chase test).',
                   steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: 27 / 240 }]] },
-  'flee-ease':  { title: 'Flee: ease off forward', chase: true, result: { at: 10, sim: () => `chaser at ${Math.round(chase.range)} m after 10 s${missTxt()}`, game: 'not measured; in game letting go of forward drops you to ~435 m/s (fixture)' }, start: { vx: 520, boost: true }, go: 0, watch: 'The coaching rule "use less forward thrust". Forward released, the same strafe taps: you drop back into the fat part of the egg, where the side push is stronger (measured ~8-12 G below 400 m/s, round 8, noisy; G-LOC caps what you can hold at ~8 G up), but every m/s you give up is closing speed for a chaser as fast as you, and the shrinking range shortens their shot (model). Worth it against a slower chaser, or to drag the chaser toward your wingmen.',
+  'flee-ease':  { title: 'Flee: ease off forward', chase: true, result: { at: 10, sim: () => `chaser at ${Math.round(chase.range)} m after 10 s`, game: 'not measured; in game letting go of forward drops you to ~435 m/s (fixture)' }, start: { vx: 520, boost: true }, go: 0,
+                  do: 'Release forward, keep the same strafe taps: the coaching rule "use less forward thrust".',
+                  see: 'You drop back into the fat part of the egg, where the side push is stronger (measured ~8-12 G below 400 m/s, round 8, noisy), but every m/s you give up is closing speed for a chaser as fast as you, and the shrinking range shortens their shot (model).',
+                  more: 'G-LOC caps what you can hold at ~8 G up. Worth it against a slower chaser, or to drag the chaser toward your wingmen. In game: not measured; letting go of forward drops you to ~435 m/s (fixture).',
                   steps: taps(0) },
 };
 // Corkscrew helix radius a/ω² (docs/RESEARCH.md), with a the current G and ω the roll rate the lesson is flying.
 function spiralR() { const w = ctl.rollFrac * gladius.boost.rotationDps.roll * Math.PI / 180; return w > 0.05 ? gSmooth * 9.80665 / (w * w) : 0; }
+// The lesson's explanation: "Do" (what the ship flies), "See" (what to look for) and a Details toggle with the caveats and
+// sources. The same block goes under the view in its caption and, on phones, into the lesson note under the lessons.
+const escHtml = s => String(s).replace(/[&<>"]/g, c => `&#${c.charCodeAt(0)};`);
+function lessonHtml(p) {
+  if (!p) return '';
+  return `<span class="do"><b>Do</b> ${escHtml(p.do)}</span><span class="see"><b>See</b> ${escHtml(p.see)}<span class="cap-dodge"></span></span>` +
+    (p.more ? `<details class="more-d"><summary>Details and sources</summary><span>${escHtml(p.more)}</span></details>` : '');
+}
 // Phones show the lesson's explanation here, under the view (the view's own caption is hidden there).
-const NOTE_IDLE = $('lesson-note').textContent;
+const NOTE_IDLE = $('lesson-note').innerHTML;
 function setNote(html) { $('lesson-note').innerHTML = html || NOTE_IDLE; }
 let maneuver = null, dodge = null, run = null;   // run: what the running lesson has measured so far   // dodge: sideways distance covered in the first 2 s of a maneuver
 function markPreset(key) { document.querySelectorAll('[data-preset]').forEach(b => b.setAttribute('aria-pressed', b.dataset.preset === key)); }
@@ -786,7 +843,7 @@ document.querySelectorAll('[data-preset]').forEach(b => b.onclick = () => {
   dodge = p.dodge ? { t: 0, dist: 0 } : null;
   run = { t: 0, min: Infinity, peakG: 0, tvi: 0, rel: null, shown: false, chase: !!p.chase }; chase.range = CHASE.range;
   $('run-name').textContent = p.title; $('run-result').textContent = ''; $('run-msg').hidden = false; $('runbar').hidden = false;
-  setNote(p.watch);
+  setNote(lessonHtml(p));
   egg.chase(true);   // ride behind the ship with its limits in frame
   // the maneuver buttons sit below the views on phones: bring the views back into sight to watch it
   const v = document.querySelector('.views'), r = v.getBoundingClientRect();
@@ -1295,11 +1352,50 @@ function drawSlice(canvas, st, d, big) {
 const VP_ASSUMED = 1500;   // m/s, ASSUMED: the Star Citizen Wiki lists 1480 for the Gladius's CF-337 Panther (4.10.1); not measured here
 // react: the shooter fires at what it saw a moment ago (human reaction and aim lag, ASSUMED 0.25 s); a dodge started inside
 // that window plus the projectile's flight time is the one that works (community advice: short, delayed, unrepeated strafe taps).
-const CHASE = { range: 550, speed: 520, vp: VP_ASSUMED, react: 0.25 }, HIT_R = 8, hist = [];
+// Two shooters (docs/aim-model.md, packages/core/src/aim.ts): the IDEAL one aims exactly at what it saw `react` ago, extrapolated;
+// the HUMAN one has to steer its crosshair after the lead pip, a manual tracking task (crossover model: the aim moves at the
+// pip's own drift plus `crossover` x the error it saw `react` ago, so a change in your motion takes ~1/crossover s to catch up).
+// Both are in the plane across the line of sight (m at the target). crossover 3 rad/s is ASSUMED, in the published range for
+// rate tasks; a two-pilot test (round 13, deferred) is what would measure it.
+const CHASE = { range: 550, speed: 520, vp: VP_ASSUMED, react: 0.25, crossover: 3 }, HIT_R = 8, hist = [];
+const HS = 1 / 60, LAG = Math.round(CHASE.react / HS);   // history sample period, and the shooter's delay in samples
 const chase = { range: CHASE.range, tau: CHASE.range / CHASE.vp };   // the live chase: range now and the flight time it gives
-const missNow = { A: 0, B: 0, ok: false };   // missTxt() below is used by the lessons
-const missTxt = () => (run && run.n ? ` · on target ${Math.round(100 * run.hitA / run.n)} % / ${Math.round(100 * run.hitB / run.n)} % of the time (model)` : '');
-const trail = []; let acc = 0, last = performance.now(), roT = 0, trailT = 0, liveT = 0;
+const missNow = { A: 0, B: 0, HA: 0, HB: 0, ok: false };   // ideal A/B, human A/B (m), onX: that shot lands on the ship; missTxt() is used by the lessons
+const pct = (k) => Math.round(100 * run[k] / run.n);
+const missTxt = () => (run && run.n ? `<span class="rr"><b>On target (model)</b> human shooter ${pct('hitHA')} % / ${pct('hitHB')} % · ideal ${pct('hitA')} % / ${pct('hitB')} %</span>` : '');
+// One history sample: your world position, velocity and acceleration, the lead pips (A velocity, B + acceleration) a shot fired now
+// would use, and where the human shooter's crosshair is for each pip (the crossover tracker, stepped from the samples it saw LAG ago).
+function pushHist(t, p, v, a) {
+  const tau = chase.tau, n = hist.length, j = n - 1 - LAG;
+  const pipA = [p[1] + v[1] * tau, p[2] + v[2] * tau], pipB = [pipA[0] + 0.5 * a[1] * tau * tau, pipA[1] + 0.5 * a[2] * tau * tau];
+  const aim = (key, pip) => { if (j < 0) return [pip[0], pip[1]];   // not enough history: settled on the pip
+    const prev = hist[n - 1][key], s0 = hist[j], s1 = hist[j + 1], pk = key === 'aimA' ? 'pipA' : 'pipB';
+    return [0, 1].map(c => prev[c] + (s1[pk][c] - s0[pk][c]) + HS * CHASE.crossover * (s0[pk][c] - s0[key][c])); };
+  hist.push({ t, p, v, a, pipA, pipB, aimA: aim('aimA', pipA), aimB: aim('aimB', pipB) }); if (hist.length > 200) hist.shift();
+}
+// Does a shot that misses the ship's centre by (dy, dz) across the line of sight still land on the ship? The Gladius seen from
+// behind is 17 m wide and 5.5 m tall (fixture dimensions_note; spviewer value, NOTICE.md), so the outline is that rectangle turned
+// with the ship's roll: a crude outline (the real ship is a cross) that over-counts hits, as in the core's aim model. The ship is
+// drawn as a disc of HIT_R if its wings are nearly edge-on to the chaser (nose far off the line), where the rectangle has no meaning.
+const HULL = { w: 17, h: 5.5 };
+function onHull(dy, dz) {
+  const L = qRot(qAtt, [0, 1, 0]), U = qRot(qAtt, [0, 0, 1]), ly = Math.hypot(L[1], L[2]), uy = Math.hypot(U[1], U[2]);
+  if (ly < 0.5 || uy < 0.5) return Math.hypot(dy, dz) < HIT_R;
+  return Math.abs((dy * L[1] + dz * L[2]) / ly) <= HULL.w / 2 && Math.abs((dy * U[1] + dz * U[2]) / uy) <= HULL.h / 2;
+}
+// The shot landing now: the ideal shooter fired it at what it saw react + flight time ago, extrapolated; the human one fired it one
+// flight time ago at wherever its crosshair was then. Misses are across the line of sight (y, z), as in the core's aim model.
+function scoreShot() {
+  const span = chase.tau + CHASE.react, now = hist[hist.length - 1], i = hist.findIndex(h => h.t >= now.t - span), k = hist.findIndex(h => h.t >= now.t - chase.tau);
+  missNow.ok = !!now && i > 0 && k > 0 && now.t - hist[i].t > span * 0.9;
+  if (!missNow.ok) return;
+  const h = hist[i], tau = now.t - h.t, g = hist[k];
+  const miss = (q) => [1, 2].map(j => now.p[j] - (h.p[j] + h.v[j] * tau + q * 0.5 * h.a[j] * tau * tau));
+  const v = { A: miss(0), B: miss(1), HA: [now.p[1] - g.aimA[0], now.p[2] - g.aimA[1]], HB: [now.p[1] - g.aimB[0], now.p[2] - g.aimB[1]] };
+  for (const m of ['A', 'B', 'HA', 'HB']) { missNow[m] = Math.hypot(...v[m]); missNow['on' + m] = onHull(...v[m]); }
+  if (run && script && script.t >= script.go) { run.n = (run.n || 0) + 1; for (const m of ['A', 'B', 'HA', 'HB']) run['hit' + m] = (run['hit' + m] || 0) + missNow['on' + m]; }
+}
+const trail = []; let acc = 0, last = performance.now(), roT = 0, histN = 0, liveT = 0;
 const DT = 1 / 240;
 function derive(st, inp) {
   const ci = coreInput(inp.u, inp.boost), d = coreDerive(st.c, ci, gladius), boost = boostActive(st.c, ci);
@@ -1307,17 +1403,22 @@ function derive(st, inp) {
   return { speed: sp, fwd: st.v[0], side: Math.hypot(st.v[1], st.v[2]), g: d.gNow, boost, r: eggRadiusAlong(gladius, boost, st.c.vWorld), req: request(inp.u, boost),
     pinned: d.pinned, room: d.lateralRoom, roomLeft: Math.max(0, d.lateralRoom - Math.hypot(st.v[1], st.v[2])), tviDeg: sp > 0.5 ? d.tvi.offAngleDeg : 0, settle };
 }
+// The caption under a view: a live line about the ship's state, then the running lesson's Do / See / Details block. The two
+// are separate elements, so the live line can change every frame without re-rendering the lesson (and closing its Details).
 function teach(el, d) {
-  let w = script && maneuver ? PRESETS[maneuver].watch : '';
-  if (w && dodge && script && script.t >= script.go) w += ` · ${dodge.t < 2 ? 'so far' : 'after 2 s'}: <b>${Math.round(dodge.dist)} m sideways</b>`;
-  const html = `${caption(d)}${w ? `<span class="watch">${w}</span>` : ''}`;
-  if (el._h !== html) { el._h = html; el.innerHTML = html; }
+  if (!el._live) { el.innerHTML = '<span class="cap-live"></span><div class="cap-lesson"></div>'; el._live = el.firstChild; el._lesson = el.lastChild; }
+  const live = caption(d), key = script && maneuver ? maneuver : '';
+  if (el._l !== live) { el._l = live; el._live.textContent = live; }
+  if (el._k !== key) { el._k = key; el._lesson.innerHTML = lessonHtml(key ? PRESETS[key] : null); el._dodge = el.querySelector('.cap-dodge'); }
+  const dz = key && dodge && script && script.t >= script.go ? ` · ${dodge.t < 2 ? 'so far' : 'after 2 s'}: ${Math.round(dodge.dist)} m sideways` : '';
+  if (el._dodge && el._d !== dz) { el._d = dz; el._dodge.textContent = dz; }
+  const empty = !live && !key; if (el._e !== empty) { el._e = empty; el.dataset.empty = String(empty); }
 }
 function caption(d) {
   if (Math.abs(S.roll || 0) > 1 && d.speed > 5) return (script && maneuver ? '' : 'Rolling: your sideways drift spins around the nose. ') +
     `Rolling ${Math.round(Math.abs(S.roll))} °/s · ${Math.round(d.side)} m/s sideways at ${Math.round(d.speed)} m/s · ${d.g.toFixed(1)} G.`;
   if (d.speed < 5) return d.boost ? 'Stopped, boosting: you can reach 520 m/s forward or 394 m/s sideways.'
-    : 'Stopped, no boost: you can reach 225 m/s in any direction (blue ball). Hold Boost to use the amber egg.';
+    : `Stopped, no boost: you can reach 225 m/s in any direction (blue ball).${script ? '' : ' Pick a lesson below, or hold Boost and drag the strafe pad.'}`;
   if (d.fwd < -5) return `Flying backwards at ${Math.round(-d.fwd)} m/s. The egg is shortest at the tail: ${d.boost ? 268 : 225} m/s.`;
   if (d.pinned && !d.boost && d.speed > 230) return 'Boost released: the flight computer is bleeding your speed back down to 225.';
   if (d.pinned && d.boost && d.fwd > 500) return `Top forward speed (${Math.round(d.fwd)} m/s): only ${Math.round(d.roomLeft)} m/s of dodge left.`;
@@ -1342,7 +1443,7 @@ function glocView(v) {
   const hudOp = v ? String(v.hud) : '';
   $('hud').style.opacity = hudOp; $('ahud').style.opacity = hudOp;
   if (v) { glocEl.style.setProperty('--c', v.centre.toFixed(2)); glocEl.style.setProperty('--e', v.edge.toFixed(2)); glocEl.style.setProperty('--r', v.red.toFixed(2)); glocEl.style.setProperty('--r0', `${Math.round(100 - 65 * v.edge)}%`); }
-  const word = !v ? 'off' : { ok: 'clear', grey: 'grey-out', gone: 'HUD gone', blackout: 'BLACKED OUT' }[v.state];
+  const word = !v ? (script ? 'paused' : 'off') : { ok: 'clear', grey: 'grey-out', gone: 'HUD gone', blackout: 'BLACKED OUT' }[v.state];
   $('r-gloc').textContent = word; $('r-gloc').className = v && v.state !== 'ok' ? 'warn' : '';
   $('r-glocbar').style.width = v ? `${Math.min(100, PS.dose / gladius.pilot.blackDose * 100)}%` : '0%';
 }
@@ -1376,19 +1477,14 @@ function frame(now) {
       S.x = [x0[0] + vw[0] * DT, x0[1] + vw[1] * DT, x0[2] + vw[2] * DT];
       S.roll = sc[0] * R.roll; S.pitch = sc[1] * R.pitch; S.yaw = sc[2] * R.yaw;
       if (dodge && dodge.t < 2 && (!script || script.t >= script.go)) { dodge.t += DT; dodge.dist += Math.hypot(S.v[1], S.v[2]) * DT; }
+      { // the chaser: keeps 520 m/s along your starting line; you open or close the range with your own speed along it
+        const away = vw[0], closing = CHASE.speed - away;
+        if (run && run.chase) chase.range = Math.max(50, chase.range - closing * DT); else chase.range = CHASE.range;
+        chase.tau = chase.range / (CHASE.vp + Math.max(0, closing)); }
+      // a ~3 s trail and the chaser's history: one sample per 1/60 s of sim time (every 4th step); every sample is a shot
+      if (++histN % Math.round(HS / DT) === 0) { trail.push(R3(...vw)); if (trail.length > 180) trail.shift();
+        pushHist(S.c.t, [...S.x], vw, qRot(qAtt, S.a)); scoreShot(); }
     }
-    // a ~3 s trail: one point per 1/60 s of sim time, whatever the frame rate
-    trailT += dt; while (trailT > 1 / 60) { trailT -= 1 / 60; trail.push(R3(...qRot(qAtt, S.v))); if (trail.length > 180) trail.shift();
-      hist.push({ t: S.c.t, p: [...S.x], v: qRot(qAtt, S.v), a: qRot(qAtt, S.a) }); if (hist.length > 200) hist.shift(); }
-    { // the chaser: keeps 520 m/s along your starting line; you open or close the range with your own speed along it
-      const away = qRot(qAtt, S.v)[0], closing = CHASE.speed - away;
-      if (run && run.chase) chase.range = Math.max(50, chase.range - closing * dt); else chase.range = CHASE.range;
-      chase.tau = chase.range / (CHASE.vp + Math.max(0, closing)); }
-    { const span = chase.tau + CHASE.react, now = hist[hist.length - 1], i = hist.findIndex(h => h.t >= now.t - span);
-      missNow.ok = !!now && i > 0 && now.t - hist[i].t > span * 0.9;
-      if (missNow.ok) { const h = hist[i], tau = now.t - h.t, d = (k) => Math.hypot(...[0, 1, 2].map(j => now.p[j] - (h.p[j] + h.v[j] * tau + k * 0.5 * h.a[j] * tau * tau)));
-        missNow.A = d(0); missNow.B = d(1);
-        if (run && script && script.t >= script.go) { run.n = (run.n || 0) + 1; run.hitA = (run.hitA || 0) + (missNow.A < HIT_R); run.hitB = (run.hitB || 0) + (missNow.B < HIT_R); } } }
   }
   const inp = currentInput(), d = derive(S, inp);
   if (run && maneuver && script && !ctl.paused) { // lesson progress and its result vs the game
@@ -1398,7 +1494,7 @@ function frame(now) {
     if (on) { run.min = Math.min(run.min, d.speed); run.peakG = Math.max(run.peakG, d.g); run.tvi = d.tviDeg; if (run.rel == null && d.speed <= gladius.scm.speedCap + 1) run.rel = run.t; }
     $('run-prog').style.width = `${Math.max(0, Math.min(100, script.t / (go + R.at) * 100))}%`;
     if (!run.shown && run.t >= R.at) { run.shown = true; $('run-msg').hidden = true;
-      $('run-result').textContent = `Simulator: ${R.sim()} · In game: ${R.game}`; }
+      $('run-result').innerHTML = `<span class="rr"><b>Simulator</b> ${R.sim()}</span><span class="rr"><b>In game</b> ${R.game}</span>${missTxt()}`; }
   }
   glocView(glocLive() ? vision(PS, gladius.pilot) : null);
   gSmooth += (d.g - gSmooth) * 0.15;
@@ -1419,8 +1515,10 @@ function frame(now) {
       $('rb-fill').style.left = `${50 - yMax / room * 50}%`; $('rb-fill').style.width = `${yMax / room * 100}%`;
       $('rb-ship').style.left = `${Math.min(100, Math.max(0, 50 - S.v[1] / room * 50))}%`;
       $('rb-lr').textContent = `◂ ${Math.round(L)} · ${Math.round(Rr)} ▸`; } $('r-g').textContent = gSmooth.toFixed(1);
-    { const m = $('r-miss'); if (!missNow.ok || d.speed < 20) { m.textContent = '–'; m.className = ''; } else { m.textContent = `${Math.round(missNow.A)} / ${Math.round(missNow.B)}`; m.className = Math.min(missNow.A, missNow.B) < HIT_R ? 'warn' : ''; }
-      $('r-miss-at').textContent = `m · ${Math.round(chase.range)} m, ${chase.tau.toFixed(2)} s shot + ${CHASE.react} s aim`; } $('r-tvi').textContent = d.speed > 3 ? Math.round(d.tviDeg) : '–';
+    { const m = $('r-miss'), on = missNow.ok && d.speed >= 20, r = x => Math.round(x);
+      m.textContent = on ? `${r(missNow.HA)} / ${r(missNow.HB)}` : '–'; m.className = on && (missNow.onHA || missNow.onHB) ? 'warn' : '';
+      const ideal = on ? `ideal ${r(missNow.A)} / ${r(missNow.B)}` : 'ideal –'; const id = $('r-miss-ideal'); id.textContent = ideal; id.classList.toggle('warn', on && !!(missNow.onA || missNow.onB));
+      $('r-miss-at').textContent = `${r(chase.range)} m · ${chase.tau.toFixed(2)} s`; } $('r-tvi').textContent = d.speed > 3 ? Math.round(d.tviDeg) : '–';
     $('r-tank').textContent = ctl.unlimited ? '∞' : S.c.boostLocked ? `${Math.round(S.tank)}🔒` : Math.round(S.tank);
     $('r-tankbar').classList.toggle('locked', !!S.c.boostLocked && !ctl.unlimited); $('r-roll').textContent = Math.round(Math.abs(S.roll || 0)); $('r-tankbar').style.width = `${S.tank}%`;
     const mode = $('r-mode'); mode.textContent = d.boost ? 'Boost' : 'SCM'; mode.className = `chip ${d.boost ? 'on-boost' : 'on-scm'}`;
@@ -1434,6 +1532,8 @@ new ResizeObserver(resizeAll).observe(document.querySelector('.views'));
 applyTabs(); drawKnob(); setThr(0); resizeAll(); refreshHints(); requestAnimationFrame(frame);
 // First visit: set up controls, the way Stay On Target opens with its setup wizard.
 if (controls.firstRun) controls.open(true, ctl.keys);
+// For automated checks (headless browser runs): a read-only peek at the simulator's state.
+window.speedwallDebug = { get: () => ({ S, run, missNow, chase, script, maneuver }) };
 </script>
 
 </body>
