@@ -4,3 +4,4 @@ dist/
 tools/sc-flighttest/results/
 tools/sc-flighttest/.venv/
 __pycache__/
+.cache/
