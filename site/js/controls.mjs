@@ -385,13 +385,13 @@ export function createControls(ui) {
 
   function renderDevices() {
     const kinds = wiz.kinds;
-    const box = (k, label, hint) => `<label class="kind"><input type="checkbox" data-kind="${k}" ${kinds.has(k) ? 'checked' : ''}><span><b>${label}</b><small>${hint}</small></span></label>`;
+    const box = (k, label, hint) => `<label class="kind"><input type="checkbox" data-kind="${k}" ${kinds.has(k) ? 'checked' : ''}><span><b>${label}</b>${hint ? `<small>${hint}</small>` : ''}</span></label>`;
     body.innerHTML = `<p class="lead">What will you fly with? Pick everything you use. Next, you press each control once, the way Star Citizen asks for bindings.</p>
       <div class="kinds">
         ${box('keyboard', 'Keyboard', 'W A S D, Space, Ctrl, Q E, Shift')}
         ${box('mouse', 'Mouse', 'Moves the nose (pitch and yaw)')}
         ${box('stick', 'Joystick / HOTAS', 'Sticks and throttles')}
-        ${box('pedals', 'Pedals', 'Usually yaw or strafe')}
+        ${box('pedals', 'Pedals', '')}
         ${box('gamepad', 'Gamepad', 'Xbox-style controller')}
       </div>
       <p class="keys" id="wiz-kinds-msg" role="status"></p>
