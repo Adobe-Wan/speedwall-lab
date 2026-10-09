@@ -11,7 +11,7 @@ path = [
   "package.json", "pnpm-workspace.yaml", "pnpm-lock.yaml", ".gitignore", ".size-limit.json",
   "tsconfig.base.json", "packages/*/package.json", "packages/*/tsconfig*.json",
   "packages/*/README.md",
-  ".github/**", "README.md", "CLAUDE.md", "PLAN.md", "CONTRIBUTING.md", "NOTICE.md",
+  ".github/**", ".claude/**", "README.md", "CLAUDE.md", "PLAN.md", "CONTRIBUTING.md", "NOTICE.md",
   "LICENSE", "LICENSE-DATA.md", "docs/adr/**", "docs/physics-fit.md", "docs/qa-*.md", "docs/flight-model-tests.md", "docs/HANDOFF.md", "docs/HANDOFF-REPLY.md", "docs/flight-model-findings.md", "tools/sc-flighttest/**",
 ]
 precedence = "aggregate"
