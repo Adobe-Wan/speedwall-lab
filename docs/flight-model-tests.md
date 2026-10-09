@@ -33,7 +33,7 @@ Run order is 6 → 7 → 8 → 9 → 5 → 4. Round 6 fixes a reported bug, roun
 | **7** C | **Boosted escape corkscrew:** speed kept and side G at roll 25/50/75 %, up vs lateral | Only roll 100 % is measured (514 m/s, 5.4 G) | 4 |
 | **7** D | **Dodge from mid-egg** (~300 m/s) | Model only (~180 m in 2 s) | 1 |
 | **7** E | **Boost tank:** drain, regen, and whether boost really comes back at 25 % | Drain 4.8 %/s and regen 4 %/s have no stated source; the 25 % red zone is assumed | 1 |
-| **7** F | **Spacebrake** from the boosted nose | Not measured | 1 |
+| **7** F → **12** | **Spacebrake.** The round-7 test never pressed the brake (runner bug, fixed 2026-10-09: it is a second release trace). Round 12 re-flies it from 150 and 225 SCM, 400 and 519 boosted, boost held and released | Not measured (the app's brake is assumed) | 6 |
 | **5** `tests_round5.yaml` | **Egg shape near the nose** (yaw sweep) and the long nose slide | Limaçon, validated within 1 % from rest | 5 |
 | **4** `tests_round4.yaml` | **Boosted back and down G** (the last third-party values) | 5.9 G and 6.6 G from spviewer | 4 |
 

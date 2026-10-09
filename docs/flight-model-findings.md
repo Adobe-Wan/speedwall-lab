@@ -1,5 +1,7 @@
 # Flight model findings, 2026-10-08 (rounds 4–9) and what comes next
 
+> **Correction, 2026-10-09:** `r7_spacebrake_nose` never pressed the spacebrake (the harness hard-coded `brake: False`; fixed in `sctest/runner.py`). It is a second release trace, so every statement below that the spacebrake is "no faster than releasing" is unsupported. The spacebrake's deceleration is not measured; round 12 (`tests_round12.yaml`) re-flies it. See `docs/coach-review-2026-10-09.md`.
+
 Hand-off for the Claude Code project. Ship: Gladius, decoupled, game version 4.x LIVE (Arena Commander). Raw data:
 `research/raw/2026-10-08/` (two sessions, 95 tests, series + meta + vision + probe per test, no frames).
 Everything below is **measured** unless marked *model* (computed from measured constants) or *hypothesis*.

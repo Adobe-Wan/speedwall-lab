@@ -1829,7 +1829,7 @@
     [24.27, 225.0]
    ]
   },
-  "spacebrake_at_boosted_nose": {
+  "second_release_from_nose_r7": {
    "test": "r7_spacebrake_nose",
    "session": "20261008-133222",
    "steps": [
@@ -2106,7 +2106,7 @@
    ],
    "note": "boost released at 338 m/s; peaked 367 before the bleed"
   },
-  "_note": "Boost released (or spacebraked) above SCM. samples = [t seconds after the inputs start, HUD speed m/s] every 0.25 s; the HUD lags the ship by ~0.3 s. steps give the release time. Samples after the last step are the harness cleanup, not the manoeuvre."
+  "_note": "Boost released above SCM. (r7_spacebrake_nose is here as a SECOND RELEASE trace: the harness never pressed the spacebrake in it, see invalid.) samples = [t seconds after the inputs start, HUD speed m/s] every 0.25 s; the HUD lags the ship by ~0.3 s. steps give the release time. Samples after the last step are the harness cleanup, not the manoeuvre."
  },
  "turnTraces": {
   "turn90_boosted_pitch_up": {
@@ -3946,6 +3946,7 @@
   ]
  },
  "invalid": {
+  "r7_spacebrake_nose": "The round-7 'spacebrake' test never braked: sctest/runner.py hard-coded brake=False in the in-test pad (fixed 2026-10-09), commands.csv has no brake column, and the speed falls exactly as in a plain release. It is a second release-from-the-nose trace. What the spacebrake does is not measured (round 12 re-flies it). Found by the sc-flight-coach review, docs/coach-review-2026-10-09.md.",
   "r4_boost_down.plateau": "The harness let go at red-out (old 'release' policy) after 2.8 s; the 76 m/s 'plateau' is not a measurement. Its acceleration (6.8 G) stands."
  },
  "forwardAxis": "The forward axis is the game's 'Throttle - Forward / Back' (there is no forward strafe binding): thrust proportional to deflection (25 % -> 3.4 G, 50 % -> 6.9 G, then to the cap); the game keeps a throttle setting after the axis returns to centre. Source: r10_thr_025/050/100_release, throttlecheck.log."

@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: 2026 AdobeWan
+# SPDX-License-Identifier: CC-BY-4.0
+# Round 12: the spacebrake, for real. Round 7's r7_spacebrake_nose never pressed the brake (runner.py hard-coded brake=False in
+# the in-test pad; fixed 2026-10-09), so what the spacebrake does is NOT measured. Each test: reach a speed, then hold the
+# spacebrake (vJoy button "brake") for 8 s. Read the speed fall and the G meter: if the brake only uses the retro bank the
+# deceleration is 4.24 G in SCM (5.96 boosted); if it brings every bank to bear it is larger. Compare with the flip-and-burn
+# (r10_flip_and_burn: about 20 G forward) and with simply letting go (r6_release_all).
+# Free flight, decoupled, with the pilot present; never in the PU or PvP.
+tests:
+  - id: r12_brake_150_scm
+    note: SCM, full forward 1.2 s (~150 m/s), then spacebrake 8 s
+    steps: [{t: 1.2, strafe_long: 1.0}, {t: 8, brake: true}]
+    expect: {decel_G: "?"}
+  - id: r12_brake_225_scm
+    note: SCM, full forward 3 s (225 m/s), then spacebrake 8 s
+    steps: [{t: 3, strafe_long: 1.0}, {t: 8, brake: true}]
+    expect: {decel_G: "?"}
+  - id: r12_brake_400_boost_off
+    note: boost + full forward 2.3 s (~400 m/s), then spacebrake 10 s with boost released
+    steps: [{t: 2.3, strafe_long: 1.0, boost: true}, {t: 10, brake: true}]
+    expect: {decel_G: "?"}
+  - id: r12_brake_400_boost_held
+    note: boost + full forward 2.3 s (~400 m/s), then spacebrake 10 s with boost HELD
+    steps: [{t: 2.3, strafe_long: 1.0, boost: true}, {t: 10, brake: true, boost: true}]
+    expect: {decel_G: "?"}
+  - id: r12_brake_nose_boost_off
+    note: pin at the boosted nose 6 s, then spacebrake 12 s with boost released (the repeat of r7_spacebrake_nose, this time braking)
+    steps: [{t: 6, strafe_long: 1.0, boost: true}, {t: 12, brake: true}]
+    expect: {decel_G: "?"}
+  - id: r12_brake_nose_boost_held
+    note: pin at the boosted nose 6 s, then spacebrake 12 s with boost HELD
+    steps: [{t: 6, strafe_long: 1.0, boost: true}, {t: 12, brake: true, boost: true}]
+    expect: {decel_G: "?"}

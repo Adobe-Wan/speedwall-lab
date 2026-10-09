@@ -203,7 +203,7 @@ def record(test, cfg, vj, grab, guard):
             elif vp.due(t):
                 press_until = t + pulse
                 vp.press(t, "cycle", None if np.isnan(dark_level) else round(float(dark_level), 3))
-        pad = {"boost": buttons.get("boost", False), "brake": False}
+        pad = {"boost": buttons.get("boost", False), "brake": buttons.get("brake", False)}   # brake was hard-coded False: r7_spacebrake_nose never braked
         if "view" in vj.button_map:
             pad["view"] = t < press_until
         cmd = ({k: axes.get(k, 0.0) for k in vj.axis_map}, pad)

@@ -146,7 +146,7 @@ details.more summary { cursor: pointer; color: var(--muted); font-size: .8rem; }
   background: radial-gradient(ellipse closest-side at 50% 50%, rgba(0,0,0,var(--c)) 0%, rgba(0,0,0,var(--c)) var(--r0), rgba(0,0,0,var(--e)) 100%),
               radial-gradient(ellipse closest-side at 50% 50%, rgba(170,15,15,0) 25%, rgba(190,20,20,var(--r)) 100%); }
 .gloc[hidden] { display: none; }
-#r-gloc.warn { color: var(--warn, #ff6a55); }
+#r-gloc.warn, #r-miss.warn { color: var(--warn, #ff6a55); }
 .legend { display: flex; flex-wrap: wrap; gap: 2px 16px; font: .76rem var(--font-ui); color: var(--muted); margin-bottom: -4px; }
 .legend span::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: -1px; }
 .legend .lg-egg::before { background: var(--boost); } .legend .lg-scm::before { background: var(--scm); }
@@ -329,6 +329,7 @@ footer p { margin: 0 0 4px; max-width: 75ch; }
     <div class="ro" title="Your current push. 1 G = Earth gravity"><b>Thrust</b><span id="r-g">0.0</span><small>G</small></div>
     <div class="ro"><b>Roll</b><span id="r-roll">0</span><small>°/s</small></div>
     <div class="ro" title="Angle between where your nose points and where you are actually going (the TVI)"><b>Drift angle</b><span id="r-tvi">–</span><small>°</small></div>
+    <div class="ro" title="MODEL: how far a shot fired 1 s ago misses you now, from a chaser behind who leads with your velocity (first number) or with your velocity and acceleration (second). 1 s flight time and an 8 m hit radius are assumptions; red = it would hit. Whether the game's lead uses acceleration is not settled."><b>Chaser's miss (model)</b><span id="r-miss">–</span><small>m · 1 s shot</small></div>
     <div class="ro" title="MODEL, not a measured rule: stress from the G you are pulling in each direction. Greys the HUD, then the screen, then blacks out and cuts thrust and boost."><b>G-LOC (model)</b><span id="r-gloc">clear</span><div class="tank"><i id="r-glocbar"></i></div></div>
     <div class="ro"><b>Boost tank</b><span id="r-tank">100</span><small>%</small><div class="tank"><i id="r-tankbar"></i></div></div>
     <div class="ro"><b>Flight mode</b><span class="chip" id="r-mode">SCM</span> <span class="chip" id="r-pin" hidden>At limit</span></div>
@@ -338,22 +339,22 @@ footer p { margin: 0 0 4px; max-width: 75ch; }
         <p class="lesson-note" id="lesson-note" role="status">Pick a lesson to watch the ship move inside the egg.</p>
         <h3>Room to dodge</h3>
         <div class="mgrid">
-          <button data-preset="rest">Strafe from a stop<small>The most dodge you'll ever have: 394 m/s sideways</small></button>
+          <button data-preset="rest">Strafe from a stop<small>A lot of dodge: 394 m/s sideways from a stop</small></button>
           <button data-preset="dodge-nose">Dodge at top speed<small>Build up to 520, then strafe: how far do you get sideways in 2 s?</small></button>
           <button data-preset="dodge-mid">Dodge from mid-egg (300 m/s)<small>Build up to 300, then strafe: compare the 2 s distance</small></button>
           <button data-preset="letoff">Ease off to make room<small>Build up to the nose, then let go of forward and strafe: speed drops to ~435 (in game), the dodge room opens</small></button>
         </div>
         <h3>Corkscrews · roll while strafing so the shooter's lead is wrong</h3>
         <div class="mgrid">
-          <button data-preset="ck-escape">Escape corkscrew<small>Boost, forward + up, roll ~120 °/s: open the range while the spiral spoils their aim</small></button>
-          <button data-preset="ck-shoot">Corkscrew and still shoot back<small>Boost, forward + up, slow roll ~27 °/s: the TVI holds still</small></button>
+          <button data-preset="ck-escape">Escape corkscrew (chaser behind)<small>Boost, forward + up, roll ~150 °/s: the readout shows how far a chaser's shots miss</small></button>
+          <button data-preset="ck-shoot">Corkscrew and still shoot back<small>For a target AHEAD: slow roll ~27 °/s keeps the TVI still (not the way to flee)</small></button>
           <button data-preset="ck-spin">Over-spinning (don't)<small>Full-rate roll: the spiral is far smaller than the ship</small></button>
         </div>
         <h3>Speed you lose · turning and braking</h3>
         <div class="mgrid">
           <button data-preset="turn-cost">Turning while boosted costs speed<small>Pitch up 90° at the nose: 520 drops to 394, the egg's side. In SCM it costs nothing</small></button>
-          <button data-preset="flip-burn">Flip and burn<small>Flip with a full pitch, then full throttle: ~300 m/s gone in 1.5 s</small></button>
-          <button data-preset="let-go">Let go of boost<small>Back to 225 m/s in about 5 s; the spacebrake is no faster</small></button>
+          <button data-preset="flip-burn">Flip and burn<small>Flip with a full pitch, then full throttle: ~300 m/s gone in 1.5 s, about twice as fast as braking</small></button>
+          <button data-preset="let-go">Let go of boost<small>Back to 225 m/s in about 5 s (the spacebrake has not been measured)</small></button>
         </div>
       </section>
   <p class="sr" aria-live="polite" id="live"></p>
@@ -633,7 +634,7 @@ function reset(pinned) {
   script = null; maneuver = null; dodge = null; run = null; markPreset(null); ctl.rollHold = 0; qAtt = [0, 0, 0, 1]; controls.mouse.center(); egg.chase(false);
   const vx = pinned === 'scm' ? 225 : pinned ? 520 : 0;
   S = { ...mkState(vx, pinned === true), x: S.x };
-  trail.length = 0; setThr(pinned ? 100 : 0); setLock(pinned === true); ctl.padL = ctl.padU = 0; ctl.padSticky = false; drawKnob();
+  trail.length = 0; hist.length = 0; missNow.ok = false; setThr(pinned ? 100 : 0); setLock(pinned === true); ctl.padL = ctl.padU = 0; ctl.padSticky = false; drawKnob();
 }
 $('reset').onclick = () => reset(false);
 $('run-stop').onclick = () => { reset(false); $('runbar').hidden = true; setNote(''); };
@@ -650,28 +651,28 @@ $('pause').onclick = togglePause;
 // Sources: fixture = research/gladius-v1-fixture.json (measured); research = docs/RESEARCH.md duel model
 // (miss distance against a shooter who leads your current velocity, 1 s projectile flight); model = this simulator.
 const PRESETS = {
-  rest:         { title: 'Strafe from a stop', result: { at: 6, sim: () => `${Math.round(Math.abs(S.v[1]))} m/s sideways`, game: '394 m/s' }, start: 'rest', go: 0, watch: 'Boost + strafe from a stop: the ship slides straight out to 394 m/s sideways, the widest point of the egg (fixture).',
+  rest:         { title: 'Strafe from a stop', result: { at: 6, sim: () => `${Math.round(Math.abs(S.v[1]))} m/s sideways`, game: '394 m/s' }, start: 'rest', go: 0, watch: 'Boost + strafe from a stop: the ship slides straight out to 394 m/s sideways (measured). The egg is a little wider than that, about 410 m/s, with 10-25 % forward added (measured: sw_f10_l100, sw_f25_l100).',
                   steps: [[0, { f: 0, l: 1, u: 0, boost: true }]] },
   'dodge-nose': { title: 'Dodge at top speed', result: { at: 2, sim: () => `${Math.round(dodge.dist)} m in 2 s`, game: 'side push 3–6 G' }, start: 'rest', go: 5.5, dodge: true, watch: 'At 520 m/s the egg is a thin tip: side thrust is ~3–6 G (fixture wall traces), so 2 s of strafing moves you only ~90 m (model).',
                   steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [5.5, { f: 1, l: 1, u: 0, boost: true }]] },
-  'dodge-mid':  { title: 'Dodge from mid-egg', result: { at: 2, sim: () => `${Math.round(dodge.dist)} m in 2 s`, game: 'not measured' }, start: 'rest', go: 1.65, dodge: true, watch: 'At 300 m/s forward you\'re in the fat middle of the egg: full ~10 G side push, ~180 m in 2 s, twice the nose (model).',
+  'dodge-mid':  { title: 'Dodge from mid-egg', result: { at: 2, sim: () => `${Math.round(dodge.dist)} m in 2 s`, game: 'one test (r7_dodge_mid_boost): side push ~12 G, 8.4 G after 1.7 s' }, start: 'rest', go: 1.65, dodge: true, watch: 'At 300 m/s forward you\'re in the fat middle of the egg: side push ~12 G falling to ~8.4 G over the next 1.7 s (measured, one test: r7_dodge_mid_boost), and the model gives ~170 m in 2 s, about twice the nose (model).',
                   steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [1.65, { f: 0, l: 1, u: 0, boost: true }]] },
-  letoff:       { title: 'Ease off to make room', result: { at: 5, sim: () => `lowest ${Math.round(run.min)} m/s`, game: 'lowest ~435 m/s' }, start: 'rest', go: 6, watch: 'Forward released, strafe held: in game the speed falls from 519 to ~435 m/s (fixture; this model dips to ~425). The ship drops back into the egg and the dodge ring opens.',
+  letoff:       { title: 'Ease off to make room', result: { at: 5, sim: () => `lowest ${Math.round(run.min)} m/s`, game: 'lowest ~435 m/s' }, start: 'rest', go: 6, watch: 'Forward released, strafe held: in game the speed falls from 519 to ~435 m/s (fixture; this model dips to ~425). The ship drops back into the egg and the dodge ring opens. (The model under-pushes sideways in this case; it is one of the listed misses in physics-fit.md.)',
                   steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [6, { f: 0, l: 1, u: 0, boost: true }]] },
-  'ck-escape':  { title: 'Escape corkscrew', result: { at: 10, sim: () => `${Math.round(len(S.v))} m/s, spiral radius ~${Math.round(spiralR())} m`, game: '513 m/s, ~5.9 G side at roll 50 % (r9_vis_bst_f100_up_r50)' }, start: 'rest', go: 0, watch: 'Boosted, forward + up, roll ~120 °/s (50 %), all from the first second so you can watch the spiral open up as the speed builds: you keep ~513 m/s, opening the range on anyone not boosting, while the side push draws a spiral wide enough to spoil their lead. The boosted launch from a stop pulls ~21 G forward and greys the screen out at about 2 s (measured); it clears as you reach the nose, and then the spiral holds with no further grey. Slower roll = wider, steadier spiral; faster = tighter. Don\'t let go: the spiral stops and the speed bleeds. Up strafe, not sideways: up is the direction you can take most G in (sideways greyed pilots out in ~2 s at 10 G, up in ~4 s, down red-outs at 5 G). A corkscrew started at speed, not from a stop, is not measured.',
-                  steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: 0.5 }]] },
-  'ck-shoot':   { title: 'Corkscrew and shoot back', result: { at: 10, sim: () => `TVI ${Math.round(run.tvi)}° off the nose`, game: 'not measured at this roll rate (model: rule of thumb ~13°)' }, start: 'rest', go: 0, watch: 'Boosted, forward + up, roll ~27 °/s from the first second (watch the TVI swing out and settle as the speed builds): the TVI holds steady ~15° off the nose (this model; the research rule of thumb says ~13°), so your target doesn\'t spin and you can shoot back. ~27 m miss vs 16 m at full roll (research). Corkscrews measured at the nose ran 514–518 m/s (fixture).',
+  'ck-escape':  { title: 'Escape corkscrew (chaser behind)', result: { at: 10, sim: () => `${Math.round(len(S.v))} m/s${missTxt()}`, game: '513 m/s, ~5.9 G side at roll 50 % (r9_vis_bst_f100_up_r50)' }, start: 'rest', go: 0, watch: 'A chaser behind you shoots at where your velocity (and, for a better shooter, your acceleration) says you will be. Boosted, forward + up, roll ~150 °/s from the first second: you keep ~513 m/s (measured, r9_vis_bst_f100_up_r50: 5.9 G side load, one run) and, on the model, both kinds of shooter miss by 20 m or more at a 1 s flight time (the readout under the view). Roll rate is a trade: slower rolls (down to ~27 °/s) miss a velocity-only shooter by more but a shooter who leads your acceleration hits you; faster rolls do the opposite; ~150 °/s is the best of both (model). The boosted launch pulls ~21 G and greys the screen at about 2 s (measured), clearing near the nose. Up is the direction you can take most G in (sideways greyed pilots out in ~2 s at 10 G, up in ~4 s, down red-outs at 5 G). Don\'t let go: the spiral stops. Not measured: whether the game\'s shooter leads your acceleration, and a corkscrew started at speed.',
+                  steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: 0.65 }]] },
+  'ck-shoot':   { title: 'Corkscrew and shoot back (target ahead)', result: { at: 10, sim: () => `TVI ${Math.round(run.tvi)}° off the nose${missTxt()}`, game: 'not measured at this roll rate (model: rule of thumb ~13°)' }, start: 'rest', go: 0, watch: 'For a target AHEAD of you, not for fleeing. Boosted, forward + up, roll ~27 °/s from a standstill: the TVI swings out and takes ~10 s to settle ~10-15° off the nose (model; the research rule of thumb says ~13°), so your target doesn\'t spin and you can shoot back. On the model, a chaser behind you who leads only your velocity misses by ~27 m at a 1 s flight time, but one who also leads your acceleration hits you (the readout under the view shows both). Roll 27 °/s is not measured. Corkscrews measured at the nose ran 514–518 m/s (fixture).',
                   steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: 27 / 240 }]] },
   'turn-cost':  { title: 'Turning while boosted costs speed', result: { at: 5, sim: () => `${Math.round(len(S.v))} m/s`, game: '394 m/s (r10_turn90_boost); in SCM a turn costs nothing (r10_turn90_scm)' }, start: 'rest', go: 6,
-                  watch: 'Boost to the nose, then pitch up 90° (1.1 s) with boost held and forward released. Your velocity stays where it was while the nose swings, so you are suddenly sideways to your own egg and the IFCS pulls you back to its edge: 520 → 394 m/s in about 4 s (measured). The egg turns with the nose; the 520 end only ever points where the ship does. In SCM the egg is a ball, so a turn costs nothing.',
+                  watch: 'Boost to the nose, then pitch up 90° (1.1 s) with boost held and forward released. Your velocity stays where it was while the nose swings, so you are suddenly sideways to your own egg and the IFCS pulls you back to its edge: 520 → 394 m/s in about 4 s (measured). The egg turns with the nose; the 520 end only ever points where the ship does. In SCM the egg is a ball, so a turn costs nothing. (With the throttle held through the turn the speed dips to ~441 and climbs back to ~483 as the forward thrust drags the velocity onto the new nose; measured once, r10_turn90_boost_fwd, and the model misses it.)',
                   steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [6, { f: 0, l: 0, u: 0, boost: true, p: 1 }], [7.1, { f: 0, l: 0, u: 0, boost: true, p: 0 }]] },
-  'flip-burn':  { title: 'Flip and burn', result: { at: 5, sim: () => `lowest ${Math.round(run.min)} m/s`, game: 'down to ~17 m/s, then speeding up the other way (r10_flip_and_burn)' }, start: 'rest', go: 4,
-                  watch: 'Boost to the nose, flip with a full pitch (2.2 s boosted; the fastest 180° is pure pitch, a diagonal stick is scaled back and is slower), then full throttle with boost. The forward thrusters (about 20 G) take ~300 m/s off in 1.5 s, through zero, and you start back the other way.',
+  'flip-burn':  { title: 'Flip and burn', result: { at: 5, sim: () => `lowest ${Math.round(run.min)} m/s`, game: 'through zero in about 4 s, then speeding up the other way (r10_flip_and_burn)' }, start: 'rest', go: 4,
+                  watch: 'Boost to the nose, flip with a full pitch (2.2 s boosted; the fastest 180° is pure pitch, a diagonal stick is scaled back and is slower), then full throttle with boost. The forward thrusters (about 20 G) take ~300 m/s off in 1.5 s, through zero (measured once, r10_flip_and_burn: about 4 s from 511 m/s). Braking with the retros alone (4-6 G) would take about 8 s and twice the distance (model; the spacebrake itself is not measured, round 12 re-flies it). The flip wins above roughly 160 m/s; below that braking is quicker and keeps your nose on the target (model). Cut the throttle at zero: continuing the 20 G burn greyed the HUD to 25 % within 2 s (r10_flip_and_burn).',
                   steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [4, { f: 0, l: 0, u: 0, boost: true, p: 1 }], [6.2, { f: 1, l: 0, u: 0, boost: true, p: 0 }]] },
-  'let-go':     { title: 'Let go of boost', result: { at: 7, sim: () => (run.rel == null ? 'still above 225 m/s' : `back to 225 m/s in ${run.rel.toFixed(1)} s`), game: '5.2 s from the nose; the spacebrake is no faster (r6_release_all, r7_spacebrake_nose)' }, start: 'rest', go: 6,
-                  watch: 'Boost to the nose, then let go of everything. The IFCS bleeds you back to the SCM ball: ~12 G at first, then a steady 4.26 G (the retros) from 300 m/s, 225 m/s after 5.2 s (measured). Hitting the spacebrake instead is no faster. Hold a strafe while you slow and it takes ~7.6 s.',
+  'let-go':     { title: 'Let go of boost', result: { at: 7, sim: () => (run.rel == null ? 'still above 225 m/s' : `back to 225 m/s in ${run.rel.toFixed(1)} s`), game: '5.2 s from the nose (r6_release_all)' }, start: 'rest', go: 6,
+                  watch: 'Boost to the nose, then let go of everything. The IFCS bleeds you back to the SCM ball: ~12 G at first, then a steady 4.26 G (the retros) from 300 m/s, 225 m/s after 5.2 s (measured). What the spacebrake does here has not been measured. Hold a strafe while you slow and it takes ~7.6 s.',
                   steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [6, { f: 0, l: 0, u: 0, boost: false }]] },
-  'ck-spin':    { title: 'Over-spinning', result: { at: 9, sim: () => `${Math.round(len(S.v))} m/s, ${gSmooth.toFixed(1)} G`, game: '514 m/s, 5.4 G' }, start: 'rest', go: 0, watch: 'Full-rate roll (240 °/s) from the first second: the side push spins so fast the spiral radius is only ~3 m (research), far smaller than the 20 m ship. It throws away ~40 % of the miss (research). In game: 514 m/s, 5.4 G side (fixture); this model: ~520 m/s, ~6 G.',
+  'ck-spin':    { title: 'Over-spinning', result: { at: 9, sim: () => `${Math.round(len(S.v))} m/s, ${gSmooth.toFixed(1)} G${missTxt()}`, game: '513 m/s, 5.96 G (r8_bst_f100_up_r100)' }, start: 'rest', go: 0, watch: 'Full-rate roll (240 °/s) from the first second. The thrust turns so fast that the spiral is tiny and the speed is ~520 m/s with ~6 G of side push (measured: 513 m/s, 5.96 G, r8_bst_f100_up_r100). Whether that is a mistake depends on the shooter: against a velocity-only lead it throws away ~40 % of the miss at a 1 s flight time (model; at 0.5 s it barely matters), against one who also leads your acceleration it is the best roll rate there is (readout under the view: both numbers). Not measured: which kind of lead the game uses.',
                   steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: 1 }]] },
 };
 // Corkscrew helix radius a/ω² (docs/RESEARCH.md), with a the current G and ω the roll rate the lesson is flying.
@@ -1178,6 +1179,11 @@ function drawSlice(canvas, st, d, big) {
 }
 
 /* ───────────────────────── loop ───────────────────────── */
+// Chaser's miss (MODEL): a shooter behind you fires at where you will be after a flight time of SHOT_TAU, leading with your
+// velocity (A) or with your velocity and acceleration (B). We keep a short history and show how far the shot fired SHOT_TAU
+// ago misses you now. The flight time and the hit radius are assumptions, and whether the game's lead uses acceleration is not settled.
+const SHOT_TAU = 1, HIT_R = 8, hist = []; const missNow = { A: 0, B: 0, ok: false };   // missTxt() below is used by the lessons
+const missTxt = () => (missNow.ok ? ` · chaser misses by ${Math.round(missNow.A)} / ${Math.round(missNow.B)} m (model)` : '');
 const trail = []; let acc = 0, last = performance.now(), roT = 0, trailT = 0, liveT = 0;
 const DT = 1 / 240;
 function derive(st, inp) {
@@ -1257,7 +1263,12 @@ function frame(now) {
       if (dodge && dodge.t < 2 && (!script || script.t >= script.go)) { dodge.t += DT; dodge.dist += Math.hypot(S.v[1], S.v[2]) * DT; }
     }
     // a ~3 s trail: one point per 1/60 s of sim time, whatever the frame rate
-    trailT += dt; while (trailT > 1 / 60) { trailT -= 1 / 60; trail.push(R3(...qRot(qAtt, S.v))); if (trail.length > 180) trail.shift(); }
+    trailT += dt; while (trailT > 1 / 60) { trailT -= 1 / 60; trail.push(R3(...qRot(qAtt, S.v))); if (trail.length > 180) trail.shift();
+      hist.push({ t: S.c.t, p: [...S.x], v: qRot(qAtt, S.v), a: qRot(qAtt, S.a) }); if (hist.length > 200) hist.shift(); }
+    { const now = hist[hist.length - 1], i = hist.findIndex(h => h.t >= now.t - SHOT_TAU);
+      missNow.ok = !!now && i > 0 && now.t - hist[i].t > SHOT_TAU * 0.9;
+      if (missNow.ok) { const h = hist[i], tau = now.t - h.t, d = (k) => Math.hypot(...[0, 1, 2].map(j => now.p[j] - (h.p[j] + h.v[j] * tau + k * 0.5 * h.a[j] * tau * tau)));
+        missNow.A = d(0); missNow.B = d(1); } }
   }
   const inp = currentInput(), d = derive(S, inp);
   if (run && maneuver && script && !ctl.paused) { // lesson progress and its result vs the game
@@ -1287,7 +1298,8 @@ function frame(now) {
       const L = Math.max(0, yMax - S.v[1]), Rr = Math.max(0, yMax + S.v[1]);
       $('rb-fill').style.left = `${50 - yMax / room * 50}%`; $('rb-fill').style.width = `${yMax / room * 100}%`;
       $('rb-ship').style.left = `${Math.min(100, Math.max(0, 50 - S.v[1] / room * 50))}%`;
-      $('rb-lr').textContent = `◂ ${Math.round(L)} · ${Math.round(Rr)} ▸`; } $('r-g').textContent = gSmooth.toFixed(1); $('r-tvi').textContent = d.speed > 3 ? Math.round(d.tviDeg) : '–';
+      $('rb-lr').textContent = `◂ ${Math.round(L)} · ${Math.round(Rr)} ▸`; } $('r-g').textContent = gSmooth.toFixed(1);
+    { const m = $('r-miss'); if (!missNow.ok || d.speed < 20) { m.textContent = '–'; m.className = ''; } else { m.textContent = `${Math.round(missNow.A)} / ${Math.round(missNow.B)}`; m.className = Math.min(missNow.A, missNow.B) < HIT_R ? 'warn' : ''; } } $('r-tvi').textContent = d.speed > 3 ? Math.round(d.tviDeg) : '–';
     $('r-tank').textContent = ctl.unlimited ? '∞' : S.c.boostLocked ? `${Math.round(S.tank)}🔒` : Math.round(S.tank);
     $('r-tankbar').classList.toggle('locked', !!S.c.boostLocked && !ctl.unlimited); $('r-roll').textContent = Math.round(Math.abs(S.roll || 0)); $('r-tankbar').style.width = `${S.tank}%`;
     const mode = $('r-mode'); mode.textContent = d.boost ? 'Boost' : 'SCM'; mode.className = `chip ${d.boost ? 'on-boost' : 'on-scm'}`;

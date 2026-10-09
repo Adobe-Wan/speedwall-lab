@@ -12,7 +12,7 @@ path = [
   "tsconfig.base.json", "packages/*/package.json", "packages/*/tsconfig*.json",
   "packages/*/README.md",
   ".github/**", ".claude/**", "README.md", "CLAUDE.md", "PLAN.md", "CONTRIBUTING.md", "NOTICE.md",
-  "LICENSE", "LICENSE-DATA.md", "docs/adr/**", "docs/physics-fit.md", "docs/qa-*.md", "docs/flight-model-tests.md", "docs/HANDOFF.md", "docs/HANDOFF-REPLY.md", "docs/flight-model-findings.md", "tools/sc-flighttest/**",
+  "LICENSE", "LICENSE-DATA.md", "docs/adr/**", "docs/physics-fit.md", "docs/qa-*.md", "docs/flight-model-tests.md", "docs/HANDOFF.md", "docs/evasion-analysis.md", "docs/coach-review-2026-10-09.md", "docs/HANDOFF-REPLY.md", "docs/flight-model-findings.md", "tools/sc-flighttest/**",
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 AdobeWan"

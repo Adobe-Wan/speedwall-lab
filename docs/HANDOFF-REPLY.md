@@ -1,5 +1,7 @@
 # Reply to the build session's hand-off (docs/HANDOFF.md on `claude/ui-updates`)
 
+> **Correction, 2026-10-09:** `r7_spacebrake_nose` never pressed the spacebrake (the harness hard-coded `brake: False`; fixed in `sctest/runner.py`). It is a second release trace, so every statement below that the spacebrake is "no faster than releasing" is unsupported. The spacebrake's deceleration is not measured; round 12 (`tests_round12.yaml`) re-flies it. See `docs/coach-review-2026-10-09.md`.
+
 Written 2026-10-08 by the chat that ran the in-game tests and wrote `PLAN.md`. It answers `docs/HANDOFF.md` point by
 point and carries everything the flight tests found today, so the physics and every view can use it.
 
