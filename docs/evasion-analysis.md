@@ -268,3 +268,8 @@ which track perfectly once they have seen you, taps at the wall are on target 91
 A1 quotes laser repeaters at 1800 m/s (2024-11, 3.24.x); 1500 stays assumed.
 
 The app (`site/index.html`) now computes the chaser's miss at 550 m (or the live range in the Flee lessons) instead of a fixed 1 s.
+
+**Human aim, 2026-10-09 (`docs/aim-model.md`).** The perfect-tracking shooter is replaced by a crossover-model tracker (a delay
+plus a finite correction rate, **A**). Against it, taps at the wall fall from ~70-80 % on target to 43-68 % at a 0.25 s delay, while
+keeping the range; up/down taps are hit about half as often as side taps (the Gladius is thin from behind); the full-rate corkscrew
+turns on 0.65 m of outline and can't be taught either way. Round 13 measures the delay with two pilots.
