@@ -42,8 +42,12 @@ Share of shots on the hull outline, lead A (velocity) / lead B (velocity + accel
 | corkscrew, full roll 240 °/s | 547 m | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
 | escape corkscrew, 60 °/s reversing | 361 m | 10 / 100 | 28 / 100 | 2 / 29 | 0 / 0 |
 | slow roll 27 °/s | 362 m | 0 / 100 | 0 / 100 | 0 / 0 | 0 / 0 |
-| strafe taps (side + up), forward held | 538 m | 69 / 70 | 78 / 80 | 43 / 68 | 27 / 55 |
-| strafe taps, forward released | 50 m | 87 / 94 | 91 / 95 | 77 / 79 | 54 / 56 |
+| shallow corkscrew, half up, 60 °/s reversing (flee-wall since 2026-10-10) | 491 m | 32 / 100 | 89 / 100 | 42 / 100 | 13 / 23 |
+| shallow corkscrew, forward released (flee-ease since 2026-10-10) | 50 m | 92 / 100 | 100 / 100 | 35 / 35 | 0 / 1 |
+| up/down taps, same timing as the old flee-wall | 542 m | 42 / 46 | 54 / 73 | 34 / 43 | 23 / 36 |
+| strafe taps (side + up), forward held (old flee-wall) | 538 m | 69 / 70 | 78 / 80 | 43 / 68 | 27 / 55 |
+| strafe taps (side + up), forward released (old flee-ease) | 50 m | 87 / 94 | 91 / 95 | 77 / 79 | 54 / 56 |
+| side taps, same timing as flee-wall | 546 m | 87 / 100 | 100 / 100 | 78 / 100 | 59 / 78 |
 | side taps only | 549 m | 97 / 100 | 100 / 100 | 80 / 100 | 47 / 75 |
 | up/down taps only | 546 m | 47 / 53 | 59 / 79 | 28 / 52 | 20 / 33 |
 
@@ -127,8 +131,18 @@ Hit share of each pattern divided by the straight runs, against the calibration 
 |---|---|
 | shooter delay `τe` | The alpha's "on target" readout switches from the ideal shooter to the human one with the measured `τe`; the 0.25 s in the readout's tooltip and the lesson texts becomes a measured number |
 | lead rule A or B | The second number of every miss readout goes (one pip rule); `ck-shoot` and `flee-tvi` texts drop the "if the game leads acceleration" hedges |
-| thin-axis confirmed | The Flee lessons tap up and down rather than sideways; a short lesson "dodge where the ship is thin" with the outline drawn behind the ship |
-| thin-axis killed | The hit outline is wrong: replace it with the measured `hit_radius` widths (`docs/ingame-test-scenarios.md` §6.4) |
+| thin-axis confirmed | ~~The Flee lessons tap up and down rather than sideways~~ (done 2026-10-10, see below); a short lesson "dodge where the ship is thin" with the outline drawn behind the ship |
+
+**2026-10-10: the Flee lessons drop strafe taps for a shallow corkscrew.** Two corrections from Alex the same day. First, strafing
+side to side at the top of the speed wall is bad advice: to a pursuer in weapons range the ship and its pip stay flat and easy to hit,
+which matches point 2 above (a sideways error must reach 8.5 m, an up/down one 2.75 m) and the measured push at the nose (~3-6 G
+sideways). Second, quick taps and "pip wiggling" are gimmicks: they live off today's near-instant accelerations, which a future flight
+model with jerk would take away, so the lessons should teach fundamentals. `flee-wall` and `flee-ease` now fly a half up-stick with a
+60 °/s roll reversed every 2.5 s (table above): it holds the range (491 m after 10 s against 361 m for the full-up escape corkscrew)
+and the human shooter with τe 0.25 s is on target 42 % (lead A), though a pip that leads acceleration still hits a steady helix
+(100 %, lead B; the reversals are what break it, **Mod**). `dodge-nose` says a sideways strafe at the nose is not a dodge. Johnathan
+Winters' "quick side-strafe taps" (2025-01-27) coach the merge, where the shooter rolls to aim in pitch and the pip sits above the
+target. Round 13 still tests the thin-axis claim and the shooter's delay; the tap rows stay in the table as calibration patterns.
 
 **Update (2026-10-10, quality pass):** the alpha now shows both shooters side by side, labelled as a model with assumed
 parameters: the "Chaser's miss" readout leads with the human shooter (`τe` 0.25 s, `ωc` 3 rad/s, the middle column above) and

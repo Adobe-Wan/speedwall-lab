@@ -19,9 +19,15 @@ const HULL = { width: 17, height: 5.5 };   // Gladius seen from behind (fixture 
 const opts = { startSpeed: 520, seconds: SECONDS, range: RANGE, chaserSpeed: 520, projectileSpeed: VP };
 
 const B = (o) => ({ fwd: 1, lat: 0, up: 0, boost: true, roll: 0, ...o });
-// The alpha's strafe-tap sequence (site/index.html TAPS): [start s, axis, sign, length s]
+// The alpha's old side + up tap sequence (site/index.html TAPS until 2026-10-10; round 13 still flies it as taps_mixed):
+// [start s, axis, sign, length s]. Alex (2026-10-10): taps are a gimmick that lives off today's instant accelerations; the
+// Flee lessons now fly SHALLOW below instead.
 const TAPS = [[0, "l", 1, .4], [.9, "u", 1, .3], [1.9, "l", -1, .5], [2.8, "l", 1, .25], [3.7, "u", 1, .5], [4.6, "l", -1, .3],
   [5.6, "l", 1, .5], [6.5, "u", 1, .3], [7.5, "l", -1, .4], [8.3, "u", 1, .5], [9.4, "l", 1, .3]];
+// The Flee lessons' shallow corkscrew since 2026-10-10 (site/index.html SHALLOW): half up-stick, roll 60 °/s reversed every 2.5 s.
+const SHALLOW = (fwd = 1) => [[0, B({ fwd, up: .5, roll: .25 })], [2.5, B({ fwd, up: .5, roll: -.25 })], [5, B({ fwd, up: .5, roll: .25 })], [7.5, B({ fwd, up: .5, roll: -.25 })]];
+// The old tap timing side to side only, for comparison (what "strafe side to side at the wall" flies).
+const SIDE_TAPS = TAPS.map(([t, , v], i) => [t, "l", TAPS[i][1] === "l" ? v : (i % 2 ? 1 : -1), TAPS[i][3]]);
 const taps = (seq, f = 1) => seq.flatMap(([t, k, v, d]) => [[t, B({ fwd: f, lat: k === "l" ? v : 0, up: k === "u" ? v : 0 })], [t + d, B({ fwd: f })]]);
 // Random taps in the same style: gap 0.35-0.9 s after each tap, length 0.25-0.5 s, side left/right or up (never the same twice).
 function mulberry32(a) { return () => { a |= 0; a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
@@ -37,8 +43,10 @@ const PATTERNS = {
   "corkscrew, full roll 240 °/s": [[0, B({ up: 1, roll: 1 })]],
   "escape corkscrew, 60 °/s reversing (ck-escape)": [[0, B({ up: 1, roll: .25 })], [3.5, B({ up: 1, roll: -.25 })], [6, B({ up: 1, roll: .25 })], [8.5, B({ up: 1, roll: -.25 })]],
   "slow roll 27 °/s (flee-tvi)": [[0, B({ up: 1, roll: .1125 })]],
-  "strafe taps, forward held (flee-wall)": taps(TAPS),
-  "strafe taps, forward released (flee-ease)": taps(TAPS, 0),
+  "shallow corkscrew, half up, 60 °/s reversing (flee-wall)": SHALLOW(1),
+  "shallow corkscrew, forward released (flee-ease)": SHALLOW(0),
+  "side + up taps, forward held (old flee-wall)": taps(TAPS),
+  "side taps, same timing, forward held": taps(SIDE_TAPS),
   "side taps only (round 13 sequence)": taps(randomTaps(1, ["l+", "l-"])),
   "up/down taps only (round 13 sequence)": taps(randomTaps(1, ["u+", "u-"])),
 };
@@ -99,7 +107,7 @@ for (const sh of SHOOTERS) {
 
 // Calibration curve for the two-pilot test: hit share against the shooter's delay, for the patterns the test flies.
 // Measured hit shares, each divided by the straight-line baseline, read off as the shooter's effective delay.
-const CAL = ["straight, forward held", "strafe taps, forward held (flee-wall)", "side taps only (round 13 sequence)", "up/down taps only (round 13 sequence)", "escape corkscrew, 60 °/s reversing (ck-escape)", "held up-strafe, no roll"];
+const CAL = ["straight, forward held", "side + up taps, forward held (old flee-wall)", "side taps only (round 13 sequence)", "up/down taps only (round 13 sequence)", "escape corkscrew, 60 °/s reversing (ck-escape)", "held up-strafe, no roll"];
 console.log(`\nCalibration: % on the hull outline by shooter delay τe (ωc = 0.75 / τe, feed-forward on), lead A / lead B\n`);
 const TAUS = [0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4];
 console.log(`| pattern | ${TAUS.map((t) => `τe ${t}`).join(" | ")} |\n|---|${TAUS.map(() => "---").join("|")}|`);

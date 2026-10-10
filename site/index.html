@@ -437,10 +437,10 @@ footer a { color: var(--fg-2) !important; }
   <section class="maneuvers" id="lessons" aria-labelledby="lessons-h">
         <div class="lessons-head"><h2 id="lessons-h">Lessons</h2><p class="lessons-how">Pick a lesson: the ship flies it while you watch. Touch any flight control to take over.</p></div>
         <p class="lesson-note" id="lesson-note" role="status">Pick a lesson to watch the ship move inside the egg.</p>
-        <h3>Room to dodge</h3>
+        <h3>Room to strafe</h3>
         <div class="mgrid">
           <button data-preset="rest">Strafe from a stop<small>A lot of dodge: 394 m/s sideways from a stop</small></button>
-          <button data-preset="dodge-nose">Dodge at top speed<small>Build up to 520, then strafe: how far do you get sideways in 2 s?</small></button>
+          <button data-preset="dodge-nose">Strafe at top speed<small>Build up to 520, then strafe sideways: how far do you get in 2 s? (Not a dodge against a chaser: see Flee)</small></button>
           <button data-preset="dodge-mid">Dodge from mid-egg (300 m/s)<small>Build up to 300, then strafe: compare the 2 s distance</small></button>
           <button data-preset="letoff">Ease off to make room<small>Build up to the nose, then let go of forward and strafe: speed drops to ~435 (in game), the dodge room opens</small></button>
         </div>
@@ -451,9 +451,9 @@ footer a { color: var(--fg-2) !important; }
         </div>
         <h3>Fleeing a chaser as fast as you · it starts 550 m behind at 520 m/s</h3>
         <div class="mgrid">
-          <button data-preset="flee-wall">Stay on the wall, tap-strafe<small>Full forward, short irregular strafe taps: the chaser can't close</small></button>
+          <button data-preset="flee-wall">Hold the wall, shallow corkscrew<small>Full forward, half up-stick, a gradual roll that reverses: the range holds and the chaser's shots drift</small></button>
           <button data-preset="flee-tvi">TVI far out, slow roll<small>Roll ~27 °/s: you slow down off the nose and the chaser closes</small></button>
-          <button data-preset="flee-ease">Ease off forward<small>More side push, but every m/s you give up is closing speed for the chaser</small></button>
+          <button data-preset="flee-ease">Ease off forward<small>Same corkscrew with forward released: more push, but every m/s you give up is closing speed for the chaser</small></button>
         </div>
         <h3>Speed you lose · turning and braking</h3>
         <div class="mgrid">
@@ -756,21 +756,24 @@ $('pause').onclick = togglePause;
 // dodge: show the sideways distance covered in the first 2 s of the maneuver.
 // Sources: fixture = research/gladius-v1-fixture.json (measured); research = docs/RESEARCH.md duel model
 // (miss distance against a shooter who leads your current velocity, 1 s projectile flight); model = this simulator.
-// Strafe taps (community advice, Winters 2024-12 / 2025-01): short, delayed, never-repeated side and up taps with forward held,
-// no roll. One fixed, irregular 10 s sequence so every Flee lesson dodges the same way and only forward/TVI differ.
-const TAPS = [[0, 'l', 1, .4], [.9, 'u', 1, .3], [1.9, 'l', -1, .5], [2.8, 'l', 1, .25], [3.7, 'u', 1, .5], [4.6, 'l', -1, .3],
-  [5.6, 'l', 1, .5], [6.5, 'u', 1, .3], [7.5, 'l', -1, .4], [8.3, 'u', 1, .5], [9.4, 'l', 1, .3]];
-const taps = (f) => TAPS.flatMap(([t, k, v, d]) => [[t, { f, l: k === 'l' ? v : 0, u: k === 'u' ? v : 0, boost: true }], [t + d, { f, l: 0, u: 0, boost: true }]]);
+// Fleeing is fundamentals, not tricks (Alex, 2026-10-10): speed along your line is what keeps the range, anything off the nose
+// costs that speed, and a sustained gradual corkscrew is the deflection that doesn't depend on how fast thrusters respond
+// (quick strafe taps or "pip wiggling" live off today's near-instant accelerations, which a future flight model with jerk would
+// take away). The Flee lessons share one shallow corkscrew so only forward/TVI differ: half up-stick, roll ~60 °/s reversed
+// every 2.5 s (Apprentice_One 2025-05-01: roll "at a gradual rate", reverse it; Johnathan Winters 2024-12 / 2025-11: roll is
+// not the dodge, don't hold one strafe). (Until 2026-10-10 these lessons flew irregular side + up strafe taps.)
+const SHALLOW = (f) => [[0, { f, l: 0, u: .5, boost: true, r: 1, rf: .25 }], [2.5, { f, l: 0, u: .5, boost: true, r: -1, rf: .25 }],
+  [5, { f, l: 0, u: .5, boost: true, r: 1, rf: .25 }], [7.5, { f, l: 0, u: .5, boost: true, r: -1, rf: .25 }]];
 const PRESETS = {
   rest:         { title: 'Strafe from a stop', result: { at: 6, sim: () => `${Math.round(Math.abs(S.v[1]))} m/s sideways`, game: '394 m/s' }, start: 'rest', go: 0,
                   do: 'Boost and strafe sideways from a standstill.',
                   see: 'The ship slides straight out to 394 m/s sideways (measured): the egg\'s width at zero forward speed.',
                   more: 'The egg is a little wider than that, about 410 m/s, with 10-25 % forward added (measured: sw_f10_l100, sw_f25_l100).',
                   steps: [[0, { f: 0, l: 1, u: 0, boost: true }]] },
-  'dodge-nose': { title: 'Dodge at top speed', result: { at: 2, sim: () => `${Math.round(dodge.dist)} m in 2 s`, game: 'side push 3–6 G' }, start: 'rest', go: 5.5, dodge: true,
+  'dodge-nose': { title: 'Strafe at top speed', result: { at: 2, sim: () => `${Math.round(dodge.dist)} m in 2 s`, game: 'side push 3–6 G' }, start: 'rest', go: 5.5, dodge: true,
                   do: 'Boost to the 520 m/s nose, then strafe sideways.',
                   see: 'Only ~90 m sideways in 2 s (model): at the tip of the egg the side push is ~3-6 G (measured, fixture wall traces).',
-                  more: 'Compare the mid-egg dodge: about twice the distance. The 2 s are counted from the moment the strafe starts.',
+                  more: 'Compare the mid-egg dodge: about twice the distance. The 2 s are counted from the moment the strafe starts. Don\'t use this to dodge a chaser in weapons range: a side-to-side strafe here is a weak push along the Gladius\'s widest part (17 m from behind), so your ship and your pip stay flat and easy to hit (Alex, 2026-10-10). The Flee lessons show what to do instead.',
                   steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [5.5, { f: 1, l: 1, u: 0, boost: true }]] },
   'dodge-mid':  { title: 'Dodge from mid-egg', result: { at: 2, sim: () => `${Math.round(dodge.dist)} m in 2 s`, game: 'one test (r7_dodge_mid_boost): side push ~12 G, 8.4 G after 1.7 s' }, start: 'rest', go: 1.65, dodge: true,
                   do: 'Boost to 300 m/s, then let go of forward and strafe.',
@@ -785,7 +788,7 @@ const PRESETS = {
   'ck-escape':  { title: 'Escape corkscrew (chaser behind)', result: { at: 10, sim: () => `${Math.round(len(S.v))} m/s`, game: '513 m/s, ~6 G side load (r9_vis_bst_f100_up_r50)' }, start: 'rest', go: 0,
                   do: 'Boost, forward + up, roll at a gradual ~60 °/s and reverse the roll every few seconds (Apprentice_One\'s escape from a tail, 2025-05).',
                   see: 'The roll only turns which way your up-push points; it is not the dodge. You keep ~513 m/s (measured), the launch pulls ~21 G and greys the screen at about 2 s (measured), and the readout shows how often a shooter behind you still connects (model).',
-                  more: 'He reverses the roll as he nears blackout. Johnathan Winters: "roll does nothing for you" (2024-12, 2025-11): the dodge comes from strafe changes the shooter can\'t predict (see the Flee lessons). At gun range (500-600 m) a shot takes ~0.35 s plus the shooter\'s ~0.25 s to react (both assumed), so a 6 G push moves you ~10 m: about one Gladius width (model). Up is the axis you tolerate most G in. A chaser as fast as you would close on you meanwhile (the Flee lessons show the range). Not measured: the game\'s lead rule, projectile speed, and whether shots inherit the shooter\'s speed.',
+                  more: 'He reverses the roll as he nears blackout. Johnathan Winters: "roll does nothing for you" (2024-12, 2025-11): the roll only points the push. Full up-stick is the quickest break from a firing solution but costs ~190 m of range in 10 s to a chaser as fast as you (model); the Flee lessons show the shallower version that keeps the range. At gun range (500-600 m) a shot takes ~0.35 s plus the shooter\'s ~0.25 s to react (both assumed), so a 6 G push moves you ~10 m: about one Gladius width (model). Up is the axis you tolerate most G in. A chaser as fast as you would close on you meanwhile (the Flee lessons show the range). Not measured: the game\'s lead rule, projectile speed, and whether shots inherit the shooter\'s speed.',
                   steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: .25 }], [3.5, { f: 1, l: 0, u: 1, boost: true, r: -1, rf: .25 }], [6, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: .25 }], [8.5, { f: 1, l: 0, u: 1, boost: true, r: -1, rf: .25 }]] },
   'ck-shoot':   { title: 'Corkscrew and shoot back (target ahead)', result: { at: 10, sim: () => `TVI ${Math.round(run.tvi)}° off the nose`, game: 'not measured at this roll rate (model: rule of thumb ~13°)' }, start: 'rest', go: 0,
                   do: 'Boost, forward + up, with a slow roll of ~27 °/s. For a target AHEAD of you, not for fleeing.',
@@ -807,21 +810,21 @@ const PRESETS = {
                   see: 'The IFCS bleeds you back to the SCM ball: 225 m/s after 5.2 s (measured). ~12 G at first, then a steady 4.26 G (the retros) from 300 m/s.',
                   more: 'What the spacebrake does here has not been measured. Hold a strafe while you slow and it takes ~7.6 s.',
                   steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [6, { f: 0, l: 0, u: 0, boost: false }]] },
-  'flee-wall':  { title: 'Flee: stay on the wall, tap-strafe', chase: true, result: { at: 10, sim: () => `chaser at ${Math.round(chase.range)} m after 10 s`, game: 'not measured (needs a two-pilot chase test)' }, start: { vx: 520, boost: true }, go: 0,
-                  do: 'Full forward on the wall, no roll, short strafe taps (0.25-0.5 s, side and up, never the same rhythm twice).',
-                  see: 'Your speed along your line stays ~515-520, so a chaser as fast as you can\'t close and the range holds (model). The taps work on the shooter\'s delay: the modelled human shooter connects far less often than the ideal one (readout; model, shooter assumed).',
-                  more: 'The dodge advice of experienced pilots (Johnathan Winters 2024-12 / 2025-01: "quick side-strafe taps", delayed, not repeated; "on a full extension you just want to tap"). The ideal shooter aims exactly at what it saw 0.25 s ago (assumed); the human one steers its crosshair after the lead pip with the same delay and needs ~0.3 s to close a gap (crossover model, docs/aim-model.md; both assumed until a two-pilot test measures them). In game: not measured.',
-                  steps: taps(1) },
+  'flee-wall':  { title: 'Flee: hold the wall, shallow corkscrew', chase: true, result: { at: 10, sim: () => `chaser at ${Math.round(chase.range)} m after 10 s`, game: 'not measured (needs a two-pilot chase test)' }, start: { vx: 520, boost: true }, go: 0,
+                  do: 'Full forward on the wall, half up-stick, roll at a gradual ~60 °/s and reverse the roll every few seconds. No side-to-side strafing.',
+                  see: 'Your speed along your line stays near the wall, so a chaser as fast as you gains only ~60 m in 10 s (model), while the up-push and the slow roll drag your velocity in a helix the shooter has to chase: the modelled human shooter is on target less than half the time (readout; model, shooter assumed). A shooter whose pip leads your acceleration still hits a steady helix; the roll reversals are what break it.',
+                  more: 'Fundamentals, not tricks (Alex, 2026-10-10): range and speed are the defence (Apprentice_One 2025-05-01: "if you fly totally straight I can fire at you from kilometres away and still hit you", and a faster ship catches you whatever you fly). Everything off the nose costs speed along your line, so the half stick is the trade: full up-stick (the escape corkscrew) breaks the solution faster but gives up ~190 m in 10 s (model). Seen from behind the Gladius is 17 m wide and 5.5 m tall, so a pursuer in weapons range holds a flat side-to-side strafe easily, and quick strafe taps live off today\'s near-instant thrust response, which a future flight model with jerk would take away (Alex, 2026-10-10; not measured). Roll is for aiming the push, not the dodge (Johnathan Winters 2024-12-30, 2025-11-29). Side load here ~3 G (model), far from G-LOC. The human shooter steers its crosshair after the lead pip with a ~0.25 s delay and needs ~0.3 s to close a gap (crossover model, docs/aim-model.md; both assumed until a two-pilot test measures them). In game: not measured.',
+                  steps: SHALLOW(1) },
   'flee-tvi':   { title: 'Flee: TVI far out, slow roll', chase: true, result: { at: 10, sim: () => `chaser at ${Math.round(chase.range)} m after 10 s · TVI ${Math.round(run.tvi)}°`, game: 'not measured (needs a two-pilot chase test)' }, start: { vx: 520, boost: true }, go: 0,
                   do: 'Forward + up, roll ~27 °/s: the coaching rule "put the TVI farther out and roll slowly".',
                   see: 'The velocity swings off the nose and your speed along your line drops, so a chaser as fast as you closes (watch the range). On the model a shooter who leads your acceleration hits you almost dead centre.',
                   more: 'It only pays against a slower chaser, or a shooter whose lead ignores your acceleration (not tested). In game: not measured (needs a two-pilot chase test).',
                   steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: 27 / 240 }]] },
   'flee-ease':  { title: 'Flee: ease off forward', chase: true, result: { at: 10, sim: () => `chaser at ${Math.round(chase.range)} m after 10 s`, game: 'not measured; in game letting go of forward drops you to ~435 m/s (fixture)' }, start: { vx: 520, boost: true }, go: 0,
-                  do: 'Release forward, keep the same strafe taps: the coaching rule "use less forward thrust".',
-                  see: 'You drop back into the fat part of the egg, where the side push is stronger (measured ~8-12 G below 400 m/s, round 8, noisy), but every m/s you give up is closing speed for a chaser as fast as you, and the shrinking range shortens their shot (model).',
+                  do: 'Release forward, keep the same shallow corkscrew: the coaching rule "use less forward thrust".',
+                  see: 'You drop back into the fat part of the egg, where the strafe push is stronger (measured ~8-12 G below 400 m/s, round 8, noisy), but every m/s you give up is closing speed for a chaser as fast as you, and the shrinking range shortens their shot (model).',
                   more: 'G-LOC caps what you can hold at ~8 G up. Worth it against a slower chaser, or to drag the chaser toward your wingmen. In game: not measured; letting go of forward drops you to ~435 m/s (fixture).',
-                  steps: taps(0) },
+                  steps: SHALLOW(0) },
 };
 // Corkscrew helix radius a/ω² (docs/RESEARCH.md), with a the current G and ω the roll rate the lesson is flying.
 function spiralR() { const w = ctl.rollFrac * gladius.boost.rotationDps.roll * Math.PI / 180; return w > 0.05 ? gSmooth * 9.80665 / (w * w) : 0; }
@@ -1351,7 +1354,7 @@ function drawSlice(canvas, st, d, big) {
 // acceleration is not settled.
 const VP_ASSUMED = 1500;   // m/s, ASSUMED: the Star Citizen Wiki lists 1480 for the Gladius's CF-337 Panther (4.10.1); not measured here
 // react: the shooter fires at what it saw a moment ago (human reaction and aim lag, ASSUMED 0.25 s); a dodge started inside
-// that window plus the projectile's flight time is the one that works (community advice: short, delayed, unrepeated strafe taps).
+// that window plus the projectile's flight time is the one that works.
 // Two shooters (docs/aim-model.md, packages/core/src/aim.ts): the IDEAL one aims exactly at what it saw `react` ago, extrapolated;
 // the HUMAN one has to steer its crosshair after the lead pip, a manual tracking task (crossover model: the aim moves at the
 // pip's own drift plus `crossover` x the error it saw `react` ago, so a change in your motion takes ~1/crossover s to catch up).
