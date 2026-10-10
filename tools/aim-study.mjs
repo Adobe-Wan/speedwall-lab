@@ -20,13 +20,13 @@ const opts = { startSpeed: 520, seconds: SECONDS, range: RANGE, chaserSpeed: 520
 
 const B = (o) => ({ fwd: 1, lat: 0, up: 0, boost: true, roll: 0, ...o });
 // The alpha's old side + up tap sequence (site/index.html TAPS until 2026-10-10; round 13 still flies it as taps_mixed):
-// [start s, axis, sign, length s]
+// [start s, axis, sign, length s]. Alex (2026-10-10): taps are a gimmick that lives off today's instant accelerations; the
+// Flee lessons now fly SHALLOW below instead.
 const TAPS = [[0, "l", 1, .4], [.9, "u", 1, .3], [1.9, "l", -1, .5], [2.8, "l", 1, .25], [3.7, "u", 1, .5], [4.6, "l", -1, .3],
   [5.6, "l", 1, .5], [6.5, "u", 1, .3], [7.5, "l", -1, .4], [8.3, "u", 1, .5], [9.4, "l", 1, .3]];
-// The Flee lessons' up/down sequence since 2026-10-10 (site/index.html TAPS): same timing, up and down only.
-const FLEE_TAPS = [[0, "u", 1, .4], [.9, "u", 1, .3], [1.9, "u", -1, .5], [2.8, "u", 1, .25], [3.7, "u", -1, .5], [4.6, "u", -1, .3],
-  [5.6, "u", 1, .5], [6.5, "u", -1, .3], [7.5, "u", 1, .4], [8.3, "u", 1, .5], [9.4, "u", -1, .3]];
-// The same timing side to side only, for comparison (what "strafe side to side at the wall" flies).
+// The Flee lessons' shallow corkscrew since 2026-10-10 (site/index.html SHALLOW): half up-stick, roll 60 °/s reversed every 2.5 s.
+const SHALLOW = (fwd = 1) => [[0, B({ fwd, up: .5, roll: .25 })], [2.5, B({ fwd, up: .5, roll: -.25 })], [5, B({ fwd, up: .5, roll: .25 })], [7.5, B({ fwd, up: .5, roll: -.25 })]];
+// The old tap timing side to side only, for comparison (what "strafe side to side at the wall" flies).
 const SIDE_TAPS = TAPS.map(([t, , v], i) => [t, "l", TAPS[i][1] === "l" ? v : (i % 2 ? 1 : -1), TAPS[i][3]]);
 const taps = (seq, f = 1) => seq.flatMap(([t, k, v, d]) => [[t, B({ fwd: f, lat: k === "l" ? v : 0, up: k === "u" ? v : 0 })], [t + d, B({ fwd: f })]]);
 // Random taps in the same style: gap 0.35-0.9 s after each tap, length 0.25-0.5 s, side left/right or up (never the same twice).
@@ -43,8 +43,8 @@ const PATTERNS = {
   "corkscrew, full roll 240 °/s": [[0, B({ up: 1, roll: 1 })]],
   "escape corkscrew, 60 °/s reversing (ck-escape)": [[0, B({ up: 1, roll: .25 })], [3.5, B({ up: 1, roll: -.25 })], [6, B({ up: 1, roll: .25 })], [8.5, B({ up: 1, roll: -.25 })]],
   "slow roll 27 °/s (flee-tvi)": [[0, B({ up: 1, roll: .1125 })]],
-  "up/down taps, forward held (flee-wall)": taps(FLEE_TAPS),
-  "up/down taps, forward released (flee-ease)": taps(FLEE_TAPS, 0),
+  "shallow corkscrew, half up, 60 °/s reversing (flee-wall)": SHALLOW(1),
+  "shallow corkscrew, forward released (flee-ease)": SHALLOW(0),
   "side + up taps, forward held (old flee-wall)": taps(TAPS),
   "side taps, same timing, forward held": taps(SIDE_TAPS),
   "side taps only (round 13 sequence)": taps(randomTaps(1, ["l+", "l-"])),
