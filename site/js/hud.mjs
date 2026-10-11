@@ -224,7 +224,7 @@ export function createHud(svg) {
   const abZoneTick = el(R, 'line', { stroke: RED, 'stroke-width': '1.25' });
   const abPct = label(R, txtAttrs(WHITE), '100%');
   const abLbl = label(R, txtAttrs(MINT), 'AB');
-  const abLock = label(R, Object.assign(txtAttrs(RED, 'start'), { 'letter-spacing': '0.06em', 'font-weight': '600' }), 'AB LOCKED');
+  const abLock = label(R, Object.assign(txtAttrs(RED, 'start'), { 'letter-spacing': '0.06em', 'font-weight': '600' }), 'AB Locked');
 
   // ---------- G block: G readout + anchoring roll rate (local x = left edge, y = G baseline) ----------
   const G = el(root, 'g');
@@ -232,8 +232,8 @@ export function createHud(svg) {
   const gUnit = label(G, txtAttrs(MINT, 'start'), 'G');
   const gRule = el(G, 'line', { stroke: MINT, 'stroke-opacity': '0.5', 'stroke-width': '1' });
   const gPeak = label(G, Object.assign(txtAttrs(WHITE, 'end'), { 'fill-opacity': '0.8' }), '0.0');
-  const gPeakLbl = label(G, txtAttrs(MINT, 'start'), 'pk');
-  const anc = label(G, Object.assign(txtAttrs(MINT, 'start'), { display: 'none' }), 'HOLD TVI: ');
+  const gPeakLbl = label(G, txtAttrs(MINT, 'start'), 'Peak');
+  const anc = label(G, Object.assign(txtAttrs(MINT, 'start'), { display: 'none' }), 'Hold TVI: ');
   const ancG = el(anc, 'tspan', { fill: MINT });   // "@13°" (the guide ring)
   ancG.appendChild(document.createTextNode(''));
   const ancV = el(anc, 'tspan', { fill: WHITE });  // "29 °/s"
@@ -461,7 +461,7 @@ export function createHud(svg) {
     if (mode !== badgeMode) { badgeMode = mode; layoutBadge(mode); }
 
     // --- maneuver label
-    const man = typeof s.maneuver === 'string' ? s.maneuver.trim().toUpperCase() : '';
+    const man = typeof s.maneuver === 'string' ? s.maneuver.trim() : '';
     if (man !== manText) { manText = man; if (man) text(M, man); layoutManeuver(); }
 
     // --- throttle command: fills from the middle mark (up = forward, down = reverse)
@@ -535,7 +535,7 @@ export function createHud(svg) {
     show(anc, hasAnc);
     if (hasAnc) {
       const gd = s.guideDeg, hasGd = typeof gd === 'number' && Number.isFinite(gd), n3 = Lo.g && Lo.g.lines === 3, n1 = Lo.g && Lo.g.lines === 1;
-      text(anc, n3 ? 'HOLD TVI' : 'HOLD TVI ');
+      text(anc, n3 ? 'Hold TVI' : 'Hold TVI ');
       text(ancG, hasGd ? `@${Math.round(gd)}°${n1 ? ': ' : ''}` : (n1 ? ': ' : ''));
       const v = Math.round(ar);
       text(ancV, (v < 0 ? '−' + -v : String(v)) + ' °/s');
