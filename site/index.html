@@ -155,7 +155,7 @@ details.more-d > span { display: block; color: var(--fg-2); font-size: .8rem; li
 .tank::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 25%; background: rgba(255,106,85,.3); }
 .tank i { position: relative; display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #d9862a, var(--boost)); border-radius: 3px; }
 .tank i.locked { background: var(--warn); }
-#r-gloc.warn, #r-miss.warn { color: var(--warn, #ff6a55); }
+#r-gloc.warn { color: var(--warn, #ff6a55); }
 /* dodge room: left/right bar */
 .roombar { position: relative; height: 6px; background: rgba(140,165,205,.12); border-radius: 3px; margin-top: 7px; }
 .roombar i { position: absolute; top: 0; bottom: 0; background: rgba(231,237,245,.45); border-radius: 3px; }
@@ -434,7 +434,7 @@ footer a { color: var(--fg-2) !important; }
     <div class="ro" title="Your current push. 1 G = Earth gravity"><b>Thrust</b><span id="r-g">0.0</span><small>G</small></div>
     <div class="ro"><b>Roll</b><span id="r-roll">0</span><small>°/s</small></div>
     <div class="ro" title="Angle between where your nose points and where you are actually going (the TVI)"><b>Drift angle</b><span id="r-tvi">–</span><small>°</small></div>
-    <div class="ro" title="MODEL: how far a shot from a Gladius behind you at gun range (550 m, or the live range in the Flee lessons; it holds 520 m/s) misses you, in metres. Big number: a human shooter who has to steer the crosshair after the lead pip and sees you 0.25 s late (assumed). Below it: an ideal shooter that aims exactly at what it saw 0.25 s ago. Each pair: the pip leads with your velocity / with your velocity and acceleration (which one the game uses is not settled). Red = the shot lands on the ship's outline (17 x 5.5 m seen from behind, turned with your roll: a crude rectangle that over-counts hits). Flight time = range / (1500 m/s projectile + closing speed). Range, projectile speed, the delays and the outline are assumptions."><b>Chaser's miss (model)</b><span id="r-miss">–</span><small>m</small><small class="ro-sub"><span>human</span> · <span id="r-miss-ideal">ideal –</span></small><small class="ro-sub" id="r-miss-at">550 m</small></div>
+    <div class="ro" id="ro-range" title="ARITHMETIC, not a measured rule: a chaser that holds 520 m/s along your starting line, starting 550 m behind. Every second it gains 520 minus your speed along that line, in metres: hold the wall and it stays back, give up speed and it closes. Both numbers are stated assumptions, kept as named constants (CHASE in the page source) so a patch can change them. Nothing here models the chaser's aim, the lead pip, projectile speed or hits: that needs a two-pilot test."><b>Chaser's range</b><span id="r-range">550</span><small>m</small><small class="ro-sub" id="r-range-rate">holding</small></div>
     <div class="ro" title="MODEL, not a measured rule: stress from the G you are pulling in each direction. Greys the HUD, then the screen, then blacks out and cuts thrust and boost. Paused while a lesson runs, so you see the speed limits; the lesson texts say what the measured pilot felt."><b>G-LOC (model)</b><span id="r-gloc">clear</span><div class="tank"><i id="r-glocbar"></i></div></div>
     <div class="ro"><b>Boost tank</b><span id="r-tank">100</span><small>%</small><div class="tank"><i id="r-tankbar"></i></div></div>
     <div class="ro"><b>Flight mode</b><span class="chip" id="r-mode">SCM</span> <span class="chip" id="r-pin" hidden>At limit</span></div>
@@ -451,7 +451,7 @@ footer a { color: var(--fg-2) !important; }
         </div>
         <h3>Fleeing a chaser as fast as you · it starts 550 m behind at 520 m/s</h3>
         <div class="mgrid">
-          <button data-preset="flee-wall">Hold the wall, shallow corkscrew<small>Full forward, half up-stick, one gradual roll held: the trail traces a helix, the range holds and the chaser's shots drift</small></button>
+          <button data-preset="flee-wall">Hold the wall, shallow corkscrew<small>Full forward, half up-stick, one gradual roll held: the trail traces a helix and the range holds</small></button>
           <button data-preset="flee-tvi">TVI far out, slow roll<small>Roll ~27 °/s: you slow down off the nose and the chaser closes</small></button>
           <button data-preset="flee-ease">Ease off forward<small>Same corkscrew with forward released: more push, but every m/s you give up is closing speed for the chaser</small></button>
         </div>
@@ -743,7 +743,7 @@ function reset(pinned) {
   script = null; maneuver = null; dodge = null; run = null; markPreset(null); ctl.rollHold = 0; qAtt = [0, 0, 0, 1]; controls.mouse.center(); egg.chase(false);
   const vx = pinned === 'scm' ? 225 : pinned ? 520 : 0;
   S = { ...mkState(vx, pinned === true), x: S.x };
-  trail.length = 0; path.length = 0; hist.length = 0; missNow.ok = false; setThr(pinned ? 100 : 0); setLock(pinned === true); ctl.padL = ctl.padU = 0; ctl.padSticky = false; drawKnob();
+  trail.length = 0; path.length = 0; setThr(pinned ? 100 : 0); setLock(pinned === true); ctl.padL = ctl.padU = 0; ctl.padSticky = false; drawKnob();
 }
 $('reset').onclick = () => reset(false);
 $('run-stop').onclick = () => { reset(false); $('runbar').hidden = true; setNote(''); };
@@ -758,8 +758,8 @@ $('pause').onclick = togglePause;
 // fraction of full roll rate; p/y = pitch/yaw stick. do: what the ship flies, one line; see: what to look for, with the key
 // number and its label (measured / model / assumed); more: the caveats, sources and test IDs, behind a Details toggle.
 // dodge: show the sideways distance covered in the first 2 s of the maneuver.
-// Sources: fixture = research/gladius-v1-fixture.json (measured); research = docs/RESEARCH.md duel model
-// (miss distance against a shooter who leads your current velocity, 1 s projectile flight); model = this simulator.
+// Sources: fixture = research/gladius-v1-fixture.json (measured); model = this simulator; arithmetic = the chaser range,
+// which is only (chaser speed - your speed along the starting line) x time, with both chaser numbers stated as assumptions.
 // Fleeing is fundamentals, not tricks (Alex, 2026-10-10): speed along your line is what keeps the range, anything off the nose
 // costs that speed, and a sustained gradual corkscrew is the deflection that doesn't depend on how fast thrusters respond
 // (quick strafe taps or "pip wiggling" live off today's near-instant accelerations, which a future flight model with jerk would
@@ -778,7 +778,7 @@ const PRESETS = {
   'dodge-nose': { title: 'Strafe at top speed', result: { at: 2, sim: () => `${Math.round(dodge.dist)} m in 2 s`, game: 'side push 3–6 G' }, start: 'rest', go: 5.5, dodge: true,
                   do: 'Boost to the 520 m/s nose, then strafe sideways.',
                   see: 'Only ~90 m sideways in 2 s (model): at the tip of the egg the side push is ~3-6 G (measured, fixture wall traces).',
-                  more: 'Compare the mid-egg strafe: about twice the distance. The 2 s are counted from the moment the strafe starts. Don\'t use this to dodge a chaser in weapons range: a side-to-side strafe here is a weak push along the Gladius\'s widest part (17 m from behind), so your ship and your pip stay flat and easy to hit (Alex, 2026-10-10). The Flee lessons show what to do instead.',
+                  more: 'Compare the mid-egg strafe: about twice the distance. The 2 s are counted from the moment the strafe starts. Don\'t use this to dodge a chaser in weapons range: a side-to-side strafe here is a weak push along the Gladius\'s widest part (17 m from behind), so your ship stays flat and easy to hit (Alex, 2026-10-10). The Flee lessons show what to do instead.',
                   steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [5.5, { f: 1, l: 1, u: 0, boost: true }]] },
   'dodge-mid':  { title: 'Strafe from mid-egg', result: { at: 2, sim: () => `${Math.round(dodge.dist)} m in 2 s`, game: 'one test: side push ~12 G, 8.4 G after 1.7 s' }, start: 'rest', go: 1.65, dodge: true,
                   do: 'Boost to 300 m/s, then let go of forward and strafe.',
@@ -790,15 +790,15 @@ const PRESETS = {
                   see: 'Speed falls from 519 to ~435 m/s in game (fixture) and the sideways ring opens as the ship drops back into the egg.',
                   more: 'This model dips to ~425 m/s and under-pushes sideways here; it is one of the misses listed in docs/physics-fit.md.',
                   steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [6, { f: 0, l: 1, u: 0, boost: true }]] },
-  'ck-escape':  { title: 'Escape corkscrew, full up-stick', miss: true, result: { at: 10, sim: () => `${Math.round(len(S.v))} m/s`, game: '513 m/s, ~6 G side load' }, start: 'rest', go: 0,
+  'ck-escape':  { title: 'Escape corkscrew, full up-stick', result: { at: 10, sim: () => `${Math.round(len(S.v))} m/s`, game: '513 m/s, ~6 G side load' }, start: 'rest', go: 0,
                   do: 'Boost, forward + up, hold one gradual roll of ~60 °/s so the trail traces a helix (Apprentice_One\'s escape from a tail, 2025-05).',
-                  see: 'The roll only turns which way your up-push points; it is not the dodge. The violet thread behind the ship is your real path, widened and squeezed lengthwise so the helix shows. You keep ~513 m/s (measured), the launch pulls ~21 G and greys the screen at about 2 s (measured), and the readout shows how often a shooter behind you still connects (model).',
-                  more: 'Keep the roll going one way: a corkscrew is a helix, and reversing every few seconds folds the trail back on itself. He reverses the roll only as he nears blackout. Johnathan Winters: "roll does nothing for you" (2024-12, 2025-11): the roll only points the push. Full up-stick is the quickest break from a firing solution but costs ~190 m of range in 10 s to a chaser as fast as you (model); the Flee lessons show the shallower version that keeps the range. At gun range (500-600 m) a shot takes ~0.35 s plus the shooter\'s ~0.25 s to react (both assumed), so a 6 G push moves you ~10 m: about one Gladius width (model). Up is the axis you tolerate most G in. A chaser as fast as you would close on you meanwhile (the Flee lessons show the range). Not measured: the game\'s lead rule, projectile speed, and whether shots inherit the shooter\'s speed. Test: r9_vis_bst_f100_up_r50.',
+                  see: 'The roll only turns which way your up-push points; it is not the dodge. The violet thread behind the ship is your real path, widened and squeezed lengthwise so the helix shows. You keep ~513 m/s (measured), the launch pulls ~21 G and greys the screen at about 2 s (measured). No chaser is scored here; the Flee lessons show the range.',
+                  more: 'Keep the roll going one way: a corkscrew is a helix, and reversing every few seconds folds the trail back on itself. He reverses the roll only as he nears blackout. Johnathan Winters: "roll does nothing for you" (2024-12, 2025-11): the roll only points the push. Full up-stick costs speed along your line: against a chaser that holds 520 m/s it gives up ~190 m of range in 10 s (arithmetic on the simulated speed); the Flee lessons show the shallower version that keeps the range. Up is the axis you tolerate most G in. Not measured, and not modelled here: the game\'s lead rule, projectile speed, whether shots inherit the shooter\'s speed, and whether any of this throws off a real shooter. Test: r9_vis_bst_f100_up_r50.',
                   steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: .25 }]] },
-  'ck-shoot':   { title: 'Corkscrew and shoot back (target ahead)', miss: true, result: { at: 10, sim: () => `TVI ${Math.round(run.tvi)}° off the nose`, game: 'not measured at this roll rate (model: rule of thumb ~13°)' }, start: 'rest', go: 0,
+  'ck-shoot':   { title: 'Corkscrew and shoot back (target ahead)', result: { at: 10, sim: () => `TVI ${Math.round(run.tvi)}° off the nose`, game: 'not measured at this roll rate (model: rule of thumb ~13°)' }, start: 'rest', go: 0,
                   do: 'Boost, forward + up, with a slow roll of ~27 °/s. For a target AHEAD of you, not for fleeing.',
                   see: 'The TVI swings out and settles ~10-15° off the nose after ~10 s (model; the research rule of thumb says ~13°), so your target doesn\'t spin and you can shoot back.',
-                  more: 'Don\'t use it to flee: on the model a chaser behind you at gun range hits you either way, and one who leads your acceleration hits you almost dead centre (the readout shows both). Roll 27 °/s is not measured. Corkscrews measured at the nose ran 514–518 m/s (fixture).',
+                  more: 'Don\'t use it to flee: the velocity swings far off the nose, so you give up speed along your line and a chaser as fast as you closes (the Flee: TVI far out lesson shows the range). Roll 27 °/s is not measured. Corkscrews measured at the nose ran 514–518 m/s (fixture).',
                   steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: 27 / 240 }]] },
   'turn-cost':  { title: 'Turning while boosted costs speed', result: { at: 5, sim: () => `${Math.round(len(S.v))} m/s`, game: '394 m/s; in SCM a turn costs nothing' }, start: 'rest', go: 6,
                   do: 'Boost to the nose, then pitch up 90° (1.1 s) with boost held and forward released.',
@@ -817,17 +817,17 @@ const PRESETS = {
                   steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [6, { f: 0, l: 0, u: 0, boost: false }]] },
   'flee-wall':  { title: 'Flee: hold the wall, shallow corkscrew', chase: true, result: { at: 10, sim: () => `chaser still ${Math.round(chase.range)} m back after 10 s (started at 550)`, game: 'not measured (needs a two-pilot chase test)' }, start: { vx: 520, boost: true }, go: 0,
                   do: 'Full forward on the wall, half up-stick, hold one gradual roll of ~60 °/s so the trail traces a helix. No side-to-side strafing, no roll flipping.',
-                  see: 'The range is the point: your speed stays on the wall, so a chaser as fast as you gains only ~10 m in 10 s (model). The violet thread behind the ship is your real path, widened and squeezed lengthwise: at true scale the helix is about 30 m wide and 3 km per turn. The result bar shows how often the modelled shooter still connects.',
-                  more: 'A shooter whose pip leads your acceleration still hits a steady helix on the model; a human shooter (0.25 s late, assumed) is the one the helix beats. Keep the roll one way: reverse it only to ease a grey-out (Apprentice_One 2025-05-01), never as the pattern (Alex, 2026-10-11). Fundamentals, not tricks (Alex, 2026-10-10): range and speed are the defence (Apprentice_One 2025-05-01: "if you fly totally straight I can fire at you from kilometres away and still hit you", and a faster ship catches you whatever you fly). Everything off the nose costs speed along your line, so the half stick is the trade: full up-stick (the escape corkscrew) breaks the solution faster but gives up ~190 m in 10 s (model). Seen from behind the Gladius is 17 m wide and 5.5 m tall, so a pursuer in weapons range holds a flat side-to-side strafe easily, and quick strafe taps live off today\'s near-instant thrust response, which a future flight model with jerk would take away (Alex, 2026-10-10; not measured). Roll is for aiming the push, not the dodge (Johnathan Winters 2024-12-30, 2025-11-29). Side load here ~3 G (model), far from G-LOC. The human shooter steers its crosshair after the lead pip with a ~0.25 s delay and needs ~0.3 s to close a gap (crossover model, docs/aim-model.md; both assumed until a two-pilot test measures them). In game: not measured.',
+                  see: 'The range is the point: your speed stays on the wall, so a chaser as fast as you gains only ~10 m in 10 s (arithmetic on the simulated speed). The violet thread behind the ship is your real path, widened and squeezed lengthwise: at true scale the helix is about 30 m wide and 3 km per turn. Whether the helix throws off a real shooter is not modelled here: that needs a two-pilot test.',
+                  more: 'Keep the roll one way: reverse it only to ease a grey-out (Apprentice_One 2025-05-01), never as the pattern (Alex, 2026-10-11). Fundamentals, not tricks (Alex, 2026-10-10): range and speed are the defence (Apprentice_One 2025-05-01: "if you fly totally straight I can fire at you from kilometres away and still hit you", and a faster ship catches you whatever you fly). Everything off the nose costs speed along your line, so the half stick is the trade: full up-stick (the escape corkscrew) pushes harder but gives up ~190 m in 10 s (arithmetic). Seen from behind the Gladius is 17 m wide and 5.5 m tall, so a pursuer in weapons range holds a flat side-to-side strafe easily, and quick strafe taps live off today\'s near-instant thrust response, which a future flight model with jerk would take away (Alex, 2026-10-10; not measured). Roll is for aiming the push, not the dodge (Johnathan Winters 2024-12-30, 2025-11-29). Side load here ~3 G (model), far from G-LOC. The chaser is arithmetic only: it holds 520 m/s along your starting line (the Gladius\'s boosted wall, measured) and starts 550 m back (assumed, in the 500-600 m gun range); the range changes by your speed along that line, nothing more. The page does not model its aim, the lead pip or projectile speed; docs/aim-model.md lists what a two-pilot test would have to measure first. In game: not measured.',
                   steps: SHALLOW(1) },
   'flee-tvi':   { title: 'Flee: TVI far out, slow roll', chase: true, result: { at: 10, sim: () => `chaser closed to ${Math.round(chase.range)} m after 10 s (started at 550) · TVI ${Math.round(run.tvi)}°`, game: 'not measured (needs a two-pilot chase test)' }, start: { vx: 520, boost: true }, go: 0,
                   do: 'Forward + up, roll ~27 °/s: the coaching rule "put the TVI farther out and roll slowly".',
-                  see: 'The velocity swings off the nose and your speed along your line drops, so a chaser as fast as you closes (watch the range). On the model a shooter who leads your acceleration hits you almost dead centre.',
-                  more: 'It only pays against a slower chaser, or a shooter whose lead ignores your acceleration (not tested). In game: not measured (needs a two-pilot chase test).',
+                  see: 'The velocity swings off the nose and your speed along your line drops, so a chaser as fast as you closes: watch the range (arithmetic on the simulated speed).',
+                  more: 'It only pays against a slower chaser: the range closes at the speed you give up along your line. Whether the wider helix throws off a shooter is not modelled here. In game: not measured (needs a two-pilot chase test).',
                   steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: 27 / 240 }]] },
   'flee-ease':  { title: 'Flee: ease off forward', chase: true, result: { at: 10, sim: () => `chaser closed to ${Math.round(chase.range)} m after 10 s (started at 550)`, game: 'not measured; in game letting go of forward drops you to ~435 m/s (fixture)' }, start: { vx: 520, boost: true }, go: 0,
                   do: 'Release forward, keep the same shallow corkscrew: the coaching rule "use less forward thrust".',
-                  see: 'You drop back into the fat part of the egg, where the strafe push is stronger (measured ~8-12 G below 400 m/s, round 8, noisy), but every m/s you give up is closing speed for a chaser as fast as you, and the shrinking range shortens their shot (model).',
+                  see: 'You drop back into the fat part of the egg, where the strafe push is stronger (measured ~8-12 G below 400 m/s, round 8, noisy), but every m/s you give up is closing speed for a chaser as fast as you (arithmetic).',
                   more: 'G-LOC caps what you can hold at ~8 G up. Worth it against a slower chaser, or to drag the chaser toward your wingmen. In game: not measured; letting go of forward drops you to ~435 m/s (fixture).',
                   steps: SHALLOW(0) },
 };
@@ -849,7 +849,7 @@ function markPreset(key) { document.querySelectorAll('[data-preset]').forEach(b 
 document.querySelectorAll('[data-preset]').forEach(b => b.onclick = () => {
   const key = b.dataset.preset, p = PRESETS[key]; reset(p.start); script = { t: 0, go: p.go || 0, steps: p.steps, i: -1 }; maneuver = key; markPreset(key);
   dodge = p.dodge ? { t: 0, dist: 0 } : null;
-  run = { t: 0, min: Infinity, peakG: 0, tvi: 0, rel: null, shown: false, chase: !!p.chase, miss: !!p.miss }; chase.range = CHASE.range;
+  run = { t: 0, min: Infinity, peakG: 0, tvi: 0, rel: null, shown: false, chase: !!p.chase }; chase.range = CHASE.range;
   $('run-name').textContent = p.title; $('run-result').textContent = ''; $('run-msg').hidden = false; $('runbar').hidden = false;
   setNote(lessonHtml(p));
   egg.chase(true);   // ride behind the ship with its limits in frame
@@ -1366,58 +1366,15 @@ function drawSlice(canvas, st, d, big) {
 }
 
 /* ───────────────────────── loop ───────────────────────── */
-// Chaser's miss (MODEL): a Gladius behind you at gun range fires at where you will be after the projectile's flight time,
-// leading with your velocity (A) or with your velocity and acceleration (B). We keep a short history and show how far the shot
-// fired one flight time ago misses you now. Flight time = range / (projectile speed + closing speed): the chaser holds the
-// Gladius top speed, so whatever speed you give up along your line it gets back as closing speed (a positive delta) and
-// the range shrinks with it. Range, projectile speed and hit radius are assumptions (A), and whether the game's lead uses
-// acceleration is not settled.
-const VP_ASSUMED = 1500;   // m/s, ASSUMED: the Star Citizen Wiki lists 1480 for the Gladius's CF-337 Panther (4.10.1); not measured here
-// react: the shooter fires at what it saw a moment ago (human reaction and aim lag, ASSUMED 0.25 s); a dodge started inside
-// that window plus the projectile's flight time is the one that works.
-// Two shooters (docs/aim-model.md, packages/core/src/aim.ts): the IDEAL one aims exactly at what it saw `react` ago, extrapolated;
-// the HUMAN one has to steer its crosshair after the lead pip, a manual tracking task (crossover model: the aim moves at the
-// pip's own drift plus `crossover` x the error it saw `react` ago, so a change in your motion takes ~1/crossover s to catch up).
-// Both are in the plane across the line of sight (m at the target). crossover 3 rad/s is ASSUMED, in the published range for
-// rate tasks; a two-pilot test (round 13, deferred) is what would measure it.
-const CHASE = { range: 550, speed: 520, vp: VP_ASSUMED, react: 0.25, crossover: 3 }, HIT_R = 8, hist = [];
-const HS = 1 / 60, LAG = Math.round(CHASE.react / HS);   // history sample period, and the shooter's delay in samples
-const chase = { range: CHASE.range, tau: CHASE.range / CHASE.vp };   // the live chase: range now and the flight time it gives
-const missNow = { A: 0, B: 0, HA: 0, HB: 0, ok: false };   // ideal A/B, human A/B (m), onX: that shot lands on the ship; missTxt() is used by the lessons
-const pct = (k) => Math.round(100 * run[k] / run.n);
-const missTxt = () => (run && run.n && (run.chase || run.miss) ? `<span class="rr"><b>On target (model)</b> human shooter ${pct('hitHA')} % / ${pct('hitHB')} % · ideal ${pct('hitA')} % / ${pct('hitB')} %</span>` : '');
-// One history sample: your world position, velocity and acceleration, the lead pips (A velocity, B + acceleration) a shot fired now
-// would use, and where the human shooter's crosshair is for each pip (the crossover tracker, stepped from the samples it saw LAG ago).
-function pushHist(t, p, v, a) {
-  const tau = chase.tau, n = hist.length, j = n - 1 - LAG;
-  const pipA = [p[1] + v[1] * tau, p[2] + v[2] * tau], pipB = [pipA[0] + 0.5 * a[1] * tau * tau, pipA[1] + 0.5 * a[2] * tau * tau];
-  const aim = (key, pip) => { if (j < 0) return [pip[0], pip[1]];   // not enough history: settled on the pip
-    const prev = hist[n - 1][key], s0 = hist[j], s1 = hist[j + 1], pk = key === 'aimA' ? 'pipA' : 'pipB';
-    return [0, 1].map(c => prev[c] + (s1[pk][c] - s0[pk][c]) + HS * CHASE.crossover * (s0[pk][c] - s0[key][c])); };
-  hist.push({ t, p, v, a, pipA, pipB, aimA: aim('aimA', pipA), aimB: aim('aimB', pipB) }); if (hist.length > 200) hist.shift();
-}
-// Does a shot that misses the ship's centre by (dy, dz) across the line of sight still land on the ship? The Gladius seen from
-// behind is 17 m wide and 5.5 m tall (fixture dimensions_note; spviewer value, NOTICE.md), so the outline is that rectangle turned
-// with the ship's roll: a crude outline (the real ship is a cross) that over-counts hits, as in the core's aim model. The ship is
-// drawn as a disc of HIT_R if its wings are nearly edge-on to the chaser (nose far off the line), where the rectangle has no meaning.
-const HULL = { w: 17, h: 5.5 };
-function onHull(dy, dz) {
-  const L = qRot(qAtt, [0, 1, 0]), U = qRot(qAtt, [0, 0, 1]), ly = Math.hypot(L[1], L[2]), uy = Math.hypot(U[1], U[2]);
-  if (ly < 0.5 || uy < 0.5) return Math.hypot(dy, dz) < HIT_R;
-  return Math.abs((dy * L[1] + dz * L[2]) / ly) <= HULL.w / 2 && Math.abs((dy * U[1] + dz * U[2]) / uy) <= HULL.h / 2;
-}
-// The shot landing now: the ideal shooter fired it at what it saw react + flight time ago, extrapolated; the human one fired it one
-// flight time ago at wherever its crosshair was then. Misses are across the line of sight (y, z), as in the core's aim model.
-function scoreShot() {
-  const span = chase.tau + CHASE.react, now = hist[hist.length - 1], i = hist.findIndex(h => h.t >= now.t - span), k = hist.findIndex(h => h.t >= now.t - chase.tau);
-  missNow.ok = !!now && i > 0 && k > 0 && now.t - hist[i].t > span * 0.9;
-  if (!missNow.ok) return;
-  const h = hist[i], tau = now.t - h.t, g = hist[k];
-  const miss = (q) => [1, 2].map(j => now.p[j] - (h.p[j] + h.v[j] * tau + q * 0.5 * h.a[j] * tau * tau));
-  const v = { A: miss(0), B: miss(1), HA: [now.p[1] - g.aimA[0], now.p[2] - g.aimA[1]], HB: [now.p[1] - g.aimB[0], now.p[2] - g.aimB[1]] };
-  for (const m of ['A', 'B', 'HA', 'HB']) { missNow[m] = Math.hypot(...v[m]); missNow['on' + m] = onHull(...v[m]); }
-  if (run && script && script.t >= script.go) { run.n = (run.n || 0) + 1; for (const m of ['A', 'B', 'HA', 'HB']) run['hit' + m] = (run['hit' + m] || 0) + missNow['on' + m]; }
-}
+// The chaser (ARITHMETIC, not a model of aiming): a ship behind you that holds CHASE.speed along your starting line, starting
+// CHASE.range behind. Each second the range changes by (your speed along that line - CHASE.speed): hold the wall and it stays
+// put, give up speed and it closes. Both numbers are the stated assumption, kept here as named constants so a game patch can
+// update them. Nothing in this page models the chaser's aim, the lead pip, projectile speed or hits: those need a two-pilot
+// test (docs/aim-model.md). The shooter model that used to be scored here was removed on 2026-10-11 (math and geometry over
+// assumptions); it lives on, marked assumed, in packages/core/src/aim.ts.
+const CHASE = { range: 550, speed: 520 };   // m behind at the start (assumed, inside the 500-600 m gun range); m/s it holds (the measured boosted wall)
+const chase = { range: CHASE.range };       // the live range
+const HS = 1 / 60;   // trail sample period, s of sim time
 const trail = [], path = []; let acc = 0, last = performance.now(), roT = 0, histN = 0, liveT = 0;
 const DT = 1 / 240;
 function derive(st, inp) {
@@ -1500,13 +1457,11 @@ function frame(now) {
       S.x = [x0[0] + vw[0] * DT, x0[1] + vw[1] * DT, x0[2] + vw[2] * DT];
       S.roll = sc[0] * R.roll; S.pitch = sc[1] * R.pitch; S.yaw = sc[2] * R.yaw;
       if (dodge && dodge.t < 2 && (!script || script.t >= script.go)) { dodge.t += DT; dodge.dist += Math.hypot(S.v[1], S.v[2]) * DT; }
-      { // the chaser: keeps 520 m/s along your starting line; you open or close the range with your own speed along it
-        const away = vw[0], closing = CHASE.speed - away;
-        if (run && run.chase) chase.range = Math.max(50, chase.range - closing * DT); else chase.range = CHASE.range;
-        chase.tau = chase.range / (CHASE.vp + Math.max(0, closing)); }
-      // a ~10 s trail and the chaser's history: one sample per 1/60 s of sim time (every 4th step); every sample is a shot
-      if (++histN % Math.round(HS / DT) === 0) { trail.push(R3(...vw)); if (trail.length > 600) trail.shift(); path.push([...S.x]); if (path.length > 600) path.shift();
-        pushHist(S.c.t, [...S.x], vw, qRot(qAtt, S.a)); scoreShot(); }
+      { // the chaser: holds CHASE.speed along your starting line; your own speed along it (vw[0]) opens or closes the range
+        const closing = CHASE.speed - vw[0];
+        if (run && run.chase) chase.range = Math.max(50, chase.range - closing * DT); else chase.range = CHASE.range; }
+      // a ~10 s trail: one sample per 1/60 s of sim time (every 4th step)
+      if (++histN % Math.round(HS / DT) === 0) { trail.push(R3(...vw)); if (trail.length > 600) trail.shift(); path.push([...S.x]); if (path.length > 600) path.shift(); }
     }
   }
   const inp = currentInput(), d = derive(S, inp);
@@ -1517,7 +1472,7 @@ function frame(now) {
     if (on) { run.min = Math.min(run.min, d.speed); run.peakG = Math.max(run.peakG, d.g); run.tvi = d.tviDeg; if (run.rel == null && d.speed <= gladius.scm.speedCap + 1) run.rel = run.t; }
     $('run-prog').style.width = `${Math.max(0, Math.min(100, script.t / (go + R.at) * 100))}%`;
     if (!run.shown && run.t >= R.at) { run.shown = true; $('run-msg').hidden = true;
-      $('run-result').innerHTML = `<span class="rr${run.chase ? ' lead' : ''}"><b>Simulator</b> ${R.sim()}</span><span class="rr"><b>In game</b> ${R.game}</span>${missTxt()}`; }
+      $('run-result').innerHTML = `<span class="rr${run.chase ? ' lead' : ''}"><b>Simulator</b> ${R.sim()}</span><span class="rr"><b>In game</b> ${R.game}</span>`; }
   }
   glocView(glocLive() ? vision(PS, gladius.pilot) : null);
   gSmooth += (d.g - gSmooth) * 0.15;
@@ -1538,11 +1493,10 @@ function frame(now) {
       $('rb-fill').style.left = `${50 - yMax / room * 50}%`; $('rb-fill').style.width = `${yMax / room * 100}%`;
       $('rb-ship').style.left = `${Math.min(100, Math.max(0, 50 - S.v[1] / room * 50))}%`;
       $('rb-lr').textContent = `◂ ${Math.round(L)} · ${Math.round(Rr)} ▸`; } $('r-g').textContent = gSmooth.toFixed(1);
-    { const m = $('r-miss'), on = missNow.ok && d.speed >= 20, r = x => Math.round(x);
-      m.closest('.ro').hidden = !!(run && !(run.chase || run.miss));   // no chaser in this lesson: the tile would only confuse
-      m.textContent = on ? `${r(missNow.HA)} / ${r(missNow.HB)}` : '–'; m.className = on && (missNow.onHA || missNow.onHB) ? 'warn' : '';
-      const ideal = on ? `ideal ${r(missNow.A)} / ${r(missNow.B)}` : 'ideal –'; const id = $('r-miss-ideal'); id.textContent = ideal; id.classList.toggle('warn', on && !!(missNow.onA || missNow.onB));
-      $('r-miss-at').textContent = on ? `${r(chase.range)} m · ${chase.tau.toFixed(2)} s` : ''; } $('r-tvi').textContent = d.speed > 3 ? Math.round(d.tviDeg) : '–';
+    { const ro = $('ro-range'); ro.hidden = !(run && run.chase);   // the chaser exists only in the Flee lessons
+      if (!ro.hidden) { $('r-range').textContent = Math.round(chase.range); const dv = CHASE.speed - qRot(qAtt, S.v)[0];
+        $('r-range-rate').textContent = Math.abs(dv) < 0.5 ? 'holding' : dv > 0 ? `closing ${dv.toFixed(0)} m/s` : `opening ${(-dv).toFixed(0)} m/s`; } }
+    $('r-tvi').textContent = d.speed > 3 ? Math.round(d.tviDeg) : '–';
     $('r-tank').textContent = ctl.unlimited ? '∞' : S.c.boostLocked ? `${Math.round(S.tank)}🔒` : Math.round(S.tank);
     $('r-tankbar').classList.toggle('locked', !!S.c.boostLocked && !ctl.unlimited); $('r-roll').textContent = Math.round(Math.abs(S.roll || 0)); $('r-tankbar').style.width = `${S.tank}%`;
     const mode = $('r-mode'); mode.textContent = d.boost ? 'Boost' : 'SCM'; mode.className = `chip ${d.boost ? 'on-boost' : 'on-scm'}`;
@@ -1557,7 +1511,7 @@ applyTabs(); drawKnob(); setThr(0); resizeAll(); refreshHints(); requestAnimatio
 // First visit: set up controls, the way Stay On Target opens with its setup wizard.
 // First visit: the Star Citizen keyboard defaults apply silently; the Controls button opens the setup wizard.
 // For automated checks (headless browser runs): a read-only peek at the simulator's state.
-window.speedwallDebug = { get: () => ({ S, run, missNow, chase, script, maneuver }) };
+window.speedwallDebug = { get: () => ({ S, run, chase, script, maneuver }) };
 </script>
 
 </body>

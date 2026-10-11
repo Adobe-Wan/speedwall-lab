@@ -154,3 +154,13 @@ parameters with measured ones; until then the readout's tooltip and the lesson t
 
 
 **2026-10-11: one roll direction.** Alex: a corkscrew is a helix, and a roll that reverses every few seconds folds the trail back on itself instead of tracing one. The Flee and escape corkscrew lessons now hold one gradual roll (~60 °/s) for the whole run; the roll is reversed only to ease a grey-out (Apprentice_One 2025-05-01). The "reversing" rows above describe the previous lessons and are not re-scored here; the alpha's result bar shows the live shares for the held roll.
+
+**2026-10-11: the alpha no longer shows the shooter model.** Alex: the chaser maths cannot be verified without a two-pilot test
+(deferred), the model knows nothing about the game's PIP mechanics, and the page must not make claims it cannot back: "math and
+geometry over assumptions". `site/index.html` now shows only the chaser's **range**, which is arithmetic on two named constants
+(`CHASE = { range: 550, speed: 520 }`: 550 m behind at the start, assumed inside the 500-600 m gun range; 520 m/s held, the measured
+boosted wall), changed by your own speed along the starting line and nothing else, so a patch that moves the wall or the engagement
+range is a one-line update. The "Chaser's miss" tile, the "on target" result segment and the page's copy of the crossover tracker
+are gone; the lesson texts say the chaser's aim, the lead pip and projectile speed are not modelled. The model itself stays in
+`packages/core/src/aim.ts` and in the tables above, marked assumed, for when round 13 can be flown. The row in section 4 that
+promised to switch the alpha's readout now means: add the readout back only with measured parameters.
