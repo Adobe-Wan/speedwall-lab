@@ -125,7 +125,7 @@ details.more-d > span { display: block; color: var(--fg-2); font-size: .8rem; li
 .lbl { position: absolute; transform: translate(-50%, -50%); font: 600 .68rem var(--font-data); letter-spacing: .02em; white-space: nowrap; color: var(--muted); text-shadow: 0 0 4px #05080d, 0 1px 2px #05080d; }
 /* text labels sit on a small dark pill so they stay readable over the egg's rings and rim (the TVI icon has no text) */
 .lbl:not(:empty):not(:has(svg)) { padding: 2px 7px; border-radius: 999px; background: rgba(5,8,13,.62); }
-.lbl.boost { color: var(--boost); } .lbl.scm { color: var(--scm); } .lbl.tvi { color: var(--tvi); } .lbl.room { color: var(--fg); }
+.lbl.boost { color: var(--boost); } .lbl.scm { color: var(--scm); } .lbl.tvi { color: var(--tvi); } .lbl.room { color: var(--fg); } .lbl.path { color: #c4a8ff; }
 .view canvas.inset { position: absolute; inset: auto; left: 10px; bottom: 36px; width: 150px; height: 150px; touch-action: auto; border: 1px solid var(--line-2); border-radius: var(--r-md); background: rgba(7,11,18,.8); }
 #slice-big { position: absolute; inset: 0; width: 100%; height: 100%; }
 
@@ -136,6 +136,7 @@ details.more-d > span { display: block; color: var(--fg-2); font-size: .8rem; li
 .legend .lg-egg::before { background: var(--boost); box-shadow: 0 0 6px rgba(242,163,58,.6); } .legend .lg-scm::before { background: var(--scm); box-shadow: 0 0 6px rgba(90,169,230,.6); }
 .legend .lg-ring::before { border: 1.5px solid var(--fg); background: none; }
 .legend .lg-tvi::before { border: 1.5px solid var(--tvi); background: none; }
+.legend .lg-path::before { background: #c4a8ff; box-shadow: 0 0 6px rgba(196,168,255,.6); }
 
 /* ── readouts ── */
 .readouts { display: grid; grid-template-columns: repeat(auto-fit, minmax(108px, 1fr)); gap: 8px; }
@@ -423,7 +424,7 @@ footer a { color: var(--fg-2) !important; }
   </div>
   </div>
   <p class="lesson-note" id="lesson-note" role="status">Pick a lesson to watch the ship move inside the egg.</p>
-  <div class="legend" aria-hidden="true"><span class="lg-egg">Amber egg: top speed with boost</span><span class="lg-scm">Blue ball: top speed without boost (225)</span><span class="lg-ring">White ring: sideways room left (red: at the limit)</span><span class="lg-tvi">TVI (circle with wings): where you're really going</span></div>
+  <div class="legend" aria-hidden="true"><span class="lg-egg">Amber egg: top speed with boost</span><span class="lg-scm">Blue ball: top speed without boost (225)</span><span class="lg-ring">White ring: sideways room left (red: at the limit)</span><span class="lg-tvi">TVI (circle with wings): where you're really going</span><span class="lg-path">Violet thread: your flight path over the last 8 s, width ×3 and length ÷12, so a corkscrew shows as one</span></div>
   <div class="readouts" aria-hidden="true">
     <div class="ro"><b>Speed</b><span id="r-speed">0</span><small>m/s</small></div>
     <div class="ro"><b>Forward</b><span id="r-fwd">0</span><small>m/s</small></div>
@@ -450,13 +451,13 @@ footer a { color: var(--fg-2) !important; }
         </div>
         <h3>Fleeing a chaser as fast as you · it starts 550 m behind at 520 m/s</h3>
         <div class="mgrid">
-          <button data-preset="flee-wall">Hold the wall, shallow corkscrew<small>Full forward, half up-stick, a gradual roll that reverses: the range holds and the chaser's shots drift</small></button>
+          <button data-preset="flee-wall">Hold the wall, shallow corkscrew<small>Full forward, half up-stick, one gradual roll held: the trail traces a helix, the range holds and the chaser's shots drift</small></button>
           <button data-preset="flee-tvi">TVI far out, slow roll<small>Roll ~27 °/s: you slow down off the nose and the chaser closes</small></button>
           <button data-preset="flee-ease">Ease off forward<small>Same corkscrew with forward released: more push, but every m/s you give up is closing speed for the chaser</small></button>
         </div>
         <h3>Corkscrews · what rolling does, and doesn't do</h3>
         <div class="mgrid">
-          <button data-preset="ck-escape">Escape corkscrew, full up-stick<small>Boost, forward + full up, a gradual roll that reverses: breaks a firing solution faster than the shallow Flee corkscrew but gives up range. The roll aims the push, it is not the dodge</small></button>
+          <button data-preset="ck-escape">Escape corkscrew, full up-stick<small>Boost, forward + full up, one gradual roll held: breaks a firing solution faster than the shallow Flee corkscrew but gives up range. The roll aims the push, it is not the dodge</small></button>
           <button data-preset="ck-shoot">Corkscrew and still shoot back<small>For a target AHEAD: slow roll ~27 °/s keeps the TVI still (not the way to flee)</small></button>
         </div>
         <h3>Speed you lose · turning and braking</h3>
@@ -742,7 +743,7 @@ function reset(pinned) {
   script = null; maneuver = null; dodge = null; run = null; markPreset(null); ctl.rollHold = 0; qAtt = [0, 0, 0, 1]; controls.mouse.center(); egg.chase(false);
   const vx = pinned === 'scm' ? 225 : pinned ? 520 : 0;
   S = { ...mkState(vx, pinned === true), x: S.x };
-  trail.length = 0; hist.length = 0; missNow.ok = false; setThr(pinned ? 100 : 0); setLock(pinned === true); ctl.padL = ctl.padU = 0; ctl.padSticky = false; drawKnob();
+  trail.length = 0; path.length = 0; hist.length = 0; missNow.ok = false; setThr(pinned ? 100 : 0); setLock(pinned === true); ctl.padL = ctl.padU = 0; ctl.padSticky = false; drawKnob();
 }
 $('reset').onclick = () => reset(false);
 $('run-stop').onclick = () => { reset(false); $('runbar').hidden = true; setNote(''); };
@@ -762,11 +763,12 @@ $('pause').onclick = togglePause;
 // Fleeing is fundamentals, not tricks (Alex, 2026-10-10): speed along your line is what keeps the range, anything off the nose
 // costs that speed, and a sustained gradual corkscrew is the deflection that doesn't depend on how fast thrusters respond
 // (quick strafe taps or "pip wiggling" live off today's near-instant accelerations, which a future flight model with jerk would
-// take away). The Flee lessons share one shallow corkscrew so only forward/TVI differ: half up-stick, roll ~60 °/s reversed
-// every 2.5 s (Apprentice_One 2025-05-01: roll "at a gradual rate", reverse it; Johnathan Winters 2024-12 / 2025-11: roll is
-// not the dodge, don't hold one strafe). (Until 2026-10-10 these lessons flew irregular side + up strafe taps.)
-const SHALLOW = (f) => [[0, { f, l: 0, u: .5, boost: true, r: 1, rf: .25 }], [2.5, { f, l: 0, u: .5, boost: true, r: -1, rf: .25 }],
-  [5, { f, l: 0, u: .5, boost: true, r: 1, rf: .25 }], [7.5, { f, l: 0, u: .5, boost: true, r: -1, rf: .25 }]];
+// take away). The Flee lessons share one shallow corkscrew so only forward/TVI differ: half up-stick, one roll of ~60 °/s
+// held (Apprentice_One 2025-05-01: roll "at a gradual rate"; Johnathan Winters 2024-12 / 2025-11: roll is not the dodge).
+// (Until 2026-10-10 these lessons flew irregular side + up strafe taps; until 2026-10-11 the roll reversed every 2.5 s.)
+// A corkscrew is a helix: one roll direction, held (Alex, 2026-10-11). The roll is reversed only to ease a grey-out, never as
+// the pattern; reversing every few seconds folds the trail back on itself instead of tracing a corkscrew.
+const SHALLOW = (f) => [[0, { f, l: 0, u: .5, boost: true, r: 1, rf: .25 }]];
 const PRESETS = {
   rest:         { title: 'Strafe from a stop', result: { at: 6, sim: () => `${Math.round(Math.abs(S.v[1]))} m/s sideways`, game: '394 m/s' }, start: 'rest', go: 0,
                   do: 'Boost and strafe sideways from a standstill.',
@@ -789,10 +791,10 @@ const PRESETS = {
                   more: 'This model dips to ~425 m/s and under-pushes sideways here; it is one of the misses listed in docs/physics-fit.md.',
                   steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [6, { f: 0, l: 1, u: 0, boost: true }]] },
   'ck-escape':  { title: 'Escape corkscrew, full up-stick', miss: true, result: { at: 10, sim: () => `${Math.round(len(S.v))} m/s`, game: '513 m/s, ~6 G side load' }, start: 'rest', go: 0,
-                  do: 'Boost, forward + up, roll at a gradual ~60 °/s and reverse the roll every few seconds (Apprentice_One\'s escape from a tail, 2025-05).',
-                  see: 'The roll only turns which way your up-push points; it is not the dodge. You keep ~513 m/s (measured), the launch pulls ~21 G and greys the screen at about 2 s (measured), and the readout shows how often a shooter behind you still connects (model).',
-                  more: 'He reverses the roll as he nears blackout. Johnathan Winters: "roll does nothing for you" (2024-12, 2025-11): the roll only points the push. Full up-stick is the quickest break from a firing solution but costs ~190 m of range in 10 s to a chaser as fast as you (model); the Flee lessons show the shallower version that keeps the range. At gun range (500-600 m) a shot takes ~0.35 s plus the shooter\'s ~0.25 s to react (both assumed), so a 6 G push moves you ~10 m: about one Gladius width (model). Up is the axis you tolerate most G in. A chaser as fast as you would close on you meanwhile (the Flee lessons show the range). Not measured: the game\'s lead rule, projectile speed, and whether shots inherit the shooter\'s speed. Test: r9_vis_bst_f100_up_r50.',
-                  steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: .25 }], [3.5, { f: 1, l: 0, u: 1, boost: true, r: -1, rf: .25 }], [6, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: .25 }], [8.5, { f: 1, l: 0, u: 1, boost: true, r: -1, rf: .25 }]] },
+                  do: 'Boost, forward + up, hold one gradual roll of ~60 °/s so the trail traces a helix (Apprentice_One\'s escape from a tail, 2025-05).',
+                  see: 'The roll only turns which way your up-push points; it is not the dodge. The violet thread behind the ship is your real path, widened and squeezed lengthwise so the helix shows. You keep ~513 m/s (measured), the launch pulls ~21 G and greys the screen at about 2 s (measured), and the readout shows how often a shooter behind you still connects (model).',
+                  more: 'Keep the roll going one way: a corkscrew is a helix, and reversing every few seconds folds the trail back on itself. He reverses the roll only as he nears blackout. Johnathan Winters: "roll does nothing for you" (2024-12, 2025-11): the roll only points the push. Full up-stick is the quickest break from a firing solution but costs ~190 m of range in 10 s to a chaser as fast as you (model); the Flee lessons show the shallower version that keeps the range. At gun range (500-600 m) a shot takes ~0.35 s plus the shooter\'s ~0.25 s to react (both assumed), so a 6 G push moves you ~10 m: about one Gladius width (model). Up is the axis you tolerate most G in. A chaser as fast as you would close on you meanwhile (the Flee lessons show the range). Not measured: the game\'s lead rule, projectile speed, and whether shots inherit the shooter\'s speed. Test: r9_vis_bst_f100_up_r50.',
+                  steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: .25 }]] },
   'ck-shoot':   { title: 'Corkscrew and shoot back (target ahead)', miss: true, result: { at: 10, sim: () => `TVI ${Math.round(run.tvi)}° off the nose`, game: 'not measured at this roll rate (model: rule of thumb ~13°)' }, start: 'rest', go: 0,
                   do: 'Boost, forward + up, with a slow roll of ~27 °/s. For a target AHEAD of you, not for fleeing.',
                   see: 'The TVI swings out and settles ~10-15° off the nose after ~10 s (model; the research rule of thumb says ~13°), so your target doesn\'t spin and you can shoot back.',
@@ -814,9 +816,9 @@ const PRESETS = {
                   more: 'What the spacebrake does here has not been measured. Hold a strafe while you slow and it takes ~7.6 s. Test: r6_release_all.',
                   steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [6, { f: 0, l: 0, u: 0, boost: false }]] },
   'flee-wall':  { title: 'Flee: hold the wall, shallow corkscrew', chase: true, result: { at: 10, sim: () => `chaser still ${Math.round(chase.range)} m back after 10 s (started at 550)`, game: 'not measured (needs a two-pilot chase test)' }, start: { vx: 520, boost: true }, go: 0,
-                  do: 'Full forward on the wall, half up-stick, roll at a gradual ~60 °/s and reverse the roll every few seconds. No side-to-side strafing.',
-                  see: 'The range is the point: your speed stays on the wall, so a chaser as fast as you gains only ~60 m in 10 s (model). The up-push and the gradual roll drag your velocity in a helix; the result bar shows how often the modelled shooter still connects.',
-                  more: 'A shooter whose pip leads your acceleration still hits a steady helix; the roll reversals are what break it, and a human shooter (0.25 s late, assumed) is the one the roll beats. Fundamentals, not tricks (Alex, 2026-10-10): range and speed are the defence (Apprentice_One 2025-05-01: "if you fly totally straight I can fire at you from kilometres away and still hit you", and a faster ship catches you whatever you fly). Everything off the nose costs speed along your line, so the half stick is the trade: full up-stick (the escape corkscrew) breaks the solution faster but gives up ~190 m in 10 s (model). Seen from behind the Gladius is 17 m wide and 5.5 m tall, so a pursuer in weapons range holds a flat side-to-side strafe easily, and quick strafe taps live off today\'s near-instant thrust response, which a future flight model with jerk would take away (Alex, 2026-10-10; not measured). Roll is for aiming the push, not the dodge (Johnathan Winters 2024-12-30, 2025-11-29). Side load here ~3 G (model), far from G-LOC. The human shooter steers its crosshair after the lead pip with a ~0.25 s delay and needs ~0.3 s to close a gap (crossover model, docs/aim-model.md; both assumed until a two-pilot test measures them). In game: not measured.',
+                  do: 'Full forward on the wall, half up-stick, hold one gradual roll of ~60 °/s so the trail traces a helix. No side-to-side strafing, no roll flipping.',
+                  see: 'The range is the point: your speed stays on the wall, so a chaser as fast as you gains only ~10 m in 10 s (model). The violet thread behind the ship is your real path, widened and squeezed lengthwise: at true scale the helix is about 30 m wide and 3 km per turn. The result bar shows how often the modelled shooter still connects.',
+                  more: 'A shooter whose pip leads your acceleration still hits a steady helix on the model; a human shooter (0.25 s late, assumed) is the one the helix beats. Keep the roll one way: reverse it only to ease a grey-out (Apprentice_One 2025-05-01), never as the pattern (Alex, 2026-10-11). Fundamentals, not tricks (Alex, 2026-10-10): range and speed are the defence (Apprentice_One 2025-05-01: "if you fly totally straight I can fire at you from kilometres away and still hit you", and a faster ship catches you whatever you fly). Everything off the nose costs speed along your line, so the half stick is the trade: full up-stick (the escape corkscrew) breaks the solution faster but gives up ~190 m in 10 s (model). Seen from behind the Gladius is 17 m wide and 5.5 m tall, so a pursuer in weapons range holds a flat side-to-side strafe easily, and quick strafe taps live off today\'s near-instant thrust response, which a future flight model with jerk would take away (Alex, 2026-10-10; not measured). Roll is for aiming the push, not the dodge (Johnathan Winters 2024-12-30, 2025-11-29). Side load here ~3 G (model), far from G-LOC. The human shooter steers its crosshair after the lead pip with a ~0.25 s delay and needs ~0.3 s to close a gap (crossover model, docs/aim-model.md; both assumed until a two-pilot test measures them). In game: not measured.',
                   steps: SHALLOW(1) },
   'flee-tvi':   { title: 'Flee: TVI far out, slow roll', chase: true, result: { at: 10, sim: () => `chaser closed to ${Math.round(chase.range)} m after 10 s (started at 550) · TVI ${Math.round(run.tvi)}°`, game: 'not measured (needs a two-pilot chase test)' }, start: { vx: 520, boost: true }, go: 0,
                   do: 'Forward + up, roll ~27 °/s: the coaching rule "put the TVI farther out and roll slowly".',
@@ -890,8 +892,9 @@ const visible = k => views[k].dataset.hidden !== 'true' && onScreen[k];
 /* ───────────────────────── render helpers ───────────────────────── */
 // physics frame (x nose, y left, z up) -> render frame (X nose, Y up, Z right)
 const R3 = (x, y, z) => [x, z, -y];
+const PATH_SQUEEZE = 12, PATH_WIDEN = 3, PATH_S = 8;   // the egg view's flight-path thread: along-track ÷12, cross-track ×3, last 8 s
 const hex = h => [parseInt(h.slice(1, 3), 16) / 255, parseInt(h.slice(3, 5), 16) / 255, parseInt(h.slice(5, 7), 16) / 255];
-const COL = { boost: hex('#f2a33a'), scm: hex('#5aa9e6'), tvi: hex('#7ef0c8'), white: [0.92, 0.95, 1], grey: [0.5, 0.56, 0.66], warn: hex('#ff6a55'), glyph: [0.78, 0.82, 0.9] };
+const COL = { path: hex('#c4a8ff'), boost: hex('#f2a33a'), scm: hex('#5aa9e6'), tvi: hex('#7ef0c8'), white: [0.92, 0.95, 1], grey: [0.5, 0.56, 0.66], warn: hex('#ff6a55'), glyph: [0.78, 0.82, 0.9] };
 const VS_LINE = `attribute vec3 position; uniform mat4 modelViewMatrix, projectionMatrix; void main(){ gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }`;
 const FS_LINE = `precision mediump float; uniform vec3 uColor; uniform float uAlpha; void main(){ gl_FragColor = vec4(uColor, uAlpha); }`;
 function lineProgram(gl, color, alpha, extra = {}) {
@@ -1084,7 +1087,7 @@ const egg = !hasWebGL ? stubView : (() => {
   glyph.setParent(glyphT);   // true size: 20 m long
   // Everything that moves (velocity arrow, trail, settle ray, thrust and dead-thrust arrows, the dodge ring and its
   // reach lines) is one coloured line mesh: one draw call.
-  const dyn = colorLines(gl, 1024); dyn.renderOrder = 40; dyn.setParent(shipT);
+  const dyn = colorLines(gl, 4096); dyn.renderOrder = 40; dyn.setParent(shipT);   // 10 s trail + path thread + rings
 
   // Position grid, kept faint: world-fixed lines on the horizontal plane through the egg's centre. The egg is velocity
   // space, so the ship holds still in it at a steady speed; the grid slides past with your position (at 0.4 x scale,
@@ -1108,7 +1111,7 @@ const egg = !hasWebGL ? stubView : (() => {
   const mk = (k, cls, text) => { const d = document.createElement('div'); d.className = `lbl ${cls}`; d.textContent = text; ov.appendChild(d); labels[k] = d; return d; };
   mk('nose', 'boost', 'nose 520'); mk('side', 'boost', 'sides 394'); mk('tail', 'boost', 'tail 268'); mk('scm', 'scm', 'SCM 225');
   mk('room', 'room', ''); mk('settle', 'tvi', ''); mk('rest', '', 'rest 0');
-  mk('reachL', 'room', ''); mk('reachR', 'room', '');
+  mk('reachL', 'room', ''); mk('reachR', 'room', ''); mk('path', 'path', '');
   const tviIcon = document.createElement('div'); tviIcon.className = 'lbl tvi';
   tviIcon.innerHTML = '<svg width="34" height="20" viewBox="-17 -10 34 20"><circle r="5.5" fill="none" stroke="#7ef0c8" stroke-width="2"/><path d="M-15 0h9.5M5.5 0H15M0-5.5V-10" stroke="#7ef0c8" stroke-width="2"/></svg>';
   ov.appendChild(tviIcon);
@@ -1128,9 +1131,9 @@ const egg = !hasWebGL ? stubView : (() => {
   const setCam = (m, auto = false) => { camMode = m; follow = m === 'follow'; autoChase = follow && auto;
     for (const [id, k] of [['cam-34', '34'], ['cam-side', 'side'], ['t-follow', 'follow']]) $(id).setAttribute('aria-pressed', m === k);
     if (!follow) { touched = false; orbit.target.set(...qrotv(qView, HOME_T)); home(); orbit.forcePosition(); return; }
-    // start behind, a little above and to the side, looking up the nose
+    // start behind and off to the side, above, looking up the nose: a helix behind the ship reads as a corkscrew, not a circle
     const p = qrotv(qView, R3(S.v[0], 0, 0)); chaseD = Math.hypot(camera.position.x - p[0], camera.position.y - p[1], camera.position.z - p[2]);
-    orbit.target.set(...p); camera.position.set(p[0] - 0.93 * chaseD, p[1] + 0.27 * chaseD, p[2] + 0.17 * chaseD); orbit.forcePosition(); touched = true; };
+    orbit.target.set(...p); camera.position.set(p[0] - 0.62 * chaseD, p[1] + 0.58 * chaseD, p[2] + 0.53 * chaseD); orbit.forcePosition(); touched = true; };
   $('cam-34').onclick = () => setCam('34'); $('cam-side').onclick = () => setCam('side');
   $('t-follow').onclick = () => setCam(follow ? '34' : 'follow');
   // A lesson starts the chase cam and hands the camera back afterwards, unless the pilot picked a view meanwhile.
@@ -1162,7 +1165,7 @@ const egg = !hasWebGL ? stubView : (() => {
       // Floor: the nose cap of the egg stays in frame, so a corkscrew reads as a spiral around the nose rather than a tight red
       // ring filling the view (at the wall the room is only a few m/s). Rolling or scripted lessons get the wider frame.
       const rolling = Math.abs(st.roll || 0) > 1 || (script && (ctl.rollHold || ctl.rollBtn));
-      const reach = Math.max(room, Math.hypot(vy, vz) + 25, 0.5 * Math.max(0, d.r - d.speed), rolling ? 240 : 160);
+      const reach = Math.max(room, Math.hypot(vy, vz) + 25, 0.5 * Math.max(0, d.r - d.speed), rolling ? 300 : 160);
       const want = Math.min(3000, Math.max(150, 1.4 * reach / Math.min(half, half * aspect)));
       chaseD += (want - chaseD) * 0.06;
       const t = orbit.target, p = camera.position, dx = p.x - t.x, dy = p.y - t.y, dz = p.z - t.z, l = Math.hypot(dx, dy, dz) || 1;
@@ -1190,9 +1193,20 @@ const egg = !hasWebGL ? stubView : (() => {
     dyn.begin();
     dyn.seg([0, 0, 0], pv, COL.tvi, 1);                                       // velocity arrow
     if (sp3 > 3) dyn.seg(pv, tviP, COL.tvi, 0.5);                              // ship -> TVI
-    { // 3 s trail: kept in world space, so turn it back into the ship's current frame (shipT turns it forward again)
+    { // 10 s trail (a 60 °/s corkscrew shows well over a turn): kept in world space, so turn it back into the ship's current frame (shipT turns it forward again)
       const inv = [-qView[0], -qView[1], -qView[2], qView[3]]; let prev = null;
-      for (const w of trail) { const pt = qrotv(inv, w); if (prev) dyn.seg(prev, pt, COL.tvi, 0.45); prev = pt; } }
+      for (const w of trail) { const pt = qrotv(inv, w); if (prev) dyn.seg(prev, pt, COL.tvi, 0.45); prev = pt; }
+      // Flight path, last 10 s: the ship's real track, drawn behind it. Cross-track is 1:1 and along-track is squeezed by
+      // PATH_SQUEEZE and widened by PATH_WIDEN, because at 520 m/s one turn of a 60 °/s corkscrew is 3 km long and only
+      // ~30 m wide: at true scale a corkscrew is a thread. Squeezed and widened, it shows as the helix it is. The label says so.
+      const n = Math.min(path.length, PATH_S * 60), n0 = path.length - n; labels.path.hidden = true;
+      if (n > 60 && sp3 > 3) { const now = path[path.length - 1], a0 = path[n0], L = Math.hypot(now[0] - a0[0], now[1] - a0[1], now[2] - a0[2]);
+        if (L > 1) { const u = [(now[0] - a0[0]) / L, (now[1] - a0[1]) / L, (now[2] - a0[2]) / L]; let prevP = null, tail = null;
+          for (let i = n0; i < path.length; i += 2) { const q = path[i], r = [q[0] - now[0], q[1] - now[1], q[2] - now[2]], al = r[0] * u[0] + r[1] * u[1] + r[2] * u[2];
+            const c = [0, 1, 2].map(k => (r[k] - al * u[k]) * PATH_WIDEN + u[k] * al / PATH_SQUEEZE);
+            const pt = qrotv(inv, R3(...c)); const w = [pv[0] + pt[0], pv[1] + pt[1], pv[2] + pt[2]];
+            if (prevP) dyn.seg(prevP, w, COL.path, 0.8); if (i === n0 + 2 * Math.floor(n / 4)) tail = w; prevP = w; }   // label a quarter of the way along
+          if (tail && follow) { place(labels.path, tail); labels.path.textContent = `your path · last ${Math.round(n / 60)} s · width ×${PATH_WIDEN} · length ÷${PATH_SQUEEZE}`; } } } }
     const ringCol = d.pinned ? COL.warn : COL.white;                         // the dodge ring at your forward speed
     for (let j = 1; j < UNIT.length; j++) dyn.seg(R3(vx, UNIT[j-1][1] * room, UNIT[j-1][0] * room), R3(vx, UNIT[j][1] * room, UNIT[j][0] * room), ringCol, 0.85);
     // reach lines: from the ship to the edge of the sideways-room disc along each strafe axis
@@ -1404,7 +1418,7 @@ function scoreShot() {
   for (const m of ['A', 'B', 'HA', 'HB']) { missNow[m] = Math.hypot(...v[m]); missNow['on' + m] = onHull(...v[m]); }
   if (run && script && script.t >= script.go) { run.n = (run.n || 0) + 1; for (const m of ['A', 'B', 'HA', 'HB']) run['hit' + m] = (run['hit' + m] || 0) + missNow['on' + m]; }
 }
-const trail = []; let acc = 0, last = performance.now(), roT = 0, histN = 0, liveT = 0;
+const trail = [], path = []; let acc = 0, last = performance.now(), roT = 0, histN = 0, liveT = 0;
 const DT = 1 / 240;
 function derive(st, inp) {
   const ci = coreInput(inp.u, inp.boost), d = coreDerive(st.c, ci, gladius), boost = boostActive(st.c, ci);
@@ -1490,8 +1504,8 @@ function frame(now) {
         const away = vw[0], closing = CHASE.speed - away;
         if (run && run.chase) chase.range = Math.max(50, chase.range - closing * DT); else chase.range = CHASE.range;
         chase.tau = chase.range / (CHASE.vp + Math.max(0, closing)); }
-      // a ~3 s trail and the chaser's history: one sample per 1/60 s of sim time (every 4th step); every sample is a shot
-      if (++histN % Math.round(HS / DT) === 0) { trail.push(R3(...vw)); if (trail.length > 180) trail.shift();
+      // a ~10 s trail and the chaser's history: one sample per 1/60 s of sim time (every 4th step); every sample is a shot
+      if (++histN % Math.round(HS / DT) === 0) { trail.push(R3(...vw)); if (trail.length > 600) trail.shift(); path.push([...S.x]); if (path.length > 600) path.shift();
         pushHist(S.c.t, [...S.x], vw, qRot(qAtt, S.a)); scoreShot(); }
     }
   }
