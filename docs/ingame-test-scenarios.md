@@ -334,7 +334,27 @@ Not in the 2 hours (second session, two pilots, about 60 min): `proj_speed`, `pr
 | `rot_*` | The instant-onset assumption in `rotation.ts` (only if net lag exceeds about 0.2 s) |
 | `d01`, `d02`, `d03` | Fixture merge for `r7_dodge_mid_boost`; what the pilot view draws (HUD fade versus screen darkness); the recovery curve |
 
-## 10. Round A1: Arrow baseline (single pilot, added 2026-10-11)
+## 10. Update, 2026-10-09: test at gun range (500-600 m)
+
+The pilot set the engagement range: 500-600 m with Panther repeaters, never 1 km. Every two-pilot test above that says 1000 m is
+flown at **550 m** instead (`lead_hits`: 550 m and 400 m; `proj_speed`: 300 / 550 / 800 m; `proj_chase`: 550 m). Standing conditions
+are unchanged: Decoupled, G-Safe OFF, 4K, FOV 100, Arena Commander free flight, pilot present, never PU or PvP.
+
+| ID | P | Auto | Procedure | What it settles |
+|---|---|---|---|---|
+| chase_equal | P0 | 2P | Both Gladii boosted at the nose, shooter 550 m behind, both full forward. Target flies 12 s of: (a) up + full roll (wall); (b) up + roll 27 deg/s (far TVI); (c) forward released, up + full roll; (d) straight line as the baseline. Shooter fires at the pip throughout. Log range each second (HUD) and hit markers. 3 runs each | The coaches' rules against a same-top-speed chaser: does the range hold on the wall and close in (b) and (c), and do the hit rates follow (model: the corkscrew alone shifts shots only 2-5 m at this range) |
+| chase_delta | P1 | 2P | As (a), but the shooter starts at 700 m and closes with a positive delta (target at 450 m/s forward, shooter on the wall), firing from 600 m in | How much a positive delta raises the hit rate at the same range |
+
+## 11. Update, 2026-10-09: measure the shooter (round 13, two pilots; deferred, no second pilot available)
+
+The tests above measure the ship. What decides whether a dodge works at 550 m is mostly the shooter's delay, which the alpha assumed
+(0.25 s) and modelled as perfect tracking. `docs/aim-model.md` adds a human tracking model and a two-pilot test that measures it:
+`tools/sc-flighttest/tests_round13.yaml`, 6 patterns x 3 runs, shuffled, the harness flying the target and a friend shooting from
+550 m. It also tests a new model claim: **up/down taps are hit about half as often as side taps** because the Gladius is 5.5 m tall
+and 17 m wide from behind. Fly it in the same session as `proj_speed` and `proj_inherit` if possible: the delay read-off assumes
+1500 m/s projectiles that inherit the chaser's speed. Needs Alex's OK on the harness-in-free-flight question first (see the YAML header).
+
+## 12. Round A1: Arrow baseline (single pilot, added 2026-10-11)
 
 The first round for a second ship, planned in `docs/ship-comparison-plan.md` (which says what each value buys and what stays a gap). **Standing conditions are those of section 0** with the ship swapped: Arrow, Arena Commander free flight, single pilot, Alex present, Decoupled, G-Safe Off, 4K, FOV 100, open space, F12 ready, SCM unless `boost: true`. Never the PU, never PvP. Nothing here needs a second pilot. The YAML below is not yet in a `tests_*.yaml`; it is the test list for `tools/sc-flighttest/tests_arrow.yaml` when that file is written.
 

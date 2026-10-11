@@ -38,7 +38,7 @@ Reading the table: rows 6, 7 (geometry half), 9, 10 and 11 are what one Arrow se
 
 ## 2. Measurement list for the Arrow
 
-This mirrors the Gladius fixture field by field, with the Gladius test that produced each value, so the Arrow fixture (`research/arrow-v1-fixture.json`, a later PR) has the same shape and the comparison code needs no special cases. The test IDs are defined in `docs/ingame-test-scenarios.md` §10.
+This mirrors the Gladius fixture field by field, with the Gladius test that produced each value, so the Arrow fixture (`research/arrow-v1-fixture.json`, a later PR) has the same shape and the comparison code needs no special cases. The test IDs are defined in `docs/ingame-test-scenarios.md` §12.
 
 | Fixture field | Gladius source | Arrow test(s) | Notes |
 |---|---|---|---|
@@ -72,7 +72,7 @@ The recommendation is 2 as the measurement, with 1 only if Alex rules it allowed
 
 ## 3. The test session, by count
 
-The full test list with step lists is in `docs/ingame-test-scenarios.md` §10 (round A1). Counted by test, not by time, since the harness's per-test overhead (brake, flip, refill, about 30 s) is the same for any ship and the flight time depends on the Arrow's own numbers, which are the thing being measured.
+The full test list with step lists is in `docs/ingame-test-scenarios.md` §12 (round A1). Counted by test, not by time, since the harness's per-test overhead (brake, flip, refill, about 30 s) is the same for any ship and the flight time depends on the Arrow's own numbers, which are the thing being measured.
 
 | Block | Tests | Priority | Buys |
 |---|---|---|---|
