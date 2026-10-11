@@ -466,32 +466,39 @@ footer a { color: var(--fg-2) !important; }
   <p class="lesson-note" id="lesson-note" role="status">Pick a lesson to watch the ship move inside the egg.</p>
   <div class="legend" aria-hidden="true"><span class="lg-egg"><b>Amber Egg (Boost):</b> the top speed boost holds in every direction</span><span class="lg-scm"><b>Blue Ball (SCM):</b> the top speed without boost, 225 m/s every way</span><span class="lg-ring"><b>White Ring (Sideways Room):</b> the sideways speed you can still add; it thins and reddens as Dodge Potential collapses</span><span class="lg-tvi"><b>TVI:</b> the circle with wings: where you are really going</span><span class="lg-path"><b>Violet Thread:</b> your path over the last 8 s (drawn wider and shorter)</span>
   </div>
-  <p class="howto"><strong>Start here.</strong> The amber egg is the speed wall: the top speed boost can hold in every direction (520 forward, 394 sideways, 268 back). The blue ball is the same without boost (SCM, 225 every way). Your ship sits at its current velocity: the farther from the centre cross, the faster you are moving, that way. Near the nose of the egg there is almost no room left to push sideways, which is why speed and range, not strafing, are the defence. The <strong>white ring</strong> is the sideways room you have left at your forward speed (red at the limit). The <strong>TVI</strong> (the circle with wings in the cockpit) is where you are really going; <strong>decoupled</strong> means the ship keeps drifting when you let go. Then pick a lesson: the ship flies it while you watch.</p>
+  <p class="howto"><strong>Start Here.</strong> The Amber Egg is the speed wall: the top speed boost can hold in every direction (520 m/s forward, 394 sideways, 268 back). The Blue Ball is the same without boost: 225 m/s every way. Your ship sits at its current velocity: the farther from the centre cross, the faster you go. The White Ring is your sideways room. Click the first lesson and watch.</p>
   <section class="maneuvers" id="lessons" aria-labelledby="lessons-h">
-        <div class="lessons-head"><h2 id="lessons-h">Lessons</h2><p class="lessons-how">Pick a lesson: the ship flies it while you watch. Touch any flight control to take over.</p></div>
-        <h3>What the wall does to your sideways push</h3>
+        <div class="lessons-head"><h2 id="lessons-h">Lessons</h2><p class="lessons-how">Take them in order. The ship flies each one while you watch; touch any flight control to take over.</p></div>
+        <h3>The Speed Wall: SCM vs Boost</h3>
+        <p class="lessons-how">What each flight mode lets your ship do, from a stop, at its top speed and in a turn.</p>
         <div class="mgrid">
-          <button data-preset="rest">Strafe from a stop<small>394 m/s sideways from a stop: the egg's full width</small></button>
-          <button data-preset="dodge-nose">Strafe at top speed<small>Build up to 520, then strafe sideways: how far do you get in 2 s? (Not a dodge against a chaser: see Flee)</small></button>
-          <button data-preset="dodge-mid">Strafe from mid-egg (300 m/s)<small>Build up to 300, then strafe: about twice the 2 s distance of the nose</small></button>
-          <button data-preset="letoff">Ease off to make room<small>Build up to the nose, then let go of forward and strafe: speed drops to ~435 (in game), the sideways room opens</small></button>
+          <button data-preset="scm-strafe">Strafe From a Stop in SCM<small>No boost, full strafe: 225 m/s sideways, the Blue Ball's radius</small></button>
+          <button data-preset="rest">Strafe From a Stop With Boost<small>Boost and full strafe: 394 m/s sideways, the Amber Egg's side</small></button>
+          <button data-preset="scm-nose">Strafe at SCM Top Speed<small>Forward to 225, then strafe: the speed stays 225, it only turns</small></button>
+          <button data-preset="turn-scm">Turn 90° in SCM<small>Pitch up 90° at 225 m/s: the speed does not change</small></button>
+          <button data-preset="turn-cost">Turn 90° With Boost<small>Pitch up 90° at the nose: speed drops to 394, the egg's side</small></button>
+          <button data-preset="let-go">Let Go of Boost<small>Release everything at the nose: back to 225 m/s in 5.2 s</small></button>
         </div>
-        <h3>Fleeing a chaser as fast as you · it starts 550 m behind at 520 m/s</h3>
+        <h3>At the Nose: What Top Speed Costs</h3>
+        <p class="lessons-how">Boost is big only along your nose: the closer to 520 you fly, the less push is left for anything else.</p>
         <div class="mgrid">
-          <button data-preset="flee-wall">Hold the wall, shallow corkscrew<small>Full forward, half up-stick, one gradual roll held: the trail traces a helix and the range holds</small></button>
-          <button data-preset="flee-tvi">TVI far out, slow roll<small>Roll ~27 °/s: you slow down off the nose and the chaser closes</small></button>
-          <button data-preset="flee-ease">Ease off forward<small>Same corkscrew with forward released: more push, but every m/s you give up is closing speed for the chaser</small></button>
+          <button data-preset="dodge-nose">Strafe at Top Speed<small>Build up to 520, then strafe: about 90 m sideways in 2 s (model)</small></button>
+          <button data-preset="dodge-mid">Strafe From Mid-Egg<small>Build up to 300, then strafe: about twice the nose's 2 s distance (model)</small></button>
+          <button data-preset="letoff">Ease Off to Make Room<small>Release forward at the nose and strafe: speed drops to ~435, room opens</small></button>
+          <button data-preset="flip-burn">Flip and Burn<small>Flip with full pitch, then full throttle: ~300 m/s gone in 1.5 s</small></button>
         </div>
-        <h3>Corkscrews · what rolling does, and doesn't do</h3>
+        <h3>Evading at the Speed Wall</h3>
+        <p class="lessons-how">Speed along your line is the defence and everything off the nose costs it; the chaser here is arithmetic, 520 m/s along your starting line from 550 m back.</p>
         <div class="mgrid">
-          <button data-preset="ck-escape">Escape corkscrew, full up-stick<small>Boost, forward + full up, one gradual roll held: breaks a firing solution faster than the shallow Flee corkscrew but gives up range. The roll aims the push, it is not the dodge</small></button>
-          <button data-preset="ck-shoot">Corkscrew and still shoot back<small>For a target AHEAD: slow roll ~27 °/s keeps the TVI still (not the way to flee)</small></button>
+          <button data-preset="flee-wall">Flee: Hold the Wall<small>Full forward, half up-stick, one gradual roll held: the range holds</small></button>
+          <button data-preset="flee-ease">Flee: Ease Off Forward<small>Same corkscrew with forward released: more push, but the chaser closes</small></button>
+          <button data-preset="flee-tvi">Flee: TVI Far Out<small>Full up-stick, slow roll: you slow off the nose and the chaser closes</small></button>
+          <button data-preset="ck-escape">Escape Corkscrew<small>Full forward and full up, one gradual roll: harder push, less range</small></button>
         </div>
-        <h3>Speed you lose · turning and braking</h3>
+        <h3>Fighting Fundamentals</h3>
+        <p class="lessons-how">Aiming, closing distance and rate fighting come here next; for now, how to corkscrew and still shoot.</p>
         <div class="mgrid">
-          <button data-preset="turn-cost">Turning while boosted costs speed<small>Pitch up 90° at the nose: 520 drops to 394, the egg's side. In SCM it costs nothing</small></button>
-          <button data-preset="flip-burn">Flip and burn<small>Flip with a full pitch, then full throttle: ~300 m/s gone in 1.5 s, about twice as fast as braking</small></button>
-          <button data-preset="let-go">Let go of boost<small>Back to 225 m/s in about 5 s (the spacebrake has not been measured)</small></button>
+          <button data-preset="ck-shoot">Corkscrew While Shooting Ahead<small>For a target ahead: a slow roll keeps the TVI nearly still</small></button>
         </div>
       </section>
   <p class="sr" aria-live="polite" id="live"></p>
@@ -785,79 +792,100 @@ $('pause').onclick = togglePause;
 // and the lowest speed are all measured from there). Each step: [start time s, inputs]; r/rf = roll direction and
 // fraction of full roll rate; p/y = pitch/yaw stick. do: what the ship flies, one line; see: what to look for, with the key
 // number and its label (measured / model / assumed); more: the caveats, sources and test IDs, behind a Details toggle.
-// dodge: show the sideways distance covered in the first 2 s of the maneuver.
-// Sources: fixture = research/gladius-v1-fixture.json (measured); model = this simulator; arithmetic = the chaser range,
-// which is only (chaser speed - your speed along the starting line) x time, with both chaser numbers stated as assumptions.
-// Fleeing is fundamentals, not tricks (Alex, 2026-10-10): speed along your line is what keeps the range, anything off the nose
-// costs that speed, and a sustained gradual corkscrew is the deflection that doesn't depend on how fast thrusters respond
-// (quick strafe taps or "pip wiggling" live off today's near-instant accelerations, which a future flight model with jerk would
-// take away). The Flee lessons share one shallow corkscrew so only forward/TVI differ: half up-stick, one roll of ~60 °/s
-// held (Apprentice_One 2025-05-01: roll "at a gradual rate"; Johnathan Winters 2024-12 / 2025-11: roll is not the dodge).
-// (Until 2026-10-10 these lessons flew irregular side + up strafe taps; until 2026-10-11 the roll reversed every 2.5 s.)
-// A corkscrew is a helix: one roll direction, held (Alex, 2026-10-11). The roll is reversed only to ease a grey-out, never as
-// the pattern; reversing every few seconds folds the trail back on itself instead of tracing a corkscrew.
+// Lessons, in teaching order (Alex, 2026-10-11): first what the speed wall is in SCM and in Boost, then what top speed
+// costs at the nose, then evading at the wall, then fighting fundamentals (Brief C2 adds aiming, closing and rate fighting).
+// Each lesson: result.at = seconds after `go` when the result line shows; result.sim = what the simulator measured;
+// result.game = the in-game value, traceable to research/gladius-v1-fixture.json by test id (or "not measured").
+// dodge: count the sideways distance covered in the first 2 s of the manoeuvre.
+// Number labels: (measured) = fixture; (model) = this simulator; (arithmetic) = the chaser range, which is only
+// (chaser speed - your speed along the starting line) x time, with both chaser numbers named constants in CHASE.
+// Evasion is fundamentals, not tricks (Alex, 2026-10-10): speed along your line keeps the range, anything off the nose
+// costs it, and the deflection is a sustained gradual corkscrew, never side-to-side strafing or strafe taps (those live off
+// today's near-instant thrust response). A corkscrew is a helix: one roll direction held (Alex, 2026-10-11); reverse only
+// to ease a grey-out, never on a timer. The Flee lessons share one shallow corkscrew: half up-stick, one roll of ~60 °/s
+// (Apprentice_One 2025-05-01: roll "at a gradual rate"; Johnathan Winters 2024-12-30 / 2025-11-29: roll is not the dodge).
 const SHALLOW = (f) => [[0, { f, l: 0, u: .5, boost: true, r: 1, rf: .25 }]];
+const SCM_PITCH90 = 90 / gladius.scm.rotationDps.pitch;   // 1.32 s at the measured 68 °/s (fixture r10_turn90_scm flew 1.33 s)
 const PRESETS = {
-  rest:         { title: 'Strafe from a stop', result: { at: 6, sim: () => `${Math.round(Math.abs(S.v[1]))} m/s sideways`, game: '394 m/s' }, start: 'rest', go: 0,
-                  do: 'Boost and strafe sideways from a standstill.',
-                  see: 'The ship slides straight out to 394 m/s sideways (measured): the egg\'s width at zero forward speed.',
-                  more: 'The egg is a little wider than that, about 410 m/s, with 10-25 % forward added (measured: sw_f10_l100, sw_f25_l100).',
+  // ── The Speed Wall: SCM vs Boost ──
+  'scm-strafe': { title: 'Strafe From a Stop in SCM', result: { at: 5, sim: () => `${Math.round(Math.abs(S.v[1]))} m/s sideways`, game: '226 m/s (r1_scm_right)' }, start: 'rest', go: 0,
+                  do: 'Stay in SCM (no boost) and hold a full sideways strafe from a standstill.',
+                  see: 'The ship slides out to 225 m/s sideways (measured) and stops gaining. The Blue Ball is the same size every way: in SCM you get 225 m/s forward, back, up or sideways.',
+                  more: 'Fixture r1_scm_right: 226 m/s plateau at 9.95 G. SCM thrust is not even: 13.7 G forward, 9.95 sideways, 10.0 up, 4.97 down, 4.24 back (measured, rounds 1 and 4). The radius is the same in every direction; only how fast you reach it differs.',
+                  steps: [[0, { f: 0, l: 1, u: 0, boost: false }]] },
+  rest:         { title: 'Strafe From a Stop With Boost', result: { at: 6, sim: () => `${Math.round(Math.abs(S.v[1]))} m/s sideways`, game: '394 m/s (hand_lat, r1_boost_up_left)' }, start: 'rest', go: 0,
+                  do: 'Hold boost and a full sideways strafe from a standstill.',
+                  see: 'The ship slides out to 394 m/s sideways (measured): the Amber Egg\'s width at zero forward speed, 169 m/s more than SCM allows (arithmetic).',
+                  more: 'Fixture hand_lat and r1_boost_up_left: 394 m/s at 12.9 G. The egg is a little wider, about 410 m/s, with 10-25 % forward added (sw_f10_l100, sw_f25_l100). Boost drains the tank at 5 %/s (r7_tank_cycle), so a full tank buys 20 s of this.',
                   steps: [[0, { f: 0, l: 1, u: 0, boost: true }]] },
-  'dodge-nose': { title: 'Strafe at top speed', result: { at: 2, sim: () => `${Math.round(dodge.dist)} m in 2 s`, game: 'side push 3–6 G' }, start: 'rest', go: 5.5, dodge: true,
-                  do: 'Boost to the 520 m/s nose, then strafe sideways.',
-                  see: 'Only ~90 m sideways in 2 s (model): at the tip of the egg the side push is ~3-6 G (measured, fixture wall traces).',
-                  more: 'Compare the mid-egg strafe: about twice the distance. The 2 s are counted from the moment the strafe starts. Don\'t use this to dodge a chaser in weapons range: a side-to-side strafe here is a weak push along the Gladius\'s widest part (17 m from behind), so your ship stays flat and easy to hit (Alex, 2026-10-10). The Flee lessons show what to do instead.',
-                  steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [5.5, { f: 1, l: 1, u: 0, boost: true }]] },
-  'dodge-mid':  { title: 'Strafe from mid-egg', result: { at: 2, sim: () => `${Math.round(dodge.dist)} m in 2 s`, game: 'one test: side push ~12 G, 8.4 G after 1.7 s' }, start: 'rest', go: 1.65, dodge: true,
-                  do: 'Boost to 300 m/s, then let go of forward and strafe.',
-                  see: '~170 m sideways in 2 s (model), about twice the nose: in the fat middle of the egg the side push is ~12 G, falling to ~8.4 G over 1.7 s (measured, one test).',
-                  more: 'The in-game numbers come from one test, r7_dodge_mid_boost; the 2 s distance itself is the model\'s, not measured.',
-                  steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [1.65, { f: 0, l: 1, u: 0, boost: true }]] },
-  letoff:       { title: 'Ease off to make room', result: { at: 5, sim: () => `lowest ${Math.round(run.min)} m/s`, game: 'lowest ~435 m/s' }, start: 'rest', go: 6,
-                  do: 'Boost to the nose, then release forward and hold a strafe.',
-                  see: 'Speed falls from 519 to ~435 m/s in game (fixture) and the sideways ring opens as the ship drops back into the egg.',
-                  more: 'This model dips to ~425 m/s and under-pushes sideways here; it is one of the misses listed in docs/physics-fit.md.',
-                  steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [6, { f: 0, l: 1, u: 0, boost: true }]] },
-  'ck-escape':  { title: 'Escape corkscrew, full up-stick', result: { at: 10, sim: () => `${Math.round(len(S.v))} m/s`, game: '513 m/s, ~6 G side load' }, start: 'rest', go: 0,
-                  do: 'Boost, forward + up, hold one gradual roll of ~60 °/s so the trail traces a helix (Apprentice_One\'s escape from a tail, 2025-05).',
-                  see: 'The roll only turns which way your up-push points; it is not the dodge. The violet thread behind the ship is your real path, widened and squeezed lengthwise so the helix shows. You keep ~513 m/s (measured), the launch pulls ~21 G and greys the screen at about 2 s (measured). No chaser is scored here; the Flee lessons show the range.',
-                  more: 'Keep the roll going one way: a corkscrew is a helix, and reversing every few seconds folds the trail back on itself. He reverses the roll only as he nears blackout. Johnathan Winters: "roll does nothing for you" (2024-12, 2025-11): the roll only points the push. Full up-stick costs speed along your line: against a chaser that holds 520 m/s it gives up ~190 m of range in 10 s (arithmetic on the simulated speed); the Flee lessons show the shallower version that keeps the range. Up is the axis you tolerate most G in. Not measured, and not modelled here: the game\'s lead rule, projectile speed, whether shots inherit the shooter\'s speed, and whether any of this throws off a real shooter. Test: r9_vis_bst_f100_up_r50.',
-                  steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: .25 }]] },
-  'ck-shoot':   { title: 'Corkscrew and shoot back (target ahead)', result: { at: 10, sim: () => `TVI ${Math.round(run.tvi)}° off the nose`, game: 'not measured at this roll rate (model: rule of thumb ~13°)' }, start: 'rest', go: 0,
-                  do: 'Boost, forward + up, with a slow roll of ~27 °/s. For a target AHEAD of you, not for fleeing.',
-                  see: 'The TVI swings out and settles ~10-15° off the nose after ~10 s (model; the research rule of thumb says ~13°), so your target doesn\'t spin and you can shoot back.',
-                  more: 'Don\'t use it to flee: the velocity swings far off the nose, so you give up speed along your line and a chaser as fast as you closes (the Flee: TVI far out lesson shows the range). Roll 27 °/s is not measured. Corkscrews measured at the nose ran 514–518 m/s (fixture).',
-                  steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: 27 / 240 }]] },
-  'turn-cost':  { title: 'Turning while boosted costs speed', result: { at: 5, sim: () => `${Math.round(len(S.v))} m/s`, game: '394 m/s; in SCM a turn costs nothing' }, start: 'rest', go: 6,
-                  do: 'Boost to the nose, then pitch up 90° (1.1 s) with boost held and forward released.',
-                  see: '520 → 394 m/s in about 4 s (measured). Your velocity stays put while the nose swings, so you are suddenly sideways to your own egg and the IFCS pulls you back to its edge. In SCM the egg is a ball, so the same turn costs nothing (measured).',
-                  more: 'The egg turns with the nose; the 520 end only ever points where the ship does. With the throttle held through the turn the speed dips to ~441 and climbs back to ~483 as the forward thrust drags the velocity onto the new nose (measured once, r10_turn90_boost_fwd; the model misses it). Tests: r10_turn90_boost, r10_turn90_scm.',
+  'scm-nose':   { title: 'Strafe at SCM Top Speed', result: { at: 2, sim: () => `${Math.round(dodge.dist)} m sideways in 2 s · ${Math.round(len(S.v))} m/s`, game: 'speed 225 throughout (dd_wall_fwdlat)' }, start: 'rest', go: 3, dodge: true,
+                  do: 'In SCM, hold full forward to 225 m/s, then add a full sideways strafe with forward still held.',
+                  see: 'Total speed stays at 225 (measured): the SCM limit is a ball, so the strafe swings your velocity around it instead of adding to it. Compare the boosted nose, where the side push is only 3-6 G.',
+                  more: 'Fixture dd_wall_fwdlat: 225-226 m/s for 6 s with forward and strafe held; the G meter hunted between 1 and 5 G, which the model does not reproduce (docs/physics-fit.md). With forward released instead (dd_wall_lat) the side push holds 9.9 G for about a second, then the retros bleed forward speed at 4.2 G.',
+                  steps: [[0, { f: 1, l: 0, u: 0, boost: false }], [3, { f: 1, l: 1, u: 0, boost: false }]] },
+  'turn-scm':   { title: 'Turn 90° in SCM', result: { at: 5, sim: () => `${Math.round(len(S.v))} m/s`, game: '224 m/s (r10_turn90_scm)' }, start: 'rest', go: 3,
+                  do: 'In SCM, hold full forward to 225 m/s, release it, then pitch up 90° (1.3 s).',
+                  see: 'Your speed stays at 225 m/s through the turn (measured). The Blue Ball is round, so your velocity is inside it whichever way the nose points: nothing pulls you back.',
+                  more: 'Fixture r10_turn90_scm: 224-226 m/s before, during and after a 1.33 s full-pitch turn (SCM pitch 68 °/s, measured). Decoupled, the velocity keeps its direction while the nose swings: after the turn you travel at 225 m/s sideways to the nose, with full thrust left to point it anywhere.',
+                  steps: [[0, { f: 1, l: 0, u: 0, boost: false }], [3, { f: 0, l: 0, u: 0, boost: false, p: 1 }], [3 + SCM_PITCH90, { f: 0, l: 0, u: 0, boost: false, p: 0 }]] },
+  'turn-cost':  { title: 'Turn 90° With Boost', result: { at: 5, sim: () => `${Math.round(len(S.v))} m/s`, game: '394 m/s (r10_turn90_boost)' }, start: 'rest', go: 6,
+                  do: 'Boost to the nose, release forward, then pitch up 90° (1.1 s) with boost held.',
+                  see: '510 → 394 m/s in about 5 s (measured). The egg turns with the nose, so after the turn your velocity sits outside its side and the IFCS pulls you back onto it.',
+                  more: 'Fixture r10_turn90_boost: settles at 394, the limaçon\'s side; r10_turn90_scm is the SCM contrast. With forward held through the turn the speed dips to ~441 and climbs back to ~483 as the forward thrust drags the velocity onto the new nose (measured once, r10_turn90_boost_fwd; the model misses it, docs/physics-fit.md). Boosted pitch is 81.6 °/s (measured).',
                   steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [6, { f: 0, l: 0, u: 0, boost: true, p: 1 }], [7.1, { f: 0, l: 0, u: 0, boost: true, p: 0 }]] },
-  'flip-burn':  { title: 'Flip and burn', result: { at: 5, sim: () => `lowest ${Math.round(run.min)} m/s`, game: 'through zero in about 4 s, then speeding up the other way' }, start: 'rest', go: 4,
-                  do: 'Boost to the nose, flip with a full pitch (2.2 s), then full throttle with boost.',
-                  see: 'The forward thrusters (about 20 G) take ~300 m/s off in 1.5 s and carry you through zero in about 4 s from 511 m/s (measured once). Braking with the retros alone (4-6 G) would take about 8 s and twice the distance (model).',
-                  more: 'The fastest 180° is pure pitch: a diagonal stick is scaled back and turns slower. The spacebrake itself is not measured (round 12 re-flies it). The flip wins above roughly 160 m/s; below that braking is quicker and keeps your nose on the target (model). Cut the throttle at zero: continuing the 20 G burn greyed the HUD to 25 % within 2 s (r10_flip_and_burn). Test: r10_flip_and_burn.',
-                  steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [4, { f: 0, l: 0, u: 0, boost: true, p: 1 }], [6.2, { f: 1, l: 0, u: 0, boost: true, p: 0 }]] },
-  'let-go':     { title: 'Let go of boost', result: { at: 7, sim: () => (run.rel == null ? 'still above 225 m/s' : `back to 225 m/s in ${run.rel.toFixed(1)} s`), game: '5.2 s from the nose' }, start: 'rest', go: 6,
-                  do: 'Boost to the nose, then let go of everything.',
-                  see: 'The IFCS bleeds you back to the SCM ball: 225 m/s after 5.2 s (measured). ~12 G at first, then a steady 4.26 G (the retros) from 300 m/s.',
-                  more: 'What the spacebrake does here has not been measured. Hold a strafe while you slow and it takes ~7.6 s. Test: r6_release_all.',
+  'let-go':     { title: 'Let Go of Boost', result: { at: 7, sim: () => (run.rel == null ? 'still above 225 m/s' : `back to 225 m/s in ${run.rel.toFixed(1)} s`), game: '5.2 s from the nose (r6_release_all)' }, start: 'rest', go: 6,
+                  do: 'Boost to the nose, then let go of everything, boost included.',
+                  see: 'The IFCS bleeds you back to the Blue Ball: 225 m/s after 5.2 s (measured), up to ~19 G on the meter at first, then a steady 4.26 G from 300 m/s down.',
+                  more: 'Fixture r6_release_all; the 18.8 G peak is boostRelease. The 4.26 G floor matches the SCM retro rating (4.24 G, r1_scm_back) and shows in every r6 release. A strafe held while you slow stretches it to ~7.6 s (r6_release_fwd_lat). What the spacebrake does is not measured: round 12 re-flies it.',
                   steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [6, { f: 0, l: 0, u: 0, boost: false }]] },
-  'flee-wall':  { title: 'Flee: hold the wall, shallow corkscrew', chase: true, result: { at: 10, sim: () => `chaser still ${Math.round(chase.range)} m back after 10 s (started at 550)`, game: 'not measured (needs a two-pilot chase test)' }, start: { vx: 520, boost: true }, go: 0,
-                  do: 'Full forward on the wall, half up-stick, hold one gradual roll of ~60 °/s so the trail traces a helix. No side-to-side strafing, no roll flipping.',
-                  see: 'The range is the point: your speed stays on the wall, so a chaser as fast as you gains only ~10 m in 10 s (arithmetic on the simulated speed). The violet thread behind the ship is your real path, widened and squeezed lengthwise: at true scale the helix is about 30 m wide and 3 km per turn. Whether the helix throws off a real shooter is not modelled here: that needs a two-pilot test.',
-                  more: 'Keep the roll one way: reverse it only to ease a grey-out (Apprentice_One 2025-05-01), never as the pattern (Alex, 2026-10-11). Fundamentals, not tricks (Alex, 2026-10-10): range and speed are the defence (Apprentice_One 2025-05-01: "if you fly totally straight I can fire at you from kilometres away and still hit you", and a faster ship catches you whatever you fly). Everything off the nose costs speed along your line, so the half stick is the trade: full up-stick (the escape corkscrew) pushes harder but gives up ~190 m in 10 s (arithmetic). Seen from behind the Gladius is 17 m wide and 5.5 m tall, so a pursuer in weapons range holds a flat side-to-side strafe easily, and quick strafe taps live off today\'s near-instant thrust response, which a future flight model with jerk would take away (Alex, 2026-10-10; not measured). Roll is for aiming the push, not the dodge (Johnathan Winters 2024-12-30, 2025-11-29). Side load here ~3 G (model), far from G-LOC. The chaser is arithmetic only: it holds 520 m/s along your starting line (the Gladius\'s boosted wall, measured) and starts 550 m back (assumed, in the 500-600 m gun range); the range changes by your speed along that line, nothing more. The page does not model its aim, the lead pip or projectile speed; docs/aim-model.md lists what a two-pilot test would have to measure first. In game: not measured.',
+  // ── At the Nose: What Top Speed Costs ──
+  'dodge-nose': { title: 'Strafe at Top Speed', result: { at: 2, sim: () => `${Math.round(dodge.dist)} m in 2 s`, game: 'side push 3-6 G at 515-519 m/s (dd_wall_fwdlat_boost)' }, start: 'rest', go: 5.5, dodge: true,
+                  do: 'Boost to the 520 m/s nose with forward held, then add a full sideways strafe.',
+                  see: 'Only ~90 m sideways in 2 s (model): at the tip of the egg the side push is 3-6 G (measured), because your velocity has nowhere left to go but back inside.',
+                  more: 'Fixture dd_wall_fwdlat_boost: 515-519 m/s held for 7 s, G meter 5.8 at the start, ~3 G from 2 s, 1.5 G by 7 s. This is physics, not a dodge: the push slides you along your ship\'s widest axis (17 m from behind, 5.5 m tall) at a few G. Evading at the Speed Wall shows what to do instead.',
+                  steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [5.5, { f: 1, l: 1, u: 0, boost: true }]] },
+  'dodge-mid':  { title: 'Strafe From Mid-Egg', result: { at: 2, sim: () => `${Math.round(dodge.dist)} m in 2 s`, game: 'not in the fixture: one raw run (r7_dodge_mid_boost) read ~12 G easing to 8.4 G' }, start: 'rest', go: 1.65, dodge: true,
+                  do: 'Boost to 300 m/s, release forward, then hold a full sideways strafe.',
+                  see: '~165 m sideways in 2 s (model; the one raw run implies ~200), about twice the nose: in the fat middle of the egg the side push starts near 12 G (one raw test).',
+                  more: 'The 2 s distance is the model\'s. The in-game push comes from one raw run, r7_dodge_mid_boost (~12 G easing to 8.4 G after 1.7 s, research/raw/2026-10-08), not yet in the fixture. The egg is widest at 100-150 m/s forward: 411 m/s of sideways room (fixture lateralRoom).',
+                  steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [1.65, { f: 0, l: 1, u: 0, boost: true }]] },
+  letoff:       { title: 'Ease Off to Make Room', result: { at: 5, sim: () => `lowest ${Math.round(run.min)} m/s`, game: 'lowest 435 m/s (dd_wall_lat_boost)' }, start: 'rest', go: 6,
+                  do: 'Boost to the nose, then release forward and hold a full sideways strafe, boost still held.',
+                  see: 'Speed falls from 519 to ~435 m/s (measured) and the White Ring opens as the ship drops back into the egg. The sideways room you buy costs forward speed.',
+                  more: 'Fixture dd_wall_lat_boost: 519 → 435 m/s, side G 6.3 rising to 7.6. The model dips to ~425 and reads 1.5-2.6 G low (docs/physics-fit.md). With forward released the IFCS bleeds forward speed on its own (a fitted 5.15 G in the model); you are not braking, the egg is.',
+                  steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [6, { f: 0, l: 1, u: 0, boost: true }]] },
+  'flip-burn':  { title: 'Flip and Burn', result: { at: 5, sim: () => `lowest ${Math.round(run.min)} m/s`, game: 'through zero about 4 s after the flip (r10_flip_and_burn)' }, start: 'rest', go: 4,
+                  do: 'Boost to the nose, flip with a full pitch (2.2 s), then full forward with boost held.',
+                  see: 'The main thrusters (about 20 G) take ~300 m/s off in 1.5 s and carry you through zero about 4 s after the flip starts (measured once). The boosted retros alone (5.96 G) would need about 9 s (arithmetic).',
+                  more: 'Fixture r10_flip_and_burn: 507 m/s at the flip, 63 m/s at 8 s, 393 the other way at 11 s. The fastest 180° is pure pitch: a diagonal stick is scaled to unit length and turns slower (r11_rot_pitchyaw_fwd). Cut the throttle at zero: the burn greys the HUD (raw HUD trace, not in the fixture). The spacebrake is not measured. The flip wins above roughly 160 m/s (model).',
+                  steps: [[0, { f: 1, l: 0, u: 0, boost: true }], [4, { f: 0, l: 0, u: 0, boost: true, p: 1 }], [6.2, { f: 1, l: 0, u: 0, boost: true, p: 0 }]] },
+  // ── Evading at the Speed Wall ──
+  'flee-wall':  { title: 'Flee: Hold the Wall', chase: true, result: { at: 10, sim: () => `chaser still ${Math.round(chase.range)} m back after 10 s (started at 550)`, game: 'not measured (needs a two-pilot chase test)' }, start: { vx: 520, boost: true }, go: 0,
+                  do: 'Full forward on the wall, half up-stick, boost held, and one gradual roll of ~60 °/s held in one direction.',
+                  see: 'Your speed stays on the wall, so a chaser as fast as you gains only ~10 m in 10 s (arithmetic on simulated speed). The Violet Thread is your path: a helix of ~27 m radius, 3 km per turn.',
+                  more: 'Apprentice_One\'s escape drill (2025-05-01): hold the TVI offset and roll at a gradual rate, reversing only to ease a grey-out. Roll aims the push; it is not the dodge (Johnathan Winters 2024-12-30, 2025-11-29). Side load ~3 G (model). CHASE: 520 m/s along your starting line (the boosted wall, measured) from 550 m (assumed, inside the 500-600 m gun range pilots report). Whether the helix throws off a shooter needs a two-pilot test.',
                   steps: SHALLOW(1) },
-  'flee-tvi':   { title: 'Flee: TVI far out, slow roll', chase: true, result: { at: 10, sim: () => `chaser closed to ${Math.round(chase.range)} m after 10 s (started at 550) · TVI ${Math.round(run.tvi)}°`, game: 'not measured (needs a two-pilot chase test)' }, start: { vx: 520, boost: true }, go: 0,
-                  do: 'Forward + up, roll ~27 °/s: the coaching rule "put the TVI farther out and roll slowly".',
-                  see: 'The velocity swings off the nose and your speed along your line drops, so a chaser as fast as you closes: watch the range (arithmetic on the simulated speed).',
-                  more: 'It only pays against a slower chaser: the range closes at the speed you give up along your line. Whether the wider helix throws off a shooter is not modelled here. In game: not measured (needs a two-pilot chase test).',
-                  steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: 27 / 240 }]] },
-  'flee-ease':  { title: 'Flee: ease off forward', chase: true, result: { at: 10, sim: () => `chaser closed to ${Math.round(chase.range)} m after 10 s (started at 550)`, game: 'not measured; in game letting go of forward drops you to ~435 m/s (fixture)' }, start: { vx: 520, boost: true }, go: 0,
-                  do: 'Release forward, keep the same shallow corkscrew: the coaching rule "use less forward thrust".',
-                  see: 'You drop back into the fat part of the egg, where the strafe push is stronger (measured ~8-12 G below 400 m/s, round 8, noisy), but every m/s you give up is closing speed for a chaser as fast as you (arithmetic).',
-                  more: 'G-LOC caps what you can hold at ~8 G up. Worth it against a slower chaser, or to drag the chaser toward your wingmen. In game: not measured; letting go of forward drops you to ~435 m/s (fixture).',
+  'flee-ease':  { title: 'Flee: Ease Off Forward', chase: true, result: { at: 10, sim: () => `chaser closed to ${Math.round(chase.range)} m after 10 s (started at 550)`, game: 'not measured; letting go of forward at the nose drops you to ~435 m/s (dd_wall_lat_boost)' }, start: { vx: 520, boost: true }, go: 0,
+                  do: 'Release forward; keep boost, the half up-stick and the same gradual one-way roll.',
+                  see: 'You drop back into the fat part of the egg, where the push is stronger (see Strafe From Mid-Egg), but every m/s you give up is closing speed for the chaser (arithmetic).',
+                  more: 'Worth it against a slower chaser, or to drag a chaser toward your wingmen. G-LOC caps what you can hold at ~8 G up (model, fitted to glocTrials). In game, letting go of forward at the nose drops you to ~435 m/s (dd_wall_lat_boost); the chase itself is not measured.',
                   steps: SHALLOW(0) },
+  'flee-tvi':   { title: 'Flee: TVI Far Out', chase: true, result: { at: 10, sim: () => `chaser closed to ${Math.round(chase.range)} m after 10 s (started at 550) · TVI ${Math.round(run.tvi)}°`, game: 'not measured (needs a two-pilot chase test)' }, start: { vx: 520, boost: true }, go: 0,
+                  do: 'Forward and full up, boost held, with a slow roll of ~27 °/s: the coaching rule "TVI farther out, roll slowly".',
+                  see: 'The velocity swings far off the nose, your speed along your line drops, and a chaser as fast as you closes: watch Chaser Range (arithmetic on the simulated speed).',
+                  more: 'It only pays against a slower chaser: the range closes at the speed you give up along your line. Roll 27 °/s is not measured; corkscrews measured at the nose ran 514-518 m/s (fixture corkscrewAtWall). Whether a wider helix throws off a shooter is not modelled.',
+                  steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: 27 / 240 }]] },
+  'ck-escape':  { title: 'Escape Corkscrew', result: { at: 10, sim: () => `${Math.round(len(S.v))} m/s`, game: '513 m/s (r10_ref_escape, at a faster roll; 60 °/s is not measured)' }, start: 'rest', go: 0,
+                  do: 'Boost, full forward and full up, one gradual roll of ~60 °/s held one way: Apprentice_One\'s escape from a tail (2025-05-01).',
+                  see: 'You keep ~513 m/s and the launch pulls ~20 G, greying the screen at about 2 s (measured at faster rolls). Full up-stick gives up ~190 m of range in 10 s against a 520 m/s chaser (arithmetic).',
+                  more: 'Fixture r9_vis_bst_f100_up_r50 (roll 120 °/s): 19.8 G peak, HUD grey at 2.2 s; corkscrewAtWall (240 °/s): 514 m/s at 5.4 G side. The 60 °/s roll flown here is not measured. Up is the axis you tolerate most G in (glocTrials). Reverse the roll only near blackout; reversing on a timer folds the helix back on itself. Not modelled: the lead pip, projectile speed, or whether any of this throws off a shooter.',
+                  steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: .25 }]] },
+  // ── Fighting Fundamentals (Brief C2 adds aiming, closing distance and rate fighting) ──
+  'ck-shoot':   { title: 'Corkscrew While Shooting Ahead', result: { at: 10, sim: () => `TVI ${Math.round(run.tvi)}° off the nose`, game: 'not measured at this roll rate (model: rule of thumb ~13° at 100° FOV)' }, start: 'rest', go: 0,
+                  do: 'Boost, forward and full up, with a slow roll of ~27 °/s. For a target ahead of you, not for fleeing.',
+                  see: 'The TVI swings out and settles 10-15° off the nose after ~10 s (model; the research rule of thumb says ~13°), so your target does not spin across the screen.',
+                  more: 'Not for fleeing: the velocity swings far off the nose and you give up speed along your line (Flee: TVI Far Out shows the range). Roll 27 °/s is not measured; corkscrews measured at the nose ran 514-518 m/s (corkscrewAtWall).',
+                  steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: 27 / 240 }]] },
 };
 // Corkscrew helix radius a/ω² (docs/RESEARCH.md), with a the current G and ω the roll rate the lesson is flying.
 function spiralR() { const w = ctl.rollFrac * gladius.boost.rotationDps.roll * Math.PI / 180; return w > 0.05 ? gSmooth * 9.80665 / (w * w) : 0; }
