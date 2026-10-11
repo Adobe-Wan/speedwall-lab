@@ -14,7 +14,7 @@ const profile = flightProfileSchema.parse(profileFromFixture(fixtureSchema.parse
 delete profile.provenance; // documented in the repo; not needed by the page
 const r = await build({
   stdin: {
-    contents: `export { step, derive, restState, capped, boostActive, eggRadius, eggRadiusAlong, lateralRoom, DT, G0, angularVelocity, stickScaled, restPilot, stepPilot, vision } from "./packages/core/src/index.ts";
+    contents: `export { step, derive, restState, capped, boostActive, eggRadius, eggRadiusAlong, lateralRoom, DT, G0, angularVelocity, stickScaled, restPilot, stepPilot, vision, WEAPON, CLOSING_SIGN, closingSpeed, timeOfFlight, leadDistance, timeToRange, timeToNose, noseCrossoverDeg, orbitLimit, orbitThrottle, outrateRadius, orbitSim } from "./packages/core/src/index.ts";
 export const gladius = ${JSON.stringify(profile)};`,
     resolveDir: ".", loader: "ts",
   },
