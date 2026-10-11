@@ -59,7 +59,8 @@ header { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; pad
 h1 { margin: 0; font-size: 1.3rem; font-weight: 700; letter-spacing: -.01em; text-wrap: balance; }
 .sub { color: var(--muted); font-size: .84rem; }
 .hdr-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.chip { font: 600 .66rem/1 var(--font-data); letter-spacing: .08em; text-transform: uppercase; padding: 5px 8px; border-radius: 999px; border: 1px solid var(--line-2); color: var(--muted); white-space: nowrap; }
+/* Labels are written in Title Case and shown as written: no text-transform anywhere. */
+.chip { font: 600 .7rem/1 var(--font-ui); letter-spacing: .01em; padding: 4px 8px; border-radius: 999px; border: 1px solid var(--line-2); color: var(--muted); white-space: nowrap; }
 .chip.proto { color: var(--boost); border-color: rgba(242,163,58,.35); background: rgba(242,163,58,.08); }
 .chip.on-boost { color: var(--bg); background: var(--boost); border-color: var(--boost); }
 .chip.on-scm { color: var(--bg); background: var(--scm); border-color: var(--scm); }
@@ -93,8 +94,8 @@ button.small { padding: 4px 10px; }
 .vtitle, .vtools, .caption, .inset { z-index: 2; }
 .view canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
 .view .overlay { position: absolute; inset: 0; pointer-events: none; }
-.vtitle { position: absolute; left: 10px; top: 10px; display: inline-flex; align-items: center; gap: 7px; font: 600 .66rem var(--font-data); letter-spacing: .1em; text-transform: uppercase; color: var(--fg-2);
-  padding: 5px 9px; border-radius: 999px; background: rgba(7,11,18,.6); border: 1px solid var(--line); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.vtitle { position: absolute; left: 12px; top: 12px; display: inline-flex; align-items: center; gap: 8px; font: 600 .72rem var(--font-ui); letter-spacing: .01em; color: var(--fg-2);
+  padding: 4px 10px; border-radius: 999px; background: rgba(7,11,18,.6); border: 1px solid var(--line); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
 .vtitle::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--boost); box-shadow: 0 0 8px var(--boost); }
 #v-pilot .vtitle::before { background: var(--tvi); box-shadow: 0 0 8px var(--tvi); }
 .vtools { position: absolute; right: 10px; top: 8px; display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; pointer-events: auto; max-width: 80%; }
@@ -106,7 +107,7 @@ button.small { padding: 4px 10px; }
 .cap-lesson { display: grid; gap: 4px; margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--line); font-size: .84rem; line-height: 1.42; }
 .cap-lesson:empty { display: none; }
 .cap-lesson .do, .cap-lesson .see, .lesson-note .do, .lesson-note .see { display: block; }
-.cap-lesson b, .lesson-note b, details.more-d summary { font: 600 .62rem var(--font-data); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-right: 6px; }
+.cap-lesson b, .lesson-note b, details.more-d summary { font: 600 .7rem var(--font-ui); letter-spacing: .01em; color: var(--muted); margin-right: 8px; }
 .cap-lesson .see b, .lesson-note .see b { color: var(--tvi); }
 .cap-lesson .see, .lesson-note .see { color: var(--tvi); }
 .cap-dodge { font-weight: 700; color: var(--fg); }
@@ -125,7 +126,7 @@ details.more-d > span { display: block; color: var(--fg-2); font-size: .8rem; li
 .lbl { position: absolute; transform: translate(-50%, -50%); font: 600 .68rem var(--font-data); letter-spacing: .02em; white-space: nowrap; color: var(--muted); text-shadow: 0 0 4px #05080d, 0 1px 2px #05080d; }
 /* text labels sit on a small dark pill so they stay readable over the egg's rings and rim (the TVI icon has no text) */
 .lbl:not(:empty):not(:has(svg)) { padding: 2px 7px; border-radius: 999px; background: rgba(5,8,13,.62); }
-.lbl.boost { color: var(--boost); } .lbl.scm { color: var(--scm); } .lbl.tvi { color: var(--tvi); } .lbl.room { color: var(--fg); } .lbl.path { color: #c4a8ff; }
+.lbl.boost { color: var(--boost); } .lbl.scm { color: var(--scm); } .lbl.tvi { color: var(--tvi); } .lbl.room { color: var(--fg); }
 .view canvas.inset { position: absolute; inset: auto; left: 10px; bottom: 36px; width: 150px; height: 150px; touch-action: auto; border: 1px solid var(--line-2); border-radius: var(--r-md); background: rgba(7,11,18,.8); }
 #slice-big { position: absolute; inset: 0; width: 100%; height: 100%; }
 
@@ -136,38 +137,47 @@ details.more-d > span { display: block; color: var(--fg-2); font-size: .8rem; li
 .legend .lg-egg::before { background: var(--boost); box-shadow: 0 0 6px rgba(242,163,58,.6); } .legend .lg-scm::before { background: var(--scm); box-shadow: 0 0 6px rgba(90,169,230,.6); }
 .legend .lg-ring::before { border: 1.5px solid var(--fg); background: none; }
 .legend .lg-tvi::before { border: 1.5px solid var(--tvi); background: none; }
-.legend .lg-path::before { background: #c4a8ff; box-shadow: 0 0 6px rgba(196,168,255,.6); }
+.legend .lg-path::before { background: #b89cf5; box-shadow: 0 0 6px rgba(184,156,245,.5); }
+.legend b { font-weight: 600; color: var(--fg); margin-right: 4px; }
 
-/* ── readouts ── */
-.readouts { display: grid; grid-template-columns: repeat(auto-fit, minmax(108px, 1fr)); gap: 8px; }
-.ro { position: relative; background: linear-gradient(180deg, rgba(24,35,53,.7), rgba(15,22,34,.7)); border: 1px solid var(--line); border-radius: var(--r-md); padding: 9px 11px 10px; min-width: 0; box-shadow: var(--shadow); }
-.ro[title] { cursor: help; }
-.ro b { display: block; font: 600 .6rem var(--font-data); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
-.ro > span:not(.chip) { white-space: nowrap; font: 600 1.2rem/1.2 var(--font-data); font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
-.ro .chip { display: inline-block; margin-top: 4px; }
-.ro.key { border-color: rgba(126,240,200,.45); background: linear-gradient(180deg, rgba(126,240,200,.12), rgba(18,30,44,.8) 70%); box-shadow: 0 0 0 1px rgba(126,240,200,.08), 0 12px 30px -14px rgba(126,240,200,.35); }
-.ro.key b { color: var(--tvi); }
-.ro.key > span:not(.chip) { font-size: 1.6rem; }
-.ro small { color: var(--muted); font-size: .7rem; margin-left: 3px; }
-.ro small.ro-sub { display: block; margin: 3px 0 0; font: 500 .72rem/1.35 var(--font-data); font-variant-numeric: tabular-nums; white-space: normal; }
-.ro small.ro-sub .warn { color: var(--warn); }
-.tank { position: relative; height: 5px; background: rgba(140,165,205,.12); border-radius: 3px; margin-top: 7px; overflow: hidden; }
+/* ── vitals and readouts ──
+   The Vitals strip sits directly under the views, inside .stage, so it is on screen whenever the views are: in flow on
+   desktops (the views never fill the viewport), pinned with the sticky stage on phones. Numbers sit in fixed-width,
+   tabular slots so a 60 Hz update never reflows the tile. */
+.vitals { display: grid; grid-template-columns: repeat(auto-fit, minmax(148px, 1fr)); gap: 8px; margin-top: 12px; }
+.readouts { display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); gap: 8px; }
+.vt, .ro { position: relative; background: linear-gradient(180deg, rgba(24,35,53,.7), rgba(15,22,34,.7)); border: 1px solid var(--line); border-radius: var(--r-md); padding: 8px 12px; min-width: 0; box-shadow: var(--shadow); }
+.vt[title], .ro[title] { cursor: help; }
+.vt b, .ro b { display: block; font: 600 .7rem/1.3 var(--font-ui); letter-spacing: .01em; color: var(--muted); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vt .num, .ro .num { display: inline-block; min-width: 3ch; text-align: right; white-space: nowrap; font: 600 1.2rem/1.2 var(--font-data); font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+.vt .num { font-size: 1.35rem; }
+.vt .chip, .ro .chip { display: inline-block; margin-top: 4px; }
+.vt.key { border-color: rgba(126,240,200,.45); background: linear-gradient(180deg, rgba(126,240,200,.12), rgba(18,30,44,.8) 70%); box-shadow: 0 0 0 1px rgba(126,240,200,.08), 0 12px 30px -14px rgba(126,240,200,.35); }
+.vt.key b { color: var(--tvi); }
+.vt.key .num { font-size: 1.65rem; }
+.vt small, .ro small { color: var(--muted); font-size: .72rem; margin-left: 4px; }
+.vt small.vt-sub, .ro small.ro-sub { display: block; margin: 4px 0 0; min-height: 1.4em; font: 500 .72rem/1.4 var(--font-ui); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tank { position: relative; height: 4px; background: rgba(140,165,205,.12); border-radius: 2px; margin-top: 8px; overflow: hidden; }
 .tank::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 25%; background: rgba(255,106,85,.3); }
-.tank i { position: relative; display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #d9862a, var(--boost)); border-radius: 3px; }
+.tank i { position: relative; display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #d9862a, var(--boost)); border-radius: 2px; }
 .tank i.locked { background: var(--warn); }
 #r-gloc.warn { color: var(--warn, #ff6a55); }
-/* dodge room: left/right bar */
-.roombar { position: relative; height: 6px; background: rgba(140,165,205,.12); border-radius: 3px; margin-top: 7px; }
-.roombar i { position: absolute; top: 0; bottom: 0; background: rgba(231,237,245,.45); border-radius: 3px; }
-.roombar b { position: absolute; top: -3px; width: 3px; height: 12px; margin-left: -1.5px; background: var(--tvi); border-radius: 1px; box-shadow: 0 0 6px var(--tvi); }
-.rb-lr { display: block; margin-left: 0 !important; margin-top: 3px; font-family: var(--font-data); }
+/* Sideways Room: the egg's cross-section at your forward speed, and where you sit in it */
+.roombar { position: relative; height: 4px; background: rgba(140,165,205,.12); border-radius: 2px; margin-top: 8px; }
+.roombar i { position: absolute; top: 0; bottom: 0; background: rgba(231,237,245,.45); border-radius: 2px; }
+.roombar b { position: absolute; top: -4px; width: 3px; height: 12px; margin: 0 0 0 -1.5px; background: var(--tvi); border-radius: 1px; box-shadow: 0 0 6px var(--tvi); overflow: visible; }
+/* Dodge Potential: a bar scaled to the table's maximum, white when full and warn red when collapsed */
+.dodgebar { position: relative; height: 4px; background: rgba(140,165,205,.12); border-radius: 2px; margin-top: 8px; overflow: hidden; }
+.dodgebar i { display: block; height: 100%; width: 0; border-radius: 2px; background: var(--dodge, var(--fg)); transition: width .12s linear, background-color .3s var(--ease); }
 
 /* ── lessons ── */
 .maneuvers { display: grid; gap: 8px; background: var(--glass); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 16px 16px 18px; box-shadow: var(--shadow); }
 .lessons-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; }
 .maneuvers h2 { margin: 0; font-size: 1.05rem; font-weight: 700; letter-spacing: -.005em; }
 .lessons-how { margin: 0; color: var(--muted); font-size: .82rem; }
-.maneuvers h3 { margin: 8px 0 0; font: 600 .64rem var(--font-data); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 10px; }
+/* a group's one-line intro (Brief B writes them), under its heading and above its cards */
+.maneuvers h3 + .lessons-how { margin: 0 0 4px; color: var(--fg-2); line-height: 1.45; max-width: 90ch; }
+.maneuvers h3 { margin: 8px 0 0; font: 600 .76rem/1.4 var(--font-ui); letter-spacing: .01em; color: var(--fg-2); display: flex; align-items: center; gap: 12px; }
 .maneuvers h3::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 .lesson-note { display: block; margin: 10px 0 0; font-size: .9rem; line-height: 1.45; color: var(--fg); background: var(--glass); border: 1px solid var(--line); border-radius: var(--r-md); padding: 10px 14px; }
 .lesson-note .cap-dodge { font-weight: 700; color: var(--fg); }
@@ -187,7 +197,7 @@ details.more-d > span { display: block; color: var(--fg-2); font-size: .8rem; li
 .run-prog { flex: 1 1 80px; height: 4px; background: rgba(140,165,205,.14); border-radius: 2px; overflow: hidden; min-width: 60px; } .run-prog i { display: block; height: 100%; width: 0; background: var(--tvi); box-shadow: 0 0 8px var(--tvi); }
 .run-result { order: 2; flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 4px 18px; font-family: var(--font-data); font-size: .82rem; color: var(--fg); } .run-result:empty { display: none; }
 .run-result .lead { flex-basis: 100%; font-size: 1.05rem; font-weight: 700; color: var(--tvi); }
-.run-result b { display: inline-block; font: 600 .62rem var(--font-data); letter-spacing: .1em; text-transform: uppercase; color: var(--tvi); margin-right: 6px; }
+.run-result b { display: inline-block; font: 600 .7rem var(--font-ui); letter-spacing: .01em; color: var(--tvi); margin-right: 8px; }
 
 /* ── control deck ── */
 .deck { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 20px; align-items: start; background: var(--glass); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 16px; box-shadow: var(--shadow); }
@@ -199,7 +209,7 @@ details.more-d > span { display: block; color: var(--fg-2); font-size: .8rem; li
 kbd.hint { font: 600 .64rem var(--font-data); border: 1px solid var(--line-strong); border-radius: 4px; padding: 1px 5px; margin-left: 6px; color: var(--muted); vertical-align: 1px; white-space: nowrap; }
 #boost kbd.hint { color: inherit; border-color: currentColor; }
 body.no-shortcuts kbd.sc { display: none; }
-.ctl-label { font: 600 .6rem var(--font-data); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); text-align: center; }
+.ctl-label { font: 600 .7rem var(--font-ui); letter-spacing: .01em; color: var(--muted); text-align: center; }
 .throttle { display: grid; justify-items: center; gap: 4px; }
 #thr { writing-mode: vertical-lr; direction: rtl; width: 34px; height: 170px; accent-color: var(--boost); }
 .thr-val { font: 600 .88rem var(--font-data); font-variant-numeric: tabular-nums; color: var(--fg-2); }
@@ -305,7 +315,7 @@ footer a { color: var(--fg-2) !important; }
 @media (max-width: 979px) and (orientation: portrait), (max-width: 600px) {
   .app { padding: 10px 14px 24px; gap: 12px; }
   .stage { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 6px 0 8px; margin: -4px 0 0; }
-  .view { height: clamp(220px, 38vh, 420px); border-radius: var(--r-md); }
+  .view { height: clamp(200px, 34vh, 420px); border-radius: var(--r-md); }
   .dock { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; background: rgba(13,19,30,.94); border-top: 1px solid var(--line-strong);
     padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px)); grid-template-columns: auto auto 1fr; gap: 10px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
   .app { padding-bottom: 210px; }
@@ -319,23 +329,34 @@ footer a { color: var(--fg-2) !important; }
   .mgrid button:hover { transform: none; }
   .brand-mark { width: 30px; height: 30px; } h1 { font-size: 1.15rem; }
   .sub { font-size: .78rem; }
-  .readouts { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  /* the Vitals ride with the sticky views: two compact rows of three */
+  .vitals { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+  .vt { padding: 8px; }
+  .vt b { font-size: .66rem; }
+  .vt .num, .vt.key .num { font-size: 1.2rem; }
+  .vt small.vt-sub { white-space: normal; min-height: 2.8em; font-size: .68rem; }
+  .readouts { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .ro { padding: 8px; }
   .run-result .lead { font-size: .92rem; }
-  .ro { padding: 8px 9px; }
-  .legend span { padding: 3px 8px 3px 7px; font-size: .72rem; }
+  .legend span { padding: 4px 8px; font-size: .72rem; }
   footer { grid-template-columns: 1fr; }
 }
-/* Phones in landscape: views on the left, everything else scrolls on the right with the dock pinned under it. */
+/* Phones in landscape: views and Vitals on the left, everything else scrolls on the right with the dock pinned under it. */
 @media (orientation: landscape) and (max-height: 540px) {
   .app { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); align-items: start; max-width: none; column-gap: 12px; }
   .app > * { grid-column: 2; }
-  .app > header { grid-column: 1 / -1; }
-  .stage { grid-column: 1; grid-row: 2 / span 20; position: sticky; top: 0; }
+  .stage { grid-column: 1; grid-row: 1 / span 30; position: sticky; top: 0; }
   .tabs { display: flex; }
   .views { grid-template-columns: 1fr; }
   .view[data-hidden="true"] { display: none; }
-  .view { height: calc(100vh - 110px); }
+  .view { height: calc(100vh - 186px); min-height: 150px; }
   .view canvas.inset { display: none; }
+  .vitals { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+  .vt { padding: 4px 8px 5px; }
+  .vt b { font-size: .66rem; margin-bottom: 0; }
+  .vt .num, .vt.key .num { font-size: 1.1rem; }
+  .vt .tank, .vt .roombar, .vt .dodgebar, .vt small.vt-sub { display: none; }
+  .vt .chip { margin-top: 0; }
   .dock { position: sticky; bottom: 0; z-index: 6; background: var(--panel); grid-template-columns: auto auto 1fr; }
   #pad { width: 110px; height: 110px; } #thr { height: 110px; }
   header .sub { display: none; }
@@ -343,10 +364,8 @@ footer a { color: var(--fg-2) !important; }
 /* Phones are for watching the lessons, not flying: no controls, no view tools, no overlay on the view. The
    running lesson's explanation sits under it instead. */
 @media (pointer: coarse) and (max-width: 979px), (pointer: coarse) and (orientation: landscape) and (max-height: 540px) {
-  .deck, .vtools, .caption, #ctl-open, #fly, .run-msg, .lessons-how { display: none !important; }
+  .deck, .vtools, .caption, #ctl-open, #fly, .run-msg, .lessons-head .lessons-how { display: none !important; }
   .app { padding-bottom: 12px; }
-  /* on a phone the lessons come first, the statistics after them */
-  .howto { order: 1; } .maneuvers { order: 1; } .legend, .readouts { order: 2; } .app > footer { order: 3; }
   .lesson-note { display: block; }
 }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; transition: none !important; } .mgrid button:hover, button:active { transform: none; } }
@@ -365,31 +384,31 @@ footer a { color: var(--fg-2) !important; }
       </div>
     </div>
     <div class="hdr-actions">
-      <a class="btn fb" href="https://github.com/Adobe-Wan/speedwall-lab/issues/new?template=alpha-feedback.yml" target="_blank" rel="noopener">Send feedback</a>
+      <a class="btn fb" href="https://github.com/Adobe-Wan/speedwall-lab/issues/new?template=alpha-feedback.yml" target="_blank" rel="noopener">Send Feedback</a>
       <button id="ctl-open" class="hdr">Controls</button>
-      <button id="fly" class="hdr" aria-pressed="false" title="Full screen, with every key going to the simulator (hold Esc to leave)">Fly full screen</button>
+      <button id="fly" class="hdr" aria-pressed="false" title="Full screen, with every key going to the simulator (hold Esc to leave)">Fly Full Screen</button>
     </div>
   </header>
 
   <div class="stage" id="stage">
   <div class="tabs" role="tablist" aria-label="Views">
-    <button role="tab" id="tab-egg" aria-selected="true" data-view="egg">Speed egg</button>
+    <button role="tab" id="tab-egg" aria-selected="true" data-view="egg">Speed Egg</button>
     <button role="tab" id="tab-pilot" aria-selected="false" data-view="pilot">Cockpit</button>
-    <button role="tab" id="tab-slice" aria-selected="false" data-view="slice">Top-down</button>
+    <button role="tab" id="tab-slice" aria-selected="false" data-view="slice">Top-Down</button>
   </div>
 
   <div class="views">
     <section class="view" id="v-egg" data-hidden="false" aria-label="Egg view: your velocity inside the Gladius speed egg">
       <canvas id="c-egg"></canvas>
       <div class="overlay" id="o-egg"></div>
-      <div class="vtitle">Speed limits · 3D</div>
+      <div class="vtitle">Speed Egg</div>
       <div class="vtools">
         <span class="seg" role="group" aria-label="Camera">
           <button id="cam-34" aria-pressed="true" title="Three-quarter view from behind and above">Overview</button>
           <button id="cam-side" aria-pressed="false" title="Side profile: the egg's real shape">Side</button>
           <button id="t-follow" aria-pressed="false" title="Chase cam: rides behind the ship and keeps your sideways room and the wall in frame. Starts by itself with each lesson.">Chase</button>
         </span>
-        <button id="t-frame" aria-pressed="true" title="On: the egg and the ship turn with the ship, and your velocity stays put in space (pitch the nose up and the 520 end goes up with it). Off: the view stays attached to the ship, so the velocity moves instead.">Egg turns with ship</button>
+        <button id="t-frame" aria-pressed="true" title="On: the egg and the ship turn with the ship, and your velocity stays put in space (pitch the nose up and the 520 end goes up with it). Off: the view stays attached to the ship, so the velocity moves instead.">Egg Turns with Ship</button>
       </div>
       <canvas class="inset" id="c-inset" aria-hidden="true"></canvas>
       <div class="caption" id="cap-egg"></div>
@@ -399,20 +418,42 @@ footer a { color: var(--fg-2) !important; }
       <div class="gloc" id="gloc" aria-hidden="true" hidden></div>
       <svg class="overlay" id="hud" aria-hidden="true"></svg>
       <svg class="overlay" id="ahud" aria-hidden="true"></svg>
-      <div class="vtitle">Cockpit view</div>
+      <div class="vtitle">Cockpit</div>
       <div class="vtools">
         <button id="t-dust" aria-pressed="true">Dust</button>
-        <button id="t-ring" aria-pressed="true">Guide ring</button>
-        <button id="t-gloc" aria-pressed="true" title="A MODEL, not a measured rule: how much G you can take depends on the direction (up most, down least), and the screen greys, darkens from the edge (red for down) and blacks out, then the thrusters and boost cut until you recover (~4 s). Fitted to the author's tests; forward and backward tolerance are not mapped. Off while a lesson runs.">G-LOC (model)</button>
+        <button id="t-ring" aria-pressed="true">Guide Ring</button>
+        <button id="t-gloc" aria-pressed="true" title="A MODEL, not a measured rule: how much G you can take depends on the direction (up most, down least), and the screen greys, darkens from the edge (red for down) and blacks out, then the thrusters and boost cut until you recover (~4 s). Fitted to the author's tests; forward and backward tolerance are not mapped. Off while a lesson runs.">G-LOC (Model)</button>
       </div>
       <div class="caption" id="cap-pilot"></div>
     </section>
     <section class="view" id="v-slice" data-hidden="true" aria-label="Slice view: top-down slice of the egg">
       <canvas id="slice-big"></canvas>
-      <div class="vtitle">Speed limits · top-down</div>
+      <div class="vtitle">Top-Down</div>
       <p class="no-gl" id="no-gl" hidden>3D views need WebGL, which this browser has turned off. Everything else works here in the top-down view.</p>
       <div class="caption" id="cap-slice"></div>
     </section>
+  </div>
+
+  <!-- Vitals: the numbers a pilot needs while watching the views. Inside .stage, so they are on screen whenever the views are. -->
+  <div class="vitals" id="vitals" aria-hidden="true">
+    <div class="vt" title="How fast the ship is moving through space, in any direction (the simulator's state; MODEL fitted to the measured settle speeds)."><b>Speed</b><span class="num" id="r-speed">0</span><small>m/s</small></div>
+    <div class="vt" title="ARITHMETIC on the measured egg: the sideways speed you can still add at your forward speed, the egg's radius there minus the sideways speed you already have. It is the egg's geometry, not Dodge Potential: near the nose it reads close to 0 while the ship can still move about 90 m sideways in 2 s, because the velocity swings along the egg's surface."><b>Sideways Room</b><span class="num" id="r-room">394</span><small>m/s</small>
+      <div class="roombar" aria-hidden="true"><i id="rb-fill"></i><b id="rb-ship"></b></div></div>
+    <div class="vt key" id="vt-dodge" title="MODEL: how far off your current line the ship moves in 2 s if you push fully off it now (the best of left, right, up and down), with your other inputs held as they are; the price is the range a chaser holding 520 m/s gains over those 2 s. Not Sideways Room: that is the egg's geometry, this is the distance the simulator actually moves you."><b>Dodge Potential</b><span class="num" id="r-dodge">–</span><small>m in 2 s</small>
+      <div class="dodgebar" aria-hidden="true"><i id="r-dodgebar"></i></div><small class="vt-sub" id="r-dodge-price">costs – m of range</small></div>
+    <div class="vt" id="vt-tank"><b>Boost Tank</b><span class="num" id="r-tank">100</span><small>%</small><div class="tank"><i id="r-tankbar"></i></div></div>
+    <div class="vt" title="Which speed limit applies right now: Boost (the amber egg) or SCM (the blue ball). At Limit shows while the flight computer holds you at that limit."><b>Flight Mode</b><span class="chip" id="r-mode">SCM</span> <span class="chip pinned" id="r-pin" hidden>At Limit</span></div>
+    <div class="vt" id="ro-range" hidden title="ARITHMETIC, not a measured rule: a chaser that holds 520 m/s along your starting line, starting 550 m behind. Every second it gains 520 minus your speed along that line, in metres: hold the wall and it stays back, give up speed and it closes. Both numbers are stated assumptions, kept as named constants (CHASE in the page source) so a patch can change them. Nothing here models the chaser's aim, the lead pip, projectile speed or hits: that needs a two-pilot test."><b>Chaser Range</b><span class="num" id="r-range">550</span><small>m</small><small class="vt-sub" id="r-range-rate">holding</small></div>
+  </div>
+  </div>
+
+  <div class="readouts" aria-hidden="true">
+    <div class="ro" title="Your speed along the nose, the axis the egg is longest on (simulator state, MODEL)."><b>Forward Speed</b><span class="num" id="r-fwd">0</span><small>m/s</small></div>
+    <div class="ro" title="Your speed off the nose, left, right, up and down combined (simulator state, MODEL)."><b>Sideways Speed</b><span class="num" id="r-side">0</span><small>m/s</small></div>
+    <div class="ro" title="The push you are getting right now, in G (1 G is Earth's gravity); at the wall it is less than you asked for (simulator state, MODEL)."><b>Thrust</b><span class="num" id="r-g">0.0</span><small>G</small></div>
+    <div class="ro" title="How fast the ship is rolling: the measured full-stick rate times the roll fraction you are flying."><b>Roll Rate</b><span class="num" id="r-roll">0</span><small>°/s</small></div>
+    <div class="ro" title="ARITHMETIC: the angle between where your nose points and where you are actually going (the TVI)."><b>Drift Angle</b><span class="num" id="r-tvi">–</span><small>°</small></div>
+    <div class="ro" title="MODEL, not a measured rule: stress from the G you are pulling in each direction. Greys the HUD, then the screen, then blacks out and cuts thrust and boost. Paused while a lesson runs, so you see the speed limits; the lesson texts say what the measured pilot felt."><b>G-LOC (Model)</b><span class="num" id="r-gloc">clear</span><div class="tank"><i id="r-glocbar"></i></div></div>
   </div>
 
   <div class="runbar" id="runbar" hidden>
@@ -422,22 +463,8 @@ footer a { color: var(--fg-2) !important; }
     <span class="run-result" id="run-result" role="status"></span>
     <button id="run-stop" class="small">Stop</button>
   </div>
-  </div>
   <p class="lesson-note" id="lesson-note" role="status">Pick a lesson to watch the ship move inside the egg.</p>
-  <div class="legend" aria-hidden="true"><span class="lg-egg">Amber egg: top speed with boost</span><span class="lg-scm">Blue ball: top speed without boost (225)</span><span class="lg-ring">White ring: sideways room left (red: at the limit)</span><span class="lg-tvi">TVI (circle with wings): where you're really going</span><span class="lg-path">Violet thread: your flight path over the last 8 s, width ×3 and length ÷12, so a corkscrew shows as one</span></div>
-  <div class="readouts" aria-hidden="true">
-    <div class="ro"><b>Speed</b><span id="r-speed">0</span><small>m/s</small></div>
-    <div class="ro"><b>Forward</b><span id="r-fwd">0</span><small>m/s</small></div>
-    <div class="ro"><b>Sideways</b><span id="r-side">0</span><small>m/s</small></div>
-    <div class="ro key" title="How much more sideways speed you can add at your current forward speed, left and right"><b>Sideways room</b><span id="r-room">394</span><small>m/s</small>
-      <div class="roombar" aria-hidden="true"><i id="rb-fill"></i><b id="rb-ship"></b></div><small class="rb-lr" id="rb-lr">◂ 394 · 394 ▸</small></div>
-    <div class="ro" title="Your current push. 1 G = Earth gravity"><b>Thrust</b><span id="r-g">0.0</span><small>G</small></div>
-    <div class="ro"><b>Roll</b><span id="r-roll">0</span><small>°/s</small></div>
-    <div class="ro" title="Angle between where your nose points and where you are actually going (the TVI)"><b>Drift angle</b><span id="r-tvi">–</span><small>°</small></div>
-    <div class="ro" id="ro-range" title="ARITHMETIC, not a measured rule: a chaser that holds 520 m/s along your starting line, starting 550 m behind. Every second it gains 520 minus your speed along that line, in metres: hold the wall and it stays back, give up speed and it closes. Both numbers are stated assumptions, kept as named constants (CHASE in the page source) so a patch can change them. Nothing here models the chaser's aim, the lead pip, projectile speed or hits: that needs a two-pilot test."><b>Chaser's range</b><span id="r-range">550</span><small>m</small><small class="ro-sub" id="r-range-rate">holding</small></div>
-    <div class="ro" title="MODEL, not a measured rule: stress from the G you are pulling in each direction. Greys the HUD, then the screen, then blacks out and cuts thrust and boost. Paused while a lesson runs, so you see the speed limits; the lesson texts say what the measured pilot felt."><b>G-LOC (model)</b><span id="r-gloc">clear</span><div class="tank"><i id="r-glocbar"></i></div></div>
-    <div class="ro"><b>Boost tank</b><span id="r-tank">100</span><small>%</small><div class="tank"><i id="r-tankbar"></i></div></div>
-    <div class="ro"><b>Flight mode</b><span class="chip" id="r-mode">SCM</span> <span class="chip" id="r-pin" hidden>At limit</span></div>
+  <div class="legend" aria-hidden="true"><span class="lg-egg"><b>Amber Egg (Boost):</b> the top speed boost holds in every direction</span><span class="lg-scm"><b>Blue Ball (SCM):</b> the top speed without boost, 225 m/s every way</span><span class="lg-ring"><b>White Ring (Sideways Room):</b> the sideways speed you can still add; it thins and reddens as Dodge Potential collapses</span><span class="lg-tvi"><b>TVI:</b> the circle with wings: where you are really going</span><span class="lg-path"><b>Violet Thread:</b> your path over the last 8 s (drawn wider and shorter)</span>
   </div>
   <p class="howto"><strong>Start Here.</strong> The Amber Egg is the speed wall: the top speed boost can hold in every direction (520 m/s forward, 394 sideways, 268 back). The Blue Ball is the same without boost: 225 m/s every way. Your ship sits at its current velocity: the farther from the centre cross, the faster you go. The White Ring is your sideways room. Click the first lesson and watch.</p>
   <section class="maneuvers" id="lessons" aria-labelledby="lessons-h">
@@ -491,29 +518,29 @@ footer a { color: var(--fg-2) !important; }
         <span class="thr-val" id="pad-val">L/R 0 · U/D 0</span>
       </div>
       <div class="dock-btns">
-        <button id="boost" aria-pressed="false">Hold to boost <kbd class="hint" data-hint="boost">L Shift</kbd></button>
+        <button id="boost" aria-pressed="false">Hold to Boost <kbd class="hint" data-hint="boost">L Shift</kbd></button>
         <div class="roll-pair">
           <button id="roll-l" aria-label="Hold to roll left">⟲ Roll <kbd class="hint" data-hint="rollLeft">Q</kbd></button>
           <button id="roll-r" aria-label="Hold to roll right">Roll ⟳ <kbd class="hint" data-hint="rollRight">E</kbd></button>
         </div>
-        <label class="tog"><input type="checkbox" id="boost-lock"> Lock boost</label>
+        <label class="tog"><input type="checkbox" id="boost-lock"> Lock Boost</label>
       </div>
     </div>
     <div class="panel">
       <div class="row">
         <button id="reset">Stop <kbd class="hint sc">R</kbd></button>
-        <button id="pin">Start at top speed <kbd class="hint sc">N</kbd></button>
+        <button id="pin">Start at Top Speed <kbd class="hint sc">N</kbd></button>
         <button id="pause" aria-pressed="false">Pause <kbd class="hint sc">P</kbd></button>
-        <label class="tog" id="unlimited-tog" title="The boost tank never drains (training aid)"><input type="checkbox" id="unlimited"> Unlimited boost</label>
+        <label class="tog" id="unlimited-tog" title="The boost tank never drains (training aid)"><input type="checkbox" id="unlimited"> Unlimited Boost</label>
       </div>
       <div class="set">
-        <span>Roll rate</span><input type="range" id="rollrate" min="5" max="100" value="100" aria-label="Roll rate, percent of full stick"><output id="rollrate-v"></output>
+        <span>Roll Rate</span><input type="range" id="rollrate" min="5" max="100" value="100" aria-label="Roll rate, percent of full stick"><output id="rollrate-v"></output>
         <span>FOV</span><input type="range" id="fov" min="60" max="120" value="100" aria-label="Pilot view horizontal field of view"><output id="fov-v">100°</output>
-        <span>Guide ring</span><input type="range" id="ring" min="2" max="30" value="13" aria-label="TVI guide ring angle"><output id="ring-v">13°</output>
+        <span>Guide Ring</span><input type="range" id="ring" min="2" max="30" value="13" aria-label="TVI guide ring angle"><output id="ring-v">13°</output>
       </div>
       <div class="row">
         <button id="ctl-open2">Controls…</button>
-        <label class="tog" title="P pause, R stop, N top speed, C centre the mouse, 0–4 throttle"><input type="checkbox" id="shortcuts" checked> Single-key shortcuts</label>
+        <label class="tog" title="P pause, R stop, N top speed, C centre the mouse, 0–4 throttle"><input type="checkbox" id="shortcuts" checked> Single-Key Shortcuts</label>
         <span class="keys" id="ctl-status"></span>
       </div>
     </div>
@@ -740,6 +767,7 @@ document.addEventListener('mousemove', e => { if (document.pointerLockElement ==
 
 $('t-gloc').onclick = e => { gloc.on = !gloc.on; e.currentTarget.setAttribute('aria-pressed', gloc.on); PS = restPilot(); glocKey = ''; prefs.gloc = gloc.on; savePrefs(); };
 $('unlimited-tog').title = `The boost tank never drains (training aid; measured in game: it drains ${gladius.boost.tankDrainPctPerS} %/s and refills ${gladius.boost.tankRegenPctPerS} %/s)`;
+$('vt-tank').title = `Boost fuel left (MEASURED: it drains ${gladius.boost.tankDrainPctPerS} %/s while boosting and refills ${gladius.boost.tankRegenPctPerS} %/s; empty, boost is locked out until the tank refills past ${gladius.boost.redZonePct} %, the red zone on the bar).`;
 $('unlimited').addEventListener('change', e => { ctl.unlimited = e.target.checked; });
 
 // pinned: false/'rest' (stopped), true/'nose' (boosted nose, 520), 'scm' (SCM wall, 225) or { vx, boost }
@@ -867,7 +895,7 @@ const escHtml = s => String(s).replace(/[&<>"]/g, c => `&#${c.charCodeAt(0)};`);
 function lessonHtml(p) {
   if (!p) return '';
   return `<span class="do"><b>Do</b> ${escHtml(p.do)}</span><span class="see"><b>See</b> ${escHtml(p.see)}<span class="cap-dodge"></span></span>` +
-    (p.more ? `<details class="more-d"><summary>Details and sources</summary><span>${escHtml(p.more)}</span></details>` : '');
+    (p.more ? `<details class="more-d"><summary>Details and Sources</summary><span>${escHtml(p.more)}</span></details>` : '');
 }
 // The lesson's explanation, under the views on every width.
 const NOTE_IDLE = $('lesson-note').innerHTML;
@@ -923,6 +951,10 @@ const R3 = (x, y, z) => [x, z, -y];
 const PATH_SQUEEZE = 12, PATH_WIDEN = 3, PATH_S = 8;   // the egg view's flight-path thread: along-track ÷12, cross-track ×3, last 8 s
 const hex = h => [parseInt(h.slice(1, 3), 16) / 255, parseInt(h.slice(3, 5), 16) / 255, parseInt(h.slice(5, 7), 16) / 255];
 const COL = { path: hex('#c4a8ff'), boost: hex('#f2a33a'), scm: hex('#5aa9e6'), tvi: hex('#7ef0c8'), white: [0.92, 0.95, 1], grey: [0.5, 0.56, 0.66], warn: hex('#ff6a55'), glyph: [0.78, 0.82, 0.9] };
+// The Dodge Potential ramp: warn red at 0 (collapsed) to white at 1 (full). One array, reused every frame.
+const RING_MIX = [0, 0, 0];
+const ringMix = f => { for (let i = 0; i < 3; i++) RING_MIX[i] = COL.warn[i] + (COL.white[i] - COL.warn[i]) * f; return RING_MIX; };
+const ringCss = f => `rgb(${Math.round(255 * (COL.warn[0] + (COL.white[0] - COL.warn[0]) * f))} ${Math.round(255 * (COL.warn[1] + (COL.white[1] - COL.warn[1]) * f))} ${Math.round(255 * (COL.warn[2] + (COL.white[2] - COL.warn[2]) * f))})`;
 const VS_LINE = `attribute vec3 position; uniform mat4 modelViewMatrix, projectionMatrix; void main(){ gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }`;
 const FS_LINE = `precision mediump float; uniform vec3 uColor; uniform float uAlpha; void main(){ gl_FragColor = vec4(uColor, uAlpha); }`;
 function lineProgram(gl, color, alpha, extra = {}) {
@@ -1138,8 +1170,8 @@ const egg = !hasWebGL ? stubView : (() => {
   const ov = $('o-egg'), labels = {};
   const mk = (k, cls, text) => { const d = document.createElement('div'); d.className = `lbl ${cls}`; d.textContent = text; ov.appendChild(d); labels[k] = d; return d; };
   mk('nose', 'boost', 'nose 520'); mk('side', 'boost', 'sides 394'); mk('tail', 'boost', 'tail 268'); mk('scm', 'scm', 'SCM 225');
-  mk('room', 'room', ''); mk('settle', 'tvi', ''); mk('rest', '', 'rest 0');
-  mk('reachL', 'room', ''); mk('reachR', 'room', ''); mk('path', 'path', '');
+  mk('settle', 'tvi', ''); mk('rest', '', 'rest 0');
+  mk('reachL', 'room', ''); mk('reachR', 'room', '');
   const tviIcon = document.createElement('div'); tviIcon.className = 'lbl tvi';
   tviIcon.innerHTML = '<svg width="34" height="20" viewBox="-17 -10 34 20"><circle r="5.5" fill="none" stroke="#7ef0c8" stroke-width="2"/><path d="M-15 0h9.5M5.5 0H15M0-5.5V-10" stroke="#7ef0c8" stroke-width="2"/></svg>';
   ov.appendChild(tviIcon);
@@ -1201,7 +1233,7 @@ const egg = !hasWebGL ? stubView : (() => {
     }
     // Render on demand (PLAN.md §9): skip the frame when nothing visible changed.
     const gp = R3(...st.x), gox = -((gp[0] * GRID_SLIDE) % GRID), goz = -((gp[2] * GRID_SLIDE) % GRID);
-    const cp = camera.position, key = [gox, goz, vx, vy, vz, cp.x, cp.y, cp.z, room, d.pinned, trail.length, st.a[0], st.a[1], st.a[2], follow, frameW, ...qView, ...qTw]
+    const cp = camera.position, key = [gox, goz, vx, vy, vz, cp.x, cp.y, cp.z, room, d.pinned, d.dodge.frac, trail.length, st.a[0], st.a[1], st.a[2], follow, frameW, ...qView, ...qTw]
       .map(x => (typeof x === 'number' ? x.toFixed(2) : x)).join();
     if (key === lastKey) return;
     lastKey = key;
@@ -1227,16 +1259,20 @@ const egg = !hasWebGL ? stubView : (() => {
       // Flight path, last 10 s: the ship's real track, drawn behind it. Cross-track is 1:1 and along-track is squeezed by
       // PATH_SQUEEZE and widened by PATH_WIDEN, because at 520 m/s one turn of a 60 °/s corkscrew is 3 km long and only
       // ~30 m wide: at true scale a corkscrew is a thread. Squeezed and widened, it shows as the helix it is. The label says so.
-      const n = Math.min(path.length, PATH_S * 60), n0 = path.length - n; labels.path.hidden = true;
+      const n = Math.min(path.length, PATH_S * 60), n0 = path.length - n;
       if (n > 60 && sp3 > 3) { const now = path[path.length - 1], a0 = path[n0], L = Math.hypot(now[0] - a0[0], now[1] - a0[1], now[2] - a0[2]);
-        if (L > 1) { const u = [(now[0] - a0[0]) / L, (now[1] - a0[1]) / L, (now[2] - a0[2]) / L]; let prevP = null, tail = null;
+        if (L > 1) { const u = [(now[0] - a0[0]) / L, (now[1] - a0[1]) / L, (now[2] - a0[2]) / L]; let prevP = null;
           for (let i = n0; i < path.length; i += 2) { const q = path[i], r = [q[0] - now[0], q[1] - now[1], q[2] - now[2]], al = r[0] * u[0] + r[1] * u[1] + r[2] * u[2];
             const c = [0, 1, 2].map(k => (r[k] - al * u[k]) * PATH_WIDEN + u[k] * al / PATH_SQUEEZE);
             const pt = qrotv(inv, R3(...c)); const w = [pv[0] + pt[0], pv[1] + pt[1], pv[2] + pt[2]];
-            if (prevP) dyn.seg(prevP, w, COL.path, 0.8); if (i === n0 + 2 * Math.floor(n / 4)) tail = w; prevP = w; }   // label a quarter of the way along
-          if (tail && follow) { place(labels.path, tail); labels.path.textContent = `your path · last ${Math.round(n / 60)} s · width ×${PATH_WIDEN} · length ÷${PATH_SQUEEZE}`; } } } }
-    const ringCol = d.pinned ? COL.warn : COL.white;                         // the dodge ring at your forward speed
-    for (let j = 1; j < UNIT.length; j++) dyn.seg(R3(vx, UNIT[j-1][1] * room, UNIT[j-1][0] * room), R3(vx, UNIT[j][1] * room, UNIT[j][0] * room), ringCol, 0.85);
+            if (prevP) dyn.seg(prevP, w, COL.path, 0.62); prevP = w; } } } }
+    // The ring and the reach lines carry Dodge Potential as colour and weight: white and three lines wide when the ship
+    // can still move far off its line, warn red and one line wide when the wall has taken that away (no metres are drawn
+    // as lengths in velocity space). The extra lines sit one pixel in and out of the ring, so the weight reads on screen.
+    const df = d.pinned ? 0 : d.dodge.frac, ringCol = ringMix(df), ringA = 0.6 + 0.3 * df;
+    const pxw = 2 * camD * half / Math.max(200, canvas.parentElement.clientHeight), passes = 1 + Math.round(2 * df);
+    for (let p = 0; p < passes; p++) { const rr = room + (p === 0 ? 0 : p === 1 ? pxw : -pxw);
+      for (let j = 1; j < UNIT.length; j++) dyn.seg(R3(vx, UNIT[j-1][1] * rr, UNIT[j-1][0] * rr), R3(vx, UNIT[j][1] * rr, UNIT[j][0] * rr), ringCol, ringA); }
     // reach lines: from the ship to the edge of the sideways-room disc along each strafe axis
     // (physics y = left, z = up). Ticks at the ends mark the wall.
     const ends = {};
@@ -1244,9 +1280,9 @@ const egg = !hasWebGL ? stubView : (() => {
     for (const [k, y, z] of [['L', yMax, vz], ['R', -yMax, vz], ['U', vy, zMax], ['D', vy, -zMax]]) {
       const e = T(R3(vx, y, z)); ends[k] = e;
       if (room <= 0.5) continue;
-      dyn.seg(pv, e, ringCol, 0.9);                                          // reach line to the wall
+      dyn.seg(pv, e, ringCol, ringA);                                        // reach line to the wall
       const tick = T(k === 'L' || k === 'R' ? [0, 9, 0] : [0, 0, 9]);
-      dyn.seg([e[0] - 9, e[1] - tick[1], e[2] - tick[2]], [e[0] + 9, e[1] + tick[1], e[2] + tick[2]], ringCol, 0.9);
+      dyn.seg([e[0] - 9, e[1] - tick[1], e[2] - tick[2]], [e[0] + 9, e[1] + tick[1], e[2] + tick[2]], ringCol, ringA);
     }
     if (d.settle) { const n = 18, sp = d.settle.p; for (let i = 0; i < n; i++) { const a = i / n, b = (i + 0.55) / n;   // dashed settle ray
       dyn.seg(T(R3(sp[0]*a, sp[1]*a, sp[2]*a)), T(R3(sp[0]*b, sp[1]*b, sp[2]*b)), COL.tvi, 0.5); } }
@@ -1261,8 +1297,7 @@ const egg = !hasWebGL ? stubView : (() => {
       // the ends they name: hide them then
       const ax = rot([1, 0, 0]), t = orbit.target, dx = t.x - cp.x, dy = t.y - cp.y, dz = t.z - cp.z;
       if (Math.abs(ax[0] * dx + ax[1] * dy + ax[2] * dz) > 0.8 * Math.hypot(dx, dy, dz)) labels.nose.hidden = labels.tail.hidden = true; }
-    // the dodge label stays clear of the ship when the room is small; the rest label sits below the ship at any scale
-    { const rl = Math.max(room, 30 + 6 * gs); place(labels.room, rot(R3(vx, -rl * 0.71, rl * 0.71 + 18))); } labels.room.textContent = `room ${Math.round(room)}`;
+    // the rest label sits below the ship at any scale
     place(labels.rest, rot(R3(0, 0, -(22 + 4 * gs)))); if (d.speed > 5) labels.rest.hidden = true;
     const leftRoom = Math.max(0, yMax - vy), rightRoom = Math.max(0, yMax + vy);
     if (room > 60 && d.speed > 5) { place(labels.reachL, rot(ends.L)); labels.reachL.textContent = `◂ ${Math.round(leftRoom)}`;
@@ -1390,7 +1425,29 @@ function drawSlice(canvas, st, d, big) {
   c.fillStyle = '#4aa3d8'; c.beginPath(); c.ellipse(0, -3.8 * g, 0.9 * g, 2.6 * g, 0, 0, 2 * Math.PI); c.fill(); c.restore();
   if (big) { c.font = '600 12px ui-monospace, Menlo, monospace'; c.fillStyle = '#f2a33a'; c.textAlign = 'center';
     c.fillText('nose 520', ...P(0, 532)); c.fillText('tail 268', ...P(0, -284)); c.textAlign = 'left'; c.fillText('394', ...P(398, 6)); c.fillStyle = '#5aa9e6'; c.fillText('SCM 225', ...P(150, 190));
-    c.fillStyle = d.pinned ? '#ff6a55' : '#e7edf5'; c.fillText(`room ${Math.round(room)}`, ...P(room + 8, fwd - 4)); }
+    drawDodgeCurve(c, w, h, d); }
+}
+// Dodge Potential against forward speed, in one small picture (bottom right of the Top-Down view): the table's curve for the
+// flight mode and forward stick the ship has now, and a dot riding at its forward speed. Axes: forward speed 0..520 m/s
+// across, Dodge Potential 0..table max up.
+function drawDodgeCurve(c, w, h, d) {
+  const dg = d.dodge; if (!dg.ready) return;
+  // bottom left corner, clear of the egg's labels (nose top centre, 394 mid right, tail bottom centre)
+  const bw = Math.max(140, Math.min(210, Math.round(w * 0.36))), bh = Math.round(bw * 0.5), x0 = 12, y0 = h - bh - 12, pad = 8, gw = bw - 2 * pad, gh = bh - 26;
+  c.save();
+  c.fillStyle = 'rgba(7,11,18,.78)'; c.strokeStyle = 'rgba(140,165,205,.22)'; c.lineWidth = 1;
+  c.beginPath(); c.roundRect ? c.roundRect(x0, y0, bw, bh, 7) : c.rect(x0, y0, bw, bh); c.fill(); c.stroke();
+  const gx = x0 + pad, gy = y0 + 18, X = vx => gx + vx / 520 * gw, Y = m => gy + gh - m / dg.max * gh;
+  c.font = '600 10px ui-monospace, Menlo, monospace'; c.textAlign = 'left'; c.fillStyle = '#c4cedc'; c.fillText('Dodge Potential, m', gx, y0 + 12);
+  c.strokeStyle = 'rgba(140,165,205,.3)'; c.beginPath(); c.moveTo(gx, Y(0)); c.lineTo(gx + gw, Y(0)); c.stroke();
+  const tab = DODGE_TABLE[d.boost ? 'boost' : 'scm'];
+  const rows = tab.held, rel = tab.released, f = Math.min(1, Math.max(0, ctl.thr / 100));
+  c.strokeStyle = d.boost ? '#f2a33a' : '#5aa9e6'; c.lineWidth = 1.5; c.beginPath();
+  for (let i = 0; i < rows.length && i < rel.length; i++) { const m = Math.max(...rows[i].perp) * f + Math.max(...rel[i].perp) * (1 - f); i ? c.lineTo(X(rows[i].vx), Y(m)) : c.moveTo(X(rows[i].vx), Y(m)); }
+  c.stroke();
+  c.fillStyle = '#8a99ae'; c.textAlign = 'left'; c.fillText('0', gx, y0 + bh - 4); c.textAlign = 'right'; c.fillText('520 m/s', gx + gw, y0 + bh - 4);
+  const fx = Math.min(520, Math.max(0, d.fwd)); c.fillStyle = ringCss(d.pinned ? 0 : dg.frac); c.beginPath(); c.arc(X(fx), Y(dg.best), 4, 0, 2 * Math.PI); c.fill();
+  c.restore();
 }
 
 /* ───────────────────────── loop ───────────────────────── */
@@ -1402,6 +1459,57 @@ function drawSlice(canvas, st, d, big) {
 // assumptions); it lives on, marked assumed, in packages/core/src/aim.ts.
 const CHASE = { range: 550, speed: 520 };   // m behind at the start (assumed, inside the 500-600 m gun range); m/s it holds (the measured boosted wall)
 const chase = { range: CHASE.range };       // the live range
+// Dodge Potential (MODEL): how far off its current line the ship moves in DODGE.windowS seconds if it pushes fully off that
+// line now, with every other input held as the pilot has it. windowS is a display window, so the number is comparable
+// from one speed to the next; it is not a claim about any shooter's reaction or firing time. Its price is the range a
+// chaser holding CHASE.speed gains over the same window: CHASE.speed x windowS minus your own distance along the line.
+const DODGE = { windowS: 2, stepMps: 10 };   // display window, s; table grid, m/s of forward speed
+// The table: Dodge Potential against forward speed, for Boost and SCM with forward held (full stick) and released, in each
+// of the four off-axis directions, computed once from the same core step() the simulator runs (at the simulator's DT), from
+// a ship flying straight at that speed with a full tank. Per frame the page only interpolates in it (PLAN.md section 9:
+// physics under 0.2 ms, no per-frame allocations). Built in slices of about 25 ms after the first frame, so the page is never
+// blocked; the tile reads "-" until its slice exists. SCM runs the same 0..520 range: boost released above 225 is an SCM state.
+const DODGE_DIRS = ['left', 'right', 'up', 'down'];
+const DODGE_TABLE = { max: 1, ready: false, boost: { held: [], released: [] }, scm: { held: [], released: [] } };
+function dodgeRun(vx, boost, fwd, dir) {
+  // core frame: y right, z up, so left is lat -1 (the egg is symmetric left/right; up and down are not)
+  const u = { fwd, lat: dir === 'left' ? -1 : dir === 'right' ? 1 : 0, up: dir === 'up' ? 1 : dir === 'down' ? -1 : 0, boost, unlimitedBoost: false };
+  let c = { ...restState(), vWorld: [vx, 0, 0] }, along = 0, py = 0, pz = 0;
+  for (let i = 0, n = Math.round(DODGE.windowS / DT); i < n; i++) { c = coreStep(c, u, gladius, DT); along += c.vWorld[0] * DT; py += c.vWorld[1] * DT; pz += c.vWorld[2] * DT; }
+  return { perp: Math.hypot(py, pz), price: CHASE.speed * DODGE.windowS - along };
+}
+function buildDodgeTable(onDone) {
+  const jobs = [];
+  for (const mode of ['boost', 'scm']) for (const hold of ['held', 'released']) for (let vx = 0; vx <= 520; vx += DODGE.stepMps) jobs.push([mode, hold, vx]);
+  let i = 0;
+  const slice = () => {
+    const t0 = performance.now();
+    while (i < jobs.length && performance.now() - t0 < 25) {
+      const [mode, hold, vx] = jobs[i++], row = { vx, perp: [0, 0, 0, 0], price: [0, 0, 0, 0] };
+      DODGE_DIRS.forEach((dir, k) => { const r = dodgeRun(vx, mode === 'boost', hold === 'held' ? 1 : 0, dir); row.perp[k] = r.perp; row.price[k] = r.price; DODGE_TABLE.max = Math.max(DODGE_TABLE.max, r.perp); });
+      DODGE_TABLE[mode][hold].push(row);
+    }
+    if (i < jobs.length) setTimeout(slice, 0); else { DODGE_TABLE.ready = true; onDone?.(); }
+  };
+  setTimeout(slice, 0);
+}
+// Dodge Potential for the ship's state now: the table row at its forward speed (interpolated), blended between forward held
+// and released by the pilot's forward stick. Writes into one reused object.
+const DODGE_NOW = { left: 0, right: 0, up: 0, down: 0, best: 0, price: 0, frac: 0, max: 1, windowS: DODGE.windowS, ready: false };
+function dodgeNow(fwd, boost, fwdStick) {
+  const tab = DODGE_TABLE[boost ? 'boost' : 'scm'], x = Math.min(520, Math.max(0, fwd)) / DODGE.stepMps, i0 = Math.floor(x), t = x - i0;
+  const hold = Math.min(1, Math.max(0, fwdStick));
+  const held = tab.held, rel = tab.released, i1 = Math.min(i0 + 1, held.length - 1);
+  DODGE_NOW.ready = held.length > i1 && rel.length > i1 && i1 >= 0;
+  if (!DODGE_NOW.ready) { DODGE_NOW.best = DODGE_NOW.price = DODGE_NOW.frac = 0; return DODGE_NOW; }
+  const at = (rows, k, which) => rows[i0][which][k] + (rows[i1][which][k] - rows[i0][which][k]) * t;
+  let best = -1, bestK = 0;
+  for (let k = 0; k < 4; k++) { const v = at(held, k, 'perp') * hold + at(rel, k, 'perp') * (1 - hold); DODGE_NOW[DODGE_DIRS[k]] = v; if (v > best) { best = v; bestK = k; } }
+  DODGE_NOW.best = best; DODGE_NOW.price = at(held, bestK, 'price') * hold + at(rel, bestK, 'price') * (1 - hold);
+  DODGE_NOW.max = DODGE_TABLE.max; DODGE_NOW.frac = Math.min(1, Math.max(0, best / DODGE_TABLE.max));
+  return DODGE_NOW;
+}
+buildDodgeTable();
 const HS = 1 / 60;   // trail sample period, s of sim time
 const trail = [], path = []; let acc = 0, last = performance.now(), roT = 0, histN = 0, liveT = 0;
 const DT = 1 / 240;
@@ -1409,7 +1517,8 @@ function derive(st, inp) {
   const ci = coreInput(inp.u, inp.boost), d = coreDerive(st.c, ci, gladius), boost = boostActive(st.c, ci);
   const sp = d.speed, settle = d.settleSpeed > 0 ? { p: toA(d.settlePoint), speed: d.settleSpeed, side: Math.hypot(d.settlePoint[1], d.settlePoint[2]) } : null;
   return { speed: sp, fwd: st.v[0], side: Math.hypot(st.v[1], st.v[2]), g: d.gNow, boost, r: eggRadiusAlong(gladius, boost, st.c.vWorld), req: request(inp.u, boost),
-    pinned: d.pinned, room: d.lateralRoom, roomLeft: Math.max(0, d.lateralRoom - Math.hypot(st.v[1], st.v[2])), tviDeg: sp > 0.5 ? d.tvi.offAngleDeg : 0, settle };
+    pinned: d.pinned, room: d.lateralRoom, roomLeft: Math.max(0, d.lateralRoom - Math.hypot(st.v[1], st.v[2])), tviDeg: sp > 0.5 ? d.tvi.offAngleDeg : 0, settle,
+    dodge: dodgeNow(st.v[0], boost, inp.u.f) };
 }
 // The caption under a view: a live line about the ship's state, then the running lesson's Do / See / Details block. The two
 // are separate elements, so the live line can change every frame without re-rendering the lesson (and closing its Details).
@@ -1500,7 +1609,7 @@ function frame(now) {
     if (on) { run.min = Math.min(run.min, d.speed); run.peakG = Math.max(run.peakG, d.g); run.tvi = d.tviDeg; if (run.rel == null && d.speed <= gladius.scm.speedCap + 1) run.rel = run.t; }
     $('run-prog').style.width = `${Math.max(0, Math.min(100, script.t / (go + R.at) * 100))}%`;
     if (!run.shown && run.t >= R.at) { run.shown = true; $('run-msg').hidden = true;
-      $('run-result').innerHTML = `<span class="rr${run.chase ? ' lead' : ''}"><b>Simulator</b> ${R.sim()}</span><span class="rr"><b>In game</b> ${R.game}</span>`; }
+      $('run-result').innerHTML = `<span class="rr${run.chase ? ' lead' : ''}"><b>Simulator</b> ${R.sim()}</span><span class="rr"><b>In Game</b> ${R.game}</span>`; }
   }
   glocView(glocLive() ? vision(PS, gladius.pilot) : null);
   gSmooth += (d.g - gSmooth) * 0.15;
@@ -1515,23 +1624,27 @@ function frame(now) {
   roT += dt; if (roT > 0.08) { roT = 0;
     $('r-speed').textContent = Math.round(d.speed); $('r-fwd').textContent = Math.round(d.fwd); $('r-side').textContent = Math.round(d.side);
     $('r-room').textContent = Math.round(d.roomLeft);
-    { // left/right dodge room: the egg's cross-section at your forward speed, and where you sit in it (page y = left)
+    { // Sideways Room bar: the egg's cross-section at your forward speed, and where you sit in it (page y = left)
       const room = Math.max(1, d.room), yMax = Math.sqrt(Math.max(0, d.room * d.room - S.v[2] * S.v[2]));
-      const L = Math.max(0, yMax - S.v[1]), Rr = Math.max(0, yMax + S.v[1]);
       $('rb-fill').style.left = `${50 - yMax / room * 50}%`; $('rb-fill').style.width = `${yMax / room * 100}%`;
-      $('rb-ship').style.left = `${Math.min(100, Math.max(0, 50 - S.v[1] / room * 50))}%`;
-      $('rb-lr').textContent = `◂ ${Math.round(L)} · ${Math.round(Rr)} ▸`; } $('r-g').textContent = gSmooth.toFixed(1);
+      $('rb-ship').style.left = `${Math.min(100, Math.max(0, 50 - S.v[1] / room * 50))}%`; }
+    { // Dodge Potential: the number, its price, and a bar scaled to the table's maximum in the ring's colour ramp
+      const dg = d.dodge, tile = $('vt-dodge');
+      $('r-dodge').textContent = dg.ready ? Math.round(dg.best) : '–';
+      $('r-dodge-price').textContent = dg.ready ? `costs ${Math.round(Math.max(0, dg.price))} m of range` : 'computing the table…';
+      $('r-dodgebar').style.width = `${Math.round(dg.frac * 100)}%`; tile.style.setProperty('--dodge', ringCss(d.pinned ? 0 : dg.frac)); }
+    $('r-g').textContent = gSmooth.toFixed(1);
     { const ro = $('ro-range'); ro.hidden = !(run && run.chase);   // the chaser exists only in the Flee lessons
       if (!ro.hidden) { $('r-range').textContent = Math.round(chase.range); const dv = CHASE.speed - qRot(qAtt, S.v)[0];
         $('r-range-rate').textContent = Math.abs(dv) < 0.5 ? 'holding' : dv > 0 ? `closing ${dv.toFixed(0)} m/s` : `opening ${(-dv).toFixed(0)} m/s`; } }
     $('r-tvi').textContent = d.speed > 3 ? Math.round(d.tviDeg) : '–';
-    $('r-tank').textContent = ctl.unlimited ? '∞' : S.c.boostLocked ? `${Math.round(S.tank)}🔒` : Math.round(S.tank);
+    $('r-tank').textContent = ctl.unlimited ? '∞' : Math.round(S.tank);
     $('r-tankbar').classList.toggle('locked', !!S.c.boostLocked && !ctl.unlimited); $('r-roll').textContent = Math.round(Math.abs(S.roll || 0)); $('r-tankbar').style.width = `${S.tank}%`;
     const mode = $('r-mode'); mode.textContent = d.boost ? 'Boost' : 'SCM'; mode.className = `chip ${d.boost ? 'on-boost' : 'on-scm'}`;
     $('r-pin').hidden = !d.pinned; $('r-pin').className = 'chip pinned'; }
   // Screen readers: announce what changed (boost, the limit, lockout), not the speed every few seconds.
   const ev = `${d.boost ? 'Boost on' : 'Boost off'}${d.pinned ? ', at your speed limit' : ''}${S.c.boostLocked && !ctl.unlimited ? ', boost locked until the tank refills to 25 percent' : ''}`;
-  liveT += dt; if (ev !== lastEv && liveT > 0.5) { liveT = 0; lastEv = ev; $('live').textContent = `${ev}. Speed ${Math.round(d.speed)} meters per second, dodge room ${Math.round(d.roomLeft)}.`; }
+  liveT += dt; if (ev !== lastEv && liveT > 0.5) { liveT = 0; lastEv = ev; $('live').textContent = `${ev}. Speed ${Math.round(d.speed)} meters per second, sideways room ${Math.round(d.roomLeft)}, dodge potential ${Math.round(d.dodge.best)} meters in ${DODGE.windowS} seconds.`; }
 }
 function resizeAll() { egg.resize(); pilot.resize(); }
 new ResizeObserver(resizeAll).observe(document.querySelector('.views'));
@@ -1539,7 +1652,13 @@ applyTabs(); drawKnob(); setThr(0); resizeAll(); refreshHints(); requestAnimatio
 // First visit: set up controls, the way Stay On Target opens with its setup wizard.
 // First visit: the Star Citizen keyboard defaults apply silently; the Controls button opens the setup wizard.
 // For automated checks (headless browser runs): a read-only peek at the simulator's state.
-window.speedwallDebug = { get: () => ({ S, run, chase, script, maneuver }) };
+window.speedwallDebug = {
+  get: () => { const dg = derive(S, currentInput()).dodge; return { S, run, chase, script, maneuver, dodge: { left: dg.left, right: dg.right, up: dg.up, down: dg.down, price: dg.price, windowS: dg.windowS, best: dg.best, max: dg.max, ready: dg.ready } }; },
+  dodgeTable: () => DODGE_TABLE,
+  // one 60 Hz frame's worth of physics (four DT steps and the readouts' derive, Dodge Potential included), for timing
+  perfFrame: () => { const inp = currentInput(); let c = S; for (let i = 0; i < 4; i++) c = step(c, inp.u, inp.boost, DT); return derive(c, inp).speed; },
+  dodgeAt: (vx, boost = true, held = true) => { const r = DODGE_DIRS.map(dir => dodgeRun(vx, boost, held ? 1 : 0, dir)); return Object.fromEntries(DODGE_DIRS.map((d, k) => [d, r[k]])); },
+};
 </script>
 
 </body>
