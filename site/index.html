@@ -126,8 +126,9 @@ details.more-d > span { display: block; color: var(--fg-2); font-size: .8rem; li
 .lbl { position: absolute; transform: translate(-50%, -50%); font: 600 .68rem var(--font-data); letter-spacing: .02em; white-space: nowrap; color: var(--muted); text-shadow: 0 0 4px #05080d, 0 1px 2px #05080d; }
 /* text labels sit on a small dark pill so they stay readable over the egg's rings and rim (the TVI icon has no text) */
 .lbl:not(:empty):not(:has(svg)) { padding: 2px 7px; border-radius: 999px; background: rgba(5,8,13,.62); }
-.lbl.boost { color: var(--boost); } .lbl.scm { color: var(--scm); } .lbl.tvi { color: var(--tvi); } .lbl.room { color: var(--fg); }
+.lbl.boost { color: var(--boost); } .lbl.scm { color: var(--scm); } .lbl.tvi { color: var(--tvi); } .lbl.room { color: var(--fg); } .lbl.tgt { color: var(--warn, #ff6a55); margin-top: -16px; }
 .view canvas.inset { position: absolute; inset: auto; left: 10px; bottom: 36px; width: 150px; height: 150px; touch-action: auto; border: 1px solid var(--line-2); border-radius: var(--r-md); background: rgba(7,11,18,.8); }
+.view canvas.inset.pos { left: auto; right: 10px; bottom: auto; top: 52px; width: 176px; height: 136px; }
 #slice-big { position: absolute; inset: 0; width: 100%; height: 100%; }
 
 /* ── legend ── */
@@ -412,6 +413,7 @@ footer a { color: var(--fg-2) !important; }
         <button id="t-frame" aria-pressed="true" title="On: the egg and the ship turn with the ship, and your velocity stays put in space (pitch the nose up and the 520 end goes up with it). Off: the view stays attached to the ship, so the velocity moves instead.">Egg Turns with Ship</button>
       </div>
       <canvas class="inset" id="c-inset" aria-hidden="true"></canvas>
+      <canvas class="inset pos" id="c-pos" aria-hidden="true" hidden></canvas>
       <div class="caption" id="cap-egg"></div>
     </section>
     <section class="view" id="v-pilot" data-hidden="false" aria-label="Pilot view: space dust, crosshair and TVI">
@@ -445,6 +447,7 @@ footer a { color: var(--fg-2) !important; }
     <div class="vt" id="vt-tank"><b>Boost Tank</b><span class="num" id="r-tank">100</span><small>%</small><div class="tank"><i id="r-tankbar"></i></div></div>
     <div class="vt" title="Which speed limit applies right now: Boost (the amber egg) or SCM (the blue ball). At Limit shows while the flight computer holds you at that limit."><b>Flight Mode</b><span class="chip" id="r-mode">SCM</span> <span class="chip pinned" id="r-pin" hidden>At Limit</span></div>
     <div class="vt" id="ro-range" hidden title="ARITHMETIC, not a measured rule: a chaser that holds 520 m/s along your starting line, starting 550 m behind. Every second it gains 520 minus your speed along that line, in metres: hold the wall and it stays back, give up speed and it closes. Both numbers are stated assumptions, kept as named constants (CHASE in the page source) so a patch can change them. Nothing here models the chaser's aim, the lead pip, projectile speed or hits: that needs a two-pilot test."><b>Chaser Range</b><span class="num" id="r-range">550</span><small>m</small><small class="vt-sub" id="r-range-rate">holding</small></div>
+    <div class="vt" id="vt-target" hidden title="The target box in the Fighting Fundamentals lessons, laid out like the game's: range, then the Δ number in brackets on the Star Citizen target box. Here + means the range is shrinking (ARITHMETIC on the simulated positions and velocities; whether the game's bracket uses the same sign is not confirmed). The target is a point with a constant velocity set by the lesson: no AI, no aim, no shooting."><b>Range · Closing</b><span class="num" id="r-tgt-range">600</span><small>m</small><small class="vt-sub" id="r-tgt-closing">[+51 m/s]</small></div>
   </div>
   </div>
 
@@ -497,8 +500,14 @@ footer a { color: var(--fg-2) !important; }
           <button data-preset="ck-escape">Escape Corkscrew<small>Full forward and full up, one gradual roll: harder push, less range</small></button>
         </div>
         <h3>Fighting Fundamentals</h3>
-        <p class="lessons-how">Aiming, closing distance and rate fighting come here next; for now, how to corkscrew and still shoot.</p>
+        <p class="lessons-how">Getting close and staying there is distance management: read the closing speed, aim in pitch, and learn what turn rate and thrust let you hold at knife range. The target here is a point with a set velocity, in SCM unless the lesson says boost.</p>
         <div class="mgrid">
+          <button data-preset="delta-read">Read the Closing Speed<small>Chase a target from 600 m: the bracket shows whether the range is shrinking</small></button>
+          <button data-preset="aim-pitch">Aim With Pitch, Not Yaw<small>A target 60° off: roll it into the pitch plane, then pitch onto it</small></button>
+          <button data-preset="pole-drill">The Pole Drill<small>Circle a point at 100 m, nose on it: 116 m/s is the ceiling</small></button>
+          <button data-preset="binary-circle">Close Distance: Binary Circle<small>Forward half, down a quarter, nose on target: 600 m closes in 4.4 s</small></button>
+          <button data-preset="ck-approach">Corkscrew to Approach<small>The flee helix flown at a target: it costs about 1 m/s of closing</small></button>
+          <button data-preset="rate-basics">Why Turn Rate Wins Up Close<small>A target crossing at 225 m/s inside 190 m outruns your nose</small></button>
           <button data-preset="ck-shoot">Corkscrew While Shooting Ahead<small>For a target ahead: a slow roll keeps the TVI nearly still</small></button>
         </div>
       </section>
@@ -564,7 +573,7 @@ footer a { color: var(--fg-2) !important; }
 import { Renderer, Camera, Transform, Program, Mesh, Geometry, Orbit, Vec3 } from './vendor/ogl.mjs';
 import { createControls, keyName } from './js/controls.mjs';
 import { createHud } from './js/hud.mjs';
-import { step as coreStep, derive as coreDerive, restState, capped, boostActive, eggRadiusAlong, lateralRoom as coreRoom, gladius, G0, angularVelocity, stickScaled, restPilot, stepPilot, vision } from './vendor/speedwall-core.mjs';
+import { step as coreStep, derive as coreDerive, restState, capped, boostActive, eggRadiusAlong, lateralRoom as coreRoom, gladius, G0, angularVelocity, stickScaled, restPilot, stepPilot, vision, WEAPON, closingSpeed, timeOfFlight, timeToRange, timeToNose, orbitLimit, outrateRadius } from './vendor/speedwall-core.mjs';
 
 /* ───────────────────────── physics: the tested core (packages/core), bundled with the Gladius profile ─────────────────────────
    site/vendor/speedwall-core.mjs is generated by `pnpm build:alpha`. The core's ship frame is y = right; this page's
@@ -611,7 +620,7 @@ let script = null;
 // pad and boost lock the maneuver set are cleared too (otherwise they keep flying the ship).
 function endManeuver(resetOnScreen) {
   if (!script && !maneuver) return;
-  script = null; maneuver = null; dodge = null; markPreset(null); ctl.rollHold = 0; egg.chase(false);
+  script = null; maneuver = null; dodge = null; markPreset(null); ctl.rollHold = 0; egg.chase(false); tgt.on = false;
   if (!run || !run.shown) { $('runbar').hidden = true; setNote(''); } else $('run-msg').textContent = 'You have the controls.';
   run = null;
   if (resetOnScreen) { setThr(0); ctl.padL = ctl.padU = 0; ctl.padSticky = false; drawKnob(); setLock(false); }
@@ -775,8 +784,12 @@ $('unlimited').addEventListener('change', e => { ctl.unlimited = e.target.checke
 function reset(pinned) {
   PS = restPilot();
   if (pinned === 'rest') pinned = false; if (pinned === 'nose') pinned = true;
-  if (typeof pinned === 'object' && pinned) { const { vx, boost } = pinned; reset(false); S = { ...mkState(vx, boost), x: S.x }; setLock(boost); return; }
-  script = null; maneuver = null; dodge = null; run = null; markPreset(null); ctl.rollHold = 0; qAtt = [0, 0, 0, 1]; controls.mouse.center(); egg.chase(false);
+  if (typeof pinned === 'object' && pinned) { const { vx, vy = 0, vz = 0, boost, cmd } = pinned; reset(false); S = { ...mkState(vx, boost), x: S.x }; setLock(boost);
+    if (vy || vz) { S.v = [vx, vy, vz]; S.c = { ...S.c, vWorld: toA(S.v) }; }
+    // cmd: the thrusters start at this input's command instead of slewing up to it, so a lesson that starts on a circle stays on it (as the core's orbitSim does)
+    if (cmd) S.c = { ...S.c, cmd: capped(coreInput(cmd, boost), gladius, boost) };
+    return; }
+  script = null; maneuver = null; dodge = null; run = null; markPreset(null); ctl.rollHold = 0; qAtt = [0, 0, 0, 1]; controls.mouse.center(); egg.chase(false); tgt.on = false;
   const vx = pinned === 'scm' ? 225 : pinned ? 520 : 0;
   S = { ...mkState(vx, pinned === true), x: S.x };
   trail.length = 0; path.length = 0; setThr(pinned ? 100 : 0); setLock(pinned === true); ctl.padL = ctl.padU = 0; ctl.padSticky = false; drawKnob();
@@ -807,6 +820,61 @@ $('pause').onclick = togglePause;
 // (Apprentice_One 2025-05-01: roll "at a gradual rate"; Johnathan Winters 2024-12-30 / 2025-11-29: roll is not the dodge).
 const SHALLOW = (f) => [[0, { f, l: 0, u: .5, boost: true, r: 1, rf: .25 }]];
 const SCM_PITCH90 = 90 / gladius.scm.rotationDps.pitch;   // 1.32 s at the measured 68 °/s (fixture r10_turn90_scm flew 1.33 s)
+const RAD = Math.PI / 180;
+// ── The target (Fighting Fundamentals) ──
+// One point target with a constant velocity set per lesson: no AI, no aim, no shooting, no hit model. ENGAGE holds the named
+// constants those lessons are built on, each with its source, so a game patch is a one-line change here:
+//   range    600 m    the start range, inside the 500-600 m engagement range pilots report (assumed)
+//   closing  51 m/s   the bracket on Alex's in-game target box, "166.9m [51m/s]" (screenshot, 2026-10-11)
+//   knife    100 m    knife-fight range for the pole drill and the crossing pass (assumed; Apprentice_One names no number)
+//   crossing 225 m/s  the SCM top speed (measured): the fastest an unboosted ship crosses your nose
+// Closing is + while the range shrinks (the core's CLOSING_SIGN). Whether the game's bracket carries the same sign is not
+// confirmed (open question, 2026-10-11). Bullet flight times use WEAPON.projectileSpeed_mps, 1,800 m/s: sourced from
+// Apprentice_One (2024-11-08, laser repeaters), not measured for the CF-117 Panther.
+const ENGAGE = { range: 600, closing: 51, knife: 100, crossing: gladius.scm.speedCap };
+const ORBIT = orbitLimit(gladius, 'scm', ENGAGE.knife, 'pitch');            // the pole drill's ceilings at knife range (thrust, turn rate, cap)
+const AIM = timeToNose(gladius, 'scm', 60, 90);                             // a target 60° off in the yaw plane: no roll / roll then pitch / diagonal, s
+const OUTRATE = { pitch: outrateRadius(gladius, 'scm', ENGAGE.crossing, 'pitch'), yaw: outrateRadius(gladius, 'scm', ENGAGE.crossing, 'yaw') };
+const JOUST_R = ENGAGE.crossing ** 2 / (gladius.scm.G.fwd * g0);           // the tightest nose-on circle at the SCM cap, v²/a (arithmetic)
+const CROSS_START = [ENGAGE.knife, 0, -150];                                // rate-basics: the crossing target starts here, ship frame (assumed)
+const fmtSigned = v => { const n = Math.round(v); return `${n > 0 ? '+' : n < 0 ? '−' : ''}${Math.abs(n)}`; };
+// Live target state. x, v: world frame (page axes); rel: the target relative to the ship, ship frame. nose: a scripted nose rule
+// keeps the nose on the target from `noseFrom` seconds into the lesson: 'track' pitches and yaws straight at it, 'rollPitch' rolls
+// it into the pitch plane first and then pitches (Apprentice_One, 2024-05-09). Both are the core's idealised orbitSim rule, capped
+// at the measured rates: geometry, not a pilot model.
+const tgt = { on: false, x: [0, 0, 0], v: [0, 0, 0], rel: [1, 0, 0], range: 0, closing: 0, offDeg: 0, nose: '', noseFrom: 0, plane: 'xz', trail: [] };
+const qConj = q => [-q[0], -q[1], -q[2], q[3]];
+function startTarget(p) {
+  tgt.on = !!p.target; tgt.trail.length = 0; if (!tgt.on) return;
+  const T = typeof p.target === 'function' ? p.target() : p.target; tgt.x = [S.x[0] + T.at[0], S.x[1] + T.at[1], S.x[2] + T.at[2]]; tgt.v = [...(T.v || [0, 0, 0])];
+  tgt.nose = T.nose || ''; tgt.noseFrom = T.noseFrom || 0; tgt.plane = T.plane || 'xz'; updateTarget(0);
+}
+function updateTarget(dt) {
+  if (dt) tgt.x = [tgt.x[0] + tgt.v[0] * dt, tgt.x[1] + tgt.v[1] * dt, tgt.x[2] + tgt.v[2] * dt];
+  const rw = [tgt.x[0] - S.x[0], tgt.x[1] - S.x[1], tgt.x[2] - S.x[2]], vw = qRot(qAtt, S.v);
+  tgt.rel = qRot(qConj(qAtt), rw); tgt.range = len(rw);
+  tgt.closing = closingSpeed(rw, [tgt.v[0] - vw[0], tgt.v[1] - vw[1], tgt.v[2] - vw[2]]);
+  tgt.offDeg = tgt.range > 1e-6 ? Math.acos(Math.max(-1, Math.min(1, tgt.rel[0] / tgt.range))) / RAD : 0;
+}
+// The nose rule: the shortest turn that takes the nose to the target, pitch and yaw only, each inside its measured rate with the
+// stick scaled to unit length, proportional over the last step so it never overshoots. Rotation signs follow the core's rotation.ts
+// (pitch up is a turn about −y, yaw right about −z).
+function noseRule(stick, boost, dt) {
+  const R = boost ? ROT_DPS.boost : ROT_DPS.scm, tv = qRot(qConj(qAtt), tgt.v);
+  // where the target will be at the end of this step (first order), so the rule does not trail it by one step
+  const rel = [tgt.rel[0] + (tv[0] - S.v[0]) * dt, tgt.rel[1] + (tv[1] - S.v[1]) * dt, tgt.rel[2] + (tv[2] - S.v[2]) * dt], r = len(rel); if (r < 1e-6) return;
+  const d = [rel[0] / r, rel[1] / r, rel[2] / r];
+  if (tgt.nose === 'rollPitch') {   // roll the target into the pitch plane first (the nearer pole), then pitch
+    let e = Math.atan2(d[1], d[2]); if (e > Math.PI / 2) e -= Math.PI; else if (e < -Math.PI / 2) e += Math.PI;
+    if (Math.abs(e) > 0.5 * RAD) { const w = Math.min(R.roll * RAD, Math.abs(e) / dt); stick.roll = -Math.sign(e) * w / (R.roll * RAD); stick.pitch = stick.yaw = 0; return; }
+    stick.roll = 0;
+  }
+  const ang = Math.acos(Math.max(-1, Math.min(1, d[0])));
+  if (ang < 1e-6) { stick.pitch = 0; stick.yaw = 0; return; }
+  const sn = Math.sin(ang), ay = -d[2] / sn, az = d[1] / sn;   // the turn axis, nose × target, unit length
+  const rp = R.pitch * RAD, ry = R.yaw * RAD, w = Math.min(1 / Math.hypot(ay / rp, az / ry), ang / dt);
+  stick.pitch = -ay * w / rp; stick.yaw = -az * w / ry;
+}
 const PRESETS = {
   // ── The Speed Wall: SCM vs Boost ──
   'scm-strafe': { title: 'Strafe From a Stop in SCM', result: { at: 5, sim: () => `${Math.round(Math.abs(S.v[1]))} m/s sideways`, game: '226 m/s (r1_scm_right)' }, start: 'rest', go: 0,
@@ -881,7 +949,52 @@ const PRESETS = {
                   see: 'You keep ~513 m/s and the launch pulls ~20 G, greying the screen at about 2 s (measured at faster rolls). Full up-stick gives up ~190 m of range in 10 s against a 520 m/s chaser (arithmetic).',
                   more: 'Fixture r9_vis_bst_f100_up_r50 (roll 120 °/s): 19.8 G peak, HUD grey at 2.2 s; corkscrewAtWall (240 °/s): 514 m/s at 5.4 G side. The 60 °/s roll flown here is not measured. Up is the axis you tolerate most G in (glocTrials). Reverse the roll only near blackout; reversing on a timer folds the helix back on itself. Not modelled: the lead pip, projectile speed, or whether any of this throws off a shooter.',
                   steps: [[0, { f: 1, l: 0, u: 1, boost: true, r: 1, rf: .25 }]] },
-  // ── Fighting Fundamentals (Brief C2 adds aiming, closing distance and rate fighting) ──
+  // ── Fighting Fundamentals ──
+  // Distance management for pilots who want to knife fight: read the closing speed, aim in pitch, and what thrust and turn rate
+  // let you hold at knife range. Every number is measured (fixture), sourced (WEAPON) or arithmetic on ENGAGE and the core's
+  // engagement math (packages/core/src/engage.ts, docs/engagement-math.md). The target is a point; aim, pip and hits are not modelled.
+  'delta-read': { title: 'Read the Closing Speed', result: { at: 8, sim: () => `range ${Math.round(tgt.range)} m · closing ${fmtSigned(tgt.closing)} m/s · bullet flight ${timeOfFlight(tgt.range, tgt.closing).toFixed(3)} s against ${timeOfFlight(tgt.range, 0).toFixed(3)} at Δ 0`,
+                  label: 'Arithmetic', game: () => `at +${ENGAGE.closing} m/s the range falls ${ENGAGE.closing} m every second: ${ENGAGE.range} to 300 m takes ${timeToRange(ENGAGE.range, 300, ENGAGE.closing).toFixed(1)} s; a ${WEAPON.projectileSpeed_mps.toLocaleString('en')} m/s bullet gets ${Math.round((1 - timeOfFlight(550, ENGAGE.closing) / timeOfFlight(550, 0)) * 100)} % less flight time` }, start: 'rest', go: 0,
+                  target: { at: [ENGAGE.range, 0, 0], v: [gladius.scm.speedCap - ENGAGE.closing, 0, 0], plane: 'xy' },
+                  do: 'In SCM, hold full forward after a target 600 m ahead that is running at 174 m/s. Watch Range · Closing.',
+                  see: 'Closing reads negative while the target outruns you and +51 once you hold 225 m/s (measured cap): the range then falls 51 m a second (arithmetic). The same 51 m/s gives a bullet only about 3 % less flight time.',
+                  more: 'Closing speed = −(r·v)/|r| on the simulated positions (core closingSpeed). Flight time = range / (1,800 + Δ) if bullets inherit your velocity (assumed, Alex 2026-10-11); 1,800 m/s is Apprentice_One\'s laser-repeater figure (2024-11-08), not measured for the Panther. At 550 m, +51 m/s is 0.297 s against 0.306: 3 %, a little more if the Panther\'s bullet is slower. Δ is distance management, not an accuracy boost. The game\'s bracket sign is unconfirmed; the target speed is 225 − 51.',
+                  steps: [[0, { f: 1, l: 0, u: 0, boost: false }]] },
+  'aim-pitch':  { title: 'Aim With Pitch, Not Yaw', result: { at: 3, sim: () => (run.noseOn == null ? 'nose not yet on the target' : `nose on the target ${run.noseOn.toFixed(2)} s after the roll starts (roll ${run.rollEnd == null ? '–' : run.rollEnd.toFixed(2)} s, then pitch)`),
+                  label: 'Arithmetic', game: () => `roll 90° then pitch 60° ${AIM.rollThenPitch.toFixed(2)} s, one yaw snap ${AIM.noRoll.toFixed(2)} s, roll and pitch together ${AIM.diagonal.toFixed(2)} s (measured rates)` }, start: 'rest', go: 0,
+                  target: { at: [ENGAGE.range * Math.cos(60 * RAD), ENGAGE.range * Math.sin(60 * RAD), 0], v: [0, 0, 0], nose: 'rollPitch', plane: 'xy' },
+                  do: 'From a stop in SCM, target 60° off the nose to your left: roll left until it sits above the nose, then pitch onto it.',
+                  see: 'Once rolled you track a crossing target 30 % faster in pitch than in yaw (68 against 52 °/s, measured). The snap is slower: 0.45 s roll plus 0.88 s pitch is 1.33 s; a yaw snap 1.15 s (arithmetic).',
+                  more: 'Apprentice_One (2024-05-09, 3.23 PTU): roll so you track in pitch. Rates from the fixture rotation gauges (round 3): pitch 68, yaw 52.1, roll 199.9 °/s. Rolling first beats a yaw snap only past 100° off the nose (core noseCrossoverDeg); roll and pitch together on one stick take 1.27 s. His other reason, that ESP locks on more easily in pitch, is his claim and is not modelled. The nose rule is idealised.',
+                  steps: [[0, { f: 0, l: 0, u: 0, boost: false }]] },
+  'pole-drill': { title: 'The Pole Drill', result: { at: 10, sim: () => `range held ${Math.round(run.rMin)}-${Math.round(run.rMax)} m at ${Math.round(len(S.v))} m/s · nose within ${run.offMax.toFixed(1)}° · ${Math.round(run.turns)}° of circle in 10 s`,
+                  label: 'Arithmetic', game: () => `${Math.round(ORBIT.vMax)} m/s is the most forward thrust (13.7 G, measured) can hold on a ${ENGAGE.knife} m circle; the pitch rate would allow ${Math.round(ORBIT.vRotation)}` }, start: { vx: 0, vz: -ORBIT.vMax, boost: false, cmd: { f: 1, l: 0, u: 0 } }, go: 0,
+                  target: { at: [ENGAGE.knife, 0, 0], v: [0, 0, 0], nose: 'track', plane: 'xz' },
+                  do: 'Circle a fixed point at 100 m with full forward in SCM, nose pinned on it in pitch, moving 116 m/s across it.',
+                  see: 'The circle holds: with the nose on the centre, forward thrust is the string that pulls you round. At 100 m it caps you at 116 m/s (arithmetic, √(a·r)); faster and the circle opens, slower and it tightens.',
+                  more: 'Apprentice_One\'s pole drill (2025-05-01): orbit a station feature at minimum range in full pitch; the faster and closer, the harder. Needed turn rate v/r = 66 °/s against 68 measured; thrust limit √(13.7 g × 100 m) = 116 m/s (core orbitLimit, checked by orbitSim to 0.1 %). The circle is not self-correcting: a fixed stick with the speed 10 % off moves it by tens of metres in 20 s (orbitSim), so modulate the throttle.',
+                  steps: [[0, { f: 1, l: 0, u: 0, boost: false }]] },
+  'binary-circle': { title: 'Close Distance: Binary Circle', result: { at: 6, sim: () => `closest ${Math.round(run.rMin)} m at ${run.tMin.toFixed(1)} s · closing peaked +${Math.round(run.cloMax)} m/s · nose ${Math.round(run.offMax)}° off at the pass`,
+                  label: 'Arithmetic', game: () => `at 225 m/s the tightest nose-on circle is ${Math.round(JOUST_R)} m (v²/a); a ${ENGAGE.knife} m circle needs ${Math.round(ORBIT.vMax)} m/s` }, start: 'rest', go: 0,
+                  target: { at: [ENGAGE.range, 0, 0], v: [0, 0, 0], nose: 'track', plane: 'xz' },
+                  do: 'Nose on a target 600 m ahead in SCM: forward at half, down-strafe a quarter, nose on it as far as it follows (Winters, 2024-12-30).',
+                  see: 'You reach 225 m/s and close at up to ~210 m/s: 600 m is 75 m in 4.4 s (model). Then you fly through: at 225 m/s no nose-on circle is tighter than 377 m (arithmetic); the nose falls 50° behind.',
+                  more: 'Johnathan Winters\' binary circle (2024-12-30): forward half, down-strafe a quarter, "modulate the throttle as needed". In SCM half forward still reaches the 225 m/s cap (measured), so the inputs alone are the approach, not the orbit: holding a circle means throttle matched to v²/r (core orbitThrottle) and speed under the limit for that radius, which the pole drill shows. His strafe taps are not taught here (Alex, 2026-10-10). Nose rule idealised.',
+                  steps: [[0, { f: .5, l: 0, u: -.25, boost: false }]] },
+  'ck-approach': { title: 'Corkscrew to Approach', result: { at: 10, sim: () => `range ${Math.round(tgt.range)} m after 10 s (started ${CHASE.range}) · closing ${tgt.closing.toFixed(1)} m/s · TVI ${run.tvi.toFixed(1)}°`,
+                  label: 'Arithmetic', game: () => `the helix costs 520 × (1 − cos TVI) along the line: ${(CHASE.speed * (1 - Math.cos(run.tvi * RAD))).toFixed(1)} m/s; the deeper Corkscrew While Shooting Ahead (TVI ~13°) costs ${(CHASE.speed * (1 - Math.cos(13 * RAD))).toFixed(0)}` }, start: { vx: 520, boost: true }, go: 0,
+                  target: () => ({ at: [CHASE.range, 0, 0], v: [CHASE.speed, 0, 0], nose: 'track', plane: 'xy' }),   // CHASE is defined with the loop, below
+                  do: 'The Flee: Hold the Wall helix flown at a target 550 m ahead holding 520 m/s: full forward, half up, one gradual roll, boost held.',
+                  see: 'Your speed stays on the wall, so the helix costs about 1 m/s of closing (arithmetic on the simulated velocity): the TVI circles the crosshair inside 4°, the target stays centred. Against an equal-speed target the range holds.',
+                  more: 'The mirror of Flee: Hold the Wall: you are the chaser, against CHASE\'s 550 m and 520 m/s. Speed along the line is v·cos(TVI); at the wall the side push is ~3 G, so the TVI stays inside 4° and the cost under 1 m/s once the helix forms (about 2 m/s averaged over the first 10 s). The nose rule keeps the target centred. Not modelled: whether the helix makes you harder to hit, or the target\'s evasion (two-pilot).',
+                  steps: SHALLOW(1) },
+  'rate-basics': { title: 'Why Turn Rate Wins Up Close', result: { at: 5, sim: () => (run.noseOn == null ? 'the nose never caught the target' : `nose on at ${run.noseOn.toFixed(2)} s (${Math.round(run.rOn)} m), then up to ${Math.round(run.lagMax)}° behind at ${Math.round(run.rLag)} m`),
+                  label: 'Arithmetic', game: () => `a ${ENGAGE.crossing} m/s target outruns your pitch (68 °/s) inside ${Math.round(OUTRATE.pitch)} m and your yaw (52 °/s) inside ${Math.round(OUTRATE.yaw)} m (v/ω)` }, start: 'rest', go: 0,
+                  target: { at: CROSS_START, v: [0, 0, ENGAGE.crossing], nose: 'track', plane: 'xz' },
+                  do: 'From a stop in SCM, pitch down onto a target 56° below, then follow it up as it crosses 100 m ahead at 225 m/s.',
+                  see: 'The nose catches it, then falls up to 27° behind as it passes (model): inside 190 m a 225 m/s target turns faster than your nose (arithmetic, v/ω). Outside that radius it keeps up; in yaw it is 247 m.',
+                  more: 'Outrate radius = crossing speed / turn rate (core outrateRadius): pitch 68 °/s, yaw 52.1 (fixture, round 3). This is one nose against one crossing speed. Who wins a real rate fight depends on both ships\' rates, both pilots\' throttle and strafe, and the ESP: not measured, needs a two-pilot test. Boost lifts pitch to 81.6 °/s (measured), the radius to 158 m. Nose rule idealised.',
+                  steps: [[0, { f: 0, l: 0, u: 0, boost: false }]] },
   'ck-shoot':   { title: 'Corkscrew While Shooting Ahead', result: { at: 10, sim: () => `TVI ${Math.round(run.tvi)}° off the nose`, game: 'not measured at this roll rate (model: rule of thumb ~13° at 100° FOV)' }, start: 'rest', go: 0,
                   do: 'Boost, forward and full up, with a slow roll of ~27 °/s. For a target ahead of you, not for fleeing.',
                   see: 'The TVI swings out and settles 10-15° off the nose after ~10 s (model; the research rule of thumb says ~13°), so your target does not spin across the screen.',
@@ -906,7 +1019,8 @@ function markPreset(key) { document.querySelectorAll('[data-preset]').forEach(b 
 document.querySelectorAll('[data-preset]').forEach(b => b.onclick = () => {
   const key = b.dataset.preset, p = PRESETS[key]; reset(p.start); script = { t: 0, go: p.go || 0, steps: p.steps, i: -1 }; maneuver = key; markPreset(key);
   dodge = p.dodge ? { t: 0, dist: 0 } : null;
-  run = { t: 0, min: Infinity, peakG: 0, tvi: 0, rel: null, shown: false, chase: !!p.chase }; chase.range = CHASE.range;
+  run = { t: 0, min: Infinity, peakG: 0, tvi: 0, rel: null, shown: false, chase: !!p.chase, rMin: Infinity, rMax: 0, tMin: 0, cloMax: -Infinity, offMax: 0, noseOn: null, rOn: 0, lagMax: 0, rLag: 0, rollEnd: null, turns: 0, st: 0 }; chase.range = CHASE.range;
+  startTarget(p);
   $('run-name').textContent = p.title; $('run-result').textContent = ''; $('run-msg').hidden = false; $('runbar').hidden = false;
   setNote(lessonHtml(p));
   egg.chase(true);   // ride behind the ship with its limits in frame
@@ -1172,7 +1286,7 @@ const egg = !hasWebGL ? stubView : (() => {
   const mk = (k, cls, text) => { const d = document.createElement('div'); d.className = `lbl ${cls}`; d.textContent = text; ov.appendChild(d); labels[k] = d; return d; };
   mk('nose', 'boost', 'nose 520'); mk('side', 'boost', 'sides 394'); mk('tail', 'boost', 'tail 268'); mk('scm', 'scm', 'SCM 225');
   mk('settle', 'tvi', ''); mk('rest', '', 'rest 0');
-  mk('reachL', 'room', ''); mk('reachR', 'room', '');
+  mk('reachL', 'room', ''); mk('reachR', 'room', ''); mk('tgt', 'tgt', '');
   const tviIcon = document.createElement('div'); tviIcon.className = 'lbl tvi';
   tviIcon.innerHTML = '<svg width="34" height="20" viewBox="-17 -10 34 20"><circle r="5.5" fill="none" stroke="#7ef0c8" stroke-width="2"/><path d="M-15 0h9.5M5.5 0H15M0-5.5V-10" stroke="#7ef0c8" stroke-width="2"/></svg>';
   ov.appendChild(tviIcon);
@@ -1234,7 +1348,7 @@ const egg = !hasWebGL ? stubView : (() => {
     }
     // Render on demand (PLAN.md §9): skip the frame when nothing visible changed.
     const gp = R3(...st.x), gox = -((gp[0] * GRID_SLIDE) % GRID), goz = -((gp[2] * GRID_SLIDE) % GRID);
-    const cp = camera.position, key = [gox, goz, vx, vy, vz, cp.x, cp.y, cp.z, room, d.pinned, d.dodge.frac, trail.length, st.a[0], st.a[1], st.a[2], follow, frameW, ...qView, ...qTw]
+    const cp = camera.position, key = [gox, goz, vx, vy, vz, cp.x, cp.y, cp.z, room, d.pinned, d.dodge.frac, trail.length, st.a[0], st.a[1], st.a[2], follow, frameW, ...qView, ...qTw, tgt.on ? tgt.range : -1, ...tgt.rel]
       .map(x => (typeof x === 'number' ? x.toFixed(2) : x)).join();
     if (key === lastKey) return;
     lastKey = key;
@@ -1290,6 +1404,11 @@ const egg = !hasWebGL ? stubView : (() => {
     const ga = st.a, gl_ = len(ga);
     if (gl_ > 0.5) { const k = 9 / g0; dyn.seg(pv, T(R3(vx + ga[0]*k, vy + ga[1]*k, vz + ga[2]*k)), COL.boost, 1); }          // thrust
     if (d.pinned && d.req && len(d.req) > 0.5) { const k = 9 / g0, q = d.req; dyn.seg(pv, T(R3(vx + q[0]*k, vy + q[1]*k, vz + q[2]*k)), COL.grey, 0.8); } // dead thrust
+    let tgtEnd = null;
+    if (tgt.on && tgt.range > 1e-6) { // the target's direction from the ship: a dashed ray in the ship frame (the egg is velocity space, so only the direction is drawn)
+      const r = tgt.range, L = 150 + 40 * gs, dr = [tgt.rel[0] / r * L, tgt.rel[1] / r * L, tgt.rel[2] / r * L];
+      for (let i = 0; i < 12; i++) { const a = i / 12, b = (i + 0.6) / 12; dyn.seg(T(R3(vx + dr[0] * a, vy + dr[1] * a, vz + dr[2] * a)), T(R3(vx + dr[0] * b, vy + dr[1] * b, vz + dr[2] * b)), COL.warn, 0.85); }
+      tgtEnd = T(R3(vx + dr[0], vy + dr[1], vz + dr[2])); }
     dyn.end();
     renderer.render({ scene, camera, sort: true });
     place(labels.nose, rot(R3(520, 0, -70))); place(labels.tail, rot(R3(-300, 0, 0))); place(labels.side, rot(R3(0, 0, 420)));
@@ -1311,6 +1430,7 @@ const egg = !hasWebGL ? stubView : (() => {
     // the settle label and the TVI icon project close together in the chase cam: lift the label clear of the icon
     if (!labels.settle.hidden && !tviIcon.hidden) { const lx = parseFloat(labels.settle.style.left), ly = parseFloat(labels.settle.style.top), tx = parseFloat(tviIcon.style.left), ty = parseFloat(tviIcon.style.top);
       if (Math.abs(lx - tx) < 110 && Math.abs(ly - ty) < 22) labels.settle.style.top = `${ty - 24}px`; }
+    if (tgtEnd) { place(labels.tgt, rot(tgtEnd)); labels.tgt.textContent = `target ${Math.round(tgt.range)} m`; } else labels.tgt.hidden = true;
   }
   return { resize, draw, chase };
 })();
@@ -1363,7 +1483,10 @@ const pilot = !hasWebGL ? stubView : (() => {
     <g id="h-tvi" stroke="#7ef0c8" stroke-width="2.2" fill="none"><circle r="8"/><path d="M-22 0h14M8 0h14M0-8v-9"/></g>
     <g id="h-anti" stroke="#7ef0c8" stroke-width="2" fill="none" opacity=".8"><circle r="8"/><path d="M-5.6-5.6l11.2 11.2M5.6-5.6l-11.2 11.2"/></g>
     <g id="h-edge" fill="#7ef0c8"><path d="M0-9L16 0 0 9z"/></g>
-    <text id="h-lbl" fill="#7ef0c8" font-family="ui-monospace, Menlo, monospace" font-size="12" font-weight="600"></text>`;
+    <text id="h-lbl" fill="#7ef0c8" font-family="ui-monospace, Menlo, monospace" font-size="12" font-weight="600"></text>
+    <g id="h-tgt" stroke="#ff6a55" stroke-width="2" fill="none"><path d="M-16-9v-7h7M9-16h7v7M16 9v7h-7M-9 16h-7v-7"/><circle r="2" fill="#ff6a55" stroke="none"/>
+      <text id="h-tgt-lbl" y="-24" fill="#ff6a55" stroke="none" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="12" font-weight="600"></text></g>
+    <g id="h-tgt-edge" fill="#ff6a55"><path d="M0-9L16 0 0 9z"/><text y="-12" fill="#ff6a55" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="11" font-weight="600">target</text></g>`;
   const el = id => svg.querySelector(id);
   function resize() { const w = canvas.parentElement.clientWidth, h = canvas.parentElement.clientHeight; if (!w || !h) return; renderer.setSize(w, h);
     const vf = 2 * Math.atan(Math.tan(hfov * Math.PI / 360) / (w / h)) * 180 / Math.PI; camera.perspective({ aspect: w / h, fov: vf }); svg.setAttribute('viewBox', `0 0 ${w} ${h}`); ahud.resize(w, h); }
@@ -1381,10 +1504,17 @@ const pilot = !hasWebGL ? stubView : (() => {
     const w = canvas.parentElement.clientWidth, h = canvas.parentElement.clientHeight, cx = w / 2, cy = h / 2, f = (w / 2) / Math.tan(hfov * Math.PI / 360);
     const rc = el('#h-ring circle'); rc.setAttribute('cx', cx); rc.setAttribute('cy', cy); rc.setAttribute('r', f * Math.tan(ringDeg * Math.PI / 180)); el('#h-ring').style.display = ringOn ? '' : 'none';
     const show = (id, x, y, on) => { const g = el(id); g.style.display = on ? '' : 'none'; if (on) g.setAttribute('transform', `translate(${x} ${y})`); };
-    if (sp < 3) { show('#h-tvi', 0, 0, false); show('#h-anti', 0, 0, false); show('#h-edge', 0, 0, false); el('#h-lbl').textContent = ''; return; }
-    const vh = st.v.map(c => c / sp), fwd = vh[0], right = -vh[1], up = vh[2];
     const proj = (fx, rx, ux) => [cx + f * rx / fx, cy - f * ux / fx];
     const inView = ([x, y]) => x > 12 && x < w - 12 && y > 12 && y < h - 12;
+    { // the target box: where the lesson's target is, with the game's readout layout under it (range, then the bracketed closing speed)
+      const r = tgt.range, on = tgt.on && r > 1e-6, tf = on ? tgt.rel[0] / r : 0, pt = on && tf > 0.087 ? proj(tf, -tgt.rel[1] / r, tgt.rel[2] / r) : null;
+      if (pt && inView(pt)) { show('#h-tgt', ...pt, true); show('#h-tgt-edge', 0, 0, false); el('#h-tgt-lbl').textContent = `${Math.round(r)}m [${fmtSigned(tgt.closing)}m/s]`; }
+      else { show('#h-tgt', 0, 0, false);
+        if (on) { const rr = -tgt.rel[1] / r, uu = tgt.rel[2] / r, ang = Math.hypot(uu, rr) < 0.05 ? Math.PI / 2 : Math.atan2(-uu, rr), ex = cx + Math.cos(ang) * (w / 2 - 44), ey = cy + Math.sin(ang) * (h / 2 - 44);
+          const g = el('#h-tgt-edge'); g.style.display = ''; g.setAttribute('transform', `translate(${Math.min(w - 40, Math.max(40, ex))} ${Math.min(h - 40, Math.max(40, ey))}) rotate(${ang * 180 / Math.PI})`); }
+        else show('#h-tgt-edge', 0, 0, false); } }
+    if (sp < 3) { show('#h-tvi', 0, 0, false); show('#h-anti', 0, 0, false); show('#h-edge', 0, 0, false); el('#h-lbl').textContent = ''; return; }
+    const vh = st.v.map(c => c / sp), fwd = vh[0], right = -vh[1], up = vh[2];
     let tviPt = null;
     if (fwd > 0.087) { tviPt = proj(fwd, right, up); }
     if (tviPt && inView(tviPt)) { show('#h-tvi', ...tviPt, true); show('#h-edge', 0, 0, false); }
@@ -1438,11 +1568,51 @@ function drawSlice(canvas, st, d, big) {
   for (let i = SHIP_PLAN.length - 1; i >= 0; i--) c.lineTo(-SHIP_PLAN[i][0] * g, -SHIP_PLAN[i][1] * g);
   c.closePath(); c.fillStyle = '#c7d1e5'; c.fill(); c.strokeStyle = 'rgba(7,11,17,.9)'; c.lineWidth = 1; c.stroke();
   c.fillStyle = '#4aa3d8'; c.beginPath(); c.ellipse(0, -3.8 * g, 0.9 * g, 2.6 * g, 0, 0, 2 * Math.PI); c.fill(); c.restore();
+  if (tgt.on && tgt.range > 1e-6) { // the target's direction from the ship (the view is velocity space, so only the direction is drawn): a dashed ray and a diamond
+    const r = tgt.range, dx = -tgt.rel[1] / r, dy = tgt.rel[0] / r, L = (big ? 110 : 60), [sx, sy] = P(lat, fwd), ex = sx + dx * L, ey = sy - dy * L;
+    c.save(); c.strokeStyle = '#ff6a55'; c.lineWidth = big ? 1.5 : 1; c.setLineDash([4, 5]); c.beginPath(); c.moveTo(sx, sy); c.lineTo(ex, ey); c.stroke(); c.setLineDash([]);
+    const k = big ? 6 : 4; c.fillStyle = '#ff6a55'; c.beginPath(); c.moveTo(ex, ey - k); c.lineTo(ex + k, ey); c.lineTo(ex, ey + k); c.lineTo(ex - k, ey); c.closePath(); c.fill();
+    if (big) { c.font = '600 11px ui-monospace, Menlo, monospace'; c.textAlign = dx >= 0 ? 'left' : 'right'; c.fillText(`target ${Math.round(r)} m`, ex + (dx >= 0 ? 10 : -10), ey + 4); }
+    c.restore(); }
   if (big) { c.font = '600 12px ui-monospace, Menlo, monospace'; c.lineJoin = 'round';
     // labels sit beside the ends they name (the ship rides on the nose at top speed), on a dark halo so lines never cut them
     const lbl = (t, x, y, col, align) => { c.textAlign = align; c.strokeStyle = 'rgba(7,11,18,.9)'; c.lineWidth = 3.5; c.strokeText(t, x, y); c.fillStyle = col; c.fillText(t, x, y); };
     lbl('nose 520', ...P(34, 540), '#f2a33a', 'left'); lbl('tail 268', ...P(34, -292), '#f2a33a', 'left'); lbl('394', ...P(404, -14), '#f2a33a', 'left'); lbl('SCM 225', ...P(150, 190), '#5aa9e6', 'left');
-    if (curve) drawDodgeCurve(c, curve, d); }
+    if (curve) drawDodgeCurve(c, curve, d);
+    // the positions picture, top right, only where the view is tall enough to keep it off the egg (a landscape phone is not)
+    if (tgt.on && h >= 320) { const bw = Math.max(130, Math.min(220, Math.round(w * 0.34))), bh = Math.round(bw * 0.78); drawPositions(c, w - bw - 12, 40, bw, bh, true); } }
+}
+// The positions picture on its own canvas (the Speed Egg view's bottom-right inset, on desktops).
+function drawPosCanvas(canvas) {
+  const dpr = Math.min(devicePixelRatio || 1, 2), w = canvas.clientWidth, h = canvas.clientHeight; if (!w || !h) return;
+  const bw = Math.round(w * dpr), bh = Math.round(h * dpr); if (canvas.width !== bw || canvas.height !== bh) { canvas.width = bw; canvas.height = bh; }
+  const c = canvas.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, w, h); drawPositions(c, 0, 0, w, h, false);
+}
+// Positions, in one small picture (bottom right of the Top-Down view) while a target lesson runs: the target and the ship's
+// track over the last 10 s, in the world plane the lesson moves in (ship nose up the page at the start), scaled to fit. The main
+// view is velocity space; this is the only place the page draws where the ship and the target actually are.
+function drawPositions(c, x0, y0, bw, bh, box) {
+  const pad = 14;
+  const pr = tgt.plane === 'xy' ? q => [-q[1], q[0]] : q => [q[2], q[0]];   // world -> [right, up] on the page
+  const pts = []; for (let i = Math.max(0, path.length - 600); i < path.length; i += 2) pts.push(pr(path[i]));
+  const ship = pr(S.x), tp = pr(tgt.x); pts.push(ship, tp);
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  for (const [x, y] of pts) { if (x < minX) minX = x; if (x > maxX) maxX = x; if (y < minY) minY = y; if (y > maxY) maxY = y; }
+  const span = Math.max(maxX - minX, maxY - minY, 60), sc = (Math.min(bw, bh) - 2 * pad - 14) / span, cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
+  const X = x => x0 + bw / 2 + (x - cx) * sc, Y = y => y0 + 10 + bh / 2 - (y - cy) * sc;
+  c.save();
+  if (box) { c.fillStyle = 'rgba(7,11,18,.78)'; c.strokeStyle = 'rgba(140,165,205,.22)'; c.lineWidth = 1;
+    c.beginPath(); c.roundRect ? c.roundRect(x0, y0, bw, bh, 7) : c.rect(x0, y0, bw, bh); c.fill(); c.stroke(); }
+  c.font = '600 10px ui-monospace, Menlo, monospace'; c.textAlign = 'left'; c.fillStyle = '#c4cedc'; c.fillText('Positions, last 10 s', x0 + 8, y0 + 12);
+  { // scale bar: a round number of metres that fits a quarter of the box
+    const want = bw / 4 / sc, bar = [10, 20, 50, 100, 200, 500, 1000, 2000, 5000].reduce((b, v) => (v <= want ? v : b), 10);
+    c.strokeStyle = 'rgba(196,206,220,.6)'; c.beginPath(); c.moveTo(x0 + 8, y0 + bh - 8); c.lineTo(x0 + 8 + bar * sc, y0 + bh - 8); c.stroke();
+    c.fillStyle = '#8a99ae'; c.fillText(`${bar} m`, x0 + 10 + bar * sc, y0 + bh - 5); }
+  c.strokeStyle = 'rgba(196,168,255,.75)'; c.lineWidth = 1.5; c.beginPath();
+  for (let i = 0; i < pts.length - 2; i++) { const [x, y] = pts[i]; i ? c.lineTo(X(x), Y(y)) : c.moveTo(X(x), Y(y)); } c.stroke();
+  c.fillStyle = '#7ef0c8'; c.beginPath(); c.arc(X(ship[0]), Y(ship[1]), 3.5, 0, 2 * Math.PI); c.fill();
+  const k = 5, tx = X(tp[0]), ty = Y(tp[1]); c.fillStyle = '#ff6a55'; c.beginPath(); c.moveTo(tx, ty - k); c.lineTo(tx + k, ty); c.lineTo(tx, ty + k); c.lineTo(tx - k, ty); c.closePath(); c.fill();
+  c.restore();
 }
 // Where the Dodge Potential curve goes in the big Top-Down view: a column on the left when the view is wide, a strip
 // under the egg when it is tall. Returns the curve's box and the area left for the egg.
@@ -1605,6 +1775,8 @@ function frame(now) {
       // The core scales a stick vector longer than 1 back to unit length (measured: full pitch + yaw turns the nose
       // slower than pitch alone) and applies the boosted rates.
       const R = S.boost ? ROT_DPS.boost : ROT_DPS.scm, stick = { roll: live.roll, pitch: live.pitch, yaw: live.yaw };
+      // a target lesson's nose rule (idealised geometry, capped at the measured rates) flies pitch and yaw, and the roll in rollPitch mode
+      if (tgt.on && tgt.nose && script && script.t - script.go >= tgt.noseFrom) noseRule(stick, S.boost, DT);
       const om = angularVelocity(stick, gladius, S.boost), sc = stickScaled(stick, gladius);
       if (om[0] || om[1] || om[2]) {
         const dq = qAxisAngle(om, DT);
@@ -1619,6 +1791,14 @@ function frame(now) {
       { // the chaser: holds CHASE.speed along your starting line; your own speed along it (vw[0]) opens or closes the range
         const closing = CHASE.speed - vw[0];
         if (run && run.chase) chase.range = Math.max(50, chase.range - closing * DT); else chase.range = CHASE.range; }
+      if (tgt.on) { // the target flies on at its set velocity; the lesson records range, closing and how far the nose is off it
+        updateTarget(DT);
+        if (run && script && script.t >= script.go) { const t = (run.st += DT);   // simulated seconds since `go`, counted per step (script.t only moves per frame)
+          if (tgt.range < run.rMin) { run.rMin = tgt.range; run.tMin = t; } run.rMax = Math.max(run.rMax, tgt.range); run.cloMax = Math.max(run.cloMax, tgt.closing);
+          if (run.rollEnd == null && tgt.nose === 'rollPitch' && Math.abs(stick.roll) < 1e-6 && t > 0) run.rollEnd = t;
+          if (run.noseOn == null) { if (tgt.offDeg < 1) { run.noseOn = t; run.rOn = tgt.range; } }
+          else { run.offMax = Math.max(run.offMax, tgt.offDeg); if (tgt.offDeg > run.lagMax) { run.lagMax = tgt.offDeg; run.rLag = tgt.range; } }
+          run.turns += Math.hypot(om[1], om[2]) / RAD * DT; } }
       // a ~10 s trail: one sample per 1/60 s of sim time (every 4th step)
       if (++histN % Math.round(HS / DT) === 0) { trail.push(R3(...vw)); if (trail.length > 600) trail.shift(); path.push([...S.x]); if (path.length > 600) path.shift(); }
     }
@@ -1631,13 +1811,14 @@ function frame(now) {
     if (on) { run.min = Math.min(run.min, d.speed); run.peakG = Math.max(run.peakG, d.g); run.tvi = d.tviDeg; if (run.rel == null && d.speed <= gladius.scm.speedCap + 1) run.rel = run.t; }
     $('run-prog').style.width = `${Math.max(0, Math.min(100, script.t / (go + R.at) * 100))}%`;
     if (!run.shown && run.t >= R.at) { run.shown = true; $('run-msg').hidden = true;
-      $('run-result').innerHTML = `<span class="rr${run.chase ? ' lead' : ''}"><b>Simulator</b> ${R.sim()}</span><span class="rr"><b>In Game</b> ${R.game}</span>`; }
+      $('run-result').innerHTML = `<span class="rr${run.chase ? ' lead' : ''}"><b>Simulator</b> ${R.sim()}</span><span class="rr"><b>${R.label || 'In Game'}</b> ${typeof R.game === 'function' ? R.game() : R.game}</span>`; }
   }
   glocView(glocLive() ? vision(PS, gladius.pilot) : null);
   gSmooth += (d.g - gSmooth) * 0.15;
   gPeak = Math.max(gSmooth, gPeak - dt * 1.5);   // peak hold, falling 1.5 G/s
   bBtn.classList.toggle('active', d.boost); bBtn.setAttribute('aria-pressed', d.boost);
-  if (visible('egg')) { egg.draw(S, d, qAtt); drawSlice($('c-inset'), S, d, false); teach($('cap-egg'), d); }
+  if (visible('egg')) { egg.draw(S, d, qAtt); drawSlice($('c-inset'), S, d, false); teach($('cap-egg'), d);
+    const pc = $('c-pos'); pc.hidden = !tgt.on; if (tgt.on) drawPosCanvas(pc); }
   if (visible('pilot')) { pilot.draw(S, d);
     pilot.hud({ speed: d.fwd < -1 ? -d.speed : d.speed, speedCap: d.r, throttle: inp.u.f, g: gSmooth, gPeak, tank: S.tank, redZone: gladius.boost.redZonePct,
       boostActive: d.boost, boostLocked: !!S.c.boostLocked && !ctl.unlimited, unlimited: ctl.unlimited, mode: d.boost ? 'BOOST' : 'SCM',
@@ -1659,6 +1840,8 @@ function frame(now) {
     { const ro = $('ro-range'); ro.hidden = !(run && run.chase);   // the chaser exists only in the Flee lessons
       if (!ro.hidden) { $('r-range').textContent = Math.round(chase.range); const dv = CHASE.speed - qRot(qAtt, S.v)[0];
         $('r-range-rate').textContent = Math.abs(dv) < 0.5 ? 'holding' : dv > 0 ? `closing ${dv.toFixed(0)} m/s` : `opening ${(-dv).toFixed(0)} m/s`; } }
+    { const vt = $('vt-target'); vt.hidden = !tgt.on;   // the target box exists only in the target lessons
+      if (tgt.on) { $('r-tgt-range').textContent = Math.round(tgt.range); $('r-tgt-closing').textContent = `[${fmtSigned(tgt.closing)} m/s] ${tgt.closing > 0.5 ? 'closing' : tgt.closing < -0.5 ? 'opening' : 'holding'}`; } }
     $('r-tvi').textContent = d.speed > 3 ? Math.round(d.tviDeg) : '–';
     $('r-tank').textContent = ctl.unlimited ? '∞' : Math.round(S.tank);
     $('r-tankbar').classList.toggle('locked', !!S.c.boostLocked && !ctl.unlimited); $('r-roll').textContent = Math.round(Math.abs(S.roll || 0)); $('r-tankbar').style.width = `${S.tank}%`;
@@ -1677,6 +1860,9 @@ applyTabs(); drawKnob(); setThr(0); resizeAll(); refreshHints(); requestAnimatio
 window.speedwallDebug = {
   get: () => { const dg = derive(S, currentInput()).dodge; return { S, run, chase, script, maneuver, dodge: { left: dg.left, right: dg.right, up: dg.up, down: dg.down, price: dg.price, windowS: dg.windowS, best: dg.best, max: dg.max, ready: dg.ready } }; },
   dodgeTable: () => DODGE_TABLE,
+  resultAt: () => (maneuver ? PRESETS[maneuver].result.at : 5),
+  target: () => ({ on: tgt.on, range: tgt.range, closing: tgt.closing, offDeg: tgt.offDeg, rel: [...tgt.rel], x: [...tgt.x], v: [...tgt.v], ship: [...S.x], speed: len(S.v), tvi: run ? run.tvi : 0 }),
+  engage: { ENGAGE, ORBIT, AIM, OUTRATE, JOUST_R, WEAPON, timeOfFlight, timeToRange, closingSpeed },
   // one 60 Hz frame's worth of physics (four DT steps and the readouts' derive, Dodge Potential included), for timing
   perfFrame: () => { const inp = currentInput(); let c = S; for (let i = 0; i < 4; i++) c = step(c, inp.u, inp.boost, DT); return derive(c, inp).speed; },
   dodgeAt: (vx, boost = true, held = true) => { const r = DODGE_DIRS.map(dir => dodgeRun(vx, boost, held ? 1 : 0, dir)); return Object.fromEntries(DODGE_DIRS.map((d, k) => [d, r[k]])); },
