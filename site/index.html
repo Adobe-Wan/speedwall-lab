@@ -1579,7 +1579,8 @@ function drawSlice(canvas, st, d, big) {
     const lbl = (t, x, y, col, align) => { c.textAlign = align; c.strokeStyle = 'rgba(7,11,18,.9)'; c.lineWidth = 3.5; c.strokeText(t, x, y); c.fillStyle = col; c.fillText(t, x, y); };
     lbl('nose 520', ...P(34, 540), '#f2a33a', 'left'); lbl('tail 268', ...P(34, -292), '#f2a33a', 'left'); lbl('394', ...P(404, -14), '#f2a33a', 'left'); lbl('SCM 225', ...P(150, 190), '#5aa9e6', 'left');
     if (curve) drawDodgeCurve(c, curve, d);
-    if (tgt.on) { const bw = Math.max(130, Math.min(220, Math.round(w * 0.34))), bh = Math.round(bw * 0.78); drawPositions(c, w - bw - 12, 40, bw, bh, true); } }
+    // the positions picture, top right, only where the view is tall enough to keep it off the egg (a landscape phone is not)
+    if (tgt.on && h >= 320) { const bw = Math.max(130, Math.min(220, Math.round(w * 0.34))), bh = Math.round(bw * 0.78); drawPositions(c, w - bw - 12, 40, bw, bh, true); } }
 }
 // The positions picture on its own canvas (the Speed Egg view's bottom-right inset, on desktops).
 function drawPosCanvas(canvas) {
