@@ -329,6 +329,7 @@ footer a { color: var(--fg-2) !important; }
   .mgrid button { flex: 0 0 76%; scroll-snap-align: start; }
   .mgrid button:hover { transform: none; }
   .brand-mark { width: 30px; height: 30px; } h1 { font-size: 1.15rem; }
+  .btn.fb { border-color: var(--line-strong); color: var(--fg); } /* the only header action on phones: read as a button, not stray text */
   .sub { font-size: .78rem; }
   /* the Vitals ride with the sticky views: two compact rows of three */
   .vitals { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
@@ -1426,6 +1427,9 @@ const egg = !hasWebGL ? stubView : (() => {
     if (far) { place(labels.settle, rot(T(R3(sv.p[0] - 40, sv.p[1], sv.p[2] - 40)))); labels.settle.textContent = `ends ~${Math.round(sv.speed)} · ${Math.round(sv.side)} sideways`; }
     else labels.settle.hidden = true;
     place(tviIcon, rot(tviP)); tviIcon.hidden = tviIcon.hidden || d.speed < 3;
+    // the settle label and the TVI icon project close together in the chase cam: lift the label clear of the icon
+    if (!labels.settle.hidden && !tviIcon.hidden) { const lx = parseFloat(labels.settle.style.left), ly = parseFloat(labels.settle.style.top), tx = parseFloat(tviIcon.style.left), ty = parseFloat(tviIcon.style.top);
+      if (Math.abs(lx - tx) < 110 && Math.abs(ly - ty) < 22) labels.settle.style.top = `${ty - 24}px`; }
     if (tgtEnd) { place(labels.tgt, rot(tgtEnd)); labels.tgt.textContent = `target ${Math.round(tgt.range)} m`; } else labels.tgt.hidden = true;
   }
   return { resize, draw, chase };
@@ -1518,7 +1522,15 @@ const pilot = !hasWebGL ? stubView : (() => {
       const g = el('#h-edge'); g.style.display = ''; g.setAttribute('transform', `translate(${Math.min(w - 18, Math.max(18, ex))} ${Math.min(h - 18, Math.max(18, ey))}) rotate(${ang * 180 / Math.PI})`); }
     const anti = -fwd > 0.087 ? proj(-fwd, -right, -up) : null; show('#h-anti', ...(anti || [0, 0]), !!anti && inView(anti));
     const lp = tviPt && inView(tviPt) ? tviPt : [cx, cy + 46];
-    const t = el('#h-lbl'); t.setAttribute('x', lp[0] + 14); t.setAttribute('y', lp[1] + 22); t.textContent = `TVI ${Math.round(d.tviDeg)}°`;
+    const t = el('#h-lbl'), txt = `TVI ${Math.round(d.tviDeg)}°`, tw = txt.length * 7.5, th = 12;
+    // the label sits below-right of the TVI unless that lands on a HUD block (bars, numbers, G readout) or the crosshair:
+    // then below-left, above-right, above-left, in that order
+    const obs = ahud.obstacles().concat([[cx - 26, cy - 26, cx + 26, cy + 26]]);
+    const cost = (x, y) => obs.reduce((n, [a, b, c2, d2]) => n + Math.max(0, Math.min(x + tw, c2) - Math.max(x, a)) * Math.max(0, Math.min(y, d2) - Math.max(y - th, b)), 0);
+    const cands = [[lp[0] + 14, lp[1] + 22], [lp[0] - 14 - tw, lp[1] + 22], [lp[0] + 14, lp[1] - 14], [lp[0] - 14 - tw, lp[1] - 14], [lp[0] - tw / 2, lp[1] - 26], [lp[0] - tw / 2, lp[1] + 34]];
+    let lx = cands[0][0], ly = cands[0][1], best = Infinity;
+    for (const [x, y] of cands) { const k = cost(x, y); if (k < best) { best = k; lx = x; ly = y; } if (k === 0) break; }
+    t.setAttribute('x', lx); t.setAttribute('y', ly); t.textContent = txt;
   }
   return { resize, draw, hud: v => ahud.update({ ...v, hfovDeg: hfov, guideDeg: ringDeg }) };
 })();
@@ -1531,7 +1543,10 @@ function drawSlice(canvas, st, d, big) {
   const bw = Math.round(w * dpr), bh = Math.round(h * dpr);
   if (canvas.width !== bw || canvas.height !== bh) { canvas.width = bw; canvas.height = bh; }
   const c = canvas.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, w, h);
-  const pad = big ? 36 : 10, sc = Math.min((h - 2 * pad) / 800, (w - 2 * pad) / 840), ox = w / 2, oy = pad + 530 * sc;
+  // The big view keeps a box for the Dodge Potential curve: beside the egg on wide views, under it on tall ones, never on it.
+  const curve = big && d.dodge && d.dodge.ready ? curveBox(w, h) : null;
+  const ax = curve ? curve.area : [0, 0, w, h], aw = ax[2] - ax[0], ah = ax[3] - ax[1];
+  const pad = big ? 30 : 10, sc = Math.min((ah - 2 * pad) / 830, (aw - 2 * pad) / 900), ox = ax[0] + aw / 2, oy = ax[1] + pad + 545 * sc;
   const P = (lat, fwd) => [ox + lat * sc, oy - fwd * sc];
   c.lineWidth = big ? 2 : 1.2;
   c.beginPath(); for (let i = 0; i <= 360; i++) { const t = i * Math.PI / 180, r = 394 + 126 * Math.cos(t); const [x, y] = P(r * Math.sin(t), r * Math.cos(t)); i ? c.lineTo(x, y) : c.moveTo(x, y); }
@@ -1559,9 +1574,12 @@ function drawSlice(canvas, st, d, big) {
     const k = big ? 6 : 4; c.fillStyle = '#ff6a55'; c.beginPath(); c.moveTo(ex, ey - k); c.lineTo(ex + k, ey); c.lineTo(ex, ey + k); c.lineTo(ex - k, ey); c.closePath(); c.fill();
     if (big) { c.font = '600 11px ui-monospace, Menlo, monospace'; c.textAlign = dx >= 0 ? 'left' : 'right'; c.fillText(`target ${Math.round(r)} m`, ex + (dx >= 0 ? 10 : -10), ey + 4); }
     c.restore(); }
-  if (big) { c.font = '600 12px ui-monospace, Menlo, monospace'; c.fillStyle = '#f2a33a'; c.textAlign = 'center';
-    c.fillText('nose 520', ...P(0, 532)); c.fillText('tail 268', ...P(0, -284)); c.textAlign = 'left'; c.fillText('394', ...P(398, 6)); c.fillStyle = '#5aa9e6'; c.fillText('SCM 225', ...P(150, 190));
-    drawDodgeCurve(c, w, h, d); if (tgt.on) { const bw = Math.max(130, Math.min(220, Math.round(w * 0.34))), bh = Math.round(bw * 0.78); drawPositions(c, w - bw - 12, 40, bw, bh, true); } }
+  if (big) { c.font = '600 12px ui-monospace, Menlo, monospace'; c.lineJoin = 'round';
+    // labels sit beside the ends they name (the ship rides on the nose at top speed), on a dark halo so lines never cut them
+    const lbl = (t, x, y, col, align) => { c.textAlign = align; c.strokeStyle = 'rgba(7,11,18,.9)'; c.lineWidth = 3.5; c.strokeText(t, x, y); c.fillStyle = col; c.fillText(t, x, y); };
+    lbl('nose 520', ...P(34, 540), '#f2a33a', 'left'); lbl('tail 268', ...P(34, -292), '#f2a33a', 'left'); lbl('394', ...P(404, -14), '#f2a33a', 'left'); lbl('SCM 225', ...P(150, 190), '#5aa9e6', 'left');
+    if (curve) drawDodgeCurve(c, curve, d);
+    if (tgt.on) { const bw = Math.max(130, Math.min(220, Math.round(w * 0.34))), bh = Math.round(bw * 0.78); drawPositions(c, w - bw - 12, 40, bw, bh, true); } }
 }
 // The positions picture on its own canvas (the Speed Egg view's bottom-right inset, on desktops).
 function drawPosCanvas(canvas) {
@@ -1595,13 +1613,18 @@ function drawPositions(c, x0, y0, bw, bh, box) {
   const k = 5, tx = X(tp[0]), ty = Y(tp[1]); c.fillStyle = '#ff6a55'; c.beginPath(); c.moveTo(tx, ty - k); c.lineTo(tx + k, ty); c.lineTo(tx, ty + k); c.lineTo(tx - k, ty); c.closePath(); c.fill();
   c.restore();
 }
+// Where the Dodge Potential curve goes in the big Top-Down view: a column on the left when the view is wide, a strip
+// under the egg when it is tall. Returns the curve's box and the area left for the egg.
+function curveBox(w, h) {
+  if (w >= 1.5 * h) { const bw = Math.max(150, Math.min(220, Math.round(w * 0.3))), bh = Math.round(bw * 0.52); return { x0: 12, y0: Math.round((h - bh) / 2), bw, bh, area: [bw + 20, 0, w, h] }; }
+  const bw = Math.min(w - 24, 320), bh = 64; return { x0: Math.round((w - bw) / 2), y0: h - bh - 10, bw, bh, area: [0, 0, w, h - bh - 14] };
+}
 // Dodge Potential against forward speed, in one small picture (bottom right of the Top-Down view): the table's curve for the
 // flight mode and forward stick the ship has now, and a dot riding at its forward speed. Axes: forward speed 0..520 m/s
 // across, Dodge Potential 0..table max up.
-function drawDodgeCurve(c, w, h, d) {
+function drawDodgeCurve(c, { x0, y0, bw, bh }, d) {
   const dg = d.dodge; if (!dg.ready) return;
-  // bottom left corner, clear of the egg's labels (nose top centre, 394 mid right, tail bottom centre)
-  const bw = Math.max(140, Math.min(210, Math.round(w * 0.36))), bh = Math.round(bw * 0.5), x0 = 12, y0 = h - bh - 12, pad = 8, gw = bw - 2 * pad, gh = bh - 26;
+  const pad = 8, gw = bw - 2 * pad, gh = bh - 30;
   c.save();
   c.fillStyle = 'rgba(7,11,18,.78)'; c.strokeStyle = 'rgba(140,165,205,.22)'; c.lineWidth = 1;
   c.beginPath(); c.roundRect ? c.roundRect(x0, y0, bw, bh, 7) : c.rect(x0, y0, bw, bh); c.fill(); c.stroke();

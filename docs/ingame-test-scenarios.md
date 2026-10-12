@@ -353,3 +353,161 @@ The tests above measure the ship. What decides whether a dodge works at 550 m is
 550 m. It also tests a new model claim: **up/down taps are hit about half as often as side taps** because the Gladius is 5.5 m tall
 and 17 m wide from behind. Fly it in the same session as `proj_speed` and `proj_inherit` if possible: the delay read-off assumes
 1500 m/s projectiles that inherit the chaser's speed. Needs Alex's OK on the harness-in-free-flight question first (see the YAML header).
+
+## 12. Round A1: Arrow baseline (single pilot, added 2026-10-11)
+
+The first round for a second ship, planned in `docs/ship-comparison-plan.md` (which says what each value buys and what stays a gap). **Standing conditions are those of section 0** with the ship swapped: Arrow, Arena Commander free flight, single pilot, Alex present, Decoupled, G-Safe Off, 4K, FOV 100, open space, F12 ready, SCM unless `boost: true`. Never the PU, never PvP. Nothing here needs a second pilot. The YAML below is not yet in a `tests_*.yaml`; it is the test list for `tools/sc-flighttest/tests_arrow.yaml` when that file is written.
+
+**No Arrow number appears in this round.** Every `expect:` is left out on purpose: `analyze` prints the Gladius model next to each result, and that column is to be ignored for these tests. Step durations are the Gladius tests' durations with margin so that a slower ship still settles; they are harness inputs, not predictions. The plateau, the slope and the rotation rate are read from the series.
+
+### Setup (manual, before the first test)
+
+| Step | Why |
+|---|---|
+| `python run.py calibrate`, then `ocrcheck` and `fpscheck` | The `roi` defaults in `config.yaml` are the Gladius cockpit. The Arrow's HUD puts the speed, G and AB digits elsewhere |
+| `dircheck`, `throttlecheck` | Axis directions and the throttle-at-centre behaviour are per ship as far as we know (GK) |
+| `turnaround: false` for block 1 | The between-test flip holds full pitch for `turnaround_s` seconds, which is 180 ÷ the Gladius's pitch rate. After `arrow_rg_pitch_100` set `turnaround_s = 180 / measured rate` and turn the flip back on for blocks 2–7 |
+| `mirror_lateral: true` stays | The Arrow is left/right symmetric, so the lateral mirroring still cancels drift |
+
+### Block 1: rotation gauges (8 tests, P0 A)
+
+The `rg_*` pattern: a gentle 25 % strafe plus one rotation axis, no forward; the HUD speed swings once per revolution and `analyze` reports `rot_dps_osc`. Fly these first (see setup).
+
+```yaml
+- id: arrow_rg_pitch_100              # P0 A   pitch rate SCM; sets turnaround_s for the rest of the session
+  steps: [{t: 12, pitch: 1.0, strafe_vert: 0.25}]
+- id: arrow_rg_yaw_100                # P0 A   yaw rate SCM
+  steps: [{t: 12, yaw: 1.0, strafe_lat: 0.25}]
+- id: arrow_rg_roll_100               # P0 A   roll rate SCM
+  steps: [{t: 10, roll: 1.0, strafe_lat: 0.25}]
+- id: arrow_rg_pitch_100_boost        # P0 A   the three rates boosted
+  steps: [{t: 12, pitch: 1.0, strafe_vert: 0.25, boost: true}]
+- id: arrow_rg_yaw_100_boost          # P0 A
+  steps: [{t: 12, yaw: 1.0, strafe_lat: 0.25, boost: true}]
+- id: arrow_rg_roll_100_boost         # P0 A
+  steps: [{t: 10, roll: 1.0, strafe_lat: 0.25, boost: true}]
+- id: arrow_rg_roll_050               # P1 A   is the stick linear? (Gladius: 50 % -> half the rate, rg_roll_050)
+  steps: [{t: 12, roll: 0.5, strafe_lat: 0.25}]
+- id: arrow_rg_pitchyaw_100           # P1 A   full pitch + full yaw with a 25 % forward gauge (r11_rot_pitchyaw_fwd pattern)
+  steps: [{t: 12, pitch: 1.0, yaw: 1.0, strafe_long: 0.25}]
+```
+
+Reading: `rot_dps_osc` per axis, SCM and boosted, goes straight into `constants.scm.rotation_dps` and `constants.boost.rotation_dps` of the Arrow fixture. `arrow_rg_roll_050` at half of `arrow_rg_roll_100` confirms a linear stick; otherwise add 25 % and 75 % in session 2. `arrow_rg_pitchyaw_100` against the pitch and yaw rates says which combination rule the Arrow follows (unit-length, independent or capped: `rotation.ts` has all three; the Gladius is unit-length, M `r11_rot_pitchyaw_fwd`). These eight tests settle claim rows 6 and 7 of the comparison plan (geometry half).
+
+### Block 2: SCM plateaus and G (6 tests, P0 A)
+
+```yaml
+- id: arrow_scm_fwd                   # P0 A   full forward from rest: plateau (the SCM cap) and the forward slope
+  steps: [{t: 20, strafe_long: 1.0}]
+- id: arrow_scm_back                  # P0 A
+  steps: [{t: 30, strafe_long: -1.0}]
+- id: arrow_scm_lat                   # P0 A   (right; the harness mirrors every second lateral test)
+  steps: [{t: 20, strafe_lat: 1.0}]
+- id: arrow_scm_up                    # P0 A
+  steps: [{t: 20, strafe_vert: 1.0}]
+- id: arrow_scm_down                  # P0 A   (the Gladius's weakest axis took 25 s to settle)
+  steps: [{t: 30, strafe_vert: -1.0}]
+- id: arrow_scm_fwd_50                # P1 A   is throttle = thrust fraction? (Gladius: yes, r1_scm_fwd50)
+  steps: [{t: 30, strafe_long: 0.5}]
+```
+
+Reading: five equal plateaus mean the SCM egg is a sphere, as the Gladius's is; unequal ones mean the SCM egg needs the block 4 treatment too. The slopes from rest, read against the HUD G meter, are `constants.scm.G`. `plateau_drift_mps_per_s` must be near zero; if a test was still settling, lengthen it in session 2.
+
+### Block 3: boost plateaus and G (6 tests, P0 A)
+
+```yaml
+- id: arrow_boost_fwd                 # P0 A   F and the forward boost G; also the run-up reference for arrow_release_mid
+  steps: [{t: 18, strafe_long: 1.0, boost: true}]
+- id: arrow_boost_back                # P0 A   B
+  steps: [{t: 18, strafe_long: -1.0, boost: true}]
+- id: arrow_boost_lat                 # P0 A   A (side)
+  steps: [{t: 18, strafe_lat: 1.0, boost: true}]
+- id: arrow_boost_up                  # P0 A   side, vertical (the Gladius is 394 up and 391 down: keep both)
+  steps: [{t: 18, strafe_vert: 1.0, boost: true}]
+- id: arrow_boost_down                # P0 A
+  steps: [{t: 18, strafe_vert: -1.0, boost: true}]
+- id: arrow_boost_fwd_50              # P1 A   does boost scale a partial throttle? (Gladius: 10.6 G at 50 %, r1_boost_fwd50)
+  steps: [{t: 18, strafe_long: 0.5, boost: true}]
+```
+
+Reading: the boost ramp occupies the first fraction of a second and the soft wall the last stretch, so `analyze`'s slope between about 10 % and 70 % of the plateau is the G to record, with the G meter beside it. Boost tank drain comes free from the AB column of every one of these (Gladius 4.95–5.02 %/s across about 40 tests). Blocks 2 and 3 together settle claim rows 9, 10 and 11 (SCM and boost halves).
+
+### Block 4: egg shape (5 tests, P1 A)
+
+The `sw_*` pattern: full lateral strafe with a forward fraction, boosted, from rest; the settled speed is a point on the egg at the angle the thrust direction sets.
+
+```yaml
+- id: arrow_sw_f25_l100               # P1 A
+  steps: [{t: 18, strafe_long: 0.25, strafe_lat: -1.0, boost: true}]
+- id: arrow_sw_f50_l100               # P1 A
+  steps: [{t: 18, strafe_long: 0.5, strafe_lat: -1.0, boost: true}]
+- id: arrow_sw_f75_l100               # P1 A
+  steps: [{t: 18, strafe_long: 0.75, strafe_lat: -1.0, boost: true}]
+- id: arrow_sw_f100_l50               # P1 A
+  steps: [{t: 18, strafe_long: 1.0, strafe_lat: -0.5, boost: true}]
+- id: arrow_boost_fwd_up              # P1 A   one point in the vertical plane
+  steps: [{t: 18, strafe_long: 1.0, strafe_vert: 1.0, boost: true}]
+```
+
+Reading: with F, B and A from block 3, the limaçon `r(θ) = A + (F − A) cos θ` predicts each settled speed from the thrust angle (`thrustRule` C2 in the fixture gives the angle from the per-axis Gs). All four within 1 %: the shape is settled and `B = 2A − F` is the cross-check. Any point off by more: fly the full nine-point sweep (`sw_f10..f90`, `sw_f100_l25/75`, `sw_f25_l25`, `sw_f75_l75`) in session 2 and fit as PLAN section 4 describes. This block gives the Arrow's `lateralRoom` and the side-by-side egg.
+
+### Block 5: tank (1 test, P1 A)
+
+```yaml
+- id: arrow_tank_cycle                # P1 A   boost + full lateral until the tank is empty, keep boost held, then release (r7_tank_cycle pattern)
+  steps: [{t: 40, strafe_lat: 1.0, boost: true}, {t: 30}]
+```
+
+Reading: drain %/s from the AB column, whether boost re-engages while held and at what percent (the Gladius re-engaged at about 25 %), and the regen rate after release. The 40 s first step is margin for a larger tank; if the AB column is not at 0 well before 40 s, extend it in session 2.
+
+### Block 6: boost release (4 tests, P1 A)
+
+The `r6_release_*` pattern: pin at the boosted nose, then let go. `analyze` reports `rel_start_mps`, `rel_speed_at_*s`, `rel_t_to_*`, `rel_decel_G_first1s`, `rel_decel_G_300_to_235` (those two thresholds are Gladius speeds; read the tail slope between the Arrow's own F and SCM cap from the series instead) and `rel_end_above_scm_mps`.
+
+```yaml
+- id: arrow_release_all               # P1 A   pin 10 s, release everything, record 25 s
+  steps: [{t: 10, strafe_long: 1.0, boost: true}, {t: 25}]
+- id: arrow_release_fwd_held          # P1 A   forward kept after boost ends
+  steps: [{t: 10, strafe_long: 1.0, boost: true}, {t: 25, strafe_long: 1.0}]
+- id: arrow_release_fwd_lat           # P1 A   forward + full strafe kept: the dodge right after boost ends
+  steps: [{t: 10, strafe_long: 1.0, boost: true}, {t: 20, strafe_long: 1.0, strafe_lat: 1.0}]
+- id: arrow_release_mid               # P1 A (HC4 `until:` makes it exact)   release part-way up the run
+  steps: [{t: T_MID, strafe_long: 1.0, boost: true}, {t: 20}]
+```
+
+`T_MID` is set on the day: half the time `arrow_boost_fwd`'s series took to reach its plateau. It is not written here because it would be an Arrow number. Reading: the bleed profile and its floor G (`releaseFloorG`), and whether a held strafe slows the fall as it does for the Gladius (7.6 s against 5.2 s from the nose, M `r6_release_fwd_lat`).
+
+### Block 7: wall traces (2 tests, P2 A)
+
+```yaml
+- id: arrow_dd_wall_lat               # P2 A   pin at the SCM forward wall, then full lateral (dd_wall_lat pattern)
+  steps: [{t: 8, strafe_long: 1.0}, {t: 8, strafe_lat: -1.0}]
+- id: arrow_dd_wall_lat_boost         # P2 A   same at the boosted wall
+  steps: [{t: 10, strafe_long: 1.0, boost: true}, {t: 8, strafe_lat: -1.0, boost: true}]
+```
+
+Reading: the G-meter profile of a dodge from the wall, for the measured side of claim row 11. P2 because blocks 2–4 already give the room; this gives the push.
+
+### Block 8: dimensions (manual, 4 screenshots, P1 M)
+
+Method 2 of the comparison plan §2.8: external view, same camera key, zoom and FOV, ship parked. Two screenshots of the Gladius (nose-on, side-on) as the ruler, two of the Arrow. Width, length and height from pixel spans times the Gladius's 20 × 17 × 5.5 m divided by the Gladius's spans. **Assumption to check:** the external camera sits at the same distance from both hulls; if the ratio comes out near 1 on every axis, the camera scaled with the ship and the method is dead, so the dimensions become a gap (or CIG's published figure, if Alex allows it: plan §2.8 option 1). Label the result **M (ratio method)**. No flight, no harness.
+
+### Session plan, by test
+
+| Session | Blocks | Automated tests | Buys |
+|---|---|---|---|
+| 1 | 0 (setup), 1, 2, 3 | 20 | Every "Arrow (1P)" cell of the claim table except the egg shape: rotation rates, G per axis, SCM cap, F / B / A |
+| 2 | 4, 5, 6, 7, 8 | 12 (+4 screenshots) | `lateralRoom`, tank, release traces, wall push, dimensions; whatever session 1 flagged for a repeat |
+
+Round 3 flew 29 Gladius tests in about 25 minutes of harness time, so each session is one sitting. If session 1 is cut short, the order inside it is already by priority: block 1, then 2, then 3. The G-LOC tests of section 4 are not in this round; the Gladius data says the tolerances are a pilot property, not a ship property (equal-G boosted and SCM pairs agree within 0.25 s). Re-fly `g01`/`g05`/`g07_*` with an `arrow_` prefix only if the Arrow's measured Gs sit above the Gladius's tolerances (6.6 lateral, 8.1 up, 3.85 down, 13.5 forward, all F).
+
+### What each result lets us change
+
+| Result | Change allowed |
+|---|---|
+| Blocks 1–3 | `research/arrow-v1-fixture.json` (new; CC BY 4.0, measured by AdobeWan), `packages/data-arrow`; the comparison plan's §4 tables get their Arrow column |
+| Block 4 | The Arrow's egg and `lateralRoom`; the side-by-side egg view |
+| Blocks 5–6 | The Arrow's tank and release model; the flee comparison |
+| Block 7 | The measured side-G profile for the Arrow's dodge lessons, if any are written |
+| Block 8 | `dimensions_m` with a `dimensions_note` stating the ratio method and its assumption; the Arrow glyph and the angular-size comparison |
+| Nothing in this round | Shields, DPS, accuracy, hit rate, pip behaviour, the outcome of a rate fight: all stay "not measured" (comparison plan §1 rows 2, 3, 4, 5, 7) |

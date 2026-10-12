@@ -333,7 +333,9 @@ export function createHud(svg) {
     const g = geom(Math.max(60, REF.barH * k), 3);
     const dl = Math.max(-REF.thrX * k, Lo.xhR + 24), dr = Math.max(REF.abX * k, Lo.xhR + 24);
     const l = [cx - dl, cy + REF.barY * k], rr = [cx + dr, cy + REF.barY * k];
-    const gp = [Math.max(cx + REF.gRight * k - g.gx, rr[0] + bw / 2 + g.zt + 8), cy + REF.gBase * k];
+    // the G column starts clear of the AB bar AND of the "100%" under it (half its width is 2 glyphs of fsM), so
+    // "Hold TVI" never runs into the tank percentage on narrow views
+    const gp = [Math.max(cx + REF.gRight * k - g.gx, rr[0] + Math.max(bw / 2 + g.zt + 8, 2 * CW * Lo.fsM + 0.6 * Lo.fsS)), cy + REF.gBase * k];
     const obs = [];
     for (const [rects, [tx, ty]] of [[g.Lr, l], [g.Rr, rr], [g.Gr, gp]]) for (const rc of rects) obs.push([rc[0] + tx, rc[1] + ty, rc[2] + tx, rc[3] + ty]);
     apply({ g, l, r: rr, gp, obs });
@@ -558,7 +560,8 @@ export function createHud(svg) {
     if (visible && last) update(last);
   }
 
-  return { resize, update, setVisible };
+  // obstacle rects [x1, y1, x2, y2] in view px (bars, numbers, G block), so the page's own labels can keep clear of them
+  return { resize, update, setVisible, obstacles: () => (Lo.ready ? Lo.obs : []) };
 }
 
 function fmtRate(v) {
