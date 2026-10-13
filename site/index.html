@@ -244,6 +244,9 @@ kbd { font: .72rem var(--font-data); border: 1px solid var(--line-2); border-bot
   .maneuvers .mgrid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   /* each group's title becomes a row label on the left of its cards */
   .maneuvers { grid-template-columns: 220px minmax(0, 1fr); column-gap: 16px; align-items: start; } .maneuvers > .lessons-head, .maneuvers > .lesson-note { grid-column: 1 / -1; }
+  /* pin each piece to its column: the title on the left, its intro and its cards on the right (auto-placement alone put
+     the cards under the title in the 220 px column once groups gained an intro line) */
+  .maneuvers > h3 { grid-column: 1; } .maneuvers > h3 + .lessons-how, .maneuvers > .mgrid { grid-column: 2; }
   .maneuvers h3 { margin-top: 12px; line-height: 1.5; } .maneuvers h3::after { display: none; }
 }
 @media (pointer: coarse) { .vtools button, .seg button { min-height: 44px; padding: 8px 10px; } button { min-height: 44px; } label.tog input { width: 22px; height: 22px; } }
@@ -1423,8 +1426,9 @@ function drawSlice(canvas, st, d, big) {
   c.strokeStyle = '#f2a33a'; c.stroke(); c.fillStyle = 'rgba(242,163,58,.06)'; c.fill();
   c.beginPath(); c.arc(ox, oy, 225 * sc, 0, 2 * Math.PI); c.strokeStyle = 'rgba(90,169,230,.7)'; c.stroke();
   c.strokeStyle = 'rgba(135,150,171,.35)'; c.beginPath(); c.moveTo(...P(0, -290)); c.lineTo(...P(0, 545)); c.stroke();
-  // top-down: sideways = all of the speed off the nose axis (left/right and up/down), signed by left/right
-  const fwd = st.v[0], lat = (st.v[1] > 0 ? -1 : 1) * Math.hypot(st.v[1], st.v[2]), room = d.room;
+  // top-down: seen from above, so only left/right shows across the page (page y = left); up/down strafe has no
+  // footprint here and the ship stays on the centre line, as in the Sideways Room bar
+  const fwd = st.v[0], lat = -st.v[1], room = d.room;
   c.strokeStyle = d.pinned ? '#ff6a55' : '#e7edf5'; c.lineWidth = big ? 3 : 2; c.beginPath(); c.moveTo(...P(-room, fwd)); c.lineTo(...P(room, fwd)); c.stroke();
   if (d.settle) { c.setLineDash([5, 6]); c.strokeStyle = 'rgba(126,240,200,.6)'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(ox, oy); c.lineTo(...P(-d.settle.p[1], d.settle.p[0])); c.stroke(); c.setLineDash([]); }
   c.strokeStyle = '#7ef0c8'; c.lineWidth = big ? 2.5 : 1.5; c.beginPath(); c.moveTo(ox, oy); c.lineTo(...P(lat, fwd)); c.stroke();
