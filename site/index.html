@@ -447,7 +447,7 @@ footer a { color: var(--fg-2) !important; }
     <div class="vt" id="vt-tank"><b>Boost Tank</b><span class="num" id="r-tank">100</span><small>%</small><div class="tank"><i id="r-tankbar"></i></div></div>
     <div class="vt" title="Which speed limit applies right now: Boost (the amber egg) or SCM (the blue ball). At Limit shows while the flight computer holds you at that limit."><b>Flight Mode</b><span class="chip" id="r-mode">SCM</span> <span class="chip pinned" id="r-pin" hidden>At Limit</span></div>
     <div class="vt" id="ro-range" hidden title="ARITHMETIC, not a measured rule: a chaser that holds 520 m/s along your starting line, starting 550 m behind. Every second it gains 520 minus your speed along that line, in metres: hold the wall and it stays back, give up speed and it closes. Both numbers are stated assumptions, kept as named constants (CHASE in the page source) so a patch can change them. Nothing here models the chaser's aim, the lead pip, projectile speed or hits: that needs a two-pilot test."><b>Chaser Range</b><span class="num" id="r-range">550</span><small>m</small><small class="vt-sub" id="r-range-rate">holding</small></div>
-    <div class="vt" id="vt-target" hidden title="The target box in the Fighting Fundamentals lessons, laid out like the game's: range, then the Δ number in brackets on the Star Citizen target box. Here + means the range is shrinking (ARITHMETIC on the simulated positions and velocities; whether the game's bracket uses the same sign is not confirmed). The target is a point with a constant velocity set by the lesson: no AI, no aim, no shooting."><b>Range · Closing</b><span class="num" id="r-tgt-range">600</span><small>m</small><small class="vt-sub" id="r-tgt-closing">[+51 m/s]</small></div>
+    <div class="vt" id="vt-target" hidden title="The target box in the Fighting Fundamentals lessons, laid out like the game's: range, then the Δ number in brackets on the Star Citizen target box. Here + means the range is shrinking (ARITHMETIC on the simulated positions and velocities), the same sign as the game's bracket (Alex, 2026-10-17). The target is a point with a constant velocity set by the lesson: no AI, no aim, no shooting."><b>Range · Closing</b><span class="num" id="r-tgt-range">600</span><small>m</small><small class="vt-sub" id="r-tgt-closing">[+51 m/s]</small></div>
   </div>
   </div>
 
@@ -500,7 +500,7 @@ footer a { color: var(--fg-2) !important; }
           <button data-preset="ck-escape">Escape Corkscrew<small>Full forward and full up, one gradual roll: harder push, less range</small></button>
         </div>
         <h3>Fighting Fundamentals</h3>
-        <p class="lessons-how">Getting close and staying there is distance management: read the closing speed, aim in pitch, and learn what turn rate and thrust let you hold at knife range. The target here is a point with a set velocity, in SCM unless the lesson says boost.</p>
+        <p class="lessons-how">Getting close and staying there is distance management: read the closing speed, aim in pitch, and learn what turn rate and thrust let you hold at knife range. The target here is a point with a set velocity, in SCM unless the lesson says boost. Range depends on the target's size: an Arrow needs 300–400 m, a Gladius 500–600 m, a Hornet can be harassed from 700–800 m, and past 1,000 m you fire only to tap shields (Alex's guideline, 2026-10-17).</p>
         <div class="mgrid">
           <button data-preset="delta-read">Read the Closing Speed<small>Chase a target from 600 m: the bracket shows whether the range is shrinking</small></button>
           <button data-preset="aim-pitch">Aim With Pitch, Not Yaw<small>A target 60° off: roll it into the pitch plane, then pitch onto it</small></button>
@@ -824,14 +824,17 @@ const RAD = Math.PI / 180;
 // ── The target (Fighting Fundamentals) ──
 // One point target with a constant velocity set per lesson: no AI, no aim, no shooting, no hit model. ENGAGE holds the named
 // constants those lessons are built on, each with its source, so a game patch is a one-line change here:
-//   range    600 m    the start range, inside the 500-600 m engagement range pilots report (assumed)
+//   range    600 m    the start range, inside the 500-600 m engagement range for a Gladius-sized target (Alex's guideline)
 //   closing  51 m/s   the bracket on Alex's in-game target box, "166.9m [51m/s]" (screenshot, 2026-10-11)
 //   knife    100 m    knife-fight range for the pole drill and the crossing pass (assumed; Apprentice_One names no number)
 //   crossing 225 m/s  the SCM top speed (measured): the fastest an unboosted ship crosses your nose
-// Closing is + while the range shrinks (the core's CLOSING_SIGN). Whether the game's bracket carries the same sign is not
-// confirmed (open question, 2026-10-11). Bullet flight times use WEAPON.projectileSpeed_mps, 1,800 m/s: sourced from
-// Apprentice_One (2024-11-08, laser repeaters), not measured for the CF-117 Panther.
-const ENGAGE = { range: 600, closing: 51, knife: 100, crossing: gladius.scm.speedCap };
+//   byTarget m        effective range depends on the target's size (Alex's guideline, 2026-10-17): Arrow 300-400, Gladius
+//                     500-600, Hornet harassed from 700-800; never shoot a fighter past 1,000 m except to tap its shields
+// Closing is + while the range shrinks (the core's CLOSING_SIGN), the same sign as the game's bracket (Alex confirmed,
+// 2026-10-17). Bullet flight times use WEAPON.projectileSpeed_mps, 1,800 m/s: sourced from Apprentice_One (2024-11-08,
+// laser repeaters), not measured for the CF-117 Panther; Alex's answer (2026-10-17) is to take it from spviewer.eu, still to do.
+const ENGAGE = { range: 600, closing: 51, knife: 100, crossing: gladius.scm.speedCap,
+                 byTarget: { arrow: [300, 400], gladius: [500, 600], hornet: [700, 800], tapOnly: 1000 } };
 const ORBIT = orbitLimit(gladius, 'scm', ENGAGE.knife, 'pitch');            // the pole drill's ceilings at knife range (thrust, turn rate, cap)
 const AIM = timeToNose(gladius, 'scm', 60, 90);                             // a target 60° off in the yaw plane: no roll / roll then pitch / diagonal, s
 const OUTRATE = { pitch: outrateRadius(gladius, 'scm', ENGAGE.crossing, 'pitch'), yaw: outrateRadius(gladius, 'scm', ENGAGE.crossing, 'yaw') };
@@ -958,7 +961,7 @@ const PRESETS = {
                   target: { at: [ENGAGE.range, 0, 0], v: [gladius.scm.speedCap - ENGAGE.closing, 0, 0], plane: 'xy' },
                   do: 'In SCM, hold full forward after a target 600 m ahead that is running at 174 m/s. Watch Range · Closing.',
                   see: 'Closing reads negative while the target outruns you and +51 once you hold 225 m/s (measured cap): the range then falls 51 m a second (arithmetic). The same 51 m/s gives a bullet only about 3 % less flight time.',
-                  more: 'Closing speed = −(r·v)/|r| on the simulated positions (core closingSpeed). Flight time = range / (1,800 + Δ) if bullets inherit your velocity (assumed, Alex 2026-10-11); 1,800 m/s is Apprentice_One\'s laser-repeater figure (2024-11-08), not measured for the Panther. At 550 m, +51 m/s is 0.297 s against 0.306: 3 %, a little more if the Panther\'s bullet is slower. Δ is distance management, not an accuracy boost. The game\'s bracket sign is unconfirmed; the target speed is 225 − 51.',
+                  more: 'Closing speed = −(r·v)/|r| on the simulated positions (core closingSpeed). Flight time = range / (1,800 + Δ) if bullets inherit your velocity (assumed, Alex 2026-10-11); 1,800 m/s is Apprentice_One\'s laser-repeater figure (2024-11-08), not measured for the Panther. At 550 m, +51 m/s is 0.297 s against 0.306: 3 %, a little more if the Panther\'s bullet is slower. Δ is distance management, not accuracy. The sign matches the game\'s bracket (Alex, 2026-10-17); target speed 225 − 51.',
                   steps: [[0, { f: 1, l: 0, u: 0, boost: false }]] },
   'aim-pitch':  { title: 'Aim With Pitch, Not Yaw', result: { at: 3, sim: () => (run.noseOn == null ? 'nose not yet on the target' : `nose on the target ${run.noseOn.toFixed(2)} s after the roll starts (roll ${run.rollEnd == null ? '–' : run.rollEnd.toFixed(2)} s, then pitch)`),
                   label: 'Arithmetic', game: () => `roll 90° then pitch 60° ${AIM.rollThenPitch.toFixed(2)} s, one yaw snap ${AIM.noRoll.toFixed(2)} s, roll and pitch together ${AIM.diagonal.toFixed(2)} s (measured rates)` }, start: 'rest', go: 0,
