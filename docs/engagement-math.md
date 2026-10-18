@@ -6,7 +6,7 @@ functions in `packages/core/src/engage.ts`, tests in `packages/data-gladius/test
 either **measured** (the Gladius fixture, `research/gladius-v1-fixture.json`) or arithmetic on a **named constant** whose
 source, date and status are stated. Where the math makes a popular claim small, the math wins and this page says so.
 
-Labels: **M** measured, **S** sourced (a dated creator statement, not measured by us), **A** assumed, **Mod** model.
+Labels: **M** measured, **S** sourced (a dated creator statement, not measured by us), **T** third-party data (a database value, tagged with site, build and date; NOTICE.md), **A** assumed, **Mod** model.
 
 ## 1. Inputs
 
@@ -17,9 +17,9 @@ Labels: **M** measured, **S** sourced (a dated creator statement, not measured b
 | Forward thrust, G | SCM 13.7, Boost 21.2 | M | fixture `constants.*.G.fwd` (speed slopes, G meter) |
 | Speed limit 90° off the nose, m/s | SCM 225 (sphere), Boost 394 (egg side, A) | M | fixture `speedCap_mps`, `A_mps` |
 | Stick combination | unit-length rule | M | fixture `rotationCombination` (round 11) |
-| `WEAPON.projectileSpeed_mps` | 1,800 | S | Apprentice_One, 2024-11-08, laser repeaters, 3.24.x. **Not measured for the CF-117 Panther; Alex has not yet confirmed it.** One constant, one place to update. |
+| `WEAPON.projectileSpeed_mps` | 1,480 | T | Star Citizen Wiki API, CF-337 Panther Repeater, game build 4.10.2-LIVE.12881860, fetched 2026-10-17 at Alex's request (third-party data, CC BY-SA, NOTICE.md). Not measured in game. One constant, one place to update. Apprentice_One's 1,800 m/s (2024-11-08, 3.24.x) was the placeholder before. |
 | Projectiles inherit the shooter's velocity | yes | A | Alex, 2026-10-11; still on the in-game test list |
-| Sign of the target box's bracket, e.g. `166.9m [51m/s]` | + = closing in this module | A | the game's convention is **unconfirmed** (`CLOSING_SIGN`); treat the game's number as \|Δ\| until Alex checks |
+| Sign of the target box's bracket, e.g. `166.9m [51m/s]` | + = closing | S | Alex confirmed 2026-10-17 that the game's bracket is + when closing (`CLOSING_SIGN`) |
 | g₀ | 9.80665 m/s² | — | SI |
 
 Engagement range for every example: 300–600 m (never 1 km).
@@ -32,30 +32,30 @@ has Δ = 0 whatever its speed; Δ says nothing about crossing motion.
 
 ## 3. Bullet flight time and lead
 
-`timeOfFlight(range, Δ, v_p = 1,800) = range / (v_p + Δ)` under the inheritance assumption (the bullet carries your speed
+`timeOfFlight(range, Δ, v_p = 1,480) = range / (v_p + Δ)` under the inheritance assumption (the bullet carries your speed
 along the line of sight). `leadDistance(crossing, tof) = crossing × tof`. A bullet that never arrives
 (`v_p + Δ ≤ 0`) returns Infinity; a non-positive range returns 0.
 
-Flight time, s, at 1,800 m/s:
+Flight time, s, at 1,480 m/s:
 
 | Range (m) | Δ −100 | Δ −51 | Δ 0 | Δ +51 | Δ +100 |
 |---|---|---|---|---|---|
-| 300 | 0.176 | 0.172 | 0.167 | 0.162 | 0.158 |
-| 450 | 0.265 | 0.257 | 0.250 | 0.243 | 0.237 |
-| 550 | 0.324 | 0.314 | 0.306 | 0.297 | 0.289 |
-| 600 | 0.353 | 0.343 | 0.333 | 0.324 | 0.316 |
+| 300 | 0.217 | 0.210 | 0.203 | 0.196 | 0.190 |
+| 450 | 0.326 | 0.315 | 0.304 | 0.294 | 0.285 |
+| 550 | 0.399 | 0.385 | 0.372 | 0.359 | 0.348 |
+| 600 | 0.435 | 0.420 | 0.405 | 0.392 | 0.380 |
 
 Lead distance, m, at Δ 0, for a target crossing at 50 / 100 / 150 / 225 m/s:
 
 | Range (m) | Flight (s) | 50 m/s | 100 m/s | 150 m/s | 225 m/s |
 |---|---|---|---|---|---|
-| 300 | 0.167 | 8.3 | 16.7 | 25.0 | 37.5 |
-| 450 | 0.250 | 12.5 | 25.0 | 37.5 | 56.3 |
-| 550 | 0.306 | 15.3 | 30.6 | 45.8 | 68.8 |
-| 600 | 0.333 | 16.7 | 33.3 | 50.0 | 75.0 |
+| 300 | 0.203 | 10.1 | 20.3 | 30.4 | 45.6 |
+| 450 | 0.304 | 15.2 | 30.4 | 45.6 | 68.4 |
+| 550 | 0.372 | 18.6 | 37.2 | 55.7 | 83.6 |
+| 600 | 0.405 | 20.3 | 40.5 | 60.8 | 91.2 |
 
 **What Δ does and does not do.** Alex's screenshot shows `[51m/s]` at 167 m. At 550 m, 51 m/s of closing shortens the
-flight from 0.306 s to 0.297 s: **about 3 %**, 9 ms. Even 100 m/s is 5.5 %. With a 1,800 m/s bullet, Δ barely changes
+flight from 0.372 s to 0.359 s: **about 3 %**, 12 ms. Even 100 m/s is 6.3 %. With a 1,480 m/s bullet, Δ barely changes
 the lead. Its real effect is on the range itself: `timeToRange(r0, r1, Δ) = (r0 − r1) / Δ`.
 
 | | Δ 25 | Δ 51 | Δ 100 | Δ 150 |
@@ -66,8 +66,8 @@ the lead. Its real effect is on the range itself: `timeToRange(r0, r1, Δ) = (r0
 
 So the lesson Δ supports is distance management: at +51 m/s a 550 m fight is a 300 m fight in five seconds. The lesson
 it does not support is "Δ is added to your bullets, so closing makes you accurate": the arithmetic says the gain is a
-few percent. If the Panther's real speed is lower than 1,800 m/s the share grows (at 1,500 m/s, 51 m/s is 3.3 %); it
-stays small unless the bullet is far slower than any sourced figure.
+few percent. A slower bullet raises the share a little (at 1,000 m/s, 51 m/s would be 4.9 %); it stays small unless the
+bullet is far slower than any sourced figure.
 
 ## 4. Time to put the nose on a target
 
@@ -228,9 +228,8 @@ precomputed tables (a 7 × 7 grid is 3 ms); `orbitSim` is for tables and tests o
   magnetizes easier in pitch" is cited as his claim.
 - **The outcome of a rate fight.** §6 is one nose against one crossing speed. Two ships, two pilots: a two-pilot
   test, which is not available (a gap).
-- **The Panther's projectile speed.** 1,800 m/s is Apprentice_One's figure for laser repeaters in 3.24.x; the Panther
-  in the current patch is unmeasured. One constant to change.
-- **The sign of the in-game Δ.** This module's + = closing; the game's bracket is unconfirmed.
+- **The Panther's projectile speed.** 1,480 m/s is the Star Citizen Wiki API's value for build 4.10.2 (2026-10-17), not
+  an in-game measurement. One constant to change.
 - **Velocity inheritance.** Assumed, per Alex; it is what makes Δ enter the flight time at all.
 - **Evasion.** Nothing here is a dodge. Winters' strafe taps are not modelled and are not taught (Alex, 2026-10-10).
 
@@ -251,7 +250,6 @@ precomputed tables (a 7 × 7 grid is 3 ms); `orbitSim` is for tables and tests o
 
 | Gap | Test needed |
 |---|---|
-| Panther projectile speed and velocity inheritance | two-pilot (`proj_speed`, `proj_inherit` could be single-pilot against a static target) |
-| Sign of the target box's Δ | single-pilot: close on a static target and read the bracket |
+| Panther projectile speed (confirm the wiki's 1,480) and velocity inheritance | two-pilot (`proj_speed`, `proj_inherit` could be single-pilot against a static target) |
 | Rate-fight outcome Gladius vs Gladius | two-pilot |
 | ESP's effect on pitch vs yaw tracking | two-pilot |

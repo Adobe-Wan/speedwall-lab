@@ -265,7 +265,7 @@ time, (b) flies the escape corkscrew with a ~60 deg/s roll that reverses, and (c
 0.25-0.5 s strafe taps, and reports the share of time each shooter model is on target. Result (**Mod**): against the model's shooters,
 which track perfectly once they have seen you, taps at the wall are on target 91 % (A) / 100 % (B) of the time, the gradual corkscrew
 36 % / 99 %. The model therefore does not reproduce the benefit pilots report; what taps beat is human aim, which is not modelled.
-A1 quotes laser repeaters at 1800 m/s (2024-11, 3.24.x); 1500 stays assumed.
+A1 quotes laser repeaters at 1800 m/s (2024-11, 3.24.x); since 2026-10-17 the core uses the Star Citizen Wiki's 1480 m/s for the Panther (`WEAPON`, NOTICE.md).
 
 The app (`site/index.html`) now computes the chaser's miss at 550 m (or the live range in the Flee lessons) instead of a fixed 1 s.
 
