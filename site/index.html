@@ -559,7 +559,7 @@ footer a { color: var(--fg-2) !important; }
   <footer>
     <p>Physics: the tested core model (<code>packages/core</code>), fitted to the author's in-game measurements. All 30 measured settle speeds match within 1%; the wall and boost-release traces mostly match, and the misses are listed in <code>docs/physics-fit.md</code>. Decoupled mode only. Roll is a preview: each corkscrew lists its in-game result to compare.</p>
     <p>Measurements: AdobeWan, in-game tests (Oct 2026). Original directional-G research: <a href="https://www.spviewer.eu/" style="color:var(--muted)">SC Ships Performances Viewer</a> by Olakeen, used with permission.</p>
-    <p>This is an unofficial Star Citizen fan project, not affiliated with the Cloud Imperium group of companies. Star Citizen® is a registered trademark of Cloud Imperium Rights LLC. No game assets are used.</p>
+    <p>This is an unofficial Star Citizen fan project, not affiliated with the Cloud Imperium group of companies. Star Citizen® is a registered trademark of Cloud Imperium Rights LLC. The ship model is derived from a third-party mesh and used for this non-profit educational project only; see <a href="https://github.com/Adobe-Wan/speedwall-lab/blob/main/NOTICE.md" style="color:var(--muted)">NOTICE</a>.</p>
   </footer>
 </div>
 
@@ -567,6 +567,7 @@ footer a { color: var(--fg-2) !important; }
 import { Renderer, Camera, Transform, Program, Mesh, Geometry, Orbit, Vec3 } from './vendor/ogl.mjs';
 import { createControls, keyName } from './js/controls.mjs';
 import { createHud } from './js/hud.mjs';
+import { loadGlb } from './js/glb.mjs';
 import { step as coreStep, derive as coreDerive, restState, capped, boostActive, eggRadiusAlong, lateralRoom as coreRoom, gladius, G0, angularVelocity, stickScaled, restPilot, stepPilot, vision } from './vendor/speedwall-core.mjs';
 
 /* ───────────────────────── physics: the tested core (packages/core), bundled with the Gladius profile ─────────────────────────
@@ -1090,6 +1091,17 @@ const qrotv = (q, v) => { const [x, y, z, w] = q, [a, b, c] = v;
   return [a + 2 * (y * tz - z * ty), b + 2 * (z * tx - x * tz), c + 2 * (x * ty - y * tx)]; };
 const FS_SHIP = `precision mediump float; varying vec3 vN; varying vec3 vC;
 void main(){ float d = 0.35 + 0.65*abs(dot(normalize(vN), normalize(vec3(0.4,0.8,0.5)))); gl_FragColor = vec4(vC*d, 1.0); }`;
+// The derived hull (assets/ships/gladius.glb, see docs/adr/004-ship-models.md): quantised positions and normals, uint8
+// RGBA vertex colours. The ship is plain white and the lighting carries the detail: a key light from above-front, a
+// cool fill from below-behind, a little sky term. Alpha 0 marks the emissive engine glow. Drawn two-sided.
+const VS_HULL = `attribute vec3 position; attribute vec3 normal; attribute vec4 color; uniform mat4 modelViewMatrix, projectionMatrix; uniform mat3 normalMatrix;
+varying vec3 vN; varying vec4 vC; void main(){ vN = normalMatrix*normal; vC = color; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }`;
+const FS_HULL = `precision mediump float; varying vec3 vN; varying vec4 vC;
+void main(){ vec3 n = normalize(vN); if (!gl_FrontFacing) n = -n;
+  float key = max(dot(n, normalize(vec3(0.35, 0.8, 0.5))), 0.0), fill = max(dot(n, normalize(vec3(-0.5, -0.35, -0.6))), 0.0);
+  float d = 0.18 + 0.66*key + 0.16*fill + 0.08*(0.5 + 0.5*n.y);
+  vec3 c = vC.a < 0.5 ? vC.rgb * 1.5 : vC.rgb * d;
+  gl_FragColor = vec4(c, 1.0); }`;
 
 const hasWebGL = (() => { try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch { return false; } })();
 function makeRenderer(canvas) {
@@ -1149,6 +1161,17 @@ const egg = !hasWebGL ? stubView : (() => {
   const glyph = new Mesh(gl, { geometry: gladiusGeometry(gl), program: new Program(gl, { vertex: VS_SHIP, fragment: FS_SHIP }) });
   // The ship rides on the velocity point: in velocity space, where the ship sits IS how fast it is going.
   glyph.setParent(glyphT);   // true size: 20 m long
+  // The real hull replaces the glyph once it has loaded (PLAN.md §9: 3D assets load lazily, after the first paint).
+  // Its frame is the render frame already (x nose, y up, z starboard, metres, 20 m long); the node's translation and
+  // scale undo the int16 quantisation. On any failure the hand-typed glyph simply stays.
+  const hullT = new Transform(); hullT.setParent(glyphT); hullT.visible = false; let hullInfo = null;
+  const loadHull = () => loadGlb(gl, 'assets/ships/gladius.glb').then(({ geometries, translation, scale, triangles }) => {
+    const program = new Program(gl, { vertex: VS_HULL, fragment: FS_HULL, cullFace: null });
+    hullT.position.set(...translation); hullT.scale.set(...scale);
+    for (const geometry of geometries) new Mesh(gl, { geometry, program, frustumCulled: false }).setParent(hullT);
+    hullT.visible = true; glyph.visible = false; hullInfo = { triangles, drawCalls: geometries.length }; lastKey = '';
+  }).catch(e => console.warn('ship model not loaded, keeping the glyph:', e));
+  (window.requestIdleCallback || (f => setTimeout(f, 300)))(() => requestAnimationFrame(loadHull), { timeout: 2000 });
   // Everything that moves (velocity arrow, trail, settle ray, thrust and dead-thrust arrows, the dodge ring and its
   // reach lines) is one coloured line mesh: one draw call.
   const dyn = colorLines(gl, 4096); dyn.renderOrder = 40; dyn.setParent(shipT);   // 10 s trail + path thread + rings
@@ -1315,7 +1338,7 @@ const egg = !hasWebGL ? stubView : (() => {
     if (!labels.settle.hidden && !tviIcon.hidden) { const lx = parseFloat(labels.settle.style.left), ly = parseFloat(labels.settle.style.top), tx = parseFloat(tviIcon.style.left), ty = parseFloat(tviIcon.style.top);
       if (Math.abs(lx - tx) < 110 && Math.abs(ly - ty) < 22) labels.settle.style.top = `${ty - 24}px`; }
   }
-  return { resize, draw, chase };
+  return { resize, draw, chase, hull: () => hullInfo };
 })();
 
 /* ───────────────────────── pilot view: dust + crosshair + TVI ───────────────────────── */

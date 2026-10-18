@@ -13,8 +13,10 @@ The chaser readout in `site/index.html` assumes a projectile speed of **1500 m/s
 ## Cockpit HUD
 `site/js/hud.mjs` is an original drawing. Its layout follows the in-game Advanced HUD (crosshair, throttle bar, AB bar, G meter); no game art, fonts or shapes are used.
 
-## Ship model
-The Gladius in the 3D view (`gladiusGeometry` in `site/index.html`) and the top-down outline in the slice views are original low-poly drawings (about 380 triangles), typed in by hand from the ship's 20 × 17 × 5.5 m size in the fixture and the proportions of a public fan data sheet of the ship. They are an approximation: nothing was extracted from the game, and no image or game model is included in this repository.
+## Ship model (not covered by this repository's licenses)
+The Gladius hull in the 3D view, `site/assets/ships/gladius.glb`, is derived from the Sketchfab model by lechatfantome (labelled CC BY 4.0; likely a game extraction, provenance unverified), decimated and modified: landing gear, cockpit interior, decals and hidden geometry removed, engine glow added, no textures. It is used for this non-profit educational fan project only, is excluded from the MIT and CC BY grants, and is removed on request. The raw source mesh is not in this repository. See `docs/adr/004-ship-models.md`.
+
+The hand-typed glyph (`gladiusGeometry` in `site/index.html`, about 380 triangles) and the top-down outline in the slice views are original low-poly drawings from the ship's 20 × 17 × 5.5 m size in the fixture and the proportions of a public fan data sheet; the page falls back to the glyph when the model has not loaded.
 
 ## Trademarks
-Star Citizen®, Squadron 42®, Roberts Space Industries®, Cloud Imperium® and the Aegis Dynamics Gladius name are registered trademarks of Cloud Imperium Rights LLC. This is an unofficial fan project, not affiliated with the Cloud Imperium group of companies. No game assets (art, models, logos, fonts or HUD graphics) are used.
+Star Citizen®, Squadron 42®, Roberts Space Industries®, Cloud Imperium® and the Aegis Dynamics Gladius name are registered trademarks of Cloud Imperium Rights LLC. This is an unofficial fan project, not affiliated with the Cloud Imperium group of companies. No game art, logos, fonts or HUD graphics are used; the one derived ship model is listed above.
