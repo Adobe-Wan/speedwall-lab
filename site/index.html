@@ -831,8 +831,8 @@ const RAD = Math.PI / 180;
 //   byTarget m        effective range depends on the target's size (Alex's guideline, 2026-10-17): Arrow 300-400, Gladius
 //                     500-600, Hornet harassed from 700-800; never shoot a fighter past 1,000 m except to tap its shields
 // Closing is + while the range shrinks (the core's CLOSING_SIGN), the same sign as the game's bracket (Alex confirmed,
-// 2026-10-17). Bullet flight times use WEAPON.projectileSpeed_mps, 1,800 m/s: sourced from Apprentice_One (2024-11-08,
-// laser repeaters), not measured for the CF-117 Panther; Alex's answer (2026-10-17) is to take it from spviewer.eu, still to do.
+// 2026-10-17). Bullet flight times use WEAPON.projectileSpeed_mps, 1,480 m/s: the CF-337 Panther's ammunition speed from the
+// Star Citizen Wiki API (build 4.10.2-LIVE.12881860, fetched 2026-10-17 at Alex's request; third-party data, NOTICE.md), not measured.
 const ENGAGE = { range: 600, closing: 51, knife: 100, crossing: gladius.scm.speedCap,
                  byTarget: { arrow: [300, 400], gladius: [500, 600], hornet: [700, 800], tapOnly: 1000 } };
 const ORBIT = orbitLimit(gladius, 'scm', ENGAGE.knife, 'pitch');            // the pole drill's ceilings at knife range (thrust, turn rate, cap)
@@ -961,7 +961,7 @@ const PRESETS = {
                   target: { at: [ENGAGE.range, 0, 0], v: [gladius.scm.speedCap - ENGAGE.closing, 0, 0], plane: 'xy' },
                   do: 'In SCM, hold full forward after a target 600 m ahead that is running at 174 m/s. Watch Range · Closing.',
                   see: 'Closing reads negative while the target outruns you and +51 once you hold 225 m/s (measured cap): the range then falls 51 m a second (arithmetic). The same 51 m/s gives a bullet only about 3 % less flight time.',
-                  more: 'Closing speed = −(r·v)/|r| on the simulated positions (core closingSpeed). Flight time = range / (1,800 + Δ) if bullets inherit your velocity (assumed, Alex 2026-10-11); 1,800 m/s is Apprentice_One\'s laser-repeater figure (2024-11-08), not measured for the Panther. At 550 m, +51 m/s is 0.297 s against 0.306: 3 %, a little more if the Panther\'s bullet is slower. Δ is distance management, not accuracy. The sign matches the game\'s bracket (Alex, 2026-10-17); target speed 225 − 51.',
+                  more: 'Closing speed = −(r·v)/|r| on the simulated positions (core closingSpeed). Flight time = range / (1,480 + Δ) if bullets inherit your velocity (assumed, Alex 2026-10-11); 1,480 m/s is the CF-337 Panther\'s speed on the Star Citizen Wiki (build 4.10.2, 2026-10-17), not measured. At 550 m, +51 m/s is 0.359 s against 0.372: 3 %. Δ is distance management, not accuracy. The sign matches the game\'s bracket (Alex, 2026-10-17); target speed 225 − 51.',
                   steps: [[0, { f: 1, l: 0, u: 0, boost: false }]] },
   'aim-pitch':  { title: 'Aim With Pitch, Not Yaw', result: { at: 3, sim: () => (run.noseOn == null ? 'nose not yet on the target' : `nose on the target ${run.noseOn.toFixed(2)} s after the roll starts (roll ${run.rollEnd == null ? '–' : run.rollEnd.toFixed(2)} s, then pitch)`),
                   label: 'Arithmetic', game: () => `roll 90° then pitch 60° ${AIM.rollThenPitch.toFixed(2)} s, one yaw snap ${AIM.noRoll.toFixed(2)} s, roll and pitch together ${AIM.diagonal.toFixed(2)} s (measured rates)` }, start: 'rest', go: 0,

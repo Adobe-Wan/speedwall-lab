@@ -17,24 +17,24 @@ export type FlightMode = "scm" | "boost";
 export type TurnAxis = "pitch" | "yaw";
 
 /**
- * Projectile speed used for time of flight. Status: sourced from a creator video, not measured for the CF-117 Panther
- * (Alex has not yet confirmed 1,800 m/s is acceptable). Update here when the game patches or the Panther is measured.
+ * Projectile speed used for time of flight: the CF-337 Panther Repeater's ammunition speed from the Star Citizen Wiki
+ * API (third-party data, CC BY-SA, listed in NOTICE.md), taken 2026-10-17 at Alex's request. Not measured in game.
+ * Update here when the game patches or the Panther is measured.
  */
 export const WEAPON = {
-  projectileSpeed_mps: 1800,
-  source: "Apprentice_One, 2024-11-08, laser repeaters (3.24.x)",
-  status: "sourced; not measured for the CF-117 Panther",
+  projectileSpeed_mps: 1480,
+  source: "Star Citizen Wiki API, CF-337 Panther Repeater (KLWE_LaserRepeater_S3), game build 4.10.2-LIVE.12881860, fetched 2026-10-17",
+  status: "third-party data (CC BY-SA, NOTICE.md); not measured in game",
 } as const;
 
 /**
  * Sign convention for closing speed in this module: positive when the range is shrinking (closing), negative when
- * it grows. The in-game target box shows range then a bracketed rate, e.g. `166.9m [51m/s]`; whether the game's
- * bracket is positive when closing is NOT yet confirmed (open question to Alex, 2026-10-11). Until it is, treat the
- * game's number as |Δ| and read the sign from whether the range is falling.
+ * it grows. The in-game target box shows range then a bracketed rate, e.g. `166.9m [51m/s]`; Alex confirmed on
+ * 2026-10-17 that the game's bracket is positive when closing, the same as this module.
  */
 export const CLOSING_SIGN = {
   positive: "closing (range shrinking)",
-  status: "this module's convention; the game's bracket sign is unconfirmed (2026-10-11)",
+  status: "matches the game's bracket: + when closing (Alex, 2026-10-17)",
 } as const;
 
 const dot = (a: Vec3, b: Vec3) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];

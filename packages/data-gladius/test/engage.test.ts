@@ -16,12 +16,13 @@ const rates = (mode: FlightMode) => (mode === "boost" ? p.boost.rotationDps : p.
 const gees = (mode: FlightMode) => (mode === "boost" ? p.boost.G : p.scm.G);
 
 describe("constants", () => {
-  it("WEAPON carries its source and status; 1,800 m/s is sourced, not measured", () => {
-    expect(WEAPON.projectileSpeed_mps).toBe(1800);
-    expect(WEAPON.source).toContain("Apprentice_One");
-    expect(WEAPON.source).toContain("2024-11-08");
+  it("WEAPON carries its source and status; 1,480 m/s is third-party data, not measured", () => {
+    expect(WEAPON.projectileSpeed_mps).toBe(1480);
+    expect(WEAPON.source).toContain("Star Citizen Wiki");
+    expect(WEAPON.source).toContain("4.10.2");
+    expect(WEAPON.source).toContain("2026-10-17");
     expect(WEAPON.status).toMatch(/not measured/);
-    expect(CLOSING_SIGN.status).toMatch(/unconfirmed/);
+    expect(CLOSING_SIGN.status).toMatch(/\+ when closing/);
   });
   it("every rate and G used here is the fixture's (measured), read through the profile", () => {
     expect(p.scm.rotationDps).toEqual({ pitch: 68.0, yaw: 52.1, roll: 199.9 });
@@ -53,14 +54,14 @@ describe("closingSpeed", () => {
 
 describe("timeOfFlight and lead", () => {
   it.each([
-    [550, 0, 0.306],
-    [550, 51, 0.297],
-    [550, -100, 0.324],
-  ])("range %d m, closing %d m/s → %f s (brief C1 sanity)", (range, closing, want) => within(timeOfFlight(range, closing), want));
+    [550, 0, 0.372],
+    [550, 51, 0.359],
+    [550, -100, 0.399],
+  ])("range %d m, closing %d m/s → %f s (1,480 m/s, docs/engagement-math.md §3)", (range, closing, want) => within(timeOfFlight(range, closing), want));
   it("51 m/s of closing shortens the flight at 550 m by about 3 %", () => {
     const d = 1 - timeOfFlight(550, 51) / timeOfFlight(550, 0);
-    expect(d).toBeGreaterThan(0.025);
-    expect(d).toBeLessThan(0.03);
+    expect(d).toBeGreaterThan(0.03);
+    expect(d).toBeLessThan(0.035);
   });
   it("is monotonic: more closing → shorter flight; more range → longer flight", () => {
     let last = Infinity;
@@ -73,13 +74,13 @@ describe("timeOfFlight and lead", () => {
     expect(timeOfFlight(550, 0, 1500)).toBeCloseTo(550 / 1500, 12);
   });
   it("guards: a projectile that never arrives is Infinity, a non-positive range is 0", () => {
-    expect(timeOfFlight(550, -1800)).toBe(Infinity);
+    expect(timeOfFlight(550, -1480)).toBe(Infinity);
     expect(timeOfFlight(550, -2000)).toBe(Infinity);
     expect(timeOfFlight(0, 51)).toBe(0);
     expect(timeOfFlight(-5, 51)).toBe(0);
   });
   it("lead distance is crossing speed × flight time (m/s × s = m)", () => {
-    expect(leadDistance(120, timeOfFlight(550, 0))).toBeCloseTo(120 * 550 / 1800, 9);
+    expect(leadDistance(120, timeOfFlight(550, 0))).toBeCloseTo(120 * 550 / 1480, 9);
     expect(leadDistance(0, 0.3)).toBe(0);
     expect(leadDistance(-120, 0.3)).toBeCloseTo(-36, 9);
   });
@@ -93,9 +94,9 @@ describe("timeToRange", () => {
     expect(timeToRange(550, 300, 0)).toBe(Infinity);
     expect(timeToRange(550, 550, 0)).toBe(0);
   });
-  it("Δ matters more as distance management than as bullet speed: 51 m/s moves 550 → 300 m in ~5 s but trims the flight by 9 ms", () => {
+  it("Δ matters more as distance management than as bullet speed: 51 m/s moves 550 → 300 m in ~5 s but trims the flight by 12 ms", () => {
     expect(timeToRange(550, 300, 51)).toBeGreaterThan(4.5);
-    expect(timeOfFlight(550, 0) - timeOfFlight(550, 51)).toBeLessThan(0.01);
+    expect(timeOfFlight(550, 0) - timeOfFlight(550, 51)).toBeLessThan(0.013);
   });
 });
 
