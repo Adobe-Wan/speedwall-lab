@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Everything comes from this site: no remote scripts, styles, fonts or calls (tools/e2e checks it). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <title>Speedwall Lab</title>
 <meta name="description" content="See how your speed limits your maneuvers: the Gladius speed egg, space dust and TVI, built from in-game measurements. Unofficial fan project.">
 <meta property="og:title" content="Speedwall Lab (alpha)">
@@ -98,6 +100,10 @@ button.small { padding: 4px 10px; }
   padding: 4px 10px; border-radius: 999px; background: rgba(7,11,18,.6); border: 1px solid var(--line); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
 .vtitle::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--boost); box-shadow: 0 0 8px var(--boost); }
 #v-pilot .vtitle::before { background: var(--tvi); box-shadow: 0 0 8px var(--tvi); }
+/* desktop: the right-hand view is Cockpit or Top-Down, picked with this switch, which also names it (the Speed Egg stays on the left) */
+.vswitch { position: absolute; left: 12px; top: 12px; z-index: 2; }
+.vswitch button { font: 600 .72rem var(--font-ui); padding: 4px 10px; }
+#v-pilot .vtitle, #v-slice .vtitle { display: none; }
 .vtools { position: absolute; right: 10px; top: 8px; display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; pointer-events: auto; max-width: 80%; }
 .vtools button { padding: 5px 9px; font-size: .72rem; background: rgba(12,18,28,.72); border-color: var(--line-2); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
 .vtools button:hover { background: rgba(28,40,60,.9); }
@@ -305,7 +311,7 @@ footer a { color: var(--fg-2) !important; }
 .no-gl { position: absolute; left: 10px; right: 10px; top: 40px; z-index: 2; margin: 0; font-size: .8rem; color: var(--boost); }
 @media (max-width: 979px) {
   .tabs { display: flex; }
-  .vtitle { display: none; } /* the tabs name the view; the title would sit under the tool buttons */
+  .vtitle, .vswitch { display: none; } /* the tabs name the view; the title would sit under the tool buttons */
   .views { grid-template-columns: 1fr; }
   .view[data-hidden="true"] { display: none; }
   .view canvas.inset { display: none; }
@@ -351,6 +357,7 @@ footer a { color: var(--fg-2) !important; }
   .app > * { grid-column: 2; }
   .stage { grid-column: 1; grid-row: 1 / span 30; position: sticky; top: 0; }
   .tabs { display: flex; }
+  .vswitch { display: none; }
   .views { grid-template-columns: 1fr; }
   .view[data-hidden="true"] { display: none; }
   .view { height: calc(100vh - 186px); min-height: 150px; }
@@ -423,6 +430,7 @@ footer a { color: var(--fg-2) !important; }
       <svg class="overlay" id="hud" aria-hidden="true"></svg>
       <svg class="overlay" id="ahud" aria-hidden="true"></svg>
       <div class="vtitle">Cockpit</div>
+      <span class="seg vswitch" role="group" aria-label="Right-hand view"><button data-right="pilot" aria-pressed="true">Cockpit</button><button data-right="slice" aria-pressed="false" title="The egg seen from above at your forward speed, with Dodge Potential against forward speed">Top-Down</button></span>
       <div class="vtools">
         <button id="t-dust" aria-pressed="true">Dust</button>
         <button id="t-ring" aria-pressed="true">Guide Ring</button>
@@ -433,6 +441,7 @@ footer a { color: var(--fg-2) !important; }
     <section class="view" id="v-slice" data-hidden="true" aria-label="Slice view: top-down slice of the egg">
       <canvas id="slice-big"></canvas>
       <div class="vtitle">Top-Down</div>
+      <span class="seg vswitch" role="group" aria-label="Right-hand view"><button data-right="pilot" aria-pressed="true">Cockpit</button><button data-right="slice" aria-pressed="false" title="The egg seen from above at your forward speed, with Dodge Potential against forward speed">Top-Down</button></span>
       <p class="no-gl" id="no-gl" hidden>3D views need WebGL, which this browser has turned off. Everything else works here in the top-down view.</p>
       <div class="caption" id="cap-slice"></div>
     </section>
@@ -443,7 +452,7 @@ footer a { color: var(--fg-2) !important; }
     <div class="vt" title="How fast the ship is moving through space, in any direction (the simulator's state; MODEL fitted to the measured settle speeds)."><b>Speed</b><span class="num" id="r-speed">0</span><small>m/s</small></div>
     <div class="vt" title="ARITHMETIC on the measured egg: the sideways speed you can still add at your forward speed, the egg's radius there minus the sideways speed you already have. It is the egg's geometry, not Dodge Potential: near the nose it reads close to 0 while the ship can still move about 90 m sideways in 2 s, because the velocity swings along the egg's surface."><b>Sideways Room</b><span class="num" id="r-room">394</span><small>m/s</small>
       <div class="roombar" aria-hidden="true"><i id="rb-fill"></i><b id="rb-ship"></b></div></div>
-    <div class="vt key" id="vt-dodge" title="MODEL: how far off your current line the ship moves in 2 s if you push fully off it now (the best of left, right, up and down), with your other inputs held as they are; the price is the range a chaser holding 520 m/s gains over those 2 s. Not Sideways Room: that is the egg's geometry, this is the distance the simulator actually moves you."><b>Dodge Potential</b><span class="num" id="r-dodge">–</span><small>m in 2 s</small>
+    <div class="vt key" id="vt-dodge" title="MODEL: how far off your current line the ship moves in 2 s if you push fully off it now (the best of left, right, up and down), with your other inputs held as they are. In the Flee lessons the line under it is the price: the range a chaser holding 520 m/s gains over those 2 s; otherwise it names the push that goes farthest. Not Sideways Room: that is the egg's geometry, this is the distance the simulator actually moves you."><b>Dodge Potential</b><span class="num" id="r-dodge">–</span><small>m in 2 s</small>
       <div class="dodgebar" aria-hidden="true"><i id="r-dodgebar"></i></div><small class="vt-sub" id="r-dodge-price">costs – m of range</small></div>
     <div class="vt" id="vt-tank"><b>Boost Tank</b><span class="num" id="r-tank">100</span><small>%</small><div class="tank"><i id="r-tankbar"></i></div></div>
     <div class="vt" title="Which speed limit applies right now: Boost (the amber egg) or SCM (the blue ball). At Limit shows while the flight computer holds you at that limit."><b>Flight Mode</b><span class="chip" id="r-mode">SCM</span> <span class="chip pinned" id="r-pin" hidden>At Limit</span></div>
@@ -910,7 +919,7 @@ function markPreset(key) { document.querySelectorAll('[data-preset]').forEach(b 
 document.querySelectorAll('[data-preset]').forEach(b => b.onclick = () => {
   const key = b.dataset.preset, p = PRESETS[key]; reset(p.start); script = { t: 0, go: p.go || 0, steps: p.steps, i: -1 }; maneuver = key; markPreset(key);
   dodge = p.dodge ? { t: 0, dist: 0 } : null;
-  run = { t: 0, min: Infinity, peakG: 0, tvi: 0, rel: null, shown: false, chase: !!p.chase }; chase.range = CHASE.range;
+  run = { t: 0, min: Infinity, peakG: 0, tvi: 0, rel: null, shown: false, chase: !!p.chase }; chase.range = CHASE.range; chase.y0 = S.x[1]; chase.z0 = S.x[2];
   $('run-name').textContent = p.title; $('run-result').textContent = ''; $('run-msg').hidden = false; $('runbar').hidden = false;
   setNote(lessonHtml(p));
   egg.chase(true);   // ride behind the ship with its limits in frame
@@ -934,15 +943,22 @@ const narrow = matchMedia('(max-width: 979px), (orientation: landscape) and (max
 // Reduced motion (PLAN.md §7): start on the top-down view on phones, with the space dust off.
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 let active = reduceMotion ? 'slice' : 'egg';
+// Desktops show two views side by side: the Speed Egg on the left, and Cockpit or Top-Down on the right (the switch in the
+// right-hand view's corner; remembered per browser). The egg's small top-down inset is hidden while the big one is beside it.
+let right = prefs.right === 'slice' ? 'slice' : 'pilot';
 function applyTabs() {
   document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.view === active));
+  document.querySelectorAll('[data-right]').forEach(b => b.setAttribute('aria-pressed', b.dataset.right === right));
+  $('c-inset').hidden = !narrow.matches && right === 'slice';
   // No WebGL: the 3D views can't run, so the top-down view is the whole app (PLAN.md §9 fallback).
   if (!hasWebGL) { active = 'slice'; for (const [k, el] of Object.entries(views)) el.dataset.hidden = String(k !== 'slice');
-    $('tab-egg').hidden = $('tab-pilot').hidden = true; document.querySelector('.views').classList.add('single'); $('no-gl').hidden = false; requestAnimationFrame(resizeAll); return; }
-  for (const [k, el] of Object.entries(views)) el.dataset.hidden = narrow.matches ? String(k !== active) : String(k === 'slice');
+    $('tab-egg').hidden = $('tab-pilot').hidden = true; document.querySelector('.views').classList.add('single'); $('no-gl').hidden = false;
+    document.querySelectorAll('.vswitch').forEach(e => { e.hidden = true; }); requestAnimationFrame(resizeAll); return; }
+  for (const [k, el] of Object.entries(views)) el.dataset.hidden = narrow.matches ? String(k !== active) : String(k !== 'egg' && k !== right);
   requestAnimationFrame(resizeAll);
 }
 document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { active = b.dataset.view; applyTabs(); });
+document.querySelectorAll('[data-right]').forEach(b => b.onclick = () => { right = prefs.right = b.dataset.right; savePrefs(); applyTabs(); });
 narrow.addEventListener('change', applyTabs);
 // A view is drawn only if it's shown AND on screen (PLAN.md §9: pause off-screen views).
 const onScreen = { egg: true, pilot: true, slice: true };
@@ -1389,7 +1405,9 @@ const pilot = !hasWebGL ? stubView : (() => {
     <g id="h-tvi" stroke="#7ef0c8" stroke-width="2.2" fill="none"><circle r="8"/><path d="M-22 0h14M8 0h14M0-8v-9"/></g>
     <g id="h-anti" stroke="#7ef0c8" stroke-width="2" fill="none" opacity=".8"><circle r="8"/><path d="M-5.6-5.6l11.2 11.2M5.6-5.6l-11.2 11.2"/></g>
     <g id="h-edge" fill="#7ef0c8"><path d="M0-9L16 0 0 9z"/></g>
-    <text id="h-lbl" fill="#7ef0c8" font-family="ui-monospace, Menlo, monospace" font-size="12" font-weight="600"></text>`;
+    <g id="h-chs" stroke="#ff6a55" stroke-width="2" fill="none"><path d="M0-10L10 0 0 10-10 0z"/></g>
+    <g id="h-chs-edge" fill="#ff6a55"><path d="M0-9L16 0 0 9z"/></g>
+    <text id="h-chs-lbl" fill="#ff6a55" text-anchor="middle" stroke="#03060a" stroke-opacity=".75" stroke-width="3" paint-order="stroke" font-family="ui-monospace, Menlo, monospace" font-size="12" font-weight="600"></text>`;
   const el = id => svg.querySelector(id);
   function resize() { const w = canvas.parentElement.clientWidth, h = canvas.parentElement.clientHeight; if (!w || !h) return; renderer.setSize(w, h);
     const vf = 2 * Math.atan(Math.tan(hfov * Math.PI / 360) / (w / h)) * 180 / Math.PI; camera.perspective({ aspect: w / h, fov: vf }); svg.setAttribute('viewBox', `0 0 ${w} ${h}`); ahud.resize(w, h); }
@@ -1407,7 +1425,23 @@ const pilot = !hasWebGL ? stubView : (() => {
     const w = canvas.parentElement.clientWidth, h = canvas.parentElement.clientHeight, cx = w / 2, cy = h / 2, f = (w / 2) / Math.tan(hfov * Math.PI / 360);
     const rc = el('#h-ring circle'); rc.setAttribute('cx', cx); rc.setAttribute('cy', cy); rc.setAttribute('r', f * Math.tan(ringDeg * Math.PI / 180)); el('#h-ring').style.display = ringOn ? '' : 'none';
     const show = (id, x, y, on) => { const g = el(id); g.style.display = on ? '' : 'none'; if (on) g.setAttribute('transform', `translate(${x} ${y})`); };
-    if (sp < 3) { show('#h-tvi', 0, 0, false); show('#h-anti', 0, 0, false); show('#h-edge', 0, 0, false); el('#h-lbl').textContent = ''; return; }
+    { // the chaser (Flee lessons only): a diamond where it is when it is on screen; within 30° of your tail (almost always:
+      // it sits on your starting line behind you) an arrow at the bottom centre, since a point straight behind has no
+      // on-screen direction and would spin with every roll; otherwise an arrow at the edge pointing to it. All kept inside
+      // the tool row at the top and the caption at the bottom; the label gives the range
+      const on = !!(run && run.chase), lb = el('#h-chs-lbl');
+      if (!on) { show('#h-chs', 0, 0, false); show('#h-chs-edge', 0, 0, false); lb.textContent = ''; }
+      else { const r = chaserRel(), n = len(r), fx = r[0] / n, rx = -r[1] / n, ux = r[2] / n, txt = `chaser ${Math.round(chase.range)} m`;
+        const pt = fx > 0.087 ? [cx + f * rx / fx, cy - f * ux / fx] : null, capH = $('cap-pilot').offsetHeight || 0;
+        const box = [44, 56, w - 44, h - capH - 34];
+        if (pt && pt[0] > box[0] && pt[0] < box[2] && pt[1] > box[1] && pt[1] < box[3]) { show('#h-chs', ...pt, true); show('#h-chs-edge', 0, 0, false); lb.setAttribute('x', pt[0]); lb.setAttribute('y', pt[1] - 16); }
+        else { show('#h-chs', 0, 0, false);
+          const ang = -fx > Math.cos(30 * Math.PI / 180) ? Math.PI / 2 : Math.atan2(-ux, rx), dx = Math.cos(ang), dy = Math.sin(ang);   // behind: point down
+          const t = Math.min(dx > 1e-6 ? (box[2] - cx) / dx : dx < -1e-6 ? (box[0] - cx) / dx : Infinity, dy > 1e-6 ? (box[3] - cy) / dy : dy < -1e-6 ? (box[1] - cy) / dy : Infinity);
+          const ex = cx + dx * t, ey = cy + dy * t, g = el('#h-chs-edge'); g.style.display = ''; g.setAttribute('transform', `translate(${ex} ${ey}) rotate(${ang * 180 / Math.PI})`);
+          lb.setAttribute('x', ex - dx * 34); lb.setAttribute('y', ey - dy * 22 + 4); }
+        lb.textContent = -fx > Math.cos(30 * Math.PI / 180) ? `${txt} behind` : txt; } }
+    if (sp < 3) { show('#h-tvi', 0, 0, false); show('#h-anti', 0, 0, false); show('#h-edge', 0, 0, false); return; }
     const vh = st.v.map(c => c / sp), fwd = vh[0], right = -vh[1], up = vh[2];
     const proj = (fx, rx, ux) => [cx + f * rx / fx, cy - f * ux / fx];
     const inView = ([x, y]) => x > 12 && x < w - 12 && y > 12 && y < h - 12;
@@ -1417,16 +1451,6 @@ const pilot = !hasWebGL ? stubView : (() => {
     else { show('#h-tvi', 0, 0, false); const ang = Math.hypot(up, right) < 0.05 ? Math.PI / 2 : Math.atan2(-up, right) /* straight behind: point down */; const ex = cx + Math.cos(ang) * (w / 2 - 22), ey = cy + Math.sin(ang) * (h / 2 - 22);
       const g = el('#h-edge'); g.style.display = ''; g.setAttribute('transform', `translate(${Math.min(w - 18, Math.max(18, ex))} ${Math.min(h - 18, Math.max(18, ey))}) rotate(${ang * 180 / Math.PI})`); }
     const anti = -fwd > 0.087 ? proj(-fwd, -right, -up) : null; show('#h-anti', ...(anti || [0, 0]), !!anti && inView(anti));
-    const lp = tviPt && inView(tviPt) ? tviPt : [cx, cy + 46];
-    const t = el('#h-lbl'), txt = `TVI ${Math.round(d.tviDeg)}°`, tw = txt.length * 7.5, th = 12;
-    // the label sits below-right of the TVI unless that lands on a HUD block (bars, numbers, G readout) or the crosshair:
-    // then below-left, above-right, above-left, in that order
-    const obs = ahud.obstacles().concat([[cx - 26, cy - 26, cx + 26, cy + 26]]);
-    const cost = (x, y) => obs.reduce((n, [a, b, c2, d2]) => n + Math.max(0, Math.min(x + tw, c2) - Math.max(x, a)) * Math.max(0, Math.min(y, d2) - Math.max(y - th, b)), 0);
-    const cands = [[lp[0] + 14, lp[1] + 22], [lp[0] - 14 - tw, lp[1] + 22], [lp[0] + 14, lp[1] - 14], [lp[0] - 14 - tw, lp[1] - 14], [lp[0] - tw / 2, lp[1] - 26], [lp[0] - tw / 2, lp[1] + 34]];
-    let lx = cands[0][0], ly = cands[0][1], best = Infinity;
-    for (const [x, y] of cands) { const k = cost(x, y); if (k < best) { best = k; lx = x; ly = y; } if (k === 0) break; }
-    t.setAttribute('x', lx); t.setAttribute('y', ly); t.textContent = txt;
   }
   return { resize, draw, hud: v => ahud.update({ ...v, hfovDeg: hfov, guideDeg: ringDeg }) };
 })();
@@ -1440,8 +1464,10 @@ function drawSlice(canvas, st, d, big) {
   if (canvas.width !== bw || canvas.height !== bh) { canvas.width = bw; canvas.height = bh; }
   const c = canvas.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, w, h);
   // The big view keeps a box for the Dodge Potential curve: beside the egg on wide views, under it on tall ones, never on it.
-  const curve = big && d.dodge && d.dodge.ready ? curveBox(w, h) : null;
-  const ax = curve ? curve.area : [0, 0, w, h], aw = ax[2] - ax[0], ah = ax[3] - ax[1];
+  // On desktops the caption sits over the bottom of the view: lay out above it.
+  const cap = big ? canvas.parentElement.querySelector('.caption') : null, hc = Math.max(120, h - (cap && cap.offsetHeight ? cap.offsetHeight + 14 : 0));
+  const curve = big && d.dodge && d.dodge.ready ? curveBox(w, hc) : null;
+  const ax = curve ? curve.area : [0, 0, w, hc], aw = ax[2] - ax[0], ah = ax[3] - ax[1];
   const pad = big ? 30 : 10, sc = Math.min((ah - 2 * pad) / 830, (aw - 2 * pad) / 900), ox = ax[0] + aw / 2, oy = ax[1] + pad + 545 * sc;
   const P = (lat, fwd) => [ox + lat * sc, oy - fwd * sc];
   c.lineWidth = big ? 2 : 1.2;
@@ -1465,6 +1491,12 @@ function drawSlice(canvas, st, d, big) {
   for (let i = SHIP_PLAN.length - 1; i >= 0; i--) c.lineTo(-SHIP_PLAN[i][0] * g, -SHIP_PLAN[i][1] * g);
   c.closePath(); c.fillStyle = '#c7d1e5'; c.fill(); c.strokeStyle = 'rgba(7,11,17,.9)'; c.lineWidth = 1; c.stroke();
   c.fillStyle = '#4aa3d8'; c.beginPath(); c.ellipse(0, -3.8 * g, 0.9 * g, 2.6 * g, 0, 0, 2 * Math.PI); c.fill(); c.restore();
+  // the chaser (Flee lessons): its velocity, CHASE.speed along your starting line, as a red diamond. The gap between it and
+  // your velocity point along the line is the closing speed (velocity space, so it is not where the chaser is)
+  if (run && run.chase) { const cv = chaserVel(), [qx, qy] = P(-cv[1], cv[0]), s = big ? 13 : 6;
+    c.strokeStyle = '#ff6a55'; c.lineWidth = big ? 2 : 1.4; c.beginPath(); c.moveTo(qx, qy - s); c.lineTo(qx + s, qy); c.lineTo(qx, qy + s); c.lineTo(qx - s, qy); c.closePath(); c.stroke();
+    if (big) { c.font = '600 12px ui-monospace, Menlo, monospace'; c.lineJoin = 'round'; c.textAlign = 'right'; c.strokeStyle = 'rgba(7,11,18,.9)'; c.lineWidth = 3.5;
+      const t = `chaser ${CHASE.speed} m/s`; c.textAlign = 'center'; c.strokeText(t, qx, qy + s + 16); c.fillStyle = '#ff6a55'; c.fillText(t, qx, qy + s + 16); } }
   if (big) { c.font = '600 12px ui-monospace, Menlo, monospace'; c.lineJoin = 'round';
     // labels sit beside the ends they name (the ship rides on the nose at top speed), on a dark halo so lines never cut them
     const lbl = (t, x, y, col, align) => { c.textAlign = align; c.strokeStyle = 'rgba(7,11,18,.9)'; c.lineWidth = 3.5; c.strokeText(t, x, y); c.fillStyle = col; c.fillText(t, x, y); };
@@ -1507,7 +1539,11 @@ function drawDodgeCurve(c, { x0, y0, bw, bh }, d) {
 // test (docs/aim-model.md). The shooter model that used to be scored here was removed on 2026-10-11 (math and geometry over
 // assumptions); it lives on, marked assumed, in packages/core/src/aim.ts.
 const CHASE = { range: 550, speed: 520 };   // m behind at the start (assumed, inside the 500-600 m gun range); m/s it holds (the measured boosted wall)
-const chase = { range: CHASE.range };       // the live range
+const chase = { range: CHASE.range, y0: 0, z0: 0 };   // the live range; y0, z0: where the starting line runs (world frame, along x)
+// Where the chaser is, for the markers in the Cockpit and Top-Down views (ship frame): it sits on your starting line,
+// chase.range behind you along it, and its velocity is CHASE.speed along that line. Geometry on the same arithmetic.
+const chaserRel = () => qRot([-qAtt[0], -qAtt[1], -qAtt[2], qAtt[3]], [-chase.range, chase.y0 - S.x[1], chase.z0 - S.x[2]]);
+const chaserVel = () => qRot([-qAtt[0], -qAtt[1], -qAtt[2], qAtt[3]], [CHASE.speed, 0, 0]);
 // Dodge Potential (MODEL): how far off its current line the ship moves in DODGE.windowS seconds if it pushes fully off that
 // line now, with every other input held as the pilot has it. windowS is a display window, so the number is comparable
 // from one speed to the next; it is not a claim about any shooter's reaction or firing time. Its price is the range a
@@ -1664,11 +1700,11 @@ function frame(now) {
   gSmooth += (d.g - gSmooth) * 0.15;
   gPeak = Math.max(gSmooth, gPeak - dt * 1.5);   // peak hold, falling 1.5 G/s
   bBtn.classList.toggle('active', d.boost); bBtn.setAttribute('aria-pressed', d.boost);
-  if (visible('egg')) { egg.draw(S, d, qAtt); drawSlice($('c-inset'), S, d, false); teach($('cap-egg'), d); }
+  if (visible('egg')) { egg.draw(S, d, qAtt); if (!$('c-inset').hidden) drawSlice($('c-inset'), S, d, false); teach($('cap-egg'), d); }
   if (visible('pilot')) { pilot.draw(S, d);
     pilot.hud({ speed: d.fwd < -1 ? -d.speed : d.speed, speedCap: d.r, throttle: inp.u.f, g: gSmooth, gPeak, tank: S.tank, redZone: gladius.boost.redZonePct,
       boostActive: d.boost, boostLocked: !!S.c.boostLocked && !ctl.unlimited, unlimited: ctl.unlimited, mode: d.boost ? 'BOOST' : 'SCM',
-      roll: S.roll || 0, pitch: S.pitch || 0, yaw: S.yaw || 0, anchorRollDps: anchorRoll(d), maneuver: script && maneuver ? PRESETS[maneuver].title : '' }); $('cap-pilot').textContent = d.speed < 3 ? 'Stopped: the space dust hangs still. Move and it streams away from where you\'re heading.' : `The dust streams out of the TVI (circle with wings), ${Math.round(d.tviDeg)}° off your nose: that's where you're really going.`; }
+      roll: S.roll || 0, pitch: S.pitch || 0, yaw: S.yaw || 0, anchorRollDps: anchorRoll(d), tviDeg: d.speed >= 3 ? d.tviDeg : null, maneuver: script && maneuver ? PRESETS[maneuver].title : '' }); $('cap-pilot').textContent = d.speed < 3 ? 'Stopped: the space dust hangs still. Move and it streams away from where you\'re heading.' : `The dust streams out of the TVI (circle with wings), ${Math.round(d.tviDeg)}° off your nose: that's where you're really going.`; }
   if (visible('slice')) { drawSlice($('slice-big'), S, d, true); teach($('cap-slice'), d); }
   roT += dt; if (roT > 0.08) { roT = 0;
     $('r-speed').textContent = Math.round(d.speed); $('r-fwd').textContent = Math.round(d.fwd); $('r-side').textContent = Math.round(d.side);
@@ -1680,7 +1716,10 @@ function frame(now) {
     { // Dodge Potential: the number, its price, and a bar scaled to the table's maximum in the ring's colour ramp
       const dg = d.dodge, tile = $('vt-dodge');
       $('r-dodge').textContent = dg.ready ? Math.round(dg.best) : '–';
-      $('r-dodge-price').textContent = dg.ready ? `costs ${Math.round(Math.max(0, dg.price))} m of range` : 'computing the table…';
+      // the price is range given to the chaser, so it shows only while there is one (the Flee lessons); at a standstill it
+      // would read 1,040 m (520 m/s x 2 s), true arithmetic but no use to a pilot. Otherwise: which push wins.
+      const bestDir = DODGE_DIRS.reduce((a, k) => (dg[k] > dg[a] ? k : a), DODGE_DIRS[0]);
+      $('r-dodge-price').textContent = !dg.ready ? 'computing the table…' : run && run.chase ? `costs ${Math.round(Math.max(0, dg.price))} m of range` : dg.best < 0.5 ? 'no push' : `best push: ${bestDir}`;
       $('r-dodgebar').style.width = `${Math.round(dg.frac * 100)}%`; tile.style.setProperty('--dodge', ringCss(d.pinned ? 0 : dg.frac)); }
     $('r-g').textContent = gSmooth.toFixed(1);
     { const ro = $('ro-range'); ro.hidden = !(run && run.chase);   // the chaser exists only in the Flee lessons

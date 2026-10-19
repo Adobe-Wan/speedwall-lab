@@ -17,6 +17,8 @@ pnpm check                  # typecheck, lint, unit tests, license check
 pnpm test:physics        # physics acceptance tests (fail until phase P1 lands)
 pnpm size                # build and check size-limit budgets
 reuse lint               # pip install reuse
+pnpm exec playwright install chromium   # once, for the browser smoke tests
+pnpm test:e2e            # the live alpha in Chromium: no errors, no off-site requests, lessons run
 ```
 
 ## Licensing and headers
