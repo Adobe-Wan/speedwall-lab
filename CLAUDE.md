@@ -6,7 +6,7 @@
   - Keep it working while the real app is built. Once P5 ships, replace it with the built app (same `site/` folder or the Vite `dist/`).
   - Its physics is a prototype port; `PLAN.md` §4 is the spec.
 - **Rules:**
-  - MIT code, CC BY data. No CIG assets.
+  - MIT code, CC BY data. No CIG assets, with one exception: the ship models under `site/assets/ships/` may be derived (decimated, stripped, rebuilt) from third-party game-extracted meshes for this non-profit educational fan project. Each one carries its provenance in `NOTICE.md`, `REUSE.toml` and `docs/adr/004-ship-models.md`, is excluded from the MIT/CC BY grants, and is removed on request. The raw source meshes are never committed.
   - No new third-party data. Spviewer values stay listed in `NOTICE.md` until replaced.
   - New runtime dependencies need an ADR and a license check.
   - Respect the performance budgets in PLAN.md §9.

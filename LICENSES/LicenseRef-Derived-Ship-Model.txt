@@ -1,0 +1,10 @@
+Derived ship model (not an open licence)
+
+The files under site/assets/ships/ are derived from third-party meshes for
+this non-profit educational fan project (see NOTICE.md "Ship model" and
+docs/adr/004-ship-models.md). Each file's source and licence label is recorded
+in NOTICE.md; for the Gladius it is the Sketchfab model by lechatfantome,
+labelled CC BY 4.0, likely a game extraction, provenance unverified.
+
+These files are excluded from the MIT and CC BY 4.0 grants of this
+repository. They are not offered for reuse, and they are removed on request.

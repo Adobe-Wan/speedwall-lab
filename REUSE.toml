@@ -55,3 +55,12 @@ path = "site/vendor/speedwall-core.mjs"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 AdobeWan"
 SPDX-License-Identifier = "MIT AND CC-BY-4.0"
+
+# Ship models derived from third-party meshes (ADR-004): not under this repository's licences, removed on request.
+# Derived from the Sketchfab model by lechatfantome (labelled CC BY 4.0; likely a game extraction, provenance
+# unverified), decimated and modified. See NOTICE.md "Ship model".
+[[annotations]]
+path = "site/assets/ships/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "lechatfantome (Sketchfab), derived by AdobeWan; provenance unverified"
+SPDX-License-Identifier = "LicenseRef-Derived-Ship-Model"
