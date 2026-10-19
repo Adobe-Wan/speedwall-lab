@@ -32,6 +32,6 @@
     "@speedwall-lab/core": "workspace:*"
   },
   "devDependencies": {
-    "zod": "^4.1.0"
+    "zod": "^4.6.7"
   }
 }
