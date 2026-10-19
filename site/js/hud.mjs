@@ -19,7 +19,10 @@
 //     in-game screenshot at 100° FOV and scaled with the view width and tan(hfov/2); only the maneuver label avoids
 //     the cone keepOutDeg around the nose, where the corkscrew lessons park the TVI,
 //   anchorRollDps (number | null), guideDeg: "HOLD TVI @13°: 27 °/s" under the G readout,
-//   maneuver (string): small caps label at the top centre, hidden when empty.
+//   maneuver (string): small caps label at the top centre, hidden when empty,
+//   tviDeg (number | null): "TVI 13°", a fixed readout centred under the crosshair, clear of the bars' numbers; hidden
+//     when null. It does not ride with the TVI glyph: the corkscrew lessons park the TVI right on the bars and the G
+//     column, where no spot beside the glyph is free.
 //
 // The HUD lives in its own <g class="sw-hud"> and never touches other children of `svg`.
 
@@ -239,6 +242,9 @@ export function createHud(svg) {
   const ancV = el(anc, 'tspan', { fill: WHITE });  // "29 °/s"
   ancV.appendChild(document.createTextNode('0 °/s'));
 
+  // ---------- TVI angle (fixed, under the crosshair) ----------
+  const T = label(root, Object.assign(txtAttrs(MINT), { 'font-weight': '600', display: 'none' }), '');
+
   // ---------- maneuver label (top centre) ----------
   const M = label(root, Object.assign(txtAttrs(WHITE), { 'letter-spacing': '0.12em', 'font-weight': '600', 'fill-opacity': '0.92', display: 'none' }), '');
 
@@ -338,6 +344,12 @@ export function createHud(svg) {
     const gp = [Math.max(cx + REF.gRight * k - g.gx, rr[0] + Math.max(bw / 2 + g.zt + 8, 2 * CW * Lo.fsM + 0.6 * Lo.fsS)), cy + REF.gBase * k];
     const obs = [];
     for (const [rects, [tx, ty]] of [[g.Lr, l], [g.Rr, rr], [g.Gr, gp]]) for (const rc of rects) obs.push([rc[0] + tx, rc[1] + ty, rc[2] + tx, rc[3] + ty]);
+    // TVI readout: centred under the crosshair, pushed below any bar number its width would touch
+    const tw = 7 * CW * fsN + 2 * HALO;   // "TVI 13°"
+    let ty = Math.max(cy + 46, cy + Lo.xhR + 1.6 * fsN);
+    for (const o of obs) if (o[0] < cx + tw / 2 + GAP && o[2] > cx - tw / 2 - GAP && o[1] < ty + HALO + GAP && o[3] > ty - 0.95 * fsN - GAP) ty = o[3] + 0.95 * fsN + GAP;
+    set(T, 'x', q(cx)); set(T, 'y', q(ty)); set(T, 'font-size', q(fsN));
+    obs.push([cx - tw / 2, ty - 0.95 * fsN, cx + tw / 2, ty + HALO]);
     apply({ g, l, r: rr, gp, obs });
     layoutManeuver();
   }
@@ -465,6 +477,10 @@ export function createHud(svg) {
     // --- maneuver label
     const man = typeof s.maneuver === 'string' ? s.maneuver.trim() : '';
     if (man !== manText) { manText = man; if (man) text(M, man); layoutManeuver(); }
+
+    // --- TVI angle
+    const tv = s.tviDeg, hasTvi = typeof tv === 'number' && Number.isFinite(tv);
+    show(T, hasTvi); if (hasTvi) text(T, `TVI ${Math.round(tv)}°`);
 
     // --- throttle command: fills from the middle mark (up = forward, down = reverse)
     const t = clamp(num(s.throttle), -1, 1);
