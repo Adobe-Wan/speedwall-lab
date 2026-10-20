@@ -189,6 +189,36 @@ details.more-d > span { display: block; color: var(--fg-2); font-size: .8rem; li
 .lesson-note .cap-dodge { font-weight: 700; color: var(--fg); }
 .lesson-note .do, .lesson-note .see { margin-bottom: 4px; }
 .mgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px; }
+/* Desktop density: the Vitals and the readouts form one instrument panel (key numbers on top, a thin telemetry row
+   under them), the legend is one plain line, and each lesson group is a heading with its intro beside it over one
+   six-column row of compact cards. Phones keep their own layout (below). */
+@media (min-width: 980px) and (min-height: 541px) {
+  .stage { margin-bottom: -14px; } /* the readouts row joins the Vitals as one panel */
+  .vitals { display: flex; gap: 0; margin-top: 10px; background: linear-gradient(180deg, rgba(24,35,53,.7), rgba(15,22,34,.7)); border: 1px solid var(--line); border-radius: var(--r-md) var(--r-md) 0 0; overflow: hidden; }
+  .vitals .vt { flex: 1 1 0; background: none; border: 0; border-radius: 0; box-shadow: none; padding: 7px 12px 8px; }
+  .vitals .vt + .vt { border-left: 1px solid var(--line); }
+  .vitals .vt.key { flex-grow: 1.35; border: 0; border-left: 1px solid rgba(126,240,200,.45); border-right: 1px solid rgba(126,240,200,.45); box-shadow: none; }
+  .vitals .vt-mode { flex: 0 0 auto; min-width: 150px; }
+  .vt b { margin-bottom: 1px; } .vt .num { font-size: 1.25rem; } .vt.key .num { font-size: 1.45rem; }
+  .vt .tank, .vt .roombar, .vt .dodgebar { margin-top: 6px; }
+  .vitals small.vt-sub { position: absolute; right: 12px; top: 7px; margin: 0; min-height: 0; max-width: 60%; font-size: .7rem; line-height: 1.3; } /* beside the label, not a third line */
+  .readouts { display: flex; flex-wrap: wrap; gap: 0; background: rgba(10,15,24,.6); border: 1px solid var(--line); border-top: 0; border-radius: 0 0 var(--r-md) var(--r-md); }
+  .readouts .ro { flex: 1 1 auto; display: flex; align-items: baseline; gap: 6px; background: none; border: 0; border-radius: 0; box-shadow: none; padding: 5px 12px; }
+  .readouts .ro + .ro { border-left: 1px solid var(--line); }
+  .ro b { margin: 0; } .ro .num { font-size: .95rem; min-width: 2.5ch; } .ro small { margin-left: 0; }
+  .ro .tank { flex: 0 0 48px; margin: 0; align-self: center; }
+  .runbar, .lesson-note { margin-top: 0; }
+  .lesson-note { padding: 9px 14px; font-size: .88rem; }
+  .legend { gap: 4px 18px; font-size: .74rem; margin: -4px 2px -2px; }
+  .legend span { padding: 0; background: none; border: 0; border-radius: 0; }
+  .maneuvers { grid-template-columns: auto minmax(0, 1fr); column-gap: 14px; row-gap: 6px; padding: 12px 14px 14px; }
+  .maneuvers > .lessons-head, .maneuvers > .mgrid { grid-column: 1 / -1; }
+  .maneuvers h3 { margin: 6px 0 0; } .maneuvers h3::after { display: none; }
+  .maneuvers h3 + .lessons-how { margin: 6px 0 0; align-self: center; font-size: .8rem; color: var(--muted); }
+  .maneuvers .mgrid { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+  .mgrid button { padding: 8px 10px 9px 12px; font-size: .82rem; }
+  .mgrid button small { font-size: .72rem; line-height: 1.35; margin-top: 2px; }
+}
 .mgrid button { position: relative; text-align: left; font-weight: 600; font-size: .86rem; line-height: 1.3; padding: 11px 12px 12px 14px; min-height: 44px; border-color: var(--line-2); background: linear-gradient(180deg, rgba(28,40,60,.55), rgba(17,25,38,.55)); border-radius: var(--r-md); }
 .mgrid button::before { content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: transparent; transition: background-color .15s var(--ease); }
 .mgrid button:hover { border-color: rgba(126,240,200,.4); background: linear-gradient(180deg, rgba(34,50,74,.7), rgba(20,30,46,.7)); transform: translateY(-1px); box-shadow: 0 10px 24px -14px rgba(0,0,0,.8); }
@@ -247,13 +277,7 @@ kbd { font: .72rem var(--font-data); border: 1px solid var(--line-2); border-bot
 @media (min-width: 1800px) {
   .app { max-width: 1760px; }
   .view { height: clamp(300px, 62vh, 760px); }
-  .maneuvers .mgrid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  /* each group's title becomes a row label on the left of its cards */
-  .maneuvers { grid-template-columns: 220px minmax(0, 1fr); column-gap: 16px; align-items: start; } .maneuvers > .lessons-head, .maneuvers > .lesson-note { grid-column: 1 / -1; }
-  /* pin each piece to its column: the title on the left, its intro and its cards on the right (auto-placement alone put
-     the cards under the title in the 220 px column once groups gained an intro line) */
-  .maneuvers > h3 { grid-column: 1; } .maneuvers > h3 + .lessons-how, .maneuvers > .mgrid { grid-column: 2; }
-  .maneuvers h3 { margin-top: 12px; line-height: 1.5; } .maneuvers h3::after { display: none; }
+  /* lesson groups keep the desktop layout above: heading and intro on one line over six columns of cards */
 }
 @media (pointer: coarse) { .vtools button, .seg button { min-height: 44px; padding: 8px 10px; } button { min-height: 44px; } label.tog input { width: 22px; height: 22px; } }
 .gloc { position: absolute; inset: 0; pointer-events: none; --c: 0; --e: 0; --r: 0; --r0: 100%;
@@ -455,7 +479,7 @@ footer a { color: var(--fg-2) !important; }
     <div class="vt key" id="vt-dodge" title="MODEL: how far off your current line the ship moves in 2 s if you push fully off it now (the best of left, right, up and down), with your other inputs held as they are. In the Flee lessons the line under it is the price: the range a chaser holding 520 m/s gains over those 2 s; otherwise it names the push that goes farthest. Not Sideways Room: that is the egg's geometry, this is the distance the simulator actually moves you."><b>Dodge Potential</b><span class="num" id="r-dodge">–</span><small>m in 2 s</small>
       <div class="dodgebar" aria-hidden="true"><i id="r-dodgebar"></i></div><small class="vt-sub" id="r-dodge-price">costs – m of range</small></div>
     <div class="vt" id="vt-tank"><b>Boost Tank</b><span class="num" id="r-tank">100</span><small>%</small><div class="tank"><i id="r-tankbar"></i></div></div>
-    <div class="vt" title="Which speed limit applies right now: Boost (the amber egg) or SCM (the blue ball). At Limit shows while the flight computer holds you at that limit."><b>Flight Mode</b><span class="chip" id="r-mode">SCM</span> <span class="chip pinned" id="r-pin" hidden>At Limit</span></div>
+    <div class="vt vt-mode" title="Which speed limit applies right now: Boost (the amber egg) or SCM (the blue ball). At Limit shows while the flight computer holds you at that limit."><b>Flight Mode</b><span class="chip" id="r-mode">SCM</span> <span class="chip pinned" id="r-pin" hidden>At Limit</span></div>
     <div class="vt" id="ro-range" hidden title="ARITHMETIC, not a measured rule: a chaser that holds 520 m/s along your starting line, starting 550 m behind. Every second it gains 520 minus your speed along that line, in metres: hold the wall and it stays back, give up speed and it closes. Both numbers are stated assumptions, kept as named constants (CHASE in the page source) so a patch can change them. Nothing here models the chaser's aim, the lead pip, projectile speed or hits: that needs a two-pilot test."><b>Chaser Range</b><span class="num" id="r-range">550</span><small>m</small><small class="vt-sub" id="r-range-rate">holding</small></div>
   </div>
   </div>
@@ -476,10 +500,9 @@ footer a { color: var(--fg-2) !important; }
     <span class="run-result" id="run-result" role="status"></span>
     <button id="run-stop" class="small">Stop</button>
   </div>
-  <p class="lesson-note" id="lesson-note" role="status">Pick a lesson to watch the ship move inside the egg.</p>
+  <p class="lesson-note" id="lesson-note" role="status"><strong>Start Here.</strong> The Amber Egg is the speed wall: the top speed boost can hold in every direction (520 m/s forward, 394 sideways, 268 back). The Blue Ball is the same without boost: 225 m/s every way. Your ship sits at its current velocity: the farther from the centre cross, the faster you go. The White Ring is your sideways room. Click the first lesson and watch.</p>
   <div class="legend" aria-hidden="true"><span class="lg-egg"><b>Amber Egg (Boost):</b> the top speed boost holds in every direction</span><span class="lg-scm"><b>Blue Ball (SCM):</b> the top speed without boost, 225 m/s every way</span><span class="lg-ring"><b>White Ring (Sideways Room):</b> the sideways speed you can still add; it thins and reddens as Dodge Potential collapses</span><span class="lg-tvi"><b>TVI:</b> the circle with wings: where you are really going</span><span class="lg-path"><b>Violet Thread:</b> your path over the last 8 s (drawn wider and shorter)</span>
   </div>
-  <p class="howto"><strong>Start Here.</strong> The Amber Egg is the speed wall: the top speed boost can hold in every direction (520 m/s forward, 394 sideways, 268 back). The Blue Ball is the same without boost: 225 m/s every way. Your ship sits at its current velocity: the farther from the centre cross, the faster you go. The White Ring is your sideways room. Click the first lesson and watch.</p>
   <section class="maneuvers" id="lessons" aria-labelledby="lessons-h">
         <div class="lessons-head"><h2 id="lessons-h">Lessons</h2><p class="lessons-how">Take them in order. The ship flies each one while you watch; touch any flight control to take over.</p></div>
         <h3>The Speed Wall: SCM vs Boost</h3>
