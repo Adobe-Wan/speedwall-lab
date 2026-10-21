@@ -39,6 +39,12 @@ test("loads with the views, the Vitals and no price on Dodge Potential at rest",
   await expect(page.locator("#r-dodge")).not.toHaveText("–");
   await expect(page.locator("#r-dodge-price")).toHaveText(/^best push: (left|right|up|down)$/);
   await expect(page.locator("#ro-range")).toBeHidden();
+  // readouts by stage: Dodge Potential and the detail row wait for group 2 unless the visitor asks for everything
+  await expect(page.locator("#vt-dodge")).toBeHidden();
+  await expect(page.locator(".readouts")).toBeHidden();
+  await page.click("#ro-all");
+  await expect(page.locator("#vt-dodge")).toBeVisible();
+  await expect(page.locator(".readouts")).toBeVisible();
 });
 
 test("every lesson starts and runs", async ({ page }) => {
