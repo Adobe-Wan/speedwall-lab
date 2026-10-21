@@ -101,6 +101,29 @@ button.small { padding: 4px 10px; }
 #first-hide { position: absolute; right: 6px; top: 6px; padding: 2px 7px; font-size: .7rem; color: var(--muted); background: none; border-color: transparent; }
 #first-hide:hover { color: var(--fg); border-color: var(--line-2); }
 @media (max-width: 820px) { .first { grid-template-columns: 1fr; } }
+/* Group 1 as three SCM / boost pairs: a header per pair, the two cards under it (blue stripe SCM, amber boost). */
+.mgrid.pairs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.pairs .pair-h { grid-column: 1 / -1; font: 600 .72rem var(--font-ui); letter-spacing: .01em; color: var(--muted); margin: 4px 0 -2px; }
+.pairs .pair-h + .pair-h { display: none; }
+.pairs button.scm::before { background: rgba(90,169,230,.65); } .pairs button.boost::before { background: rgba(242,163,58,.65); }
+.pairs button small::before { font: 600 .66rem var(--font-ui); letter-spacing: .03em; margin-right: 6px; }
+.pairs button.scm small::before { content: "SCM"; color: var(--scm); } .pairs button.boost small::before { content: "BOOST"; color: var(--boost); }
+/* View subtitles and keys: shown at rest only (body.at-rest), so the diagram stays clear while anything moves. */
+.vsub { position: absolute; left: 12px; top: 44px; z-index: 2; max-width: 34%; font: .76rem/1.4 var(--font-ui); color: var(--fg-2); text-shadow: 0 1px 2px rgba(0,0,0,.8); display: none; }
+.vsub .keys { display: block; margin-top: 6px; color: var(--muted); font-size: .72rem; } .vsub .keys kbd { margin-right: 2px; }
+body.at-rest .vsub { display: block; } #v-pilot .vsub { max-width: 46%; }
+/* View options: the expert toggles in one menu, so the view toolbar shows only the view switch. */
+.vopts { position: relative; } .vopts summary { list-style: none; cursor: pointer; padding: 5px 9px; font: 600 .72rem var(--font-ui); color: var(--fg); background: rgba(12,18,28,.72); border: 1px solid var(--line-2); border-radius: var(--r-sm); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.vopts summary::-webkit-details-marker { display: none; } .vopts summary:hover { background: rgba(28,40,60,.9); } .vopts[open] summary { background: rgba(126,240,200,.14); box-shadow: inset 0 -2px 0 var(--tvi); }
+.vopts .vmenu { position: absolute; right: 0; top: calc(100% + 6px); display: flex; flex-direction: column; gap: 6px; padding: 8px; min-width: 190px; background: rgba(12,18,28,.95); border: 1px solid var(--line-2); border-radius: var(--r-md); box-shadow: var(--shadow); z-index: 5; }
+.vopts .vmenu button { text-align: left; }
+.vopts .vmenu button[aria-pressed="true"]::before { content: "✓ "; color: var(--tvi); } .vopts .vmenu button[aria-pressed="false"]::before { content: "○ "; color: var(--muted); }
+/* Readouts by stage (prefs.allReadouts shows everything): Dodge Potential and the detail row appear with group 2. */
+body.stage-0 #vt-dodge, body.stage-0 .readouts { display: none !important; }
+.ro-more { margin: 6px 0 0; font: .76rem var(--font-ui); color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }
+.ro-more button { padding: 2px 9px; font-size: .72rem; } body:not(.stage-0) .ro-more { display: none; }
+.legend .lg-chaser::before { width: 0; height: 0; border: 5px solid transparent; border-top: 8px solid var(--danger, #ff6a5c); border-radius: 0; margin-top: 4px; }
+
 /* Glossary terms: dotted underline, definition on hover, focus or tap (one source: GLOSSARY in the script). */
 .term { border-bottom: 1px dotted var(--tvi); cursor: help; position: relative; text-decoration: none; font-style: inherit; outline-offset: 2px; }
 .term::after { content: attr(data-def); position: absolute; left: 0; top: calc(100% + 6px); z-index: 20; width: max-content; max-width: min(44ch, 80vw); padding: 7px 10px; border-radius: var(--r-sm); border: 1px solid var(--tvi); background: #101a28; color: var(--fg); font: 400 .78rem/1.4 var(--font-ui); box-shadow: 0 10px 24px -10px rgba(0,0,0,.9); pointer-events: none; opacity: 0; visibility: hidden; transition: opacity .12s var(--ease); }
@@ -247,6 +270,7 @@ details.more-d > span { display: block; color: var(--fg-2); font-size: .8rem; li
   .maneuvers h3 { margin: 6px 0 0; } .maneuvers h3::after { display: none; }
   .maneuvers h3 + .lessons-how { margin: 6px 0 0; align-self: center; font-size: .8rem; color: var(--muted); }
   .maneuvers .mgrid { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+  .mgrid.pairs .pair-h { grid-row: 1; grid-column: span 2; margin: 0; } .pairs .pair-h + .pair-h { display: block; } .mgrid.pairs button { grid-row: 2; }
   .mgrid button { padding: 8px 10px 9px 12px; font-size: .82rem; }
   .mgrid button small { font-size: .72rem; line-height: 1.35; margin-top: 2px; }
 }
@@ -332,6 +356,7 @@ dialog p { margin: 0 0 10px; }
 .notice { color: var(--tvi); margin: 0 0 8px; }
 .brow { display: contents; } /* rows keep the shared grid on wide screens */
 @media (max-width: 520px) {
+  .vsub { display: none !important; }
   .binds { display: block; }
   .brow { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; padding: 6px 0; border-top: 1px solid var(--line); }
   .brow .src { grid-column: 1; white-space: normal; } .brow .live { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
@@ -430,7 +455,7 @@ footer a { color: var(--fg-2) !important; }
 /* Phones are for watching the lessons, not flying: no controls, no view tools, no overlay on the view. The
    running lesson's explanation sits under it instead. */
 @media (pointer: coarse) and (max-width: 979px), (pointer: coarse) and (orientation: landscape) and (max-height: 540px) {
-  .deck, .vtools, .caption, #ctl-open, #fly, .run-msg, .lessons-head .lessons-how { display: none !important; }
+  .deck, .vtools, .vsub, .caption, #ctl-open, #fly, .run-msg, .lessons-head .lessons-how { display: none !important; }
   .app { padding-bottom: 12px; }
   .lesson-note { display: block; }
 }
@@ -480,8 +505,11 @@ footer a { color: var(--fg-2) !important; }
           <button id="cam-side" aria-pressed="false" title="Side profile: the egg's real shape">Side</button>
           <button id="t-follow" aria-pressed="false" title="Chase cam: rides behind the ship and keeps your sideways room and the wall in frame. Starts by itself with each lesson.">Chase</button>
         </span>
-        <button id="t-frame" aria-pressed="true" title="On: the egg and the ship turn with the ship, and your velocity stays put in space (pitch the nose up and the 520 end goes up with it). Off: the view stays attached to the ship, so the velocity moves instead.">Egg Turns with Ship</button>
+        <details class="vopts"><summary>Options</summary><div class="vmenu">
+          <button id="t-frame" aria-pressed="true" title="On: the egg and the ship turn with the ship, and your velocity stays put in space (pitch the nose up and the 520 end goes up with it). Off: the view stays attached to the ship, so the velocity moves instead.">Egg Turns with Ship</button>
+        </div></details>
       </div>
+      <div class="vsub" aria-hidden="true">Your velocity, drawn inside the limits: the ship sits where its velocity is. The amber shell is the boost limit, the blue ball the no-boost limit. Farther from the centre is faster.</div>
       <canvas class="inset" id="c-inset" aria-hidden="true"></canvas>
       <div class="caption" id="cap-egg"></div>
     </section>
@@ -493,10 +521,13 @@ footer a { color: var(--fg-2) !important; }
       <div class="vtitle">Cockpit</div>
       <span class="seg vswitch" role="group" aria-label="Right-hand view"><button data-right="pilot" aria-pressed="true">Cockpit</button><button data-right="slice" aria-pressed="false" title="The egg seen from above at your forward speed, with Dodge Potential against forward speed">Top-Down</button></span>
       <div class="vtools">
+        <details class="vopts"><summary>Options</summary><div class="vmenu">
         <button id="t-dust" aria-pressed="true">Dust</button>
         <button id="t-ring" aria-pressed="true">Guide Ring</button>
         <button id="t-gloc" aria-pressed="true" title="A MODEL, not a measured rule: how much G you can take depends on the direction (up most, down least), and the screen greys, darkens from the edge (red for down) and blacks out, then the thrusters and boost cut until you recover (~4 s). Fitted to the author's tests; forward and backward tolerance are not mapped. Off while a lesson runs.">G-LOC (Model)</button>
+        </div></details>
       </div>
+      <div class="vsub" aria-hidden="true">From the seat: the crosshair is where the nose points, the winged circle (TVI) is where you are really going.<span class="keys"><kbd class="hint" data-hint="throttleFwd">W</kbd><kbd class="hint" data-hint="strafeLeft">A</kbd><kbd class="hint" data-hint="throttleBack">S</kbd><kbd class="hint" data-hint="strafeRight">D</kbd> move · <kbd class="hint" data-hint="strafeUp">Space</kbd><kbd class="hint" data-hint="strafeDown">Left Ctrl</kbd> up / down · <kbd class="hint" data-hint="boost">Left Shift</kbd> boost · <kbd class="hint" data-hint="rollLeft">Q</kbd><kbd class="hint" data-hint="rollRight">E</kbd> roll</span></div>
       <div class="caption" id="cap-pilot"></div>
     </section>
     <section class="view" id="v-slice" data-hidden="true" aria-label="Slice view: top-down slice of the egg">
@@ -530,6 +561,7 @@ footer a { color: var(--fg-2) !important; }
     <div class="ro" title="MODEL, not a measured rule: stress from the G you are pulling in each direction. Greys the HUD, then the screen, then blacks out and cuts thrust and boost. Paused while a lesson runs, so you see the speed limits; the lesson texts say what the measured pilot felt."><b>G-LOC (Model)</b><span class="num" id="r-gloc">clear</span><div class="tank"><i id="r-glocbar"></i></div></div>
   </div>
 
+  <p class="ro-more" aria-hidden="true"><span>Dodge Potential and the detail readouts appear with the lessons that use them.</span><button id="ro-all" class="small">Show all readouts</button></p>
   <div class="runbar" id="runbar" hidden>
     <span class="run-name" id="run-name"></span>
     <span class="run-msg" id="run-msg">Press <kbd class="hint" data-hint="throttleFwd">W</kbd> <kbd class="hint" data-hint="strafeLeft">A</kbd> <kbd class="hint" data-hint="throttleBack">S</kbd> <kbd class="hint" data-hint="strafeRight">D</kbd> to take over</span>
@@ -539,19 +571,22 @@ footer a { color: var(--fg-2) !important; }
     <button id="run-stop" class="small">Stop</button>
   </div>
   <p class="lesson-note" id="lesson-note" role="status"><strong>Start Here.</strong> The Amber Egg is the <span class="term" data-term="wall" tabindex="0">speed wall</span> with <span class="term" data-term="boost" tabindex="0">boost</span> held: 520 m/s forward, 394 sideways, 268 back. The Blue Ball is the limit without boost (<span class="term" data-term="scm" tabindex="0">SCM</span>): 225 m/s every way. Your ship sits at its current velocity: the farther from the centre cross, the faster you go. The White Ring is your sideways room. Pick a lesson below: the ship flies it, the page says what to look for, then you get the keys.</p>
-  <div class="legend" aria-hidden="true"><span class="lg-egg"><b>Amber Egg (Boost):</b> the top speed boost holds in every direction</span><span class="lg-scm"><b>Blue Ball (SCM):</b> the top speed without boost, 225 m/s every way</span><span class="lg-ring"><b>White Ring (Sideways Room):</b> the sideways speed you can still add; it thins and reddens as Dodge Potential collapses</span><span class="lg-tvi"><b>TVI:</b> the circle with wings: where you are really going</span><span class="lg-path"><b>Violet Thread:</b> your path over the last 8 s (drawn wider and shorter)</span>
+  <div class="legend" aria-hidden="true"><span class="lg-egg"><b>Amber Egg (Boost):</b> the top speed boost holds in every direction</span><span class="lg-scm"><b>Blue Ball (SCM):</b> the top speed without boost, 225 m/s every way</span><span class="lg-ring"><b>White Ring (Sideways Room):</b> the sideways speed you can still add; it thins and reddens as Dodge Potential collapses</span><span class="lg-tvi"><b>TVI:</b> the circle with wings: where you are really going</span><span class="lg-path"><b>Violet Thread:</b> your path over the last 8 s (drawn wider and shorter)</span><span class="lg-chaser" id="lg-chaser" hidden><b>Red Marker:</b> the pretend chaser, 520 m/s along your starting line</span>
   </div>
   <section class="maneuvers" id="lessons" aria-labelledby="lessons-h">
         <div class="lessons-head"><h2 id="lessons-h">Lessons</h2><p class="lessons-how">Take them in order. The ship flies each one while you watch and tells you what to look for; press a flight key to take over.</p></div>
         <h3>The Speed Wall: SCM vs Boost</h3>
         <p class="lessons-how">What <span class="term" data-term="scm" tabindex="0">SCM</span> and <span class="term" data-term="boost" tabindex="0">boost</span> each let your ship do, from a stop, at the limit and in a turn.</p>
-        <div class="mgrid">
-          <button data-preset="scm-strafe">Strafe From a Stop in SCM<small>How far sideways can you get without boost? Watch where the ship stops.</small></button>
-          <button data-preset="rest">Strafe From a Stop With Boost<small>The same push with boost held. How much more do you get?</small></button>
-          <button data-preset="scm-nose">Strafe at SCM Top Speed<small>Already at the limit: where does a strafe take you now?</small></button>
-          <button data-preset="turn-scm">Turn 90° in SCM<small>Does a hard turn cost speed without boost?</small></button>
-          <button data-preset="turn-cost">Turn 90° With Boost<small>The same turn at full boost speed. Watch the speed.</small></button>
-          <button data-preset="let-go">Let Go of Boost<small>What happens to 520 m/s when you release everything?</small></button>
+        <div class="mgrid pairs">
+          <div class="pair-h">From a stop</div>
+          <button data-preset="scm-strafe" class="scm">Strafe From a Stop in SCM<small>How far sideways can you get without boost? Watch where the ship stops.</small></button>
+          <button data-preset="rest" class="boost">Strafe From a Stop With Boost<small>The same push with boost held. How much more do you get?</small></button>
+          <div class="pair-h">At the limit</div>
+          <button data-preset="scm-nose" class="scm">Strafe at SCM Top Speed<small>Already at the limit: where does a strafe take you now?</small></button>
+          <button data-preset="let-go" class="boost">Let Go of Boost<small>What happens to 520 m/s when you release everything?</small></button>
+          <div class="pair-h">Turning 90°</div>
+          <button data-preset="turn-scm" class="scm">Turn 90° in SCM<small>Does a hard turn cost speed without boost?</small></button>
+          <button data-preset="turn-cost" class="boost">Turn 90° With Boost<small>The same turn at full boost speed. Watch the speed.</small></button>
         </div>
         <h3>At the Nose: What Top Speed Costs</h3>
         <p class="lessons-how">Boost is big only along <span class="term" data-term="nose" tabindex="0">the nose</span>: the closer to 520 you fly, the less push is left for anything else.</p>
@@ -1006,7 +1041,7 @@ const PRESET_ORDER = [...document.querySelectorAll('[data-preset]')].map(b => b.
 const keyHint = id => { const k = controls.hint(id) || (STEPS.find(s => s.id === id) || {}).kb || ''; return k ? `<kbd>${escHtml(k)}</kbd>` : ''; };
 function lessonEnd(key) {
   const p = PRESETS[key], next = PRESET_ORDER[PRESET_ORDER.indexOf(key) + 1], np = next && PRESETS[next];
-  const tryIt = p.try ? `<span class="try">Your turn: ${glossify(escHtml(p.try)).replace(/\{(\w+)\}/g, (_, id) => keyHint(id))}</span>` : '';
+  const tryIt = p.try ? `<span class="try">Your turn: ${glossify(escHtml(p.try).replace(/\{(\w+)\}/g, (_, id) => keyHint(id)))}</span>` : '';
   $('run-end').innerHTML = `<span class="take"><b>Takeaway</b>${glossify(escHtml(p.takeaway || p.see))}</span>${tryIt}` +
     `<button id="run-fly" class="small" title="Stop the lesson and put you at its starting point, controls in your hands">You fly it</button>` +
     (np ? `<button id="run-next" class="small next">Next: ${escHtml(np.title)} →</button>` : '') + `<button id="run-again" class="small">Replay</button>`;
@@ -1015,12 +1050,18 @@ function lessonEnd(key) {
   $('run-again').onclick = () => document.querySelector(`[data-preset="${key}"]`).click();
   const done = new Set(prefs.done || []); done.add(key); prefs.done = [...done]; savePrefs(); markDone();
 }
-function markDone() { const done = new Set(prefs.done || []); document.querySelectorAll('[data-preset]').forEach(b => b.classList.toggle('done', done.has(b.dataset.preset))); }
-markDone();
+function markDone() { const done = new Set(prefs.done || []); document.querySelectorAll('[data-preset]').forEach(b => b.classList.toggle('done', done.has(b.dataset.preset))); applyStage(); }
+// Readouts by stage: group 1 (The Speed Wall) needs Speed, Sideways Room, Boost Tank and Flight Mode; Dodge Potential and
+// the detail row join with group 2, where the lessons start to use them. prefs.allReadouts shows everything from the start.
+const GROUP_OF = {}; document.querySelectorAll('#lessons .mgrid').forEach((g, i) => g.querySelectorAll('[data-preset]').forEach(b => { GROUP_OF[b.dataset.preset] = i; }));
+function stage() { if (prefs.allReadouts) return 9; let s = 0; for (const k of [...(prefs.done || []), maneuver]) if (k && GROUP_OF[k] > s) s = GROUP_OF[k]; return s; }
+function applyStage() { const s = stage(); document.body.classList.toggle('stage-0', s === 0); }
+$('ro-all').onclick = () => { prefs.allReadouts = true; savePrefs(); applyStage(); };
 $('first').hidden = !!prefs.started;
 $('first-go').onclick = () => document.querySelector('[data-preset="scm-strafe"]').click();
 $('first-hide').onclick = () => { prefs.started = true; savePrefs(); $('first').hidden = true; };
-let maneuver = null, dodge = null, run = null;   // run: what the running lesson has measured so far   // dodge: sideways distance covered in the first 2 s of a maneuver
+let maneuver = null, dodge = null, run = null, frameRest = null;   // run: what the running lesson has measured so far   // dodge: sideways distance covered in the first 2 s of a maneuver
+markDone();   // ticks on finished lessons and the readout stage (needs maneuver declared)
 function markPreset(key) { document.querySelectorAll('[data-preset]').forEach(b => b.setAttribute('aria-pressed', b.dataset.preset === key)); }
 document.querySelectorAll('[data-preset]').forEach(b => b.onclick = () => {
   const key = b.dataset.preset, p = PRESETS[key]; reset(p.start); script = { t: 0, go: p.go || 0, steps: p.steps, i: -1 }; maneuver = key; markPreset(key);
@@ -1028,7 +1069,7 @@ document.querySelectorAll('[data-preset]').forEach(b => b.onclick = () => {
   run = { t: 0, min: Infinity, peakG: 0, tvi: 0, rel: null, shown: false, chase: !!p.chase }; chase.range = CHASE.range; chase.y0 = S.x[1]; chase.z0 = S.x[2];
   $('run-name').textContent = p.title; $('run-result').textContent = ''; $('run-end').textContent = ''; $('run-msg').hidden = false; $('runbar').hidden = false;
   setNote(lessonHtml(p));
-  if (!prefs.started) { prefs.started = true; savePrefs(); } $('first').hidden = true;
+  if (!prefs.started) { prefs.started = true; savePrefs(); } $('first').hidden = true; applyStage();
   egg.chase(true);   // ride behind the ship with its limits in frame
   // the maneuver buttons sit below the views on phones: bring the views back into sight to watch it
   const v = document.querySelector('.views'), r = v.getBoundingClientRect();
@@ -1832,7 +1873,9 @@ function frame(now) {
       $('r-dodge-price').textContent = !dg.ready ? 'computing the table…' : run && run.chase ? `costs ${Math.round(Math.max(0, dg.price))} m of range` : dg.best < 0.5 ? 'no push' : `best push: ${bestDir}`;
       $('r-dodgebar').style.width = `${Math.round(dg.frac * 100)}%`; tile.style.setProperty('--dodge', ringCss(d.pinned ? 0 : dg.frac)); }
     $('r-g').textContent = gSmooth.toFixed(1);
-    { const ro = $('ro-range'); ro.hidden = !(run && run.chase);   // the chaser exists only in the Flee lessons
+    { const atRest = !script && d.speed < 3; if (atRest !== frameRest) { frameRest = atRest; document.body.classList.toggle('at-rest', atRest); }
+      $('lg-chaser').hidden = !(run && run.chase);
+      const ro = $('ro-range'); ro.hidden = !(run && run.chase);   // the chaser exists only in the Flee lessons
       if (!ro.hidden) { $('r-range').textContent = Math.round(chase.range); const dv = CHASE.speed - qRot(qAtt, S.v)[0];
         $('r-range-rate').textContent = Math.abs(dv) < 0.5 ? 'holding' : dv > 0 ? `closing ${dv.toFixed(0)} m/s` : `opening ${(-dv).toFixed(0)} m/s`; } }
     $('r-tvi').textContent = d.speed > 3 ? Math.round(d.tviDeg) : '–';
