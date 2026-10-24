@@ -907,18 +907,18 @@ $('pause').onclick = togglePause;
 // and the lowest speed are all measured from there). Each step: [start time s, inputs]; r/rf = roll direction and
 // fraction of full roll rate; p/y = pitch/yaw stick. do: what the ship flies, one line; see: what to look for, with the key
 // number and its label (measured / model / assumed); more: the caveats, sources and test IDs, behind a Details toggle.
-// Lessons, in teaching order (Alex, 2026-10-11): first what the speed wall is in SCM and in Boost, then what top speed
+// Lessons, in teaching order (project owner, 2026-10-11): first what the speed wall is in SCM and in Boost, then what top speed
 // costs at the nose, then evading at the wall, then fighting fundamentals (Brief C2 adds aiming, closing and rate fighting).
 // Each lesson: result.at = seconds after `go` when the result line shows; result.sim = what the simulator measured;
 // result.game = the in-game value, traceable to research/gladius-v1-fixture.json by test id (or "not measured").
 // dodge: count the sideways distance covered in the first 2 s of the manoeuvre.
 // Number labels: (measured) = fixture; (model) = this simulator; (arithmetic) = the chaser range, which is only
 // (chaser speed - your speed along the starting line) x time, with both chaser numbers named constants in CHASE.
-// Evasion is fundamentals, not tricks (Alex, 2026-10-10): speed along your line keeps the range, anything off the nose
+// Evasion is fundamentals, not tricks (project owner, 2026-10-10): speed along your line keeps the range, anything off the nose
 // costs it, and the deflection is a sustained gradual corkscrew, never side-to-side strafing or strafe taps (those live off
-// today's near-instant thrust response). A corkscrew is a helix: one roll direction held (Alex, 2026-10-11); reverse only
+// today's near-instant thrust response). A corkscrew is a helix: one roll direction held (project owner, 2026-10-11); reverse only
 // to ease a grey-out, never on a timer. The Flee lessons share one shallow corkscrew: half up-stick, one roll of ~60 °/s
-// (Apprentice_One 2025-05-01: roll "at a gradual rate"; Johnathan Winters 2024-12-30 / 2025-11-29: roll is not the dodge).
+// (coaching consensus: roll "at a gradual rate", and the roll is not the dodge; sources in docs/RESEARCH.md).
 const SHALLOW = (f) => [[0, { f, l: 0, u: .5, boost: true, r: 1, rf: .25 }]];
 const SCM_PITCH90 = 90 / gladius.scm.rotationDps.pitch;   // 1.32 s at the measured 68 °/s (fixture r10_turn90_scm flew 1.33 s)
 const PRESETS = {
@@ -978,7 +978,7 @@ const PRESETS = {
   'flee-wall':  { title: 'Flee: Hold the Wall', plain: 'Flat out, nudge the nose up a little, and roll slowly one way; keep it all held. ({boost} and {throttleFwd} held, half {strafeUp}, gentle {rollLeft}.)', takeaway: 'Stay on the wall and a chaser as fast as you cannot close: the gentle corkscrew costs almost no speed along your line (arithmetic).', try: 'hold {boost} and {throttleFwd}, half {strafeUp}, and hold {rollLeft} gently.', chase: true, result: { at: 10, sim: () => `chaser still ${Math.round(chase.range)} m back after 10 s (started at 550)`, game: 'not measured (needs a two-pilot chase test)' }, start: { vx: 520, boost: true }, go: 0,
                   do: 'Full forward on the wall, half up-stick, boost held, and one gradual roll of ~60 °/s held in one direction.',
                   see: 'Your speed stays on the wall, so a chaser as fast as you gains only ~10 m in 10 s (arithmetic on simulated speed). The Violet Thread is your path: a helix of ~27 m radius, 3 km per turn.',
-                  more: 'Apprentice_One\'s escape drill (2025-05-01): hold the TVI offset and roll at a gradual rate, reversing only to ease a grey-out. Roll aims the push; it is not the dodge (Johnathan Winters 2024-12-30, 2025-11-29). Side load ~3 G (model). CHASE: 520 m/s along your starting line (the boosted wall, measured) from 550 m (assumed, inside the 500-600 m gun range pilots report). Whether the helix throws off a shooter needs a two-pilot test.',
+                  more: 'The escape drill: hold the TVI offset and roll at a gradual rate, reversing only to ease a grey-out. Roll aims the push; it is not the dodge. Side load ~3 G (model). CHASE: 520 m/s along your starting line (the boosted wall, measured) from 550 m (assumed, inside the 500-600 m gun range pilots report). Whether the helix throws off a shooter needs a two-pilot test.',
                   steps: SHALLOW(1) },
   'flee-ease':  { title: 'Flee: Ease Off Forward', plain: 'The same corkscrew with the forward push let go. ({boost}, half {strafeUp}, gentle {rollLeft}; release {throttleFwd}.)', takeaway: 'Every m/s you give up along your line is closing speed for the chaser: more push is paid for with range (arithmetic).', try: 'same corkscrew with {throttleFwd} released.', chase: true, result: { at: 10, sim: () => `chaser closed to ${Math.round(chase.range)} m after 10 s (started at 550)`, game: 'not measured; letting go of forward at the nose drops you to ~435 m/s (dd_wall_lat_boost)' }, start: { vx: 520, boost: true }, go: 0,
                   do: 'Release forward; keep boost, the half up-stick and the same gradual one-way roll.',
