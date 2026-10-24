@@ -20,7 +20,7 @@ const opts = { startSpeed: 520, seconds: SECONDS, range: RANGE, chaserSpeed: 520
 
 const B = (o) => ({ fwd: 1, lat: 0, up: 0, boost: true, roll: 0, ...o });
 // The alpha's old side + up tap sequence (site/index.html TAPS until 2026-10-10; round 13 still flies it as taps_mixed):
-// [start s, axis, sign, length s]. Alex (2026-10-10): taps are a gimmick that lives off today's instant accelerations; the
+// [start s, axis, sign, length s]. The project owner (2026-10-10): taps are a gimmick that lives off today's instant accelerations; the
 // Flee lessons now fly SHALLOW below instead.
 const TAPS = [[0, "l", 1, .4], [.9, "u", 1, .3], [1.9, "l", -1, .5], [2.8, "l", 1, .25], [3.7, "u", 1, .5], [4.6, "l", -1, .3],
   [5.6, "l", 1, .5], [6.5, "u", 1, .3], [7.5, "l", -1, .4], [8.3, "u", 1, .5], [9.4, "l", 1, .3]];

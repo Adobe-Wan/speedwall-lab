@@ -17,9 +17,9 @@ Labels: **M** measured, **S** sourced (a dated creator statement, not measured b
 | Forward thrust, G | SCM 13.7, Boost 21.2 | M | fixture `constants.*.G.fwd` (speed slopes, G meter) |
 | Speed limit 90° off the nose, m/s | SCM 225 (sphere), Boost 394 (egg side, A) | M | fixture `speedCap_mps`, `A_mps` |
 | Stick combination | unit-length rule | M | fixture `rotationCombination` (round 11) |
-| `WEAPON.projectileSpeed_mps` | 1,480 | T | Star Citizen Wiki API, CF-337 Panther Repeater, game build 4.10.2-LIVE.12881860, fetched 2026-10-17 at Alex's request (third-party data, CC BY-SA, NOTICE.md). Not measured in game. One constant, one place to update. Apprentice_One's 1,800 m/s (2024-11-08, 3.24.x) was the placeholder before. |
-| Projectiles inherit the shooter's velocity | yes | A | Alex, 2026-10-11; still on the in-game test list |
-| Sign of the target box's bracket, e.g. `166.9m [51m/s]` | + = closing | S | Alex confirmed 2026-10-17 that the game's bracket is + when closing (`CLOSING_SIGN`) |
+| `WEAPON.projectileSpeed_mps` | 1,480 | T | Star Citizen Wiki API, CF-337 Panther Repeater, game build 4.10.2-LIVE.12881860, fetched 2026-10-17 at the project owner's request (third-party data, CC BY-SA, NOTICE.md). Not measured in game. One constant, one place to update. Apprentice_One's 1,800 m/s (2024-11-08, 3.24.x) was the placeholder before. |
+| Projectiles inherit the shooter's velocity | yes | A | The project owner, 2026-10-11; still on the in-game test list |
+| Sign of the target box's bracket, e.g. `166.9m [51m/s]` | + = closing | S | The project owner confirmed 2026-10-17 that the game's bracket is + when closing (`CLOSING_SIGN`) |
 | g₀ | 9.80665 m/s² | — | SI |
 
 Engagement range for every example: 300–600 m (never 1 km).
@@ -54,7 +54,7 @@ Lead distance, m, at Δ 0, for a target crossing at 50 / 100 / 150 / 225 m/s:
 | 550 | 0.372 | 18.6 | 37.2 | 55.7 | 83.6 |
 | 600 | 0.405 | 20.3 | 40.5 | 60.8 | 91.2 |
 
-**What Δ does and does not do.** Alex's screenshot shows `[51m/s]` at 167 m. At 550 m, 51 m/s of closing shortens the
+**What Δ does and does not do.** The project owner's screenshot shows `[51m/s]` at 167 m. At 550 m, 51 m/s of closing shortens the
 flight from 0.372 s to 0.359 s: **about 3 %**, 12 ms. Even 100 m/s is 6.3 %. With a 1,480 m/s bullet, Δ barely changes
 the lead. Its real effect is on the range itself: `timeToRange(r0, r1, Δ) = (r0 − r1) / Δ`.
 
@@ -230,8 +230,8 @@ precomputed tables (a 7 × 7 grid is 3 ms); `orbitSim` is for tables and tests o
   test, which is not available (a gap).
 - **The Panther's projectile speed.** 1,480 m/s is the Star Citizen Wiki API's value for build 4.10.2 (2026-10-17), not
   an in-game measurement. One constant to change.
-- **Velocity inheritance.** Assumed, per Alex; it is what makes Δ enter the flight time at all.
-- **Evasion.** Nothing here is a dodge. Winters' strafe taps are not modelled and are not taught (Alex, 2026-10-10).
+- **Velocity inheritance.** Assumed, per the project owner; it is what makes Δ enter the flight time at all.
+- **Evasion.** Nothing here is a dodge. Winters' strafe taps are not modelled and are not taught (the project owner, 2026-10-10).
 
 ## 10. Where the math does not support the request
 
@@ -240,7 +240,7 @@ precomputed tables (a 7 × 7 grid is 3 ms); `orbitSim` is for tables and tests o
   boost.
 - "Roll so you aim in pitch" as a faster way to get on target: not for a one-off snap inside ~100° off the nose. It
   holds for sustained tracking (30 % more rate), which is where the lesson should put it.
-- "The Gladius needs to be within 300–400 m to be accurate" (Alex, 2026-10-11) is a hit-rate claim; nothing here can
+- "The Gladius needs to be within 300–400 m to be accurate" (the project owner, 2026-10-11) is a hit-rate claim; nothing here can
   check it. Memory's 500–600 m engagement range is the range used in every table.
 - Winters' binary circle as a tight knife-fight orbit: with the inputs he names the circle opens to the thrust-limited
   radius for the speed built (hundreds of metres at the SCM cap). A tight circle needs the throttle matched to
