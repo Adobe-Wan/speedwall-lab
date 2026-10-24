@@ -902,16 +902,16 @@ $('pause').onclick = togglePause;
 // and the lowest speed are all measured from there). Each step: [start time s, inputs]; r/rf = roll direction and
 // fraction of full roll rate; p/y = pitch/yaw stick. do: what the ship flies, one line; see: what to look for, with the key
 // number and its label (measured / model / assumed); more: the caveats, sources and test IDs, behind a Details toggle.
-// Lessons, in teaching order (Alex, 2026-10-11): first what the speed wall is in SCM and in Boost, then what top speed
+// Lessons, in teaching order (project owner, 2026-10-11): first what the speed wall is in SCM and in Boost, then what top speed
 // costs at the nose, then evading at the wall, then fighting fundamentals (Brief C2 adds aiming, closing and rate fighting).
 // Each lesson: result.at = seconds after `go` when the result line shows; result.sim = what the simulator measured;
 // result.game = the in-game value, traceable to research/gladius-v1-fixture.json by test id (or "not measured").
 // dodge: count the sideways distance covered in the first 2 s of the manoeuvre.
 // Number labels: (measured) = fixture; (model) = this simulator; (arithmetic) = the chaser range, which is only
 // (chaser speed - your speed along the starting line) x time, with both chaser numbers named constants in CHASE.
-// Evasion is fundamentals, not tricks (Alex, 2026-10-10): speed along your line keeps the range, anything off the nose
+// Evasion is fundamentals, not tricks (project owner, 2026-10-10): speed along your line keeps the range, anything off the nose
 // costs it, and the deflection is a sustained gradual corkscrew, never side-to-side strafing or strafe taps (those live off
-// today's near-instant thrust response). A corkscrew is a helix: one roll direction held (Alex, 2026-10-11); reverse only
+// today's near-instant thrust response). A corkscrew is a helix: one roll direction held (project owner, 2026-10-11); reverse only
 // to ease a grey-out, never on a timer. The Flee lessons share one shallow corkscrew: half up-stick, one roll of ~60 °/s
 // (coaching consensus: roll "at a gradual rate", and the roll is not the dodge; sources in docs/RESEARCH.md).
 const SHALLOW = (f) => [[0, { f, l: 0, u: .5, boost: true, r: 1, rf: .25 }]];
