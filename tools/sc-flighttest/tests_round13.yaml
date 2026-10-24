@@ -11,7 +11,7 @@
 # The shooter fires three 2 s bursts at 2-4, 5-7 and 8-10 s into the pattern and must not know which pattern is coming:
 # fly 3 x each, shuffled, straight first and last.
 #
-# CLAUDE.md: the harness is never used in PvP. A friend shooting at the harness ship in private free flight needs Alex's OK
+# CLAUDE.md: the harness is never used in PvP. A friend shooting at the harness ship in private free flight needs the project owner's OK
 # first; without it, the target flies these sequences by hand.
 tests:
   - id: r13_aim_straight

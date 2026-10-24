@@ -11,4 +11,4 @@ Watch the HUD throttle line while this runs and tell me what it does.
    -> CLEARED the throttle (peak 0.0)
 
 Result: use  full back, tap (-1.0 for 0.15 s)  -> throttle_reset: {value: -1.0, seconds: 0.15}
-Inputs released. Saved to C:\Users\alexs\sc-flighttest\v2\throttlecheck.log
+Inputs released. Saved to C:\Users\<user>\sc-flighttest\v2\throttlecheck.log

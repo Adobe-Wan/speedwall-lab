@@ -18,7 +18,7 @@ export type TurnAxis = "pitch" | "yaw";
 
 /**
  * Projectile speed used for time of flight: the CF-337 Panther Repeater's ammunition speed from the Star Citizen Wiki
- * API (third-party data, CC BY-SA, listed in NOTICE.md), taken 2026-10-17 at Alex's request. Not measured in game.
+ * API (third-party data, CC BY-SA, listed in NOTICE.md), taken 2026-10-17 at the project owner's request. Not measured in game.
  * Update here when the game patches or the Panther is measured.
  */
 export const WEAPON = {
@@ -29,7 +29,7 @@ export const WEAPON = {
 
 /**
  * Sign convention for closing speed in this module: positive when the range is shrinking (closing), negative when
- * it grows. The in-game target box shows range then a bracketed rate, e.g. `166.9m [51m/s]`; Alex confirmed on
+ * it grows. The in-game target box shows range then a bracketed rate, e.g. `166.9m [51m/s]`; the project owner confirmed on
  * 2026-10-17 that the game's bracket is positive when closing, the same as this module.
  */
 export const CLOSING_SIGN = {
@@ -54,7 +54,7 @@ export function closingSpeed(relPos: Vec3, relVel: Vec3): number {
 
 /**
  * Time of flight, s: `range / (projectileSpeed + closing)`, under the ASSUMPTION that projectiles inherit the shooter's
- * velocity along the line of sight (Alex, 2026-10-11; still on the in-game test list). A projectile that never arrives
+ * velocity along the line of sight (the project owner, 2026-10-11; still on the in-game test list). A projectile that never arrives
  * (`projectileSpeed + closing ≤ 0`) returns Infinity; a non-positive range returns 0.
  */
 export function timeOfFlight(range: number, closing: number, projectileSpeed: number = WEAPON.projectileSpeed_mps): number {

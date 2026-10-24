@@ -352,11 +352,11 @@ The tests above measure the ship. What decides whether a dodge works at 550 m is
 `tools/sc-flighttest/tests_round13.yaml`, 6 patterns x 3 runs, shuffled, the harness flying the target and a friend shooting from
 550 m. It also tests a new model claim: **up/down taps are hit about half as often as side taps** because the Gladius is 5.5 m tall
 and 17 m wide from behind. Fly it in the same session as `proj_speed` and `proj_inherit` if possible: the delay read-off assumes
-1500 m/s projectiles that inherit the chaser's speed. Needs Alex's OK on the harness-in-free-flight question first (see the YAML header).
+1500 m/s projectiles that inherit the chaser's speed. Needs the project owner's OK on the harness-in-free-flight question first (see the YAML header).
 
 ## 12. Round A1: Arrow baseline (single pilot, added 2026-10-11)
 
-The first round for a second ship, planned in `docs/ship-comparison-plan.md` (which says what each value buys and what stays a gap). **Standing conditions are those of section 0** with the ship swapped: Arrow, Arena Commander free flight, single pilot, Alex present, Decoupled, G-Safe Off, 4K, FOV 100, open space, F12 ready, SCM unless `boost: true`. Never the PU, never PvP. Nothing here needs a second pilot. The YAML below is not yet in a `tests_*.yaml`; it is the test list for `tools/sc-flighttest/tests_arrow.yaml` when that file is written.
+The first round for a second ship, planned in `docs/ship-comparison-plan.md` (which says what each value buys and what stays a gap). **Standing conditions are those of section 0** with the ship swapped: Arrow, Arena Commander free flight, single pilot, the project owner present, Decoupled, G-Safe Off, 4K, FOV 100, open space, F12 ready, SCM unless `boost: true`. Never the PU, never PvP. Nothing here needs a second pilot. The YAML below is not yet in a `tests_*.yaml`; it is the test list for `tools/sc-flighttest/tests_arrow.yaml` when that file is written.
 
 **No Arrow number appears in this round.** Every `expect:` is left out on purpose: `analyze` prints the Gladius model next to each result, and that column is to be ignored for these tests. Step durations are the Gladius tests' durations with margin so that a slower ship still settles; they are harness inputs, not predictions. The plateau, the slope and the rotation rate are read from the series.
 
@@ -490,7 +490,7 @@ Reading: the G-meter profile of a dodge from the wall, for the measured side of 
 
 ### Block 8: dimensions (manual, 4 screenshots, P1 M)
 
-Method 2 of the comparison plan §2.8: external view, same camera key, zoom and FOV, ship parked. Two screenshots of the Gladius (nose-on, side-on) as the ruler, two of the Arrow. Width, length and height from pixel spans times the Gladius's 20 × 17 × 5.5 m divided by the Gladius's spans. **Assumption to check:** the external camera sits at the same distance from both hulls; if the ratio comes out near 1 on every axis, the camera scaled with the ship and the method is dead, so the dimensions become a gap (or CIG's published figure, if Alex allows it: plan §2.8 option 1). Label the result **M (ratio method)**. No flight, no harness.
+Method 2 of the comparison plan §2.8: external view, same camera key, zoom and FOV, ship parked. Two screenshots of the Gladius (nose-on, side-on) as the ruler, two of the Arrow. Width, length and height from pixel spans times the Gladius's 20 × 17 × 5.5 m divided by the Gladius's spans. **Assumption to check:** the external camera sits at the same distance from both hulls; if the ratio comes out near 1 on every axis, the camera scaled with the ship and the method is dead, so the dimensions become a gap (or CIG's published figure, if the project owner allows it: plan §2.8 option 1). Label the result **M (ratio method)**. No flight, no harness.
 
 ### Session plan, by test
 

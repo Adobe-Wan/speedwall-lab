@@ -1,30 +1,30 @@
 # Ship comparison plan: Arrow vs Gladius (docs only, 2026-10-11)
 
-**Status: a plan, not data.** There is no Arrow measurement in this repository, and project rules forbid new third-party data (`CLAUDE.md`, `NOTICE.md`, `PLAN.md` §10). So nothing about the Arrow goes on the page, into the fixture or into `packages/core` until the tests in §3 have been flown. This document says which of Alex's claims each measurement could support, what to measure, what the comparison would then show, and what stays a gap. **No Arrow number appears here, not even as an example.** Every number below is a Gladius value from `research/gladius-v1-fixture.json` or plain arithmetic on it.
+**Status: a plan, not data.** There is no Arrow measurement in this repository, and project rules forbid new third-party data (`CLAUDE.md`, `NOTICE.md`, `PLAN.md` §10). So nothing about the Arrow goes on the page, into the fixture or into `packages/core` until the tests in §3 have been flown. This document says which of the project owner's claims each measurement could support, what to measure, what the comparison would then show, and what stays a gap. **No Arrow number appears here, not even as an example.** Every number below is a Gladius value from `research/gladius-v1-fixture.json` or plain arithmetic on it.
 
 Labels follow `docs/ingame-test-scenarios.md`: **M** measured (test ID), **Mod** model (computed, not flown), **A** assumed, **GK** game knowledge, **Gap** needs something the project cannot do now.
 
 ## 0. The ask
 
-Alex (2026-10-11): *"Eventually how your ship's accelerations and turn rates (pitch yaw roll) affect their combat style. For example, the Arrow is smaller, has half the shields, but can out-DPS the Gladius at range due to its smaller size (Gladius needs to be within 3-400 m to be accurate) but it can also 'rate' the Gladius to get above/below it when up close if the pilot understands movement."*
+The project owner (2026-10-11): *"Eventually how your ship's accelerations and turn rates (pitch yaw roll) affect their combat style. For example, the Arrow is smaller, has half the shields, but can out-DPS the Gladius at range due to its smaller size (Gladius needs to be within 3-400 m to be accurate) but it can also 'rate' the Gladius to get above/below it when up close if the pilot understands movement."*
 
 Standing rules for everything that follows:
 
 1. Math and geometry over assumptions. Measured fixture values or named constants with a source; never an invented number.
-2. The harness (`tools/sc-flighttest`) runs only in Arena Commander free flight, single pilot, Alex present, Decoupled, G-Safe Off, 4K, 100° FOV. Never the PU, never PvP.
-3. Two-pilot tests are not available (Alex, 2026-10-09). Anything that needs one is a **Gap**, and nothing below depends on it.
-4. Engagement range in examples is 500–600 m (Alex, 2026-10-09). Never 1 km.
+2. The harness (`tools/sc-flighttest`) runs only in Arena Commander free flight, single pilot, the project owner present, Decoupled, G-Safe Off, 4K, 100° FOV. Never the PU, never PvP.
+3. Two-pilot tests are not available (the project owner, 2026-10-09). Anything that needs one is a **Gap**, and nothing below depends on it.
+4. Engagement range in examples is 500–600 m (the project owner, 2026-10-09). Never 1 km.
 5. Sources: Apprentice_One, Shadow Moses, Jonathan Winters; post-3.23 only, dated.
 
 ## 1. Claim table
 
-Alex's example, split into atomic claims. **Now** = computable today from Gladius data alone (one side of the comparison). **Arrow (1P)** = computable after the single-pilot Arrow measurements in §2–§3. **Weapons** = needs weapon data the repo does not hold (damage, fire rate, spread, projectile speed per gun). **2P** = needs a two-pilot test (a Gap today).
+The project owner's example, split into atomic claims. **Now** = computable today from Gladius data alone (one side of the comparison). **Arrow (1P)** = computable after the single-pilot Arrow measurements in §2–§3. **Weapons** = needs weapon data the repo does not hold (damage, fire rate, spread, projectile speed per gun). **2P** = needs a two-pilot test (a Gap today).
 
 | # | Claim | Now | Arrow (1P) | Weapons | 2P | What decides it |
 |---|---|---|---|---|---|---|
 | 1 | The Arrow is smaller than the Gladius | Gladius 20 × 17 × 5.5 m (fixture, author-specified) | Hull dimensions: §2.8 (method with a stated assumption, else Gap) | | | Width, length, height of each hull |
 | 2 | Smaller is harder to hit | Gladius angular width = width ÷ range (geometry, §4.5) | Same formula once the Arrow's width exists | | **Hit rate** (`hit_radius`, `lead_hits` in `ingame-test-scenarios.md` §6.4) | Angular size is geometry. Whether a smaller angle means fewer hits depends on spread, pip behaviour and the shooter: not computable |
-| 3 | The Arrow has half the shields | | | Shield HP per ship (ship systems data, not flight data; the harness reads only the flight HUD) | | **Gap**: no source the rules allow. Only a game-side readout Alex captures himself, if one exists, could fill it |
+| 3 | The Arrow has half the shields | | | Shield HP per ship (ship systems data, not flight data; the harness reads only the flight HUD) | | **Gap**: no source the rules allow. Only a game-side readout the project owner captures, if one exists, could fill it |
 | 4 | The Arrow out-DPSes the Gladius at range | | | Damage, fire rate and spread per weapon and hardpoint | Hits landed at range | **Gap**: DPS on paper needs weapon data; DPS delivered needs hits (2P) |
 | 5 | The Gladius needs to be within 300–400 m to be accurate | | | Spread and projectile speed of the Gladius guns | Hits by range | **Gap**, and it conflicts with the project's 500–600 m engagement range: see §5 |
 | 6 | The Arrow out-turns the Gladius | Gladius pitch 68.0 / yaw 52.1 / roll 199.9 °/s SCM; 81.6 / 62.7 / 240.0 boosted (M, `rg_*`) | `arrow_rg_*` (rotation gauges, §3 block 1) | | | Per-axis rotation rate, per mode. A straight comparison of measured rates |
@@ -64,11 +64,11 @@ Not mirrored, on purpose: `corkscrewAtWall`, `turnTraces`, the round 8–12 evas
 
 The Gladius's 20 × 17 × 5.5 m is "author-specified" and matches spviewer, which is why the fixture carries a `dimensions_note`. For the Arrow there are three ways to get a width, length and height, none of them a fan site:
 
-1. **CIG's own published figures** (the in-game vehicle information panel or the ship's RSI page). This is the game's own first-party data, not a fan database, but whether it counts as "third-party data" under the project's rule is **a question for Alex** (`NOTICE.md` names only spviewer today). If allowed, record it as `source: "CIG published spec, <date>"` with the same `dimensions_note` treatment as the Gladius.
+1. **CIG's own published figures** (the in-game vehicle information panel or the ship's RSI page). This is the game's own first-party data, not a fan database, but whether it counts as "third-party data" under the project's rule is **a question for the project owner** (`NOTICE.md` names only spviewer today). If allowed, record it as `source: "CIG published spec, <date>"` with the same `dimensions_note` treatment as the Gladius.
 2. **Geometry from the external camera, against the Gladius as the ruler.** In Arena Commander, with the same camera key, zoom and FOV: an external-view screenshot of the Gladius (known 20 × 17 m) and one of the Arrow, each parked, nose-on and side-on. Width = pixel span × 17 m ÷ Gladius pixel span. The **assumption** is that the external camera sits at the same distance from both ships. It is checkable: if the camera distance scales with the ship, both ships fill the same fraction of the frame and the ratio comes out near 1 whatever the hull, which would show as the Arrow reading the same width as the Gladius. Two screenshots per ship, no flight, pilot present. Label the result **M (ratio method)** with the assumption stated.
 3. **Gap.** Keep `dimensions_m: null`, draw no Arrow glyph, and state "size not measured" wherever the comparison shows the ship. Row 1 and the geometry half of row 2 then wait.
 
-The recommendation is 2 as the measurement, with 1 only if Alex rules it allowed, and 3 until either lands.
+The recommendation is 2 as the measurement, with 1 only if the project owner rules it allowed, and 3 until either lands.
 
 ## 3. The test session, by count
 
@@ -149,14 +149,14 @@ For a one-off snap the yaw column beats roll-then-pitch at every angle shown; th
 
 Shields, damage, DPS, accuracy, hit rate, pip behaviour, ESP, and the outcome of a rate fight. Each needs weapon data or a two-pilot test, both out of reach now. The comparison page states these as "not measured" rather than leaving them blank, so a new pilot does not read silence as "equal".
 
-## 5. Open question on range (for Alex, not resolved here)
+## 5. Open question on range (for the project owner, not resolved here)
 
-The project's engagement range is **500–600 m** with the Gladius and Panther repeaters (Alex, 2026-10-09), and every lesson and example uses it. The example at the top of this document says the **Gladius needs to be within 300–400 m to be accurate**. Both can be true (fights are joined at 500–600 m and a Gladius pilot then wants to close to 300–400 m), but that is a reading, not a measurement, and the two ranges lead to different lessons:
+The project's engagement range is **500–600 m** with the Gladius and Panther repeaters (the project owner, 2026-10-09), and every lesson and example uses it. The example at the top of this document says the **Gladius needs to be within 300–400 m to be accurate**. Both can be true (fights are joined at 500–600 m and a Gladius pilot then wants to close to 300–400 m), but that is a reading, not a measurement, and the two ranges lead to different lessons:
 
 - If 500–600 m is where hits land, the lesson is "hold the range you have"; closing speed is distance management and claim row 10 is the one that matters.
 - If 300–400 m is needed for hits, the lesson is "close 150–300 m first"; then `timeToRange` with the two ships' forward plateaus decides who gets to choose the range, and the Arrow's DPS-at-range claim (row 4) becomes the one to test.
 
-Neither accuracy figure is measured; both would need the `proj_*` and `hit_radius` tests of `ingame-test-scenarios.md` §6.4, which are two-pilot. The question for Alex: **which range should lessons and examples use, and is the 300–400 m figure his own observation or a creator's claim (with date)?** Until answered, this document and the Arrow round keep 500–600 m.
+Neither accuracy figure is measured; both would need the `proj_*` and `hit_radius` tests of `ingame-test-scenarios.md` §6.4, which are two-pilot. The question for the project owner: **which range should lessons and examples use, and is the 300–400 m figure his own observation or a creator's claim (with date)?** Until answered, this document and the Arrow round keep 500–600 m.
 
 ## 6. After the data arrives
 
