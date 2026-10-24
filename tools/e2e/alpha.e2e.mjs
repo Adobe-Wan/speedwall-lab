@@ -39,6 +39,12 @@ test("loads with the views, the Vitals and no price on Dodge Potential at rest",
   await expect(page.locator("#r-dodge")).not.toHaveText("–");
   await expect(page.locator("#r-dodge-price")).toHaveText(/^best push: (left|right|up|down)$/);
   await expect(page.locator("#ro-range")).toBeHidden();
+  // readouts by stage: Dodge Potential and the detail row wait for group 2 unless the visitor asks for everything
+  await expect(page.locator("#vt-dodge")).toBeHidden();
+  await expect(page.locator(".readouts")).toBeHidden();
+  await page.click("#ro-all");
+  await expect(page.locator("#vt-dodge")).toBeVisible();
+  await expect(page.locator(".readouts")).toBeVisible();
 });
 
 test("every lesson starts and runs", async ({ page }) => {
@@ -50,6 +56,25 @@ test("every lesson starts and runs", async ({ page }) => {
     await page.waitForFunction(() => window.speedwallDebug.get().script?.t > 0.3);
     await expect(page.locator("#runbar")).toBeVisible();
   }
+});
+
+test("First Flight strip starts lesson one; the lesson ends with a takeaway, your keys and Next", async ({ page }) => {
+  await open(page);
+  await expect(page.locator("#first")).toBeVisible();
+  await expect(page.locator("#lesson-note .term[data-term='scm']")).toHaveAttribute("data-def", /^SCM: /);
+  await page.click("#first-go");
+  await expect(page.locator("#first")).toBeHidden();
+  await page.waitForFunction(() => { const r = window.speedwallDebug.get().run; return r && r.shown; }, null, { timeout: 90_000 });
+  await expect(page.locator("#run-result")).toContainText("In Game 226 m/s");
+  await expect(page.locator("#run-result")).not.toContainText("r1_scm_right");
+  await expect(page.locator("#run-end .take")).toContainText("225 m/s is the limit");
+  await expect(page.locator("#run-end .try kbd")).toHaveText("D");
+  await page.click("#run-next");
+  await expect(page.locator("#run-name")).toHaveText(/^Strafe From a Stop With Boost/);
+  await expect(page.locator('[data-preset="scm-strafe"]')).toHaveClass(/done/);
+  await page.reload();
+  await open(page);
+  await expect(page.locator("#first")).toBeHidden();   // remembered: the strip is for the first visit
 });
 
 test("Flee: Hold the Wall marks the chaser in the Cockpit and prices the dodge", async ({ page }) => {
