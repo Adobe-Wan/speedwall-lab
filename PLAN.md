@@ -50,7 +50,7 @@ Every visual has a one-line plain-language caption. The tone is a coaching white
    - Hard budgets enforced in CI (§9).
 3. **Clean provenance.**
    - Code is MIT. The Gladius data is the author's own measurements, under CC BY 4.0.
-   - No CIG assets, and no third-party data that we lack the right to relicense (§10).
+   - No CIG assets, and no third-party data that we lack the right to relicense (§10). One exception: the ship models in `site/assets/ships/` may be derived from third-party game-extracted meshes, with provenance recorded and excluded from our licence grants (§10, ADR-004).
 4. **Measured, fitted or predicted, always labelled.** Never invent a number.
 
 ---
@@ -317,7 +317,7 @@ There's no public spviewer repository or license, and the framework is unknown. 
 | **Third-party data** | **None in the open repo.** The fixture still has two spviewer-sourced values (boosted back 5.9 G and down 6.6 G). Measure them with `sc-flighttest/tests_round4.yaml` and replace them before the repo goes public. The permission from Olakeen covers use in the app, not relicensing under CC BY. |
 | **Dependencies** | Allow-list only: MIT, BSD-2/3, ISC, Apache-2.0, Unlicense, 0BSD, CC0. Checked in CI. Runtime deps: `ogl` (Unlicense) only. |
 | **Contributions** | DCO sign-off (`Signed-off-by`) on every commit, so provenance stays clean for a later hand-off to spviewer. |
-| **CIG** | No CIG art, models, fonts, logos or HUD graphics; dust and TVI visuals are original. Footer on every page: *"This is an unofficial Star Citizen fan site, not affiliated with the Cloud Imperium group of companies."* plus the trademark line (RESEARCH.md "Fan-site notices"). No brand names in the domain, repo or package names. No ads, paywalls or tip links in this project. |
+| **CIG** | No CIG art, fonts, logos or HUD graphics; dust and TVI visuals are original. **Ship models are the one exception** (decided 2026-10-18, ADR-004): the meshes in `site/assets/ships/` are derived (decimated, landing gear and interior stripped, thin plates rebuilt) from third-party game-extracted models, because hand-built hulls could not reach the needed accuracy. They are used for this non-profit educational fan project only, carry a provenance line in `NOTICE.md` and a separate `REUSE.toml` entry naming the source and its stated licence, are **not** covered by the MIT or CC BY grants, and are removed on request from the rights holder. The raw source meshes stay outside the repo; only the derived export is committed. Footer on every page: *"This is an unofficial Star Citizen fan site, not affiliated with the Cloud Imperium group of companies."* plus the trademark line (RESEARCH.md "Fan-site notices"). No brand names in the domain, repo or package names. No ads, paywalls or tip links in this project. |
 | **Credits** | Olakeen / spviewer.eu for the original directional-G work and permission. Author's in-game measurements for speed caps, walls and partial-input data. |
 
 ---
@@ -365,5 +365,5 @@ There's no public spviewer repository or license, and the framework is unknown. 
 - Build from this file. Stop after each phase and summarize what's verified vs assumed.
 - Never invent a stat. Anything missing from the fixture is out of scope or marked `assumed`.
 - Write physics tests before physics code. Keep the physics model swappable.
-- No CIG assets. No third-party data in the repo. No new runtime dependencies without an ADR and a license check.
+- No CIG assets, except the derived ship models in `site/assets/ships/` (§10, ADR-004). No third-party data in the repo. No new runtime dependencies without an ADR and a license check.
 - Respect the budgets. A PR that breaks `size-limit` or Lighthouse CI doesn't merge.

@@ -11,7 +11,7 @@ path = [
   "package.json", "pnpm-workspace.yaml", "pnpm-lock.yaml", ".gitignore", ".size-limit.json",
   "tsconfig.base.json", "packages/*/package.json", "packages/*/tsconfig*.json",
   "packages/*/README.md",
-  ".github/**", ".claude/**", "README.md", "CLAUDE.md", "PLAN.md", "CONTRIBUTING.md", "NOTICE.md",
+  ".github/**", ".claude/**", "README.md", "CLAUDE.md", "PLAN.md", "CONTRIBUTING.md", "SECURITY.md", "NOTICE.md",
   "LICENSE", "LICENSE-DATA.md", "docs/adr/**", "docs/physics-fit.md", "docs/qa-*.md", "docs/flight-model-tests.md", "docs/HANDOFF.md", "docs/evasion-analysis.md", "docs/aim-model.md", "docs/coach-review-2026-10-09.md", "docs/ingame-test-scenarios.md", "docs/ship-comparison-plan.md", "docs/HANDOFF-REPLY.md", "docs/flight-model-findings.md", "docs/engagement-math.md", "tools/sc-flighttest/**",
 ]
 precedence = "aggregate"
@@ -55,3 +55,12 @@ path = "site/vendor/speedwall-core.mjs"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 AdobeWan"
 SPDX-License-Identifier = "MIT AND CC-BY-4.0"
+
+# Ship models derived from third-party meshes (ADR-004): not under this repository's licences, removed on request.
+# Derived from the Sketchfab model by lechatfantome (labelled CC BY 4.0; likely a game extraction, provenance
+# unverified), decimated and modified. See NOTICE.md "Ship model".
+[[annotations]]
+path = "site/assets/ships/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "lechatfantome (Sketchfab), derived by AdobeWan; provenance unverified"
+SPDX-License-Identifier = "LicenseRef-Derived-Ship-Model"
