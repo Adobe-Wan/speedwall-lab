@@ -290,7 +290,7 @@ There's no public spviewer repository or license, and the framework is unknown. 
 | Initial JS (shell + core + Slice view) | ≤ 60 KB min+gz | `size-limit` |
 | 3D chunk (render + OGL + shaders), lazy-loaded | ≤ 60 KB min+gz | `size-limit` |
 | Total transfer, first visit, excluding fonts | ≤ 200 KB | Lighthouse CI |
-| Fonts | system font stack; 0 bytes | review |
+| Fonts | IBM Plex Sans 400/500/600 + Plex Mono 400/500, latin woff2, self-hosted: ≤ 92 KB, `font-display: swap`, system fallback (ADR-005) | review |
 | Lighthouse mobile performance / accessibility | ≥ 95 / ≥ 95 | Lighthouse CI |
 | Frame time, iPhone-12-class device | 60 fps (≤ 8 ms render) | manual check + Playwright trace |
 | Draw calls per frame | ≤ 12 (egg ~6, pilot ~4) | dev overlay |
