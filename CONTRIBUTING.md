@@ -5,7 +5,7 @@ Thanks for helping. This is a small, MIT-licensed teaching tool for the Star Cit
 ## Ground rules
 - **Never invent a number.** Physics values come from `research/gladius-v1-fixture.json`. Anything not in the fixture is out of scope or labelled `assumed`.
 - **No CIG assets** (art, models, fonts, logos, HUD graphics) and **no third-party data** we cannot relicense. Spviewer-sourced values are listed in `NOTICE.md` until replaced.
-- **New runtime dependencies need an ADR (`docs/adr/`) and a license check.** Allowed licenses: MIT, BSD-2/3-Clause, ISC, Apache-2.0, Unlicense, 0BSD, CC0-1.0. CI enforces this.
+- **New runtime dependencies need an ADR (`docs/adr/`) and a license check.** Allowed licenses: MIT, BSD-2/3-Clause, ISC, Apache-2.0, Unlicense, 0BSD, CC0-1.0. CI enforces this. Font files may be SIL OFL 1.1 (ADR-005).
 - **Respect the performance budgets** in `PLAN.md` §9. A change that breaks `size-limit` or Lighthouse CI does not merge.
 - **Write physics tests before physics code.**
 

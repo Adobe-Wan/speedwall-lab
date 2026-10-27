@@ -5,6 +5,8 @@
 
 - **Stay On Target** (https://github.com/Adobe-Wan/stay-on-target), MIT, Copyright (c) 2026 Stay On Target contributors. The controller matching and "move it to map it" capture in `site/js/controls.mjs` are adapted from it.
 
+- **IBM Plex Sans** and **IBM Plex Mono** (https://github.com/IBM/plex), Copyright 2017-2018 IBM Corp., SIL Open Font License 1.1. Unmodified latin woff2 subsets from Fontsource (`@fontsource/ibm-plex-sans` and `@fontsource/ibm-plex-mono` 5.1.1) in `site/assets/fonts/`; licence text in `site/assets/fonts/OFL.txt`. They are the UI and data faces of the Verseglass design system (ADR-005).
+
 ## Third-party data (not covered by this repository's licenses)
 Two Gladius values (boosted back 5.9 G and down 6.6 G) were first taken from **SC Ships Performances Viewer (spviewer.eu) by Olakeen**, used with the author's permission. Round 4 (2026-10-08) replaced both with the author's own measurements (5.96 G and 6.8 G), so no spviewer value remains in `research/gladius-v1-fixture.json` or `site/`. `docs/RESEARCH.md` still quotes spviewer figures in its research notes; those may not be reused under MIT or CC BY.
 

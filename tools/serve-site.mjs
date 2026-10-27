@@ -11,7 +11,7 @@ import { fileURLToPath } from "node:url";
 const root = fileURLToPath(new URL("../site/", import.meta.url));
 const port = Number(process.argv[2] || process.env.PORT || 4173);
 const TYPES = { ".html": "text/html; charset=utf-8", ".mjs": "text/javascript", ".js": "text/javascript", ".json": "application/json",
-  ".glb": "model/gltf-binary", ".png": "image/png", ".svg": "image/svg+xml", ".css": "text/css", ".md": "text/markdown" };
+  ".glb": "model/gltf-binary", ".png": "image/png", ".svg": "image/svg+xml", ".css": "text/css", ".md": "text/markdown", ".woff2": "font/woff2", ".txt": "text/plain; charset=utf-8" };
 
 createServer(async (req, res) => {
   const path = decodeURIComponent(new URL(req.url, "http://x").pathname);

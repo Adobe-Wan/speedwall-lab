@@ -64,3 +64,10 @@ path = "site/assets/ships/**"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "lechatfantome (Sketchfab), derived by AdobeWan; provenance unverified"
 SPDX-License-Identifier = "LicenseRef-Derived-Ship-Model"
+
+# IBM Plex Sans and Mono (latin woff2 subsets via Fontsource), SIL Open Font License 1.1 (ADR-005).
+[[annotations]]
+path = "site/assets/fonts/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2017-2018 IBM Corp."
+SPDX-License-Identifier = "OFL-1.1"

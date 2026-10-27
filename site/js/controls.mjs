@@ -222,22 +222,22 @@ export function stepPrompt(st, kinds, buttonsOnly = false) {
   return { text: text[0].toUpperCase() + text.slice(1) + '.', tip: tips.join(' '), mouse };
 }
 
-// New styles for the controls dialog. The rest (.binds, .brow, .ask, .meter, .kinds...) live in index.html.
+// New styles for the controls dialog, on Verseglass tokens (defined in index.html). The rest (.binds, .brow, .ask, .meter, .kinds...) live in index.html.
 const CSS = `
-dialog .c-conf { display: flex; gap: 10px; align-items: center; justify-content: space-between; border: 1px solid var(--line); border-left: 3px solid var(--tvi); border-radius: 6px; padding: 6px 8px 6px 10px; margin: 0 0 10px; font-size: .82rem; }
+dialog .c-conf { display: flex; gap: var(--vg-space-3); align-items: center; justify-content: space-between; border: 1px solid var(--vg-line-accent); background: var(--vg-accent-soft); border-radius: var(--vg-radius-sm); padding: var(--vg-space-2) var(--vg-space-2) var(--vg-space-2) var(--vg-space-3); margin: 0 0 var(--vg-space-3); font-size: var(--vg-text-sm); line-height: var(--vg-leading-sm); }
 dialog .c-conf p { margin: 0; min-width: 0; overflow-wrap: anywhere; }
-dialog .c-conf.warn { border-left-color: var(--warn); }
-dialog .c-warnline { display: block; color: var(--warn); margin-top: 2px; }
-dialog button.c-act { padding: 4px 10px; font-size: .75rem; flex: none; }
-dialog .c-box { border: 1px solid var(--line); border-left: 3px solid var(--warn); border-radius: 6px; padding: 6px 10px; margin: 0 0 10px; font-size: .8rem; }
+dialog .c-conf.warn { border-color: var(--vg-status-danger); background: var(--vg-status-danger-soft); }
+dialog .c-warnline { display: block; color: var(--vg-status-danger); margin-top: 2px; }
+dialog button.c-act { padding: 3px var(--vg-space-3); min-height: var(--vg-size-control-sm); font-size: var(--vg-text-xs); line-height: var(--vg-leading-xs); flex: none; }
+dialog .c-box { border: 1px solid var(--vg-status-danger); background: var(--vg-status-danger-soft); border-radius: var(--vg-radius-sm); padding: var(--vg-space-2) var(--vg-space-3); margin: 0 0 var(--vg-space-3); font-size: var(--vg-text-sm); line-height: var(--vg-leading-sm); }
 dialog .c-box p { margin: 2px 0; }
-dialog .c-box.c-auto { border-left-color: var(--line-strong); color: var(--muted); }
-dialog .c-box.c-auto b { color: var(--fg); }
-dialog .binds .brow.conflict .what { color: var(--warn); }
-dialog .binds .opts { align-items: center; margin-bottom: 6px; }
-dialog .c-flag { margin-right: 4px; }
-dialog .c-note { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; color: var(--fg); font-size: .78rem; }
-dialog button:disabled { opacity: .45; cursor: default; }
+dialog .c-box.c-auto { border-color: var(--vg-line-default); background: var(--vg-surface-ink-1); color: var(--vg-text-2); }
+dialog .c-box.c-auto b { color: var(--vg-text-1); }
+dialog .binds .brow.conflict .what { color: var(--vg-status-danger); }
+dialog .binds .opts { align-items: center; margin-bottom: var(--vg-space-2); }
+dialog .c-flag { margin-right: var(--vg-space-1); }
+dialog .c-note { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: var(--vg-space-1) var(--vg-space-3); align-items: center; color: var(--vg-text-1); font-size: var(--vg-text-xs); line-height: var(--vg-leading-xs); }
+dialog button:disabled { opacity: .45; cursor: not-allowed; }
 dialog .c-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 dialog h2:focus, dialog .ask:focus { outline: none; }
 `;
