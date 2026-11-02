@@ -157,8 +157,8 @@ body.stage-0 #vt-dodge, body.stage-0 .readouts { display: none !important; }
 
 /* Glossary terms: dotted underline, definition on hover, focus or tap (one source: GLOSSARY in the script). */
 .term { border-bottom: 1px dotted var(--accent-text); cursor: help; position: relative; text-decoration: none; font-style: inherit; outline-offset: 2px; }
-.term::after { content: attr(data-def); position: absolute; left: 0; top: calc(100% + 6px); z-index: 20; width: max-content; max-width: min(44ch, 80vw); padding: var(--vg-space-2) var(--vg-space-3); border-radius: var(--r-sm); border: 1px solid var(--line-2); background: var(--vg-navy-900); color: var(--fg); font: var(--vg-weight-regular) var(--vg-text-xs)/var(--vg-leading-xs) var(--font-ui); box-shadow: inset 0 1px 0 var(--vg-line-highlight), var(--vg-shadow-overlay); pointer-events: none; opacity: 0; visibility: hidden; transition: opacity var(--vg-duration-fast) var(--ease); }
-.term:hover::after, .term:focus-visible::after, .term:focus::after { opacity: 1; visibility: visible; }
+.term::after { content: attr(data-def); position: absolute; left: 0; top: calc(100% + 6px); z-index: 20; width: max-content; max-width: min(44ch, 80vw); padding: var(--vg-space-2) var(--vg-space-3); border-radius: var(--r-sm); border: 1px solid var(--line-2); background: var(--vg-navy-900); color: var(--fg); font: var(--vg-weight-regular) var(--vg-text-xs)/var(--vg-leading-xs) var(--font-ui); box-shadow: inset 0 1px 0 var(--vg-line-highlight), var(--vg-shadow-overlay); pointer-events: none; display: none; }
+.term:hover::after, .term:focus-visible::after, .term:focus::after { display: block; } /* display, not visibility: a hidden definition must not widen the page */
 .term.right::after { left: auto; right: 0; }
 /* Lesson end: takeaway, your turn, next */
 .run-end { order: 3; flex-basis: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: var(--vg-space-2) var(--vg-space-4); font-size: var(--vg-text-sm); line-height: var(--vg-leading-sm); }
@@ -381,6 +381,9 @@ kbd { display: inline-block; min-width: 20px; text-align: center; font: var(--vg
 dialog { background: var(--glass); color: var(--fg); border: 1px solid var(--line-2); border-radius: var(--r-lg); padding: var(--vg-space-6); width: min(540px, calc(100vw - 32px)); box-sizing: border-box; font-size: var(--vg-text-sm); line-height: var(--vg-leading-sm);
   box-shadow: inset 0 1px 0 var(--vg-line-highlight), var(--vg-shadow-overlay); backdrop-filter: blur(var(--vg-blur-panel)) saturate(1.15); -webkit-backdrop-filter: blur(var(--vg-blur-panel)) saturate(1.15); }
 dialog::backdrop { background: var(--vg-surface-scrim); }
+/* the Controls dialog keeps its exit in reach: a close button in the corner and the actions row pinned to the bottom edge */
+#c-x { position: absolute; right: var(--vg-space-4); top: var(--vg-space-5); min-width: var(--vg-size-control-sm); padding: 3px var(--vg-space-2); font-size: var(--vg-text-md); line-height: 1; }
+#ctl-body > .row:last-child { position: sticky; bottom: calc(-1 * var(--vg-space-6)); z-index: 1; margin: var(--vg-space-4) calc(-1 * var(--vg-space-6)) calc(-1 * var(--vg-space-6)); padding: var(--vg-space-3) var(--vg-space-6); background: var(--vg-navy-900); border-top: 1px solid var(--line); }
 dialog h2 { margin: 0 0 var(--vg-space-3); font-size: var(--vg-text-lg); line-height: var(--vg-leading-lg); font-weight: var(--vg-weight-semibold); letter-spacing: -.005em; text-wrap: balance; }
 dialog p { margin: 0 0 var(--vg-space-3); }
 .ask { font-size: var(--vg-text-md); line-height: var(--vg-leading-md); font-weight: var(--vg-weight-semibold); margin: var(--vg-space-2) 0 var(--vg-space-3); }
@@ -495,6 +498,53 @@ footer a { color: var(--fg-2) !important; }
   .app { padding-bottom: 12px; }
   .lesson-note { display: block; }
 }
+/* ── desktop: cockpit + rail ──
+   The views never leave the window. The cockpit (views, Vitals, the running lesson and its note) is a sticky column that
+   fills the window height; everything else (header, First Flight, the lesson list, flight controls, footer) is a rail
+   beside it that scrolls with the page. Picking a lesson in the rail starts it in plain view. Phones keep their own
+   layouts above (.cockpit is display: contents there). */
+.cockpit { display: contents; }
+@media (min-width: 980px) and (min-height: 541px) {
+  .app { --rail: clamp(320px, 26vw, 440px); max-width: 2400px; grid-template-columns: minmax(0, 1fr) var(--rail); column-gap: var(--vg-space-4); row-gap: var(--vg-space-3); align-items: start; padding-top: 0; }
+  .app > * { grid-column: 2; min-width: 0; }
+  .app > header { padding-top: var(--vg-space-3); }
+  .app > .cockpit { grid-column: 1; grid-row: 1 / span 40; position: sticky; top: 0; height: 100vh; height: 100dvh; box-sizing: border-box; padding: var(--vg-space-3) 0; display: flex; flex-direction: column; gap: var(--vg-space-2); }
+  .app > .cockpit { overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; } /* a short window scrolls the lesson text, never squeezes the views */
+  .cockpit > .stage { flex: 1 0 auto; min-height: 0; display: flex; flex-direction: column; margin: 0; }
+  .cockpit .views { flex: 1 0 auto; min-height: max(240px, 48vh); grid-template-rows: minmax(0, 1fr); gap: var(--vg-space-3); }
+  .cockpit .view, body.flying .cockpit .view { height: auto; min-height: 220px; }
+  .cockpit .vitals { flex: none; margin-top: var(--vg-space-2); }
+  .cockpit .vitals small.vt-sub { position: static; display: block; max-width: none; margin-top: 2px; } /* under the number: the tiles are narrower beside the rail */
+  .cockpit > .readouts { margin-top: calc(-1 * var(--vg-space-2)); } /* joins the Vitals as one panel */
+  .cockpit > .ro-more, .cockpit > .runbar, .cockpit > .legend { flex: none; margin: 0; }
+  .cockpit > .lesson-note { flex: none; max-height: 34vh; overflow: auto; margin: 0; }
+  /* header in the rail: brand on one line, the three actions under it */
+  header { gap: var(--vg-space-2); }
+  .brand { margin-right: 0; flex: 1 1 100%; }
+  .hdr-actions { flex: 1 1 100%; flex-wrap: nowrap; gap: var(--vg-space-1); } .hdr-actions .btn, .hdr-actions button { padding: 3px var(--vg-space-2); font-size: var(--vg-text-xs); line-height: var(--vg-leading-xs); white-space: nowrap; }
+  .hdr-actions #fly { margin-left: auto; }
+  .sub { font-size: var(--vg-text-xs); line-height: var(--vg-leading-xs); }
+  /* First Flight stacks in the rail */
+  .first { grid-template-columns: 1fr; margin: 0; }
+  /* the lesson list: one card per row, numbered (the order is the curriculum), groups as eyebrows with their intro under */
+  .maneuvers { grid-template-columns: minmax(0, 1fr); padding: var(--vg-space-3); row-gap: var(--vg-space-2); }
+  .maneuvers h3 + .lessons-how { margin: 0; align-self: auto; }
+  .maneuvers h3::after { display: block; }
+  .maneuvers .mgrid { grid-template-columns: minmax(0, 1fr); gap: var(--vg-space-1); }
+  .maneuvers .mgrid.pairs { grid-template-columns: minmax(0, 1fr); }
+  .mgrid.pairs .pair-h { grid-row: auto; grid-column: 1 / -1; margin: var(--vg-space-1) 0 0; } .mgrid.pairs button { grid-row: auto; }
+  #lessons { counter-reset: lesson; }
+  .mgrid button { counter-increment: lesson; padding: var(--vg-space-2) var(--vg-space-3) var(--vg-space-2) 36px; }
+  .mgrid button::before { content: counter(lesson); position: absolute; left: var(--vg-space-3); top: var(--vg-space-2); font: var(--vg-weight-medium) var(--vg-text-xs)/var(--vg-leading-sm) var(--font-data); font-variant-numeric: tabular-nums; color: var(--muted); }
+  .mgrid button.done::before { color: var(--accent-text); }
+  /* flight controls in the rail */
+  .deck { grid-template-columns: minmax(0, 1fr); gap: var(--vg-space-4); padding: var(--vg-space-3); }
+  .dock { grid-template-columns: auto auto; justify-content: start; gap: var(--vg-space-3) var(--vg-space-5); }
+  .dock-btns { min-width: 0; grid-column: 1 / -1; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; }
+  .dock-btns #boost { grid-column: 1 / -1; }
+  #pad { width: 128px; height: 128px; } #knob { left: 41px; top: 41px; } #thr { height: 128px; }
+  footer { grid-template-columns: minmax(0, 1fr); }
+}
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; transition: none !important; } .mgrid button:hover, button:active { transform: none; } }
 </style>
 </head>
@@ -507,7 +557,7 @@ footer a { color: var(--fg-2) !important; }
       <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32"><ellipse cx="14" cy="16" rx="12" ry="11" fill="none" stroke="#f2a33a" stroke-width="2.6"/><circle cx="14" cy="16" r="5.5" fill="none" stroke="#5aa9e6" stroke-width="1.6" opacity=".8"/><circle cx="22" cy="16" r="3.3" fill="#7ef0c8"/></svg></span>
       <div class="brand-text">
         <div class="brand-row"><h1>Speedwall Lab</h1><span class="chip proto" title="Physics reproduces the measured settle speeds; some wall behavior is still being fitted.">Alpha · v0.8</span></div>
-        <span class="sub">Gladius · decoupled · how your speed limits your maneuvers</span>
+        <span class="sub">Gladius · <span class="term" data-term="decoupled" tabindex="0">decoupled</span> · how your speed limits your maneuvers</span>
       </div>
     </div>
     <div class="hdr-actions">
@@ -518,11 +568,14 @@ footer a { color: var(--fg-2) !important; }
   </header>
 
   <section class="first" id="first" aria-label="First flight: where to start" hidden>
-    <div class="fs now"><b>1 · The one idea</b>Your ship has a top speed in every direction, and it is not the same in every direction. The amber shape is that limit. The faster you fly forward, the less sideways push you have left for <span class="term" data-term="dodge" tabindex="0">dodging</span>.<button id="first-hide" class="small" title="Hide this until the browser forgets it">Hide</button></div>
-    <div class="fs"><b>2 · Watch the first lesson</b>The ship flies it for you in about 10 seconds: a sideways <span class="term" data-term="strafe" tabindex="0">strafe</span> with boost off. Watch where it stops.<div class="act"><button id="first-go">▶ Watch: Strafe From a Stop in SCM</button></div></div>
-    <div class="fs"><b>3 · Then take the keys</b>After each lesson, fly it yourself with the Star Citizen default keys. Nothing here can be broken.<div class="keys"><kbd class="hint" data-hint="throttleFwd">W</kbd><kbd class="hint" data-hint="strafeLeft">A</kbd><kbd class="hint" data-hint="throttleBack">S</kbd><kbd class="hint" data-hint="strafeRight">D</kbd> move · <kbd class="hint" data-hint="strafeUp">Space</kbd><kbd class="hint" data-hint="strafeDown">Left Ctrl</kbd> up and down · <kbd class="hint" data-hint="boost">Left Shift</kbd> boost</div></div>
+    <div class="fs now"><b>1 · The one idea</b>Your ship has a top speed in every direction, and it is not the same in every direction. The Amber Egg is that limit (the Blue Ball is the limit without boost). The faster you fly forward, the less sideways push you have left for <span class="term" data-term="dodge" tabindex="0">dodging</span>.<button id="first-hide" class="small" title="Hide this until the browser forgets it">Hide</button></div>
+    <div class="fs"><b>2 · Watch the first lesson</b>The ship flies it for you in about 10 seconds: a sideways <span class="term" data-term="strafe" tabindex="0">strafe</span> with boost off. Watch where it stops.<div class="act"><button id="first-go">▶ Watch the first lesson</button></div></div>
+    <div class="fs"><b>3 · Then take the keys</b>After each lesson, fly it yourself with the Star Citizen default keys and mouse (click the Cockpit view to steer, Esc frees the mouse). Nothing here can be broken.<div class="keys"><kbd class="hint" data-hint="throttleFwd">W</kbd><kbd class="hint" data-hint="strafeLeft">A</kbd><kbd class="hint" data-hint="throttleBack">S</kbd><kbd class="hint" data-hint="strafeRight">D</kbd> move · <kbd class="hint" data-hint="strafeUp">Space</kbd><kbd class="hint" data-hint="strafeDown">Left Ctrl</kbd> up and down · <kbd class="hint" data-hint="boost">Left Shift</kbd> boost</div></div>
   </section>
 
+  <!-- Cockpit: the views, the Vitals, the running lesson and its note. On desktops it is a sticky column that always fills the
+       window, so a lesson picked from the rail beside it starts in view; on phones it is display: contents (the old flow). -->
+  <div class="cockpit" id="cockpit">
   <div class="stage" id="stage">
   <div class="tabs" role="tablist" aria-label="Views">
     <button role="tab" id="tab-egg" aria-selected="true" data-view="egg">Speed Egg</button>
@@ -545,7 +598,7 @@ footer a { color: var(--fg-2) !important; }
           <button id="t-frame" aria-pressed="true" title="On: the egg and the ship turn with the ship, and your velocity stays put in space (pitch the nose up and the 520 end goes up with it). Off: the view stays attached to the ship, so the velocity moves instead.">Egg Turns with Ship</button>
         </div></details>
       </div>
-      <div class="vsub" aria-hidden="true">Your velocity, drawn inside the limits: the ship sits where its velocity is. The amber shell is the boost limit, the blue ball the no-boost limit. Farther from the centre is faster.</div>
+      <div class="vsub" aria-hidden="true">Your velocity, drawn inside the limits: the ship sits where its velocity is. The Amber Egg is the boost limit, the Blue Ball the limit without boost. Farther from the centre is faster.</div>
       <canvas class="inset" id="c-inset" aria-hidden="true"></canvas>
       <canvas class="inset pos" id="c-pos" aria-hidden="true" hidden></canvas>
       <div class="caption" id="cap-egg"></div>
@@ -599,7 +652,7 @@ footer a { color: var(--fg-2) !important; }
     <div class="ro" title="MODEL, not a measured rule: stress from the G you are pulling in each direction. Greys the HUD, then the screen, then blacks out and cuts thrust and boost. Paused while a lesson runs, so you see the speed limits; the lesson texts say what the measured pilot felt."><b>G-LOC (Model)</b><span class="num" id="r-gloc">clear</span><div class="tank"><i id="r-glocbar"></i></div></div>
   </div>
 
-  <p class="ro-more" aria-hidden="true"><span>Dodge Potential and the detail readouts appear with the lessons that use them.</span><button id="ro-all" class="small">Show all readouts</button></p>
+  <p class="ro-more" aria-hidden="true"><span>More readouts unlock with the lessons that use them.</span><button id="ro-all" class="small">Show all now</button></p>
   <div class="runbar" id="runbar" hidden>
     <span class="run-name" id="run-name"></span>
     <span class="run-msg" id="run-msg">Press <kbd class="hint" data-hint="throttleFwd">W</kbd> <kbd class="hint" data-hint="strafeLeft">A</kbd> <kbd class="hint" data-hint="throttleBack">S</kbd> <kbd class="hint" data-hint="strafeRight">D</kbd> to take over</span>
@@ -608,11 +661,12 @@ footer a { color: var(--fg-2) !important; }
     <span class="run-end" id="run-end"></span>
     <button id="run-stop" class="small">Stop</button>
   </div>
-  <p class="lesson-note" id="lesson-note" role="status"><strong>Start Here.</strong> The Amber Egg is the <span class="term" data-term="wall" tabindex="0">speed wall</span> with <span class="term" data-term="boost" tabindex="0">boost</span> held: 520 m/s forward, 394 sideways, 268 back. The Blue Ball is the limit without boost (<span class="term" data-term="scm" tabindex="0">SCM</span>): 225 m/s every way. Your ship sits at its current velocity: the farther from the centre cross, the faster you go. The White Ring is your sideways room. Pick a lesson below: the ship flies it, the page says what to look for, then you get the keys.</p>
+  <p class="lesson-note" id="lesson-note" role="status"><strong>Start Here.</strong> The Amber Egg is the <span class="term" data-term="wall" tabindex="0">speed wall</span> with <span class="term" data-term="boost" tabindex="0">boost</span> held: 520 m/s forward, 394 sideways, 268 back. The Blue Ball is the limit without boost (<span class="term" data-term="scm" tabindex="0">SCM</span>): 225 m/s every way. Your ship sits at its current velocity: the farther from the centre cross, the faster you go. The White Ring is your sideways room. Pick a lesson from the list: the ship flies it, the page says what to look for, then you get the keys.</p>
   <div class="legend" aria-hidden="true"><span class="lg-ring"><b>White Ring (Sideways Room):</b> the sideways speed you can still add; it thins and reddens as Dodge Potential collapses</span><span class="lg-tvi"><b>TVI:</b> the circle with wings: where you are really going</span><span class="lg-path"><b>Violet Thread:</b> your path over the last 8 s (drawn wider and shorter)</span><span class="lg-chaser" id="lg-chaser" hidden><b>Red Marker:</b> the pretend chaser, 520 m/s along your starting line</span>
   </div>
+  </div>
   <section class="maneuvers" id="lessons" aria-labelledby="lessons-h">
-        <div class="lessons-head"><h2 id="lessons-h">Lessons</h2><p class="lessons-how">Take them in order. The ship flies each one while you watch and tells you what to look for; press a flight key to take over.</p></div>
+        <div class="lessons-head"><h2 id="lessons-h">Lessons</h2><span id="lessons-count" class="chip" hidden></span><p class="lessons-how">Take them in order. The ship flies each one while you watch and tells you what to look for; press a flight key to take over.</p></div>
         <h3>The Speed Wall: SCM vs Boost</h3>
         <p class="lessons-how">What <span class="term" data-term="scm" tabindex="0">SCM</span> and <span class="term" data-term="boost" tabindex="0">boost</span> each let your ship do, from a stop, at the limit and in a turn.</p>
         <div class="mgrid pairs">
@@ -701,6 +755,7 @@ footer a { color: var(--fg-2) !important; }
 
   <dialog id="ctl-dlg" aria-labelledby="ctl-h">
     <h2 id="ctl-h">Controls</h2>
+    <button id="c-x" class="small" type="button" aria-label="Close controls" title="Close (Esc)">×</button>
     <div id="ctl-body"></div>
   </dialog>
   <p class="fly-note" id="fly-note" hidden></p>
@@ -762,10 +817,15 @@ const NO_THRUST = { f: 0, l: 0, u: 0 };
 let script = null;
 // Ending a maneuver. resetOnScreen: the pilot took over with keys or a controller, so the on-screen throttle,
 // pad and boost lock the maneuver set are cleared too (otherwise they keep flying the ship).
-function endManeuver(resetOnScreen) {
+function endManeuver(resetOnScreen, byKey) {
   if (!script && !maneuver) return;
+  const key = maneuver;
   script = null; maneuver = null; dodge = null; markPreset(null); ctl.rollHold = 0; egg.chase(false); tgt.on = false;
-  if (!run || !run.shown) { $('runbar').hidden = true; setNote(''); } else $('run-msg').textContent = 'You have the controls.';
+  if (byKey && key && run && !run.shown) {   // took the keys before the result: say so, keep the Do/See note, offer a replay (no tick)
+    $('run-msg').hidden = false; $('run-msg').textContent = 'You took over, so the lesson stopped before its result.';
+    $('run-end').innerHTML = '<button id="run-again" class="small">Replay</button>';
+    $('run-again').onclick = () => document.querySelector(`[data-preset="${key}"]`).click();
+  } else if (!run || !run.shown) { $('runbar').hidden = true; setNote(''); } else $('run-msg').textContent = 'You have the controls.';
   run = null;
   if (resetOnScreen) { setThr(0); ctl.padL = ctl.padU = 0; ctl.padSticky = false; drawKnob(); setLock(false); }
 }
@@ -775,12 +835,13 @@ function endManeuver(resetOnScreen) {
 const controls = createControls({ dialog: $('ctl-dlg'), body: $('ctl-body'), status: $('ctl-status'), onFly: () => fly(true) });
 let FLIGHT_KEYS = controls.flightKeys();
 $('ctl-dlg').addEventListener('close', () => { FLIGHT_KEYS = controls.flightKeys(); });
+$('c-x').onclick = () => $('ctl-dlg').close();
 const NO_INPUT = { f: undefined, l: undefined, u: undefined, roll: undefined, pitch: undefined, yaw: undefined, boost: false, brake: false, rollIsButton: false };
 function currentInput() {
   // While the Controls dialog is open you're testing inputs there: the ship doesn't fly.
   const dev = controls.dialogOpen() ? NO_INPUT : controls.read(ctl.keys);
   // A controller axis coming out of its deadzone takes over from a running maneuver.
-  if (script && !controls.dialogOpen() && ['f', 'l', 'u', 'roll', 'pitch', 'yaw'].some(a => dev[a] != null && dev[a] !== 0)) endManeuver(true);
+  if (script && !controls.dialogOpen() && ['f', 'l', 'u', 'roll', 'pitch', 'yaw'].some(a => dev[a] != null && dev[a] !== 0)) endManeuver(true, true);
   // priority per axis: a bound key/button or device axis > on-screen controls
   let u = { f: dev.f ?? ctl.thr / 100, l: dev.l ?? ctl.padL, u: dev.u ?? ctl.padU };
   // keys, the on-screen buttons and maneuvers roll at the chosen rate; a device axis is analog
@@ -871,7 +932,7 @@ addEventListener('keydown', e => {
     const kbFocused = focusFromKeyboard && e.target.closest?.('button, input, summary, a, select');
     if (!flying && (e.code === 'Space' || e.code === 'Enter') && kbFocused) return;
     if (e.target.closest?.('button, input, summary, select')) e.target.blur?.();
-    ctl.keys.add(e.code); if (script) endManeuver(true); e.preventDefault(); return;
+    ctl.keys.add(e.code); if (script) endManeuver(true, true); e.preventDefault(); return;
   }
   const ctrlHeld = [...ctl.keys].some(c => c.startsWith('Control'));
   if (ctrlHeld || flying) e.preventDefault();
@@ -1179,6 +1240,9 @@ function glossify(s) {
   return s.replace(TERM_ALL, (m, ...groups) => { const id = TERM_IDS[groups.findIndex(g => g !== undefined)]; if (!id || seen.has(id)) return m; seen.add(id); return termTag(m, id); });
 }
 document.querySelectorAll('.term[data-term]').forEach(t => { t.dataset.def = GLOSSARY[t.dataset.term] || ''; });
+// A definition opens toward the middle of the window, so a term near the right edge (the lesson rail) never pushes it off screen.
+const termSide = e => { const t = e.target.closest && e.target.closest('.term'); if (t) t.classList.toggle('right', t.getBoundingClientRect().left > innerWidth / 2); };
+document.addEventListener('pointerover', termSide); document.addEventListener('focusin', termSide);
 const keyHint = id => { const k = controls.hint(id) || (STEPS.find(s => s.id === id) || {}).kb || ''; return k ? `<kbd>${escHtml(k)}</kbd>` : ''; };
 function lessonHtml(p) {
   if (!p) return '';
@@ -1188,14 +1252,18 @@ function lessonHtml(p) {
 }
 // The lesson's explanation, under the views on every width.
 const NOTE_IDLE = $('lesson-note').innerHTML;
-function setNote(html) { $('lesson-note').innerHTML = html || NOTE_IDLE; }
+// At rest the note is the Start Here text, plus a Continue button once some lessons are done (the next one in order).
+function continueHtml() { const done = new Set(prefs.done || []), next = PRESET_ORDER.find(k => !done.has(k));
+  return done.size && next ? ` <button id="note-next" class="small next">Continue: ${escHtml(PRESETS[next].title)} →</button>` : ''; }
+function setNote(html) { const el = $('lesson-note'); el.innerHTML = html || NOTE_IDLE + continueHtml();
+  const nb = el.querySelector('#note-next'); if (nb) nb.onclick = () => { const done = new Set(prefs.done || []); document.querySelector(`[data-preset="${PRESET_ORDER.find(k => !done.has(k))}"]`).click(); }; }
 // Lesson end: the takeaway in one sentence, the keys to fly it yourself, and the next lesson in the page's order.
 const PRESET_ORDER = [...document.querySelectorAll('[data-preset]')].map(b => b.dataset.preset);
 function lessonEnd(key) {
   const p = PRESETS[key], next = PRESET_ORDER[PRESET_ORDER.indexOf(key) + 1], np = next && PRESETS[next];
   const tryIt = p.try ? `<span class="try">Your turn: ${glossify(escHtml(p.try).replace(/\{(\w+)\}/g, (_, id) => keyHint(id)))}</span>` : '';
   $('run-end').innerHTML = `<span class="take"><b>Takeaway</b>${glossify(escHtml(p.takeaway || p.see))}</span>${tryIt}` +
-    `<button id="run-fly" class="small" title="Stop the lesson and put you at its starting point, controls in your hands">You fly it</button>` +
+    `<button id="run-fly" class="small" title="Stop the lesson and put you at its starting point, controls in your hands">Fly it yourself</button>` +
     (np ? `<button id="run-next" class="small next">Next: ${escHtml(np.title)} →</button>` : '') + `<button id="run-again" class="small">Replay</button>`;
   $('run-fly').onclick = () => { const start = p.start; endManeuver(true); reset(start); $('run-msg').hidden = false; $('run-msg').textContent = 'You have the controls.'; $('run-end').textContent = ''; };
   if (np) $('run-next').onclick = () => document.querySelector(`[data-preset="${next}"]`).click();
@@ -1203,7 +1271,9 @@ function lessonEnd(key) {
   const done = new Set(prefs.done || []); done.add(key); prefs.done = [...done]; savePrefs(); markDone();
 }
 function markDone() { const done = new Set(prefs.done || []), next = PRESET_ORDER.find(k => !done.has(k));
-  document.querySelectorAll('[data-preset]').forEach(b => { b.classList.toggle('done', done.has(b.dataset.preset)); b.classList.toggle('up-next', b.dataset.preset === next); }); applyStage(); }
+  document.querySelectorAll('[data-preset]').forEach(b => { b.classList.toggle('done', done.has(b.dataset.preset)); b.classList.toggle('up-next', b.dataset.preset === next); });
+  const n = PRESET_ORDER.filter(k => done.has(k)).length; $('lessons-count').hidden = !n; $('lessons-count').textContent = `${n} of ${PRESET_ORDER.length} done`;
+  if (!maneuver && $('runbar').hidden) setNote(''); applyStage(); }
 // Readouts by stage: group 1 (The Speed Wall) needs Speed, Sideways Room, Boost Tank and Flight Mode; Dodge Potential and
 // the detail row join with group 2, where the lessons start to use them. prefs.allReadouts shows everything from the start.
 const GROUP_OF = {}; document.querySelectorAll('#lessons .mgrid').forEach((g, i) => g.querySelectorAll('[data-preset]').forEach(b => { GROUP_OF[b.dataset.preset] = i; }));
@@ -1978,7 +2048,7 @@ function caption(d) {
   if (Math.abs(S.roll || 0) > 1 && d.speed > 5) return (script && maneuver ? '' : 'Rolling: your sideways drift spins around the nose. ') +
     `Rolling ${Math.round(Math.abs(S.roll))} °/s · ${Math.round(d.side)} m/s sideways at ${Math.round(d.speed)} m/s · ${d.g.toFixed(1)} G.`;
   if (d.speed < 5) return d.boost ? 'Stopped, boosting: you can reach 520 m/s forward or 394 m/s sideways.'
-    : `Stopped, no boost: you can reach 225 m/s in any direction (blue ball).${script ? '' : ' Pick a lesson below, or hold Boost and drag the strafe pad.'}`;
+    : `Stopped, no boost: you can reach 225 m/s in any direction (Blue Ball).${script ? '' : ' Pick a lesson from the list, or hold Boost and fly.'}`;
   if (d.fwd < -5) return `Flying backwards at ${Math.round(-d.fwd)} m/s. The egg is shortest at the tail: ${d.boost ? 268 : 225} m/s.`;
   if (d.pinned && !d.boost && d.speed > 230) return 'Boost released: the flight computer is bleeding your speed back down to 225.';
   if (d.pinned && d.boost && d.fwd > 500) return `Top forward speed (${Math.round(d.fwd)} m/s): only ${Math.round(d.roomLeft)} m/s of sideways room left.`;
