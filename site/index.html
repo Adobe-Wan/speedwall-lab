@@ -505,6 +505,8 @@ footer a { color: var(--fg-2) !important; }
    beside it that scrolls with the page. Picking a lesson in the rail starts it in plain view. Phones keep their own
    layouts above (.cockpit is display: contents there). */
 .cockpit { display: contents; }
+.viewbar { display: contents; } .layout-sw { display: none; }
+@media (min-width: 980px) and (min-height: 541px) { .viewbar .layout-sw { display: inline-flex; } }
 @media (min-width: 980px) and (min-height: 541px) {
   .app { --rail: clamp(320px, 26vw, 440px); max-width: 2400px; grid-template-columns: minmax(0, 1fr) var(--rail); column-gap: var(--vg-space-4); row-gap: var(--vg-space-3); align-items: start; padding-top: 0; }
   .app > * { grid-column: 2; min-width: 0; }
@@ -514,6 +516,11 @@ footer a { color: var(--fg-2) !important; }
   .cockpit > .stage { flex: 1 0 auto; min-height: 0; display: flex; flex-direction: column; margin: 0; }
   .cockpit .views { flex: 1 0 auto; min-height: max(240px, 48vh); grid-template-rows: minmax(0, 1fr); gap: var(--vg-space-3); }
   .cockpit .view, body.flying .cockpit .view { height: auto; min-height: 220px; }
+  .viewbar { display: flex; align-items: center; gap: var(--vg-space-3); margin-bottom: var(--vg-space-2); }
+  .viewbar .tabs { flex: 1 1 auto; max-width: 640px; }
+  .layout-sw { margin-left: auto; }
+  body.one-view .tabs { display: flex; } body.one-view .views { grid-template-columns: minmax(0, 1fr); } body.one-view .vswitch { display: none; }
+  body:not(.one-view) .viewbar .tabs { display: none; }
   .cockpit .vitals { flex: none; margin-top: var(--vg-space-2); }
   .cockpit .vitals small.vt-sub { position: static; display: block; max-width: none; margin-top: 2px; } /* under the number: the tiles are narrower beside the rail */
   .cockpit > .readouts { margin-top: calc(-1 * var(--vg-space-2)); } /* joins the Vitals as one panel */
@@ -578,10 +585,14 @@ footer a { color: var(--fg-2) !important; }
        window, so a lesson picked from the rail beside it starts in view; on phones it is display: contents (the old flow). -->
   <div class="cockpit" id="cockpit">
   <div class="stage" id="stage">
+  <div class="viewbar">
   <div class="tabs" role="tablist" aria-label="Views">
-    <button role="tab" id="tab-egg" aria-selected="true" data-view="egg">Speed Egg</button>
-    <button role="tab" id="tab-pilot" aria-selected="false" data-view="pilot">Cockpit</button>
-    <button role="tab" id="tab-slice" aria-selected="false" data-view="slice">Top-Down</button>
+    <button role="tab" id="tab-pilot" aria-selected="false" data-view="pilot" title="From the seat: crosshair, TVI and the space dust">First Person</button>
+    <button role="tab" id="tab-third" aria-selected="false" data-view="third" title="Behind your ship, with the space dust and the target">Third Person</button>
+    <button role="tab" id="tab-egg" aria-selected="true" data-view="egg" title="Your velocity inside the speed limits">Speed Egg</button>
+    <button role="tab" id="tab-slice" aria-selected="false" data-view="slice" title="The egg seen from above at your forward speed">Top-Down</button>
+  </div>
+  <span class="seg layout-sw" role="group" aria-label="Layout"><button data-layout="one" aria-pressed="true">One View</button><button data-layout="two" aria-pressed="false">Two Views</button></span>
   </div>
 
   <div class="views">
@@ -610,7 +621,7 @@ footer a { color: var(--fg-2) !important; }
       <svg class="overlay" id="hud" aria-hidden="true"></svg>
       <svg class="overlay" id="ahud" aria-hidden="true"></svg>
       <div class="vtitle">Cockpit</div>
-      <span class="seg vswitch" role="group" aria-label="Right-hand view"><button data-right="pilot" aria-pressed="true">Cockpit</button><button data-right="slice" aria-pressed="false" title="The egg seen from above at your forward speed, with Dodge Potential against forward speed">Top-Down</button></span>
+      <span class="seg vswitch" role="group" aria-label="Right-hand view"><button data-right="pilot" aria-pressed="true" title="First person: from the seat">1st Person</button><button data-right="third" aria-pressed="false" title="Third person: behind your ship, with the space dust and the target">3rd Person</button><button data-right="slice" aria-pressed="false" title="The egg seen from above at your forward speed, with Dodge Potential against forward speed">Top-Down</button></span>
       <div class="vtools">
         <details class="vopts"><summary>Options</summary><div class="vmenu">
         <button id="t-dust" aria-pressed="true">Dust</button>
@@ -624,7 +635,7 @@ footer a { color: var(--fg-2) !important; }
     <section class="view" id="v-slice" data-hidden="true" aria-label="Slice view: top-down slice of the egg">
       <canvas id="slice-big"></canvas>
       <div class="vtitle">Top-Down</div>
-      <span class="seg vswitch" role="group" aria-label="Right-hand view"><button data-right="pilot" aria-pressed="true">Cockpit</button><button data-right="slice" aria-pressed="false" title="The egg seen from above at your forward speed, with Dodge Potential against forward speed">Top-Down</button></span>
+      <span class="seg vswitch" role="group" aria-label="Right-hand view"><button data-right="pilot" aria-pressed="true" title="First person: from the seat">1st Person</button><button data-right="third" aria-pressed="false" title="Third person: behind your ship, with the space dust and the target">3rd Person</button><button data-right="slice" aria-pressed="false" title="The egg seen from above at your forward speed, with Dodge Potential against forward speed">Top-Down</button></span>
       <p class="no-gl" id="no-gl" hidden>3D views need WebGL, which this browser has turned off. Everything else works here in the top-down view.</p>
       <div class="caption" id="cap-slice"></div>
     </section>
@@ -1328,22 +1339,31 @@ const views = { egg: $('v-egg'), pilot: $('v-pilot'), slice: $('v-slice') };
 const narrow = matchMedia('(max-width: 979px), (orientation: landscape) and (max-height: 540px)');
 // Reduced motion (PLAN.md §7): start on the top-down view on phones, with the space dust off.
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-let active = reduceMotion ? 'slice' : 'egg';
+// One View (the default on desktops; the owner, 2026-11-02): one big view with First / Third Person, Speed Egg and Top-Down
+// tabs on top. Two Views keeps the Speed Egg beside the switchable right-hand view. Phones always show one view.
+let active = reduceMotion ? 'slice' : ['pilot', 'third', 'egg', 'slice'].includes(prefs.view) ? prefs.view : 'third';
 // Desktops show two views side by side: the Speed Egg on the left, and Cockpit or Top-Down on the right (the switch in the
 // right-hand view's corner; remembered per browser). The egg's small top-down inset is hidden while the big one is beside it.
-let right = prefs.right === 'slice' ? 'slice' : 'pilot';
+// Cockpit and Chase are the same view (first and third person): Chase moves the camera behind the ship.
+let right = ['slice', 'third'].includes(prefs.right) ? prefs.right : 'pilot';
+const viewOf = k => (k === 'third' ? 'pilot' : k);
+const single = () => narrow.matches || prefs.layout !== 'two';
 function applyTabs() {
+  document.body.classList.toggle('one-view', !narrow.matches && single());
+  document.querySelectorAll('[data-layout]').forEach(b => b.setAttribute('aria-pressed', b.dataset.layout === (single() ? 'one' : 'two')));
   document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.view === active));
   document.querySelectorAll('[data-right]').forEach(b => b.setAttribute('aria-pressed', b.dataset.right === right));
-  $('c-inset').hidden = !narrow.matches && right === 'slice';
+  $('c-inset').hidden = !single() && right === 'slice';
   // No WebGL: the 3D views can't run, so the top-down view is the whole app (PLAN.md §9 fallback).
   if (!hasWebGL) { active = 'slice'; for (const [k, el] of Object.entries(views)) el.dataset.hidden = String(k !== 'slice');
-    $('tab-egg').hidden = $('tab-pilot').hidden = true; document.querySelector('.views').classList.add('single'); $('no-gl').hidden = false;
+    $('tab-egg').hidden = $('tab-pilot').hidden = $('tab-third').hidden = true; document.querySelector('.views').classList.add('single'); $('no-gl').hidden = false;
     document.querySelectorAll('.vswitch').forEach(e => { e.hidden = true; }); requestAnimationFrame(resizeAll); return; }
-  for (const [k, el] of Object.entries(views)) el.dataset.hidden = narrow.matches ? String(k !== active) : String(k !== 'egg' && k !== right);
+  for (const [k, el] of Object.entries(views)) el.dataset.hidden = single() ? String(k !== viewOf(active)) : String(k !== 'egg' && k !== viewOf(right));
+  pilot.third((single() ? active : right) === 'third');
   requestAnimationFrame(resizeAll);
 }
-document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { active = b.dataset.view; applyTabs(); });
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { active = prefs.view = b.dataset.view; savePrefs(); applyTabs(); });
+document.querySelectorAll('[data-layout]').forEach(b => b.onclick = () => { prefs.layout = b.dataset.layout; savePrefs(); applyTabs(); });
 document.querySelectorAll('[data-right]').forEach(b => b.onclick = () => { right = prefs.right = b.dataset.right; savePrefs(); applyTabs(); });
 narrow.addEventListener('change', applyTabs);
 // A view is drawn only if it's shown AND on screen (PLAN.md §9: pause off-screen views).
@@ -1513,7 +1533,7 @@ function makeRenderer(canvas) {
 }
 
 /* ───────────────────────── egg view ───────────────────────── */
-const stubView = { resize() {}, draw() {}, chase() {}, hud() {} };
+const stubView = { resize() {}, draw() {}, chase() {}, hud() {}, third() {} };
 const egg = !hasWebGL ? stubView : (() => {
   const canvas = $('c-egg'), renderer = makeRenderer(canvas), gl = renderer.gl;
   const camera = new Camera(gl, { fov: 38, near: 5, far: 8000 });
@@ -1783,6 +1803,30 @@ const pilot = !hasWebGL ? stubView : (() => {
     fragment: FS_LINE, uniforms: { uColor: { value: [0.6, 0.66, 0.78] }, uAlpha: { value: 0.55 } }, transparent: true, depthTest: false });
   new Mesh(gl, { geometry: new Geometry(gl, { position: { size: 3, data: new Float32Array(stars) } }), program: starProg, mode: gl.POINTS, frustumCulled: false }).setParent(world);
 
+  // Ship models (loaded lazily, as in the egg view): your Gladius, seen only in third person, and the same hull shaded red
+  // for the lesson's target and the Flee chaser. The target is a point with a velocity, so its nose follows that velocity,
+  // or faces you when it holds still; the chaser's nose follows your starting line. The models are 20 m, true size.
+  const FS_RED = FS_HULL.replace('gl_FragColor = vec4(c, 1.0);', 'gl_FragColor = vec4(c * vec3(1.0, 0.32, 0.28), 1.0);');
+  const ownT = new Transform(), tgtT = new Transform(), chsT = new Transform();
+  for (const t of [ownT, tgtT, chsT]) { t.setParent(scene); t.visible = false; }
+  let hullsReady = false, thirdOn = false;
+  const loadHulls = () => loadGlb(gl, 'assets/ships/gladius.glb').then(({ geometries, translation, scale }) => {
+    const grey = new Program(gl, { vertex: VS_HULL, fragment: FS_HULL, cullFace: null }), red = new Program(gl, { vertex: VS_HULL, fragment: FS_RED, cullFace: null });
+    for (const [t, prog] of [[ownT, grey], [tgtT, red], [chsT, red]]) { const n = new Transform(); n.position.set(...translation); n.scale.set(...scale); n.setParent(t);
+      for (const geometry of geometries) new Mesh(gl, { geometry, program: prog, frustumCulled: false }).setParent(n); }
+    hullsReady = true; lastKey = '';
+  }).catch(e => console.warn('ship model not loaded in the pilot view:', e));
+  (window.requestIdleCallback || (f => setTimeout(f, 300)))(() => requestAnimationFrame(loadHulls), { timeout: 2500 });
+  // quaternion that turns the model's nose (+x, render frame) onto the unit vector d (render frame), keeping its top up when it can
+  const aimQ = d => { const n = Math.hypot(...d); if (n < 1e-9) return [0, 0, 0, 1]; const v = d.map(c => c / n), c = v[0];
+    if (c < -0.9999) return [0, 1, 0, 0]; const ax = [0, -v[2], v[1]], s2 = Math.sqrt((1 + c) * 2); return [ax[0] / s2, ax[1] / s2, ax[2] / s2, s2 / 2]; };
+  const place = (t, relShip, dirShip) => { t.position.set(...R3(...relShip)); const q = aimQ(R3(...dirShip)); t.quaternion.set(...q); };
+  const CHASE_CAM = [-42, 0, 11];   // third person: 42 m behind, 11 m above the ship's centre (ship frame), looking along the nose
+  function setThird(on) { thirdOn = !!on; ownT.visible = thirdOn && hullsReady; lastKey = '';
+    if (thirdOn) { camera.position.set(...R3(...CHASE_CAM)); camera.lookAt(R3(80, 0, 0)); } else { camera.position.set(0, 0, 0); camera.lookAt([1, 0, 0]); }
+    svg.style.display = $('ahud').style.display = thirdOn ? 'none' : ''; $('v-pilot').querySelector('.vtitle').textContent = thirdOn ? 'Chase' : 'Cockpit';
+    $('v-pilot').classList.toggle('third', thirdOn); }
+
   let dustOn = !reduceMotion, ringOn = true, hfov = 100, ringDeg = 13, lastKey = '';
   if (!dustOn) { streaks.visible = dots.visible = false; $('t-dust').setAttribute('aria-pressed', 'false'); }
   $('t-dust').onclick = e => { dustOn = !dustOn; e.target.setAttribute('aria-pressed', dustOn); streaks.visible = dots.visible = dustOn; };
@@ -1814,8 +1858,13 @@ const pilot = !hasWebGL ? stubView : (() => {
     const vw = qRot(qAtt, st.v);
     uniforms.uVel.value = R3(...vw); dotUniforms.uVel.value = uniforms.uVel.value;
     const sp = d.speed; uniforms.uTau.value = Math.min(1 / 30, 40 / Math.max(sp, 1)); dotUniforms.uOpacity.value = 0.65 * Math.max(0, 1 - sp / 60);
+    // the models: your ship (third person), the target and the chaser, all in the ship frame like the camera
+    ownT.visible = thirdOn && hullsReady; tgtT.visible = hullsReady && tgt.on; chsT.visible = hullsReady && !!(run && run.chase);
+    const conj = [-qAtt[0], -qAtt[1], -qAtt[2], qAtt[3]];
+    if (tgtT.visible) { const tv = qRot(conj, tgt.v), still = len(tgt.v) < 1; place(tgtT, tgt.rel, still ? tgt.rel.map(c => -c) : tv); }
+    if (chsT.visible) place(chsT, chaserRel(), qRot(conj, [1, 0, 0]));
     // render on demand: a ship that isn't moving or turning has a still starfield
-    const key = [m[0], m[1], m[2], ...st.v, ...qAtt, hfov, dustOn, renderer.width, renderer.height].map(x => (typeof x === 'number' ? x.toFixed(3) : x)).join();
+    const key = [m[0], m[1], m[2], ...st.v, ...qAtt, hfov, dustOn, renderer.width, renderer.height, thirdOn, hullsReady, tgt.on, ...tgt.rel, run && run.chase ? chase.range : 0].map(x => (typeof x === 'number' ? x.toFixed(3) : x)).join();
     if (key !== lastKey) { lastKey = key; renderer.render({ scene, camera }); }
     const w = canvas.parentElement.clientWidth, h = canvas.parentElement.clientHeight, cx = w / 2, cy = h / 2, f = (w / 2) / Math.tan(hfov * Math.PI / 360);
     const rc = el('#h-ring circle'); rc.setAttribute('cx', cx); rc.setAttribute('cy', cy); rc.setAttribute('r', f * Math.tan(ringDeg * Math.PI / 180)); el('#h-ring').style.display = ringOn ? '' : 'none';
@@ -1854,7 +1903,7 @@ const pilot = !hasWebGL ? stubView : (() => {
       const g = el('#h-edge'); g.style.display = ''; g.setAttribute('transform', `translate(${Math.min(w - 18, Math.max(18, ex))} ${Math.min(h - 18, Math.max(18, ey))}) rotate(${ang * 180 / Math.PI})`); }
     const anti = -fwd > 0.087 ? proj(-fwd, -right, -up) : null; show('#h-anti', ...(anti || [0, 0]), !!anti && inView(anti));
   }
-  return { resize, draw, hud: v => ahud.update({ ...v, hfovDeg: hfov, guideDeg: ringDeg }) };
+  return { resize, draw, third: setThird, hud: v => ahud.update({ ...v, hfovDeg: hfov, guideDeg: ringDeg }) };
 })();
 
 /* ───────────────────────── slice views (2D canvas) ───────────────────────── */
@@ -2160,7 +2209,7 @@ function frame(now) {
   if (visible('pilot')) { pilot.draw(S, d);
     pilot.hud({ speed: d.fwd < -1 ? -d.speed : d.speed, speedCap: d.r, throttle: inp.u.f, g: gSmooth, gPeak, tank: S.tank, redZone: gladius.boost.redZonePct,
       boostActive: d.boost, boostLocked: !!S.c.boostLocked && !ctl.unlimited, unlimited: ctl.unlimited, mode: d.boost ? 'BOOST' : 'SCM',
-      roll: S.roll || 0, pitch: S.pitch || 0, yaw: S.yaw || 0, anchorRollDps: anchorRoll(d), tviDeg: d.speed >= 3 ? d.tviDeg : null, maneuver: script && maneuver ? PRESETS[maneuver].title : '' }); $('cap-pilot').textContent = d.speed < 3 ? 'Stopped: the space dust hangs still. Move and it streams away from where you\'re heading.' : `The dust streams out of the TVI (circle with wings), ${Math.round(d.tviDeg)}° off your nose: that's where you're really going.`; }
+      roll: S.roll || 0, pitch: S.pitch || 0, yaw: S.yaw || 0, anchorRollDps: anchorRoll(d), tviDeg: d.speed >= 3 ? d.tviDeg : null, maneuver: script && maneuver ? PRESETS[maneuver].title : '' }); $('cap-pilot').textContent = $('v-pilot').classList.contains('third') ? (d.speed < 3 ? 'Stopped: the space dust hangs still around your ship.' : `Behind your ship: the dust streams past at ${Math.round(d.speed)} m/s, ${Math.round(d.tviDeg)}° off your nose.`) : d.speed < 3 ? 'Stopped: the space dust hangs still. Move and it streams away from where you\'re heading.' : `The dust streams out of the TVI (circle with wings), ${Math.round(d.tviDeg)}° off your nose: that's where you're really going.`; }
   if (visible('slice')) { drawSlice($('slice-big'), S, d, true); teach($('cap-slice'), d); }
   roT += dt; if (roT > 0.08) { roT = 0;
     $('r-speed').textContent = Math.round(d.speed); $('r-fwd').textContent = Math.round(d.fwd); $('r-side').textContent = Math.round(d.side);

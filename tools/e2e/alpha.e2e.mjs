@@ -34,6 +34,14 @@ async function lesson(page, key, seconds) {
 test("loads with the views, the Vitals and no price on Dodge Potential at rest", async ({ page }) => {
   await open(page);
   await expect(page).toHaveTitle("Speedwall Lab");
+  // One View by default: Third Person, with First Person / Speed Egg / Top-Down tabs; Two Views is one click away
+  await expect(page.locator("#v-pilot")).toBeVisible();
+  await expect(page.locator("#v-egg")).toBeHidden();
+  await expect(page.locator("#tab-third")).toHaveAttribute("aria-selected", "true");
+  await expect(page.locator("#cap-pilot")).toContainText("ship");
+  await page.click("#tab-egg");
+  await expect(page.locator("#v-egg")).toBeVisible();
+  await page.click('[data-layout="two"]');
   await expect(page.locator("#v-egg")).toBeVisible();
   await expect(page.locator("#v-pilot")).toBeVisible();
   await expect(page.locator("#r-dodge")).not.toHaveText("–");
@@ -79,6 +87,7 @@ test("First Flight strip starts lesson one; the lesson ends with a takeaway, you
 
 test("Flee: Hold the Wall marks the chaser in the Cockpit and prices the dodge", async ({ page }) => {
   await open(page);
+  await page.click("#tab-pilot");
   await lesson(page, "flee-wall", 4);
   await expect(page.locator("#ro-range")).toBeVisible();
   await expect(page.locator("#h-chs-lbl")).toHaveText(/^chaser \d+ m behind$/);
@@ -92,6 +101,7 @@ test("Flee: Hold the Wall marks the chaser in the Cockpit and prices the dodge",
 
 test("desktop Top-Down switch swaps the right-hand view and is remembered", async ({ page }) => {
   await open(page);
+  await page.click('[data-layout="two"]');
   await page.click('#v-pilot [data-right="slice"]');
   await expect(page.locator("#v-slice")).toBeVisible();
   await expect(page.locator("#v-pilot")).toBeHidden();
@@ -106,6 +116,7 @@ test("desktop Top-Down switch swaps the right-hand view and is remembered", asyn
 
 test("the TVI readout never overlaps the HUD bars, numbers or G column", async ({ page }) => {
   await open(page);
+  await page.click("#tab-pilot");
   await lesson(page, "ck-shoot", 8);   // parks the TVI ~10° off the nose, right on the bars
   const boxes = await page.evaluate(() => {
     const all = [...document.querySelectorAll("#ahud text")].filter(t => t.getAttribute("display") !== "none" && t.textContent.trim());
