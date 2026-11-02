@@ -120,6 +120,55 @@ test("the TVI readout never overlaps the HUD bars, numbers or G column", async (
   expect(hits).toEqual([]);
 });
 
+// Desktop layout: the views sit in a sticky cockpit beside the lesson rail, so a lesson picked anywhere in the list
+// starts with the views, the Vitals and the running lesson in the window (the owner's report, 2026-11-01).
+for (const vp of [{ width: 1440, height: 900 }, { width: 1366, height: 768 }, { width: 1920, height: 1080 }]) {
+  test(`at ${vp.width}x${vp.height} a lesson low in the list starts with the views in sight`, async ({ page }) => {
+    await page.setViewportSize(vp);
+    await open(page);
+    const last = page.locator("[data-preset]").last();
+    await last.scrollIntoViewIfNeeded();
+    await last.click();
+    await page.waitForFunction(() => window.speedwallDebug.get().script?.t > 0.3);
+    const inWindow = async sel => { const b = await page.locator(sel).boundingBox(); return b && b.y >= 0 && b.y + b.height <= vp.height + 1; };
+    expect(await inWindow(".views"), "views in the window").toBe(true);
+    expect(await inWindow("#vitals"), "Vitals in the window").toBe(true);
+    expect(await inWindow("#runbar"), "running lesson in the window").toBe(true);
+    expect(await inWindow('[data-preset][aria-pressed="true"]'), "the picked card stays where it was clicked").toBe(true);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(vp.width);
+  });
+}
+
+test("taking the keys early keeps the lesson's note and offers a replay; Continue picks up where you left off", async ({ page }) => {
+  await open(page);
+  await page.click("#first-go");
+  await page.waitForFunction(() => window.speedwallDebug.get().script?.t > 0.5);
+  await page.keyboard.down("KeyW");
+  await expect(page.locator("#run-msg")).toHaveText(/You took over/);
+  await expect(page.locator("#run-again")).toBeVisible();
+  await expect(page.locator('[data-preset="scm-strafe"]')).not.toHaveClass(/done/);
+  await page.keyboard.up("KeyW");
+  await page.click("#run-again");
+  await page.waitForFunction(() => { const r = window.speedwallDebug.get().run; return r && r.shown; }, null, { timeout: 90_000 });
+  await page.click("#run-stop");
+  await expect(page.locator("#note-next")).toHaveText(/^Continue: Strafe From a Stop With Boost/);
+  await expect(page.locator("#lessons-count")).toHaveText(/^1 of \d+ done$/);
+  await page.click("#note-next");
+  await expect(page.locator("#run-name")).toHaveText(/^Strafe From a Stop With Boost/);
+});
+
+test("Controls: Done is in reach, the mouse flies the nose on a first desktop visit", async ({ page }) => {
+  await page.setViewportSize({ width: 1366, height: 768 });
+  await open(page);
+  await page.click("#ctl-open");
+  const done = await page.locator("#c-close").boundingBox();
+  expect(done.y + done.height).toBeLessThanOrEqual(768);
+  await expect(page.locator("#c-mouse")).toBeChecked();
+  await expect(page.locator("#c-wizard")).toHaveText("Set up controls");
+  await page.click("#c-x");
+  await expect(page.locator("#ctl-dlg")).toBeHidden();
+});
+
 test.describe("phone", () => {
   test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   test("tabs name the views and the desktop switch is hidden", async ({ page }) => {

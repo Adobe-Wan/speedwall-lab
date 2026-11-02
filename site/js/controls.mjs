@@ -259,7 +259,11 @@ export function createControls(ui) {
     if (j && typeof j === 'object' && j.axes && typeof j.axes === 'object') map = sanitize(j); // a partial or damaged save can't break the page
   } catch { /* private mode or bad JSON: start fresh */ }
   const firstRun = !map;
-  if (!map) map = scDefaults();
+  if (!map) {
+    map = scDefaults();
+    // A first visit on a desktop flies the nose with the mouse, as the game does: the lessons say "pitch with the mouse".
+    try { map.mouse.enabled = window.matchMedia('(pointer: fine)').matches; } catch { /* no matchMedia: keep it off */ }
+  }
   let saved = !firstRun;
   // Every save tells the page (window 'controls-changed'), so it can refresh key hints on its buttons.
   const save = () => {
@@ -610,7 +614,7 @@ export function createControls(ui) {
     body.innerHTML = `${notice ? `<p class="notice" role="status">${esc(notice)}${undo ? ' <button type="button" id="c-undo" class="c-act">Undo</button>' : ''}</p>` : ''}
       ${conflicts.length ? `<div class="c-box c-conflicts" id="c-conflicts">${conflicts.map((c) => `<p>⚠ ${esc(c.text)}.</p>`).join('')}<p class="keys">Rebind or clear one of them.</p></div>` : ''}
       <div class="c-box c-auto" id="c-auto" ${autoPad() ? '' : 'hidden'}><p><b>Gamepad (automatic):</b> left stick strafes forward/back and left/right, right stick pitches and yaws, bumpers strafe down/up, triggers roll, A boosts, B spacebrakes. Binding any control to a controller turns this off.</p></div>
-      <p class="keys">${firstRun && map.source === 'defaults' ? 'Using the Star Citizen keyboard defaults. ' : ''}Move each control to check it. Saved in this browser.</p>
+      <p class="keys">${firstRun && map.source === 'defaults' ? 'Using the Star Citizen keyboard defaults. ' : ''}Move each control to check it. Saved in this browser. Esc closes this window.</p>
       <div class="binds">${rows}</div>
       <div class="set">
         <span>Deadzone</span><input type="range" id="c-dz" min="0" max="25" value="${Math.round(map.deadzone * 100)}" aria-label="Axis deadzone"><output id="c-dz-v">${Math.round(map.deadzone * 100)}%</output>
@@ -619,10 +623,10 @@ export function createControls(ui) {
       </div>
       <p class="keys">Mouse flight: click the cockpit view to capture the mouse, Esc to release it, middle-click or <kbd>C</kbd> to centre the nose.</p>
       <div class="row">
-        <button id="c-wizard" class="primary">Set up controls again</button>
+        <button id="c-close" class="primary">Done</button>
+        <button id="c-wizard">${map.source === 'defaults' ? 'Set up controls' : 'Set up controls again'}</button>
         <button id="c-defaults">Star Citizen keyboard defaults</button>
         <button id="c-fly">Fly full screen</button>
-        <button id="c-close">Done</button>
       </div>`;
     notice = '';
     if (undo) body.querySelector('#c-undo').onclick = () => { map = undo; save(); status(); notice = 'Undone.'; render(); };
