@@ -576,9 +576,9 @@ footer a { color: var(--fg-2) !important; }
   </header>
 
   <section class="first" id="first" aria-label="First flight: where to start" hidden>
-    <div class="fs now"><b>1 · The one idea</b>Your ship has a top speed in every direction, and it is not the same in every direction. The Amber Egg is that limit (the Blue Ball is the limit without boost). The faster you fly forward, the less sideways push you have left for <span class="term" data-term="dodge" tabindex="0">dodging</span>.<button id="first-hide" class="small" title="Hide this until the browser forgets it">Hide</button></div>
-    <div class="fs"><b>2 · Watch the first lesson</b>The ship flies it for you in about 10 seconds: a sideways <span class="term" data-term="strafe" tabindex="0">strafe</span> with boost off. Watch where it stops.<div class="act"><button id="first-go">▶ Watch the first lesson</button></div></div>
-    <div class="fs"><b>3 · Then take the keys</b>After each lesson, fly it yourself with the Star Citizen default keys and mouse (click the Cockpit view to steer, Esc frees the mouse). Nothing here can be broken.<div class="keys"><kbd class="hint" data-hint="throttleFwd">W</kbd><kbd class="hint" data-hint="strafeLeft">A</kbd><kbd class="hint" data-hint="throttleBack">S</kbd><kbd class="hint" data-hint="strafeRight">D</kbd> move · <kbd class="hint" data-hint="strafeUp">Space</kbd><kbd class="hint" data-hint="strafeDown">Left Ctrl</kbd> up and down · <kbd class="hint" data-hint="boost">Left Shift</kbd> boost</div></div>
+    <div class="fs now"><b>1 · The one idea</b>Your top speed differs by direction. The Amber Egg is that limit with boost, the Blue Ball without. The faster you fly forward, the less push is left for <span class="term" data-term="dodge" tabindex="0">dodging</span>.<button id="first-hide" class="small" title="Hide this until the browser forgets it">Hide</button></div>
+    <div class="fs"><b>2 · Watch the first lesson</b>The ship flies a 10-second sideways <span class="term" data-term="strafe" tabindex="0">strafe</span> for you. Watch where it stops.<div class="act"><button id="first-go">▶ Watch the first lesson</button></div></div>
+    <div class="fs"><b>3 · Then take the keys</b>Fly each lesson yourself with the Star Citizen default keys. Click the view to steer with the mouse; Esc frees it.<div class="keys"><kbd class="hint" data-hint="throttleFwd">W</kbd><kbd class="hint" data-hint="strafeLeft">A</kbd><kbd class="hint" data-hint="throttleBack">S</kbd><kbd class="hint" data-hint="strafeRight">D</kbd> move · <kbd class="hint" data-hint="strafeUp">Space</kbd><kbd class="hint" data-hint="strafeDown">Left Ctrl</kbd> up and down · <kbd class="hint" data-hint="boost">Left Shift</kbd> boost</div></div>
   </section>
 
   <!-- Cockpit: the views, the Vitals, the running lesson and its note. On desktops it is a sticky column that always fills the
@@ -664,7 +664,7 @@ footer a { color: var(--fg-2) !important; }
     <div class="ro" title="MODEL, not a measured rule: stress from the G you are pulling in each direction. Greys the HUD, then the screen, then blacks out and cuts thrust and boost. Paused while a lesson runs, so you see the speed limits; the lesson texts say what the measured pilot felt."><b>G-LOC (Model)</b><span class="num" id="r-gloc">clear</span><div class="tank"><i id="r-glocbar"></i></div></div>
   </div>
 
-  <p class="ro-more" aria-hidden="true"><span>More readouts unlock with the lessons that use them.</span><button id="ro-all" class="small">Show all now</button></p>
+  <p class="ro-more" aria-hidden="true"><span>More readouts unlock as the lessons need them.</span><button id="ro-all" class="small">Show all now</button></p>
   <div class="runbar" id="runbar" hidden>
     <span class="run-name" id="run-name"></span>
     <span class="run-msg" id="run-msg">Press <kbd class="hint" data-hint="throttleFwd">W</kbd> <kbd class="hint" data-hint="strafeLeft">A</kbd> <kbd class="hint" data-hint="throttleBack">S</kbd> <kbd class="hint" data-hint="strafeRight">D</kbd> to take over</span>
@@ -673,51 +673,51 @@ footer a { color: var(--fg-2) !important; }
     <span class="run-end" id="run-end"></span>
     <button id="run-stop" class="small">Stop</button>
   </div>
-  <p class="lesson-note" id="lesson-note" role="status"><strong>Start Here.</strong> The Amber Egg is the <span class="term" data-term="wall" tabindex="0">speed wall</span> with <span class="term" data-term="boost" tabindex="0">boost</span> held: 520 m/s forward, 394 sideways, 268 back. The Blue Ball is the limit without boost (<span class="term" data-term="scm" tabindex="0">SCM</span>): 225 m/s every way. Your ship sits at its current velocity: the farther from the centre cross, the faster you go. The White Ring is your sideways room. Pick a lesson from the list: the ship flies it, the page says what to look for, then you get the keys.</p>
+  <p class="lesson-note" id="lesson-note" role="status"><strong>Start Here.</strong> The Amber Egg is the <span class="term" data-term="wall" tabindex="0">speed wall</span> with <span class="term" data-term="boost" tabindex="0">boost</span>: 520 m/s forward, 394 sideways, 268 back. The Blue Ball is <span class="term" data-term="scm" tabindex="0">SCM</span>: 225 m/s every way. Pick a lesson from the list.</p>
   <div class="legend" aria-hidden="true"><span class="lg-ring"><b>White Ring (Sideways Room):</b> the sideways speed you can still add; it thins and reddens as Dodge Potential collapses</span><span class="lg-tvi"><b>TVI:</b> the circle with wings: where you are really going</span><span class="lg-path"><b>Violet Thread:</b> your path over the last 8 s (drawn wider and shorter)</span><span class="lg-chaser" id="lg-chaser" hidden><b>Red Marker:</b> the pretend chaser, 520 m/s along your starting line</span>
   </div>
   </div>
   <section class="maneuvers" id="lessons" aria-labelledby="lessons-h">
-        <div class="lessons-head"><h2 id="lessons-h">Lessons</h2><span id="lessons-count" class="chip" hidden></span><p class="lessons-how">Take them in order. The ship flies each one while you watch and tells you what to look for; press a flight key to take over.</p></div>
+        <div class="lessons-head"><h2 id="lessons-h">Lessons</h2><span id="lessons-count" class="chip" hidden></span><p class="lessons-how">Take them in order. The ship flies, you watch; press any flight key to take over.</p></div>
         <h3>The Speed Wall: SCM vs Boost</h3>
-        <p class="lessons-how">What <span class="term" data-term="scm" tabindex="0">SCM</span> and <span class="term" data-term="boost" tabindex="0">boost</span> each let your ship do, from a stop, at the limit and in a turn.</p>
+        <p class="lessons-how"><span class="term" data-term="scm" tabindex="0">SCM</span> against <span class="term" data-term="boost" tabindex="0">boost</span>: from a stop, at the limit, in a turn.</p>
         <div class="mgrid pairs">
           <div class="pair-h">From a stop</div>
-          <button data-preset="scm-strafe" class="scm">Strafe From a Stop in SCM<small>How far sideways can you get without boost? Watch where the ship stops.</small></button>
-          <button data-preset="rest" class="boost">Strafe From a Stop With Boost<small>The same push with boost held. How much more do you get?</small></button>
+          <button data-preset="scm-strafe" class="scm">Strafe From a Stop in SCM<small>How far sideways without boost?</small></button>
+          <button data-preset="rest" class="boost">Strafe From a Stop With Boost<small>Same push, boost held: how much more?</small></button>
           <div class="pair-h">At the limit</div>
-          <button data-preset="scm-nose" class="scm">Strafe at SCM Top Speed<small>Already at the limit: where does a strafe take you now?</small></button>
-          <button data-preset="let-go" class="boost">Let Go of Boost<small>What happens to 520 m/s when you release everything?</small></button>
+          <button data-preset="scm-nose" class="scm">Strafe at SCM Top Speed<small>Already at the limit: where does a strafe go?</small></button>
+          <button data-preset="let-go" class="boost">Let Go of Boost<small>Release everything at 520 m/s: what happens?</small></button>
           <div class="pair-h">Turning 90°</div>
-          <button data-preset="turn-scm" class="scm">Turn 90° in SCM<small>Does a hard turn cost speed without boost?</small></button>
-          <button data-preset="turn-cost" class="boost">Turn 90° With Boost<small>The same turn at full boost speed. Watch the speed.</small></button>
+          <button data-preset="turn-scm" class="scm">Turn 90° in SCM<small>Does a hard turn cost speed?</small></button>
+          <button data-preset="turn-cost" class="boost">Turn 90° With Boost<small>Same turn at 520 m/s: watch the speed.</small></button>
         </div>
         <h3>At the Nose: What Top Speed Costs</h3>
-        <p class="lessons-how">Boost is big only along <span class="term" data-term="nose" tabindex="0">the nose</span>: the closer to 520 you fly, the less push is left for anything else.</p>
+        <p class="lessons-how">Boost is big only along <span class="term" data-term="nose" tabindex="0">the nose</span>: the closer to 520 you fly, the less push is left.</p>
         <div class="mgrid">
-          <button data-preset="dodge-nose">Strafe at Top Speed<small>At top speed, how much sideways room is left?</small></button>
-          <button data-preset="dodge-mid">Strafe From Mid-Egg<small>Slower, in the egg's fat middle: how much more room?</small></button>
-          <button data-preset="letoff">Ease Off to Make Room<small>Can you buy room back by easing off forward, and what does it cost?</small></button>
-          <button data-preset="flip-burn">Flip and Burn<small>The fastest way to lose speed: flip and use the main engines.</small></button>
+          <button data-preset="dodge-nose">Strafe at Top Speed<small>How much sideways room is left at 520?</small></button>
+          <button data-preset="dodge-mid">Strafe From Mid-Egg<small>Slower, mid-egg: how much more room?</small></button>
+          <button data-preset="letoff">Ease Off to Make Room<small>Ease off forward: what room do you buy?</small></button>
+          <button data-preset="flip-burn">Flip and Burn<small>The fastest way to lose speed.</small></button>
         </div>
         <h3>Evading at the Speed Wall</h3>
-        <p class="lessons-how">Speed along your line is the defence and everything off the nose costs some of it. A pretend chaser starts 550 m behind you at 520 m/s and flies straight along your starting line; it does not steer. Watch whether the gap grows or shrinks.</p>
+        <p class="lessons-how">Speed along your line is your defence; anything off the nose costs some. A chaser starts 550 m behind at 520 m/s and flies straight, without steering. Watch the gap.</p>
         <div class="mgrid">
-          <button data-preset="flee-wall">Flee: Hold the Wall<small>Can you dodge gently and still keep a chaser from closing?</small></button>
-          <button data-preset="flee-ease">Flee: Ease Off Forward<small>The same corkscrew with forward released: who gains?</small></button>
-          <button data-preset="flee-tvi">Flee: TVI Far Out<small>Swing the TVI far out: more dodge, but what does the chaser do?</small></button>
-          <button data-preset="ck-escape">Escape Corkscrew<small>Full up-stick on the wall: what does it cost in speed and range?</small></button>
+          <button data-preset="flee-wall">Flee: Hold the Wall<small>Dodge gently and keep the chaser back?</small></button>
+          <button data-preset="flee-ease">Flee: Ease Off Forward<small>Same corkscrew, forward released: who gains?</small></button>
+          <button data-preset="flee-tvi">Flee: TVI Far Out<small>More dodge: what does the chaser gain?</small></button>
+          <button data-preset="ck-escape">Escape Corkscrew<small>Full up-stick at the wall: what does it cost?</small></button>
         </div>
         <h3>Fighting Fundamentals</h3>
-        <p class="lessons-how">Getting close and staying there is distance management: read the closing speed, aim in pitch, and learn what turn rate and thrust let you hold at knife range. Fights are flown with boost, so every lesson here holds it. The target is an enemy Gladius on the same limits as yours (G, speed egg, turn rates), nose on you unless it is running. Effective range by target size (pilot guideline, not measured): <span class="ranges">Arrow 300–400 m · Gladius 500–600 m · Hornet 700–800 m · past 1,000 m: tap shields only</span></p>
+        <p class="lessons-how">Distance management with boost held, as fights are flown. The enemy is a Gladius on your limits (G, egg, turn rates), nose on you unless it runs. Effective range by target size (pilot guideline, not measured): <span class="ranges">Arrow 300–400 m · Gladius 500–600 m · Hornet 700–800 m · past 1,000 m: tap shields only</span></p>
         <div class="mgrid">
-          <button data-preset="delta-read">Read the Closing Speed<small>A target 600 m ahead: is the range shrinking, and how fast?</small></button>
-          <button data-preset="aim-pitch">Aim With Pitch, Not Yaw<small>A target 60° off: is rolling it into pitch faster than yawing?</small></button>
-          <button data-preset="pole-drill">The Pole Drill<small>Circle a point at 100 m with boost, nose on it: how fast can you go?</small></button>
-          <button data-preset="binary-circle">Close Distance: Binary Circle<small>Boost, forward half, down a quarter: do you circle the target or fly through?</small></button>
-          <button data-preset="ck-approach">Corkscrew to Approach<small>Fly the flee helix at a target: how much closing does it cost?</small></button>
-          <button data-preset="rate-basics">Why Turn Rate Wins Up Close<small>An enemy strafing across 100 m ahead: can your nose keep up?</small></button>
-                    <button data-preset="ck-shoot">Corkscrew While Shooting Ahead<small>Can you corkscrew and keep a target ahead steady on screen?</small></button>
+          <button data-preset="delta-read">Read the Closing Speed<small>Is the range shrinking, and how fast?</small></button>
+          <button data-preset="aim-pitch">Aim With Pitch, Not Yaw<small>Target 60° off: roll and pitch, or yaw?</small></button>
+          <button data-preset="pole-drill">The Pole Drill<small>Circle at 100 m, nose on: how fast?</small></button>
+          <button data-preset="binary-circle">Close Distance: Binary Circle<small>Half forward, quarter down: circle or fly through?</small></button>
+          <button data-preset="ck-approach">Corkscrew to Approach<small>Helix toward a target: what closing does it cost?</small></button>
+          <button data-preset="rate-basics">Why Turn Rate Wins Up Close<small>Enemy strafing across at 100 m: can you keep up?</small></button>
+                    <button data-preset="ck-shoot">Corkscrew While Shooting Ahead<small>Corkscrew and keep a target steady on screen?</small></button>
         </div>
       </section>
   <p class="sr" aria-live="polite" id="live"></p>
@@ -1301,8 +1301,10 @@ const keyHint = id => { const k = controls.hint(id) || (STEPS.find(s => s.id ===
 function lessonHtml(p) {
   if (!p) return '';
   const plain = p.plain ? glossify(escHtml(p.plain).replace(/\{(\w+)\}/g, (_, id) => keyHint(id))) + ' ' : '';
-  return `<span class="do"><b>Do</b> ${plain}<span class="${p.plain ? 'do-exact' : ''}">${glossify(escHtml(p.do))}</span></span><span class="see"><b>See</b> ${glossify(escHtml(p.see))}<span class="cap-dodge"></span></span>` +
-    (p.more ? `<details class="more-d"><summary>Details and Sources</summary><span>${escHtml(p.more)}</span></details>` : '');
+  // Do: the plain sentence with its keys; the exact inputs the ship flies open with the Details (copy audit, 2026-11-02)
+  const exact = p.plain ? `${escHtml(p.do)} ` : '';
+  return `<span class="do"><b>Do</b> ${plain || glossify(escHtml(p.do))}</span><span class="see"><b>See</b> ${glossify(escHtml(p.see))}<span class="cap-dodge"></span></span>` +
+    (p.more || exact ? `<details class="more-d"><summary>Details and Sources</summary><span>${exact}${escHtml(p.more || '')}</span></details>` : '');
 }
 // The lesson's explanation, under the views on every width.
 const NOTE_IDLE = $('lesson-note').innerHTML;
