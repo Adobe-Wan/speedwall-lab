@@ -8,6 +8,14 @@ source, date and status are stated. Where the math makes a popular claim small, 
 
 Labels: **M** measured, **S** sourced (a dated creator statement, not measured by us), **T** third-party data (a database value, tagged with site, build and date; NOTICE.md), **A** assumed, **Mod** model.
 
+**2026-11-01: the lessons fly boosted.** The project owner: fights are flown with boost, never at the 225 m/s SCM cap. The
+Fighting Fundamentals lessons in `site/index.html` (`FIGHT = 'boost'`) now hold boost and take their limits from the boost
+profile: Read the Closing Speed chases a 469 m/s target (520 − 51); the pole drill circles 100 m at 142 m/s (pitch-rate
+limited, 98 % forward, against 116 in SCM; thrust and pitch rate run out together at a/ω² ≈ 102 m); the binary-circle
+inputs pass ~70 m from the target at ~350 m/s (orbitSim, boosted); a 520 m/s crossing target outruns the boosted pitch
+inside 365 m (yaw 475 m). The SCM numbers in the sections below stay as the contrast. A full tank gives 20 s of boost
+(measured drain 5 %/s).
+
 ## 1. Inputs
 
 | Input | Value | Status | Source |
