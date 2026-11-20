@@ -592,7 +592,7 @@ footer a { color: var(--fg-2) !important; }
     <button role="tab" id="tab-egg" aria-selected="true" data-view="egg" title="Your velocity inside the speed limits">Speed Egg</button>
     <button role="tab" id="tab-slice" aria-selected="false" data-view="slice" title="The egg seen from above at your forward speed">Top-Down</button>
   </div>
-  <span class="seg layout-sw" role="group" aria-label="Layout"><button data-layout="one" aria-pressed="true">One View</button><button data-layout="two" aria-pressed="false">Two Views</button></span>
+  <span class="seg layout-sw" role="group" aria-label="Layout"><button data-layout="one" aria-pressed="false">One View</button><button data-layout="two" aria-pressed="true">Two Views</button></span>
   </div>
 
   <div class="views">
@@ -621,7 +621,7 @@ footer a { color: var(--fg-2) !important; }
       <svg class="overlay" id="hud" aria-hidden="true"></svg>
       <svg class="overlay" id="ahud" aria-hidden="true"></svg>
       <div class="vtitle">Cockpit</div>
-      <span class="seg vswitch" role="group" aria-label="Right-hand view"><button data-right="pilot" aria-pressed="true" title="First person: from the seat">1st Person</button><button data-right="third" aria-pressed="false" title="Third person: behind your ship, with the space dust and the target">3rd Person</button><button data-right="slice" aria-pressed="false" title="The egg seen from above at your forward speed, with Dodge Potential against forward speed">Top-Down</button></span>
+      <span class="seg vswitch" role="group" aria-label="Right-hand view"><button data-right="pilot" aria-pressed="false" title="First person: from the seat">1st Person</button><button data-right="third" aria-pressed="false" title="Third person: behind your ship, with the space dust and the target">3rd Person</button><button data-right="slice" aria-pressed="true" title="The egg seen from above at your forward speed, with Dodge Potential against forward speed">Top-Down</button></span>
       <div class="vtools">
         <details class="vopts"><summary>Options</summary><div class="vmenu">
         <button id="t-dust" aria-pressed="true">Dust</button>
@@ -635,7 +635,7 @@ footer a { color: var(--fg-2) !important; }
     <section class="view" id="v-slice" data-hidden="true" aria-label="Slice view: top-down slice of the egg">
       <canvas id="slice-big"></canvas>
       <div class="vtitle">Top-Down</div>
-      <span class="seg vswitch" role="group" aria-label="Right-hand view"><button data-right="pilot" aria-pressed="true" title="First person: from the seat">1st Person</button><button data-right="third" aria-pressed="false" title="Third person: behind your ship, with the space dust and the target">3rd Person</button><button data-right="slice" aria-pressed="false" title="The egg seen from above at your forward speed, with Dodge Potential against forward speed">Top-Down</button></span>
+      <span class="seg vswitch" role="group" aria-label="Right-hand view"><button data-right="pilot" aria-pressed="false" title="First person: from the seat">1st Person</button><button data-right="third" aria-pressed="false" title="Third person: behind your ship, with the space dust and the target">3rd Person</button><button data-right="slice" aria-pressed="true" title="The egg seen from above at your forward speed, with Dodge Potential against forward speed">Top-Down</button></span>
       <p class="no-gl" id="no-gl" hidden>3D views need WebGL, which this browser has turned off. Everything else works here in the top-down view.</p>
       <div class="caption" id="cap-slice"></div>
     </section>
@@ -1370,15 +1370,16 @@ const views = { egg: $('v-egg'), pilot: $('v-pilot'), slice: $('v-slice') };
 const narrow = matchMedia('(max-width: 979px), (orientation: landscape) and (max-height: 540px)');
 // Reduced motion (PLAN.md §7): start on the top-down view on phones, with the space dust off.
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-// One View (the default on desktops; the owner, 2026-11-02): one big view with First / Third Person, Speed Egg and Top-Down
-// tabs on top. Two Views keeps the Speed Egg beside the switchable right-hand view. Phones always show one view.
+// Two Views (the default on desktops; the owner, 2026-11-20): the Speed Egg beside the Top-Down slice, a split view.
+// One View is one click away: one big view with First / Third Person, Speed Egg and Top-Down tabs on top.
+// Phones always show one view.
 let active = reduceMotion ? 'slice' : ['pilot', 'third', 'egg', 'slice'].includes(prefs.view) ? prefs.view : 'third';
-// Desktops show two views side by side: the Speed Egg on the left, and Cockpit or Top-Down on the right (the switch in the
-// right-hand view's corner; remembered per browser). The egg's small top-down inset is hidden while the big one is beside it.
+// Desktops show two views side by side: the Speed Egg on the left, and Top-Down (default), 1st or 3rd Person on the right
+// (the switch in the right-hand view's corner; remembered per browser). The egg's small top-down inset is hidden while the big one is beside it.
 // Cockpit and Chase are the same view (first and third person): Chase moves the camera behind the ship.
-let right = ['slice', 'third'].includes(prefs.right) ? prefs.right : 'pilot';
+let right = ['pilot', 'third'].includes(prefs.right) ? prefs.right : 'slice';
 const viewOf = k => (k === 'third' ? 'pilot' : k);
-const single = () => narrow.matches || prefs.layout !== 'two';
+const single = () => narrow.matches || prefs.layout === 'one';
 function applyTabs() {
   document.body.classList.toggle('one-view', !narrow.matches && single());
   document.querySelectorAll('[data-layout]').forEach(b => b.setAttribute('aria-pressed', b.dataset.layout === (single() ? 'one' : 'two')));
@@ -1949,7 +1950,9 @@ function drawSlice(canvas, st, d, big) {
   // On desktops the caption sits over the bottom of the view: lay out above it.
   const cap = big ? canvas.parentElement.querySelector('.caption') : null, hc = Math.max(120, h - (cap && cap.offsetHeight ? cap.offsetHeight + 14 : 0));
   const curve = big && d.dodge && d.dodge.ready ? curveBox(w, hc) : null;
-  const ax = curve ? curve.area : [0, 0, w, hc], aw = ax[2] - ax[0], ah = ax[3] - ax[1];
+  // In Two Views the right-hand switch sits over the top-left corner: start the egg under it so the nose label stays clear.
+  const sw = big ? canvas.parentElement.querySelector('.vswitch') : null, top = sw && sw.offsetParent ? sw.offsetTop + sw.offsetHeight - 20 : 0;
+  const ax = [...(curve ? curve.area : [0, 0, w, hc])]; ax[1] = Math.max(ax[1], top); const aw = ax[2] - ax[0], ah = ax[3] - ax[1];
   const pad = big ? 30 : 10, sc = Math.min((ah - 2 * pad) / 830, (aw - 2 * pad) / 900), ox = ax[0] + aw / 2, oy = ax[1] + pad + 545 * sc;
   const P = (lat, fwd) => [ox + lat * sc, oy - fwd * sc];
   c.lineWidth = big ? 2 : 1.2;
